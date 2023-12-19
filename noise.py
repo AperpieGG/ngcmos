@@ -2,6 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+# pylint: disable=superfluous-parens
+# pylint: disable=invalid-name
+# pylint: disable=redefined-outer-name
+
+
 def plot_images():
     plt.rcParams['figure.dpi'] = 100
     plt.rcParams['xtick.top'] = True
@@ -37,10 +42,6 @@ def plot_images():
     plt.rcParams['legend.loc'] = 'best'
     plt.rcParams['legend.fancybox'] = True
     plt.rcParams['legend.fontsize'] = 14
-
-
-def cmos_data():
-    cmos_flux = []
 
 
 def noise_sources():
@@ -83,7 +84,7 @@ def noise_sources():
     read_signal = (read_noise_pix * npix) ** 2
 
     # set random sky background
-    sky_flux = 94 * exposure_time * npix
+    sky_flux = 22.6 * exposure_time * npix
     sky_noise = np.sqrt(sky_flux) / flux
 
     # set random photon shot noise from the flux
@@ -120,6 +121,8 @@ def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_s
     ax.set_ylabel('RMS (mag)')
     ax.set_xscale('log')
     ax.set_yscale('log')
+    ax.set_ylim(0.001, 0.1)
+    ax.set_xlim(1000, 1e6)
     plt.tight_layout()
 
     plt.legend(loc='best')
@@ -129,3 +132,7 @@ def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_s
 plot_images()
 flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise = noise_sources()
 noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise)
+
+# TODO add noise model for the Ikon-L
+# TODO check James code that slaves the Ikon-L with Marana
+# TODO generate a automatic json file for marana (talk to Paul for the packages)
