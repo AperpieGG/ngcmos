@@ -2,7 +2,7 @@ import datetime
 import glob
 import numpy as np
 from astropy.io import fits
-from astropy.visualization import SqrtStretch, ImageNormalize, ZScaleInterval, AsinhStretch
+from astropy.visualization import SqrtStretch, ImageNormalize, ZScaleInterval
 from image_registration import chi2_shift
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -10,8 +10,7 @@ from matplotlib.animation import FuncAnimation
 
 def read_fits_image(file_path):
     with fits.open(file_path) as hdu_list:
-        image_data = hdu_list[0].data
-        image_data = image_data[450:550, 600:700]
+        image_data = hdu_list[0].data[450:550, 600:700]
     return image_data
 
 
@@ -22,17 +21,13 @@ def register_images(images):
 
     # Register each image to the reference using chi2_shift
     registered_images_list = [reference_image]
-    for i in range(1, len(images), 5):
-        img = images[i]
+    for img in images[1:]:
         # Ensure img is a NumPy array
         img_data = img.data
-
         # Use chi2_shift without the WCS information
         shift_result = chi2_shift(reference_data, img_data)
-
         # Shift the data using the returned values
         shifted_image_data = np.roll(img_data, shift_result[0].astype(int), axis=0)
-
         # Create a new HDU with the shifted data and the original header
         shifted_hdu = fits.PrimaryHDU(data=shifted_image_data)
         registered_images_list.append(shifted_hdu)
@@ -73,9 +68,10 @@ if __name__ == "__main__":
     # Read the FITS files
     fits_files = sorted(glob.glob(directory_path + '*_r.fits'))
 
-    # Read and register the images
-    raw_images = [read_fits_image(file) for file in fits_files]
+    raw_images = [read_fits_image(file) for file in fits_files[::5]]
+
     registered_images = register_images(raw_images)
+    print(f"Total number of images used: {len(registered_images)}")
 
     # Create and save the blink animation
     create_blink_animation(registered_images)
