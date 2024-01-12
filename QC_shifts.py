@@ -1,3 +1,6 @@
+#!/Users/u5500483/anaconda3/bin/python
+from datetime import datetime
+
 from donuts import Donuts
 import glob
 from matplotlib import pyplot as plt
@@ -40,7 +43,7 @@ plot_images()
 path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/TOI-00451/'
 
 reference_image_name = [f for f in glob.glob(path + '*_r.fits')][0]
-science_image_names = [f for f in glob.glob(path + '*_r.fits')[1:]]
+science_image_names = [f for f in glob.glob(path + '*_r.fits')[150:]]
 # Construct a donuts object
 d = Donuts(
     refimage=reference_image_name,
@@ -74,11 +77,11 @@ for image in science_image_names:
     x_shifts.append(x.value)
     y_shifts.append(y.value)
 
-plt.figure(figsize=(8, 8))
+fig = plt.figure(figsize=(8, 8))
 plt.scatter(x_shifts, y_shifts, label='Shifts', marker='o')
 plt.xlabel('X Shift (pixels)')
 plt.ylabel('Y Shift (pixels)')
-plt.title('Shifts with respect to the first image')
+plt.title('Shifts with respect to the ref image')
 plt.axhline(0, color='black', linestyle='-', linewidth=1)  # Add horizontal line at y=0
 plt.axvline(0, color='black', linestyle='-', linewidth=1)  # Add vertical line at x=0
 plt.legend()
@@ -87,5 +90,5 @@ plt.legend()
 plt.xlim(-1, 1)
 plt.ylim(-1, 1)
 
-
-plt.show()
+save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/TOI-00451/'
+fig.savefig(save_path + "shifts_{}.pdf".format(datetime.now().strftime("%Y%m%d-%H%M%S")), bbox_inches='tight')
