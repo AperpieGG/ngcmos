@@ -1,9 +1,14 @@
 #!/Users/u5500483/anaconda3/bin/python
+import argparse
+import os
 from datetime import datetime
-
 from donuts import Donuts
 import glob
 from matplotlib import pyplot as plt
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
+warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
 
 
 def plot_images():
@@ -40,55 +45,79 @@ def plot_images():
 
 plot_images()
 
-path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/TOI-00451/'
 
-reference_image_name = [f for f in glob.glob(path + '*_r.fits')][0]
-science_image_names = [f for f in glob.glob(path + '*_r.fits')[150:]]
-# Construct a donuts object
-d = Donuts(
-    refimage=reference_image_name,
-    image_ext=0,
-    overscan_width=20,
-    prescan_width=20,
-    border=64,
-    normalise=True,
-    exposure='EXPTIME',
-    subtract_bkg=True,
-    ntiles=32)
-# for each image, compute the x/y translation required
-# to align the images onto the reference image
+def main(directory):
+    path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/' + directory + '/'
+    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
 
-x_shifts = []
-y_shifts = []
+    reference_image_name = [f for f in glob.glob(path + '*_r.fits')][0]
+    science_image_names = [f for f in glob.glob(path + '*_r.fits')[150:]]
 
-for image in science_image_names:
-    shift_result = d.measure_shift(image)
-    x = shift_result.x
-    y = shift_result.y
-    # Also check out shift_result.sky_background
-    print(x, y)
+    # Construct a donuts object
+    d = Donuts(
+        refimage=reference_image_name,
+        image_ext=0,
+        overscan_width=20,
+        prescan_width=20,
+        border=64,
+        normalise=True,
+        exposure='EXPTIME',
+        subtract_bkg=True,
+        ntiles=32)
+    # for each image, compute the x/y translation required
+    # to align the images onto the reference image
 
-    if x.value > 0.5 or y.value > 0.5 or x.value < -0.5 or y.value < -0.5:
-        print('WARNING: Image {} is not aligned'.format(image))
-    else:
-        pass
+    x_shifts = []
+    y_shifts = []
 
-    # Append shift values to the lists
-    x_shifts.append(x.value)
-    y_shifts.append(y.value)
+    for image in science_image_names:
+        shift_result = d.measure_shift(image)
+        x = shift_result.x
+        y = shift_result.y
+        # Also check out shift_result.sky_background
+        print(x, y)
 
-fig = plt.figure(figsize=(8, 8))
-plt.scatter(x_shifts, y_shifts, label='Shifts', marker='o')
-plt.xlabel('X Shift (pixels)')
-plt.ylabel('Y Shift (pixels)')
-plt.title('Shifts with respect to the ref image')
-plt.axhline(0, color='black', linestyle='-', linewidth=1)  # Add horizontal line at y=0
-plt.axvline(0, color='black', linestyle='-', linewidth=1)  # Add vertical line at x=0
-plt.legend()
+        if x.value > 0.5 or y.value > 0.5 or x.value < -0.5 or y.value < -0.5:
+            print('WARNING: Image {} is not aligned'.format(image))
+        else:
+            pass
 
-# Set the axes limits to center (0, 0)
-plt.xlim(-1, 1)
-plt.ylim(-1, 1)
+        # Append shift values to the lists
+        x_shifts.append(x.value)
+        y_shifts.append(y.value)
 
-save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/TOI-00451/'
-fig.savefig(save_path + "shifts_{}.pdf".format(datetime.now().strftime("%Y%m%d-%H%M%S")), bbox_inches='tight')
+        fig = plt.figure(figsize=(8, 8))
+        plt.scatter(x_shifts, y_shifts, label='Shifts', marker='o')
+        plt.xlabel('X Shift (pixels)')
+        plt.ylabel('Y Shift (pixels)')
+        plt.title('Shifts with respect to the ref image')
+        plt.axhline(0, color='black', linestyle='-', linewidth=1)  # Add horizontal line at y=0
+        plt.axvline(0, color='black', linestyle='-', linewidth=1)  # Add vertical line at x=0
+        plt.legend()
+
+        # Set the axes limits to center (0, 0)
+        plt.xlim(-1, 1)
+        plt.ylim(-1, 1)
+
+        # Get the current date in the format DDMMYYYY
+        date_format = datetime.now().strftime("%d%m%Y")
+
+        # Construct the directory path based on the current date
+        save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
+
+        # Create the directory if it doesn't exist
+        os.makedirs(save_path, exist_ok=True)
+
+        # Construct the full file path within the "shifts_plots" directory
+        file_path = os.path.join(save_path, "donuts_{}.pdf".format(datetime.now().strftime("%Y%m%d")))
+
+        # Save the figure
+        fig.savefig(file_path, bbox_inches='tight')
+
+
+if __name__ == "__main__":
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Run the script with a specific directory.')
+    parser.add_argument('directory', help='Specify the directory to use.')
+    args = parser.parse_args()
+    main(args.directory)
