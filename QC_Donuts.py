@@ -61,8 +61,8 @@ def find_first_image_of_each_prefix(directory):
     # List all items (files and directories) in the given directory
     items = os.listdir(directory)
 
-    # Filter out files with the word "flat" in their names
-    filtered_items = [item for item in items if "flat" not in item.lower()]
+    # Filter out files with the word "flat, dark, bias" in their names
+    filtered_items = [item for item in items if "flat" and "bias" and "dark" not in item.lower()]
 
     # Dictionary to store the first image of each prefix
     first_image_of_each_prefix = {}
@@ -70,7 +70,7 @@ def find_first_image_of_each_prefix(directory):
     # Iterate through filtered items
     for item in filtered_items:
         # Extract the first 6 letters of the item
-        prefix = item[:6]
+        prefix = item[:31]
 
         # Check if the prefix is already a key in the dictionary
         if prefix not in first_image_of_each_prefix:
@@ -85,7 +85,7 @@ def find_first_image_of_each_prefix(directory):
                 first_image_of_each_prefix[prefix] = matching_files[0]
 
     # Print the first image for each different prefix
-    print(f"First image of each prefix in {directory} (excluding those with 'flat' in the name):\n")
+    print(f"First image of each prefix in {directory} (excluding those with 'flat', 'bias' and 'dark' in the name):\n")
     for prefix, first_image in first_image_of_each_prefix.items():
         print(f"Prefix: {prefix}, First Image: {first_image}")
         run_donuts(directory, prefix)
