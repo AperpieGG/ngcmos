@@ -1,4 +1,5 @@
 #!/Users/u5500483/anaconda3/bin/python
+import json
 import os
 from datetime import datetime
 from donuts import Donuts
@@ -141,6 +142,10 @@ def main(directory, prefix):
         x_shifts.append(x.value)
         y_shifts.append(y.value)
 
+    print("The number of images with shifts greater than 0.5 pixels is: {}".format(
+        len([i for i in x_shifts if abs(i) >= 0.5] and [i for i in y_shifts if abs(i) >= 0.5])))
+
+    # Plot the shifts
     fig = plt.figure(figsize=(8, 8))
     plt.scatter(x_shifts, y_shifts, label='Shifts for field: {}'.format(prefix), marker='o')
     plt.xlabel('X Shift (pixels)')
@@ -168,6 +173,35 @@ def main(directory, prefix):
 
     # Save the figure
     fig.savefig(file_path, bbox_inches='tight')
+
+    save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names)
+
+
+def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names):
+    # Create a timestamp for the file name
+    timestamp = datetime.now().strftime("%Y%m%d")
+
+    # Construct the base file name
+    base_file_name = f"donuts_{prefix}_{timestamp}"
+
+    # Construct the full file paths
+    json_file_path = os.path.join(save_path, f"{base_file_name}.json")
+
+    # Save the results to the JSON file
+    results_data = {
+        "Reference Image": reference_image_name,
+        "The number of images with shifts greater than 0.5 pixels is": len(
+            [i for i in x_shifts if abs(i) >= 0.5] and [i for i in y_shifts if abs(i) >= 0.5]),
+        "The name of the images with shifts greater than 0.5 pixels is":
+            [i for i in science_image_names if abs(x_shifts[science_image_names.index(i)]) >= 0.5 or
+             abs(y_shifts[science_image_names.index(i)]) >= 0.5],
+        "X Shifts and Y Shifts": list(zip(x_shifts, y_shifts)),
+    }
+
+    with open(json_file_path, 'w') as json_file:
+        json.dump(results_data, json_file, indent=4)
+
+    print(f"JSON results saved to: {json_file_path}")
 
 
 if __name__ == "__main__":
