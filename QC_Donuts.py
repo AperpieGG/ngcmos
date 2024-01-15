@@ -88,13 +88,11 @@ def find_first_image_of_each_prefix(directory):
     print(f"First image of each prefix in {directory} (excluding those with 'flat' in the name):\n")
     for prefix, first_image in first_image_of_each_prefix.items():
         print(f"Prefix: {prefix}, First Image: {first_image}")
-        main(directory, prefix)
+        run_donuts(directory, prefix)
 
 
-def main(directory, prefix):
+def run_donuts(directory, prefix):
     path = directory + '/'
-    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
-
     image_names = glob.glob(path + f'{prefix}*.fits')
     image_names = sorted(image_names)
 
@@ -145,6 +143,12 @@ def main(directory, prefix):
     print("The number of images with shifts greater than 0.5 pixels is: {}".format(
         len([i for i in x_shifts if abs(i) >= 0.5] and [i for i in y_shifts if abs(i) >= 0.5])))
 
+    save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names)
+
+    plot_shifts(x_shifts, y_shifts, save_path, prefix)
+
+
+def plot_shifts(x_shifts, y_shifts, save_path, prefix):
     # Plot the shifts
     fig = plt.figure(figsize=(8, 8))
     plt.scatter(x_shifts, y_shifts, label='Shifts for field: {}'.format(prefix), marker='o')
@@ -160,21 +164,17 @@ def main(directory, prefix):
     plt.ylim(-1, 1)
 
     # Get the current date in the format DDMMYYYY
-    date_format = datetime.now().strftime("%d%m%Y")
+    timestamp = datetime.now().strftime("%Y%m%d")
 
     # Construct the directory path based on the current date
-    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
-
-    # Create the directory if it doesn't exist
-    os.makedirs(save_path, exist_ok=True)
+    base_file_name = f"donuts_{prefix}_{timestamp}"
 
     # Construct the full file path within the "shifts_plots" directory
-    file_path = os.path.join(save_path, f"donuts_{prefix}_{datetime.now().strftime('%Y%m%d')}.pdf")
+    pdf_file_path = os.path.join(save_path, f"{base_file_name}.pdf")
 
     # Save the figure
-    fig.savefig(file_path, bbox_inches='tight')
-
-    save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names)
+    fig.savefig(pdf_file_path, bbox_inches='tight')
+    print(f"PDF plot saved to: {pdf_file_path}")
 
 
 def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names):
@@ -207,6 +207,9 @@ def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, sc
 if __name__ == "__main__":
     # Specify the base path
     base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
     # Find the current night directory
     current_night_directory = find_current_night_directory(base_path)
