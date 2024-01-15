@@ -1,0 +1,191 @@
+#!/Users/u5500483/anaconda3/bin/python
+import os
+from datetime import datetime
+from donuts import Donuts
+import glob
+from matplotlib import pyplot as plt
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
+warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
+
+
+def plot_images():
+    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['xtick.top'] = True
+    plt.rcParams['xtick.labeltop'] = False
+    plt.rcParams['xtick.labelbottom'] = True
+    plt.rcParams['xtick.bottom'] = True
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['xtick.minor.visible'] = True
+    plt.rcParams['xtick.major.top'] = True
+    plt.rcParams['xtick.minor.top'] = True
+    plt.rcParams['xtick.minor.bottom'] = True
+    plt.rcParams['xtick.alignment'] = 'center'
+
+    plt.rcParams['ytick.left'] = True
+    plt.rcParams['ytick.labelleft'] = True
+    plt.rcParams['ytick.right'] = True
+    plt.rcParams['ytick.minor.visible'] = True
+    plt.rcParams['ytick.major.right'] = True
+    plt.rcParams['ytick.major.left'] = True
+    plt.rcParams['ytick.minor.right'] = True
+    plt.rcParams['ytick.minor.left'] = True
+
+    plt.rcParams['font.family'] = 'Times New Roman'
+    plt.rcParams['font.size'] = 12
+
+    plt.rcParams['legend.frameon'] = True
+    plt.rcParams['legend.framealpha'] = 0.8
+    plt.rcParams['legend.loc'] = 'best'
+    plt.rcParams['legend.fancybox'] = True
+    plt.rcParams['legend.fontsize'] = 12
+
+
+def find_current_night_directory(base_path):
+    # Get the current date in the format YYYYMMDD
+    current_date = datetime.now().strftime("%Y%m%d")
+
+    # Construct the path for the current date directory
+    current_date_directory = os.path.join(base_path, current_date)
+
+    # Check if the directory exists
+    if os.path.isdir(current_date_directory):
+        return current_date_directory
+    else:
+        return None
+
+
+def find_first_image_of_each_prefix(directory):
+    # List all items (files and directories) in the given directory
+    items = os.listdir(directory)
+
+    # Filter out files with the word "flat" in their names
+    filtered_items = [item for item in items if "flat" not in item.lower()]
+
+    # Dictionary to store the first image of each prefix
+    first_image_of_each_prefix = {}
+
+    # Iterate through filtered items
+    for item in filtered_items:
+        # Extract the first 6 letters of the item
+        prefix = item[:6]
+
+        # Check if the prefix is already a key in the dictionary
+        if prefix not in first_image_of_each_prefix:
+            # Update the file path pattern for the given prefix
+            pattern = os.path.join(directory, f'{prefix}*.fits')
+            # Use glob to find matching files
+            matching_files = glob.glob(pattern)
+            # Sort the matching files
+            matching_files = sorted(matching_files)
+            # Check if any matching files were found
+            if matching_files:
+                first_image_of_each_prefix[prefix] = matching_files[0]
+
+    # Print the first image for each different prefix
+    print(f"First image of each prefix in {directory} (excluding those with 'flat' in the name):\n")
+    for prefix, first_image in first_image_of_each_prefix.items():
+        print(f"Prefix: {prefix}, First Image: {first_image}")
+        main(directory, prefix)
+
+
+def main(directory, prefix):
+    path = directory + '/'
+    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+
+    image_names = glob.glob(path + f'{prefix}*.fits')
+    image_names = sorted(image_names)
+
+    if not image_names:
+        print(f"No images found for prefix: {prefix}")
+        return
+
+    reference_image_name = image_names[0]
+
+    # Print some debugging information
+    print(f"Using {reference_image_name} as the reference image for prefix: {prefix}")
+
+    science_image_names = [f for f in glob.glob(path + f'{prefix}*.fits')[1:]]
+    science_image_names = sorted(science_image_names)
+
+    d = Donuts(
+        refimage=reference_image_name,
+        image_ext=0,
+        overscan_width=20,
+        prescan_width=20,
+        border=64,
+        normalise=True,
+        exposure='EXPTIME',
+        subtract_bkg=True,
+        ntiles=32)
+    # for each image, compute the x/y translation required
+    # to align the images onto the reference image
+
+    x_shifts = []
+    y_shifts = []
+
+    for image in science_image_names:
+        shift_result = d.measure_shift(image)
+        x = shift_result.x
+        y = shift_result.y
+
+        if abs(x.value) < 0.5 and abs(y.value) < 0.5:
+            print("Image {} with shifts (x, y): {}, {}".format(image[-22:], x.value, y.value))
+        elif abs(x.value) >= 0.5 or abs(y.value) >= 0.5:
+            print('WARNING: Image {} is not aligned with shifts (x, y): {}, {}'.format(image[-22:], x.value, y.value))
+        else:
+            pass
+
+        # Append shift values to the lists
+        x_shifts.append(x.value)
+        y_shifts.append(y.value)
+
+    fig = plt.figure(figsize=(8, 8))
+    plt.scatter(x_shifts, y_shifts, label='Shifts for field: {}'.format(prefix), marker='o')
+    plt.xlabel('X Shift (pixels)')
+    plt.ylabel('Y Shift (pixels)')
+    plt.title('Shifts with respect to the ref image')
+    plt.axhline(0, color='black', linestyle='-', linewidth=1)  # Add horizontal line at y=0
+    plt.axvline(0, color='black', linestyle='-', linewidth=1)  # Add vertical line at x=0
+    plt.legend()
+
+    # Set the axes limits to center (0, 0)
+    plt.xlim(-1, 1)
+    plt.ylim(-1, 1)
+
+    # Get the current date in the format DDMMYYYY
+    date_format = datetime.now().strftime("%d%m%Y")
+
+    # Construct the directory path based on the current date
+    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
+
+    # Create the directory if it doesn't exist
+    os.makedirs(save_path, exist_ok=True)
+
+    # Construct the full file path within the "shifts_plots" directory
+    file_path = os.path.join(save_path, f"donuts_{prefix}_{datetime.now().strftime('%Y%m%d')}.pdf")
+
+    # Save the figure
+    fig.savefig(file_path, bbox_inches='tight')
+
+
+if __name__ == "__main__":
+    # Specify the base path
+    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+
+    # Find the current night directory
+    current_night_directory = find_current_night_directory(base_path)
+
+    if current_night_directory:
+        print(f"Current night directory found: {current_night_directory}")
+        find_first_image_of_each_prefix(current_night_directory)
+    else:
+        print("No current night directory found.")
+
+
+
+
+
+
+
