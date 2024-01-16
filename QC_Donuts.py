@@ -70,7 +70,7 @@ def find_first_image_of_each_prefix(directory):
     # Iterate through filtered items
     for item in filtered_items:
         # Extract the first 6 letters of the item
-        prefix = item[:31]
+        prefix = item[:11]
 
         # Check if the prefix is already a key in the dictionary
         if prefix not in first_image_of_each_prefix:
@@ -103,7 +103,7 @@ def run_donuts(directory, prefix):
     reference_image_name = image_names[0]
 
     # Print some debugging information
-    print(f"Using {reference_image_name} as the reference image for prefix: {prefix}")
+    print(f"Using {reference_image_name} as the reference image for prefix: {prefix}\n")
 
     science_image_names = [f for f in glob.glob(path + f'{prefix}*.fits')[1:]]
     science_image_names = sorted(science_image_names)
@@ -140,9 +140,9 @@ def run_donuts(directory, prefix):
         x_shifts.append(x.value)
         y_shifts.append(y.value)
 
-    print("The number of images with shifts greater than 0.5 pixels is: {}".format(
-        len([i for i in x_shifts if abs(i) >= 0.5] and [i for i in y_shifts if abs(i) >= 0.5])))
-
+    num_large_shifts = sum(1 for x, y in zip(x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5)
+    print("The number of images with shifts greater than 0.5 pixels is: {}".format(num_large_shifts))
+    print()
     save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names)
 
     plot_shifts(x_shifts, y_shifts, save_path, prefix)
@@ -174,7 +174,7 @@ def plot_shifts(x_shifts, y_shifts, save_path, prefix):
 
     # Save the figure
     fig.savefig(pdf_file_path, bbox_inches='tight')
-    print(f"PDF plot saved to: {pdf_file_path}")
+    print(f"PDF plot saved to: {pdf_file_path}\n")
 
 
 def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names):
@@ -187,14 +187,16 @@ def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, sc
     # Construct the full file paths
     json_file_path = os.path.join(save_path, f"{base_file_name}.json")
 
+    num_large_shifts = sum(1 for x, y in zip(x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5)
+
     # Save the results to the JSON file
     results_data = {
         "Reference Image": reference_image_name,
-        "The number of images with shifts greater than 0.5 pixels is": len(
-            [i for i in x_shifts if abs(i) >= 0.5] and [i for i in y_shifts if abs(i) >= 0.5]),
-        "The name of the images with shifts greater than 0.5 pixels is":
-            [i for i in science_image_names if abs(x_shifts[science_image_names.index(i)]) >= 0.5 or
-             abs(y_shifts[science_image_names.index(i)]) >= 0.5],
+        "The number of images with shifts greater than +/-0.5 pixels is": {
+            "Total Images": len(science_image_names),
+            "Number of Images with Large Shifts": num_large_shifts
+        },
+        "The name of the images with shifts greater than 0.5 pixels is": science_image_names,
         "X Shifts and Y Shifts": list(zip(x_shifts, y_shifts)),
     }
 
