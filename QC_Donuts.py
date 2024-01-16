@@ -6,6 +6,9 @@ from donuts import Donuts
 import glob
 from matplotlib import pyplot as plt
 import warnings
+from astropy.io import fits
+from astropy.time import Time
+
 
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
 warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
@@ -145,13 +148,45 @@ def run_donuts(directory, prefix):
     print()
     save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names)
 
-    plot_shifts(x_shifts, y_shifts, save_path, prefix)
+    time = acquire_header_info(directory, prefix)
+
+    plot_shifts(x_shifts, y_shifts, save_path, prefix, time)
 
 
-def plot_shifts(x_shifts, y_shifts, save_path, prefix):
-    # Plot the shifts
-    fig = plt.figure(figsize=(8, 8))
-    plt.scatter(x_shifts, y_shifts, label='Shifts for field: {}'.format(prefix), marker='o')
+def utc_to_jd(utc_time_str):
+    # Convert DATE-OBS to Astropy Time object
+    t = Time(utc_time_str, format='isot', scale='utc')
+
+    # Convert to Julian Date
+    jd = t.jd
+
+    return jd
+
+
+def acquire_header_info(directory, prefix):
+    path = directory + '/'
+    image_names = glob.glob(path + f'{prefix}*.fits')
+    image_names = sorted(image_names[1:])
+    time_jd = []
+
+    for image in image_names:
+        with fits.open(image) as hdulist:
+            header = hdulist[0].header
+            # Extract the UTC time string from the header
+            utc_time_str = header['DATE-OBS']
+
+            # Convert the UTC time string to JD
+            jd = utc_to_jd(utc_time_str)
+
+            time_jd.append(jd)
+            print(utc_time_str)
+    return time_jd
+
+
+def plot_shifts(x_shifts, y_shifts, save_path, prefix, time):
+    # Plot the shifts with colorbar
+    fig, ax = plt.subplots(figsize=(8, 8))
+    scatter = ax.scatter(x_shifts, y_shifts, c=time, cmap='viridis', label='Shifts for field: {}'.format(prefix), marker='o')
     plt.xlabel('X Shift (pixels)')
     plt.ylabel('Y Shift (pixels)')
     plt.title('Shifts with respect to the ref image')
@@ -162,6 +197,9 @@ def plot_shifts(x_shifts, y_shifts, save_path, prefix):
     # Set the axes limits to center (0, 0)
     plt.xlim(-1, 1)
     plt.ylim(-1, 1)
+
+    # Add colorbar
+    cbar = plt.colorbar(scatter, label='Time')
 
     # Get the current date in the format DDMMYYYY
     timestamp = datetime.now().strftime("%Y%m%d")
@@ -196,7 +234,8 @@ def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, sc
             "Total Images": len(science_image_names),
             "Number of Images with Large Shifts": num_large_shifts
         },
-        "The name of the images with shifts greater than 0.5 pixels is": science_image_names,
+        "The name of the images with shifts greater than 0.5 pixels is":
+            [image for image, x, y in zip(science_image_names, x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5],
         "X Shifts and Y Shifts": list(zip(x_shifts, y_shifts)),
     }
 
