@@ -1,5 +1,5 @@
 #!/Users/u5500483/anaconda3/bin/python
-import datetime
+from datetime import datetime, timedelta
 import glob
 import os
 import numpy as np
@@ -10,14 +10,55 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-def read_fits_image(file_path):
-    with fits.open(file_path) as hdu_list:
-        image_data = hdu_list[0].data[450:550, 600:700]
-        date_obs = hdu_list[0].header.get('DATE-OBS', 'N/A')
-        tel_ra = hdu_list[0].header.get('TELRA', 'N/A')
-        tel_dec = hdu_list[0].header.get('TELDEC', 'N/A')
-        target_id = hdu_list[0].header.get('OBJECT', 'N/A')
-    return image_data, date_obs, tel_ra, tel_dec, target_id
+def plot_images():
+    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['xtick.top'] = True
+    plt.rcParams['xtick.labeltop'] = False
+    plt.rcParams['xtick.labelbottom'] = True
+    plt.rcParams['xtick.bottom'] = True
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['xtick.minor.visible'] = True
+    plt.rcParams['xtick.major.top'] = True
+    plt.rcParams['xtick.minor.top'] = True
+    plt.rcParams['xtick.minor.bottom'] = True
+    plt.rcParams['xtick.alignment'] = 'center'
+
+    plt.rcParams['ytick.left'] = True
+    plt.rcParams['ytick.labelleft'] = True
+    plt.rcParams['ytick.right'] = True
+    plt.rcParams['ytick.minor.visible'] = True
+    plt.rcParams['ytick.major.right'] = True
+    plt.rcParams['ytick.major.left'] = True
+    plt.rcParams['ytick.minor.right'] = True
+    plt.rcParams['ytick.minor.left'] = True
+    plt.rcParams['font.size'] = 12
+    plt.rcParams['legend.frameon'] = True
+    plt.rcParams['legend.framealpha'] = 0.8
+    plt.rcParams['legend.loc'] = 'best'
+    plt.rcParams['legend.fancybox'] = True
+    plt.rcParams['legend.fontsize'] = 12
+
+
+def find_fits(file_path):
+    total_files = sorted(glob.glob(file_path + '*.fits'))
+    print(f"Initial images found: {len(total_files)}")
+    filtered_files = [item for item in total_files if
+                      "flat" not in item.lower() and "bias" not in item.lower() and "dark" not in item.lower()]
+    raw_images = filtered_files[::5]
+    return raw_images
+
+
+def read_fits(file_path):
+    images_dt = []
+    for file_path in file_path:
+        with fits.open(file_path) as hdu_list:
+            image_data = hdu_list[0].data[450:550, 600:700]
+            date_obs = hdu_list[0].header.get('DATE-OBS', 'N/A')
+            tel_ra = hdu_list[0].header.get('TELRA', 'N/A')
+            tel_dec = hdu_list[0].header.get('TELDEC', 'N/A')
+            target_id = hdu_list[0].header.get('OBJECT', 'N/A')
+            images_dt.append((image_data, date_obs, tel_ra, tel_dec, target_id))
+    return images_dt
 
 
 def register_images(images):
@@ -33,16 +74,15 @@ def register_images(images):
     return registered_images_list
 
 
-def create_blink_animation(images, output_path=None):
-    if save_path is not None:
-        # Default output path with object name and date
-        object_name = images[0][4][:11]
-        timestamp = datetime.datetime.now().strftime('%Y%m%d')
-        output_name = f"donuts_{object_name}_{timestamp}.gif"
-        output_path = os.path.join(save_path, output_name)
+def create_blink_animation(images, save_path):
+    # Default output path with object name and date
+    object_name = images[0][4][:11]
+    timestamp = datetime.now().strftime('%Y%m%d')
+    output_name = f"donuts_{object_name}_{timestamp}.gif"
+    output_path = os.path.join(save_path, output_name)
 
-        # Create the base path directory if it doesn't exist
-        os.makedirs(save_path, exist_ok=True)
+    # Create the base path directory if it doesn't exist
+    os.makedirs(save_path, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(8, 8))
     zscale_interval = ZScaleInterval()
@@ -103,13 +143,41 @@ def create_blink_animation(images, output_path=None):
     animation.save(output_path, writer='imagemagick', fps=5)
 
 
+def find_current_night_directory(file_path):
+    # Get the current date in the format YYYYMMDD
+    current_date = datetime.now().strftime("%Y%m%d") + '/'
+    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + '/'
+
+    # Construct the path for the previous_date directory
+    current_date_directory = os.path.join(file_path, previous_date)
+
+    # Check if the directory exists
+    if os.path.isdir(current_date_directory):
+        return current_date_directory
+    else:
+        return None
+
+
 if __name__ == "__main__":
-    directory_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/TOI-00451/'
-    save_path = "/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/"
-    fits_files = sorted(glob.glob(directory_path + '*_r.fits'))
+    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
-    raw_images = [read_fits_image(file) for file in fits_files[::5]]
-    registered_images = register_images(raw_images)
-    print(f"Total number of images used: {len(registered_images)}")
+    # Find the current night directory
+    current_night_directory = find_current_night_directory(base_path)
+    plot_images()
 
-    create_blink_animation(registered_images, save_path)
+    if current_night_directory:
+        print(f"Current night directory found: {current_night_directory}")
+        images = read_fits(find_fits(current_night_directory))
+
+        # Check if the images list is not empty before proceeding
+        if images:
+            registered_images = register_images(images)
+            print(f"Total number of registered_images used: {len(registered_images)}")
+            create_blink_animation(registered_images, save_path)
+        else:
+            print("No fits images found.")
+    else:
+        print("No current night directory found.")
