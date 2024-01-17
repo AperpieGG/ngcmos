@@ -1,7 +1,7 @@
 #!/Users/u5500483/anaconda3/bin/python
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from donuts import Donuts
 import glob
 from matplotlib import pyplot as plt
@@ -49,9 +49,10 @@ def plot_images():
 def find_current_night_directory(base_path):
     # Get the current date in the format YYYYMMDD
     current_date = datetime.now().strftime("%Y%m%d")
+    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
 
-    # Construct the path for the current date directory
-    current_date_directory = os.path.join(base_path, current_date)
+    # Construct the path for the previous_date directory
+    current_date_directory = os.path.join(base_path, previous_date)
 
     # Check if the directory exists
     if os.path.isdir(current_date_directory):
@@ -92,6 +93,9 @@ def find_first_image_of_each_prefix(directory):
     for prefix, first_image in first_image_of_each_prefix.items():
         print(f"Prefix: {prefix}, First Image: {first_image}")
         run_donuts(directory, prefix)
+
+    if not first_image_of_each_prefix:
+        print(f"No images found in {directory} with the specified prefix.")
 
 
 def run_donuts(directory, prefix):
