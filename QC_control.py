@@ -16,8 +16,8 @@ def read_fits_image(file_path):
         date_obs = hdu_list[0].header.get('DATE-OBS', 'N/A')
         tel_ra = hdu_list[0].header.get('TELRA', 'N/A')
         tel_dec = hdu_list[0].header.get('TELDEC', 'N/A')
-        object = hdu_list[0].header.get('OBJECT', 'N/A')
-    return image_data, date_obs, tel_ra, tel_dec, object
+        target_id = hdu_list[0].header.get('OBJECT', 'N/A')
+    return image_data, date_obs, tel_ra, tel_dec, target_id
 
 
 def register_images(images):
