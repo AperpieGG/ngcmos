@@ -44,7 +44,7 @@ def find_fits(file_path):
     print(f"Initial images found: {len(total_files)}")
     filtered_files = [item for item in total_files if
                       "flat" not in item.lower() and "bias" not in item.lower() and "dark" not in item.lower()]
-    raw_images = filtered_files[::5]
+    raw_images = sorted(filtered_files[::5])
     return raw_images
 
 
@@ -52,7 +52,7 @@ def read_fits(file_path):
     images_dt = []
     for file_path in file_path:
         with fits.open(file_path) as hdu_list:
-            image_data = hdu_list[0].data[450:550, 600:700]
+            image_data = hdu_list[0].data
             date_obs = hdu_list[0].header.get('DATE-OBS', 'N/A')
             tel_ra = hdu_list[0].header.get('TELRA', 'N/A')
             tel_dec = hdu_list[0].header.get('TELDEC', 'N/A')
@@ -74,6 +74,32 @@ def register_images(images):
     return registered_images_list
 
 
+def add_text_elements(ax):
+    zscale_interval = ZScaleInterval()
+    norm = ImageNormalize(interval=zscale_interval, stretch=SqrtStretch())
+
+    time_text = ax.text(0.02, 0.98, '', transform=ax.transAxes, color='white',
+                        fontsize=10, verticalalignment='top', bbox=dict(facecolor='black', alpha=0.6))
+
+    frame_text = ax.text(0.98, 0.98, '', transform=ax.transAxes, color='white',
+                         fontsize=10, verticalalignment='top', horizontalalignment='right',
+                         bbox=dict(facecolor='black', alpha=0.8))
+
+    info_text = ax.text(0.02, 0.02, '', transform=ax.transAxes, color='white',
+                        fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
+
+    if "TOI" in images[0][4]:
+        object_text = ax.text(0.76, 0.02, '', transform=ax.transAxes, color='white',
+                              fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
+    elif "TIC" in images[0][4]:
+        object_text = ax.text(0.74, 0.02, '', transform=ax.transAxes, color='white',
+                              fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
+    else:
+        pass
+
+    return time_text, frame_text, info_text, object_text
+
+
 def create_blink_animation(images, save_path):
     # Default output path with object name and date
     object_name = images[0][4][:11]
@@ -84,60 +110,58 @@ def create_blink_animation(images, save_path):
     # Create the base path directory if it doesn't exist
     os.makedirs(save_path, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
+
     zscale_interval = ZScaleInterval()
     norm = ImageNormalize(interval=zscale_interval, stretch=SqrtStretch())
-    im = ax.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
-    ax.set_xlabel('X-axis [pix]')
-    ax.set_ylabel('Y-axis [pix]')
-    ax.set_title('QC guiding')
 
-    time_text = ax.text(0.02, 0.98, '', transform=ax.transAxes, color='white',
-                        fontsize=10, verticalalignment='top', bbox=dict(facecolor='black', alpha=0.8))
+    # Plot for full frame data
+    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
+    ax1.set_xlabel('X-axis [pix]')
+    ax1.set_ylabel('Y-axis [pix]')
+    ax1.set_title('Zoom in Image')
 
-    frame_text = ax.text(0.98, 0.98, '', transform=ax.transAxes, color='white',
-                         fontsize=10, verticalalignment='top', horizontalalignment='right',
-                         bbox=dict(facecolor='black', alpha=0.8))
-    info_text = ax.text(0.02, 0.02, '', transform=ax.transAxes, color='white',
-                        fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
+    # Plot for cropped data
+    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
+    ax2.set_xlabel('X-axis [pix]')
+    ax2.set_ylabel('Y-axis [pix]')
+    ax2.set_title('Full frame Image')
 
-    if "TOI" in images[0][4]:
-        object_text = ax.text(0.78, 0.02, '', transform=ax.transAxes, color='white',
-                              fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
-    elif "TIC" in images[0][4]:
-        object_text = ax.text(0.74, 0.02, '', transform=ax.transAxes, color='white',
-                              fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
-    else:
-        pass
+    # Add text elements to both axes
+    time_text1, frame_text1, info_text1, object_text1 = add_text_elements(ax1)
+    time_text2, frame_text2, info_text2, object_text2 = add_text_elements(ax2)
 
     def update(frame):
-        im.set_array(images[frame][0])
-        time_text.set_text(f'DATE-OBS: {images[frame][1]}')
-        frame_text.set_text(f'Frame: {frame + 1}')
-        object_ra_dec_text = f'RA: {images[frame][2]}, DEC: {images[frame][3]}'
-        info_text.set_text(object_ra_dec_text)
+        # Update for full frame data
+        im1.set_array(images[frame][0][450:550, 600:700])
+        # Update for cropped data
+        im2.set_array(images[frame][0])
 
-        object_text.set_text(f'Object: {images[frame][4][:11]}')
+        time_text1.set_text(f'DATE-OBS: {images[frame][1]}')
+        frame_text1.set_text(f'Frame: {frame + 1}')
+        info_text1.set_text(f'RA: {images[frame][2]}, DEC: {images[frame][3]}')
+        object_text1.set_text(f'Object: {images[frame][4][:11]}')
+
+        time_text2.set_text(f'DATE-OBS: {images[frame][1]}')
+        frame_text2.set_text(f'Frame: {frame + 1}')
+        info_text2.set_text(f'RA: {images[frame][2]}, DEC: {images[frame][3]}')
+        object_text2.set_text(f'Object: {images[frame][4][:11]}')
+
         if "TOI" in images[frame][4]:
-            # Find the index where "TOI" starts
             toi_index = images[frame][4].find("TOI")
-
-            # Extract "TOI" and the next 5 letters
             toi_and_next_five = images[frame][4][toi_index:toi_index + 9]
-
-            object_text.set_text(f'Object: {toi_and_next_five}')
+            object_text2.set_text(f'Object: {toi_and_next_five}')
+            object_text1.set_text(f'Object: {toi_and_next_five}')
         elif "TIC" in images[frame][4]:
-            # Find the index where "TIC" starts
             tic_index = images[frame][4].find("TIC")
-
-            # Extract "TIC" and the next 5 letters
             tic_and_next_five = images[frame][4][tic_index:tic_index + 15]
-
-            object_text.set_text(f'Object: {tic_and_next_five}')
+            object_text2.set_text(f'Object: {tic_and_next_five}')
+            object_text1.set_text(f'Object: {tic_and_next_five}')
         else:
-            object_text.set_text(f'Object: {images[frame][4][:11]}')
+            object_text2.set_text(f'Object: {images[frame][4][:11]}')
+            object_text1.set_text(f'Object: {images[frame][4][:11]}')
 
-        return [im, time_text, object_text, frame_text, info_text]
+        return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2, info_text2]
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='imagemagick', fps=5)
