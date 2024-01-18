@@ -65,14 +65,21 @@ def find_first_image_of_each_prefix(directory):
     # List all items (files and directories) in the given directory
     items = os.listdir(directory)
 
-    # Filter out files with the word "flat, dark, bias" in their names
-    filtered_items = [item for item in items if "*flat*" and "bias*" and "dark*" not in item.lower()]
+    # Filter out files with the words "flat," "bias," and "dark" in their names
+    filtered_items = [item for item in items if "flat" not in item.lower() and "bias" not in item.lower() and "dark" not in item.lower()]
 
     # Dictionary to store the first image of each prefix
     first_image_of_each_prefix = {}
 
+    # Words to exclude in the prefix
+    exclude_words = ["evening", "morning"]
+
     # Iterate through filtered items
     for item in filtered_items:
+        # Check if any exclude word is in the item
+        if any(word in item.lower() for word in exclude_words):
+            continue  # Skip this item if any exclude word is found
+
         # Extract the first 6 letters of the item
         prefix = item[:11]
 
@@ -89,9 +96,11 @@ def find_first_image_of_each_prefix(directory):
                 first_image_of_each_prefix[prefix] = matching_files[0]
 
     # Print the first image for each different prefix
-    print(f"First image of each prefix in {directory} (excluding those with 'flat', 'bias' and 'dark' in the name):\n")
+    print(f"First image of each prefix in {directory} (excluding those with 'flat', 'bias', 'dark', 'evening', "
+          f"and 'morning' in the name):\n")
     for prefix, first_image in first_image_of_each_prefix.items():
         print(f"Prefix: {prefix}, First Image: {first_image}")
+        # Assuming you have a run_donuts function defined
         run_donuts(directory, prefix)
 
     if not first_image_of_each_prefix:
@@ -183,7 +192,7 @@ def acquire_header_info(directory, prefix):
             jd = utc_to_jd(utc_time_str)
 
             time_jd.append(jd)
-            print(utc_time_str)
+    
     return time_jd
 
 
@@ -205,11 +214,11 @@ def plot_shifts(x_shifts, y_shifts, save_path, prefix, time):
     # Add colorbar
     cbar = plt.colorbar(scatter, label='Time')
 
-    # Get the current date in the format DDMMYYYY
-    timestamp = datetime.now().strftime("%Y%m%d")
+    # Get the prev night directory in the format DDMMYYYY
+    timestamp_yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
 
     # Construct the directory path based on the current date
-    base_file_name = f"donuts_{prefix}_{timestamp}"
+    base_file_name = f"donuts_{prefix}_{timestamp_yesterday}"
 
     # Construct the full file path within the "shifts_plots" directory
     pdf_file_path = os.path.join(save_path, f"{base_file_name}.pdf")
