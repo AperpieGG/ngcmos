@@ -1,4 +1,5 @@
 #!/Users/u5500483/anaconda3/bin/python
+from collections import defaultdict
 from datetime import datetime, timedelta
 import glob
 import os
@@ -74,7 +75,7 @@ def register_images(images):
     return registered_images_list
 
 
-def add_text_elements(ax):
+def add_text_elements(ax, images):
     zscale_interval = ZScaleInterval()
     norm = ImageNormalize(interval=zscale_interval, stretch=SqrtStretch())
 
@@ -92,7 +93,7 @@ def add_text_elements(ax):
         object_text = ax.text(0.76, 0.02, '', transform=ax.transAxes, color='white',
                               fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
     elif "TIC" in images[0][4]:
-        object_text = ax.text(0.74, 0.02, '', transform=ax.transAxes, color='white',
+        object_text = ax.text(0.70, 0.02, '', transform=ax.transAxes, color='white',
                               fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
     else:
         pass
@@ -128,8 +129,8 @@ def create_blink_animation(images, save_path):
     ax2.set_title('Full frame Image')
 
     # Add text elements to both axes
-    time_text1, frame_text1, info_text1, object_text1 = add_text_elements(ax1)
-    time_text2, frame_text2, info_text2, object_text2 = add_text_elements(ax2)
+    time_text1, frame_text1, info_text1, object_text1 = add_text_elements(ax1, images)
+    time_text2, frame_text2, info_text2, object_text2 = add_text_elements(ax2, images)
 
     def update(frame):
         # Update for full frame data
@@ -154,14 +155,15 @@ def create_blink_animation(images, save_path):
             object_text1.set_text(f'Object: {toi_and_next_five}')
         elif "TIC" in images[frame][4]:
             tic_index = images[frame][4].find("TIC")
-            tic_and_next_five = images[frame][4][tic_index:tic_index + 15]
+            tic_and_next_five = images[frame][4][tic_index:tic_index + 12]
             object_text2.set_text(f'Object: {tic_and_next_five}')
             object_text1.set_text(f'Object: {tic_and_next_five}')
         else:
             object_text2.set_text(f'Object: {images[frame][4][:11]}')
             object_text1.set_text(f'Object: {images[frame][4][:11]}')
 
-        return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2, info_text2]
+        return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2,
+                info_text2]
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='imagemagick', fps=5)
@@ -182,26 +184,48 @@ def find_current_night_directory(file_path):
         return None
 
 
-if __name__ == "__main__":
-    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
-    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
+def process_images_by_prefix(base_path, save_path):
     # Find the current night directory
     current_night_directory = find_current_night_directory(base_path)
-    plot_images()
 
     if current_night_directory:
         print(f"Current night directory found: {current_night_directory}")
-        images = read_fits(find_fits(current_night_directory))
 
-        # Check if the images list is not empty before proceeding
-        if images:
-            registered_images = register_images(images)
-            print(f"Total number of registered_images used: {len(registered_images)}")
-            create_blink_animation(registered_images, save_path)
-        else:
-            print("No fits images found.")
+        # Get a list of all fits files in the current night directory
+        fits_files = find_fits(current_night_directory)
+
+        # Group fits files by their prefixes
+        prefix_groups = defaultdict(list)
+        for fits_file in fits_files:
+            # Extract the file name (excluding the directory path)
+            file_name = os.path.basename(fits_file)
+            prefix = file_name[:11]
+            prefix_groups[prefix].append(fits_file)
+
+        for prefix, fits_files_with_prefix in prefix_groups.items():
+            print(f"\nProcessing images with prefix: {prefix}")
+            images = read_fits(fits_files_with_prefix)
+
+            # Check if the images list is not empty before proceeding
+            if images:
+                registered_images = register_images(images)
+                print(f"Number of registered_images used: {len(registered_images)}")
+
+                # Create and save animation for each prefix
+                create_blink_animation(registered_images, save_path)
+            else:
+                print(f"No fits images found for prefix: {prefix}")
+
     else:
         print("No current night directory found.")
+
+
+if __name__ == "__main__":
+    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
+
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    # Process images for each prefix in the current night directory
+    process_images_by_prefix(base_path, save_path)
