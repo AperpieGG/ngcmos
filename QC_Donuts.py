@@ -229,7 +229,7 @@ def plot_shifts(x_shifts, y_shifts, save_path, prefix, time):
 
 
 def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names):
-    # Create a timestamp for the file name
+    # Get the prev night directory in the format DDMMYYYY
     timestamp_yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
 
     # Construct the base file name
