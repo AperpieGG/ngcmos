@@ -66,7 +66,7 @@ def find_first_image_of_each_prefix(directory):
     items = os.listdir(directory)
 
     # Filter out files with the word "flat, dark, bias" in their names
-    filtered_items = [item for item in items if "flat" and "bias" and "dark" not in item.lower()]
+    filtered_items = [item for item in items if "*flat*" and "bias*" and "dark*" not in item.lower()]
 
     # Dictionary to store the first image of each prefix
     first_image_of_each_prefix = {}
