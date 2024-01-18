@@ -192,7 +192,7 @@ def acquire_header_info(directory, prefix):
             jd = utc_to_jd(utc_time_str)
 
             time_jd.append(jd)
-    
+
     return time_jd
 
 
@@ -230,10 +230,10 @@ def plot_shifts(x_shifts, y_shifts, save_path, prefix, time):
 
 def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names):
     # Create a timestamp for the file name
-    timestamp = datetime.now().strftime("%Y%m%d")
+    timestamp_yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
 
     # Construct the base file name
-    base_file_name = f"donuts_{prefix}_{timestamp}"
+    base_file_name = f"donuts_{prefix}_{timestamp_yesterday}"
 
     # Construct the full file paths
     json_file_path = os.path.join(save_path, f"{base_file_name}.json")
