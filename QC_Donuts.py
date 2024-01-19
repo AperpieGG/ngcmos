@@ -2,13 +2,15 @@
 import json
 import os
 from datetime import datetime, timedelta
+
+from astropy.visualization import ZScaleInterval, ImageNormalize, SqrtStretch, LinearStretch
 from donuts import Donuts
 import glob
 from matplotlib import pyplot as plt
 import warnings
 from astropy.io import fits
 from astropy.time import Time
-
+from matplotlib.animation import FuncAnimation
 
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
 warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
@@ -72,7 +74,7 @@ def find_first_image_of_each_prefix(directory):
     first_image_of_each_prefix = {}
 
     # Words to exclude in the prefix
-    exclude_words = ["evening", "morning"]
+    exclude_words = ["evening", "morning", "flat", "bias", "dark"]
 
     # Iterate through filtered items
     for item in filtered_items:
@@ -159,11 +161,92 @@ def run_donuts(directory, prefix):
     num_large_shifts = sum(1 for x, y in zip(x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5)
     print("The number of images with shifts greater than 0.5 pixels is: {}".format(num_large_shifts))
     print()
+
+    plot_images()
+
     save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, science_image_names)
 
     time = acquire_header_info(directory, prefix)
 
     plot_shifts(x_shifts, y_shifts, save_path, prefix, time)
+
+    create_blink_animation(science_image_names, x_shifts, y_shifts, prefix)
+
+
+def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix):
+    images_with_large_shift = [image for image, x, y in zip(science_image_names, x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5]
+
+    if not images_with_large_shift:
+        print("No images with shifts greater than 0.5 pixels.")
+    else:
+        print("Creating animation for images with shifts greater than 0.5 pixels.\n")
+        print(f"Number of images with shifts greater than 0.5 pixels: {len(images_with_large_shift)}\n")
+
+        # get the date of the images
+        date_obs = [fits.getheader(image)['DATE-OBS'] for image in images_with_large_shift]
+
+        object_name = [fits.getheader(image)['OBJECT'] for image in images_with_large_shift]
+        ra = [fits.getheader(image)['TELRA'] for image in images_with_large_shift]
+        dec = [fits.getheader(image)['TELDEC'] for image in images_with_large_shift]
+
+        # Default output path with object name and date
+        timestamp_yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+
+        # Construct the directory path based on the current date
+        base_file_name = f"donuts_{prefix}_{timestamp_yesterday}"
+
+        # Construct the full file path within the "shifts_plots" directory
+        gif_file_path = os.path.join(save_path, f"{base_file_name}.gif")
+
+        fig, ax = plt.subplots(figsize=(8, 8))
+        zscale_interval = ZScaleInterval()
+        norm = ImageNormalize(interval=zscale_interval, stretch=LinearStretch())
+        im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=norm)
+        ax.set_xlabel('X-axis [pix]')
+        ax.set_ylabel('Y-axis [pix]')
+        ax.set_title('QC guiding')
+        time_text = ax.text(0.02, 0.98, '', transform=ax.transAxes, color='white',
+                            fontsize=10, verticalalignment='top', bbox=dict(facecolor='black', alpha=0.8))
+        frame_text = ax.text(0.98, 0.98, '', transform=ax.transAxes, color='white',
+                             fontsize=10, verticalalignment='top', horizontalalignment='right',
+                             bbox=dict(facecolor='black', alpha=0.8))
+        info_text = ax.text(0.02, 0.02, '', transform=ax.transAxes, color='white',
+                            fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
+        if "TOI" in object_name[0]:
+            object_text = ax.text(0.78, 0.02, '', transform=ax.transAxes, color='white',
+                                  fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
+        elif "TIC" in object_name[0]:
+            object_text = ax.text(0.72, 0.02, '', transform=ax.transAxes, color='white',
+                                  fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
+        else:
+            pass
+
+        def update(frame):
+            im.set_array(fits.getdata(images_with_large_shift[frame]))
+            time_text.set_text(f'DATE-OBS: {date_obs[frame]}')
+            frame_text.set_text(f'Frame: {frame + 1}')
+            object_ra_dec_text = f'RA: {ra[frame]}\nDEC: {dec[frame]}'
+            info_text.set_text(object_ra_dec_text)
+            object_text.set_text(f'Object: {object_name[frame][:11]}')
+            if "TOI" in object_name[frame]:
+                # Find the index where "TOI" starts
+                toi_index = object_name[frame].find("TOI")
+                # Extract "TOI" and the next 5 letters
+                toi_and_next_five = object_name[frame][toi_index:toi_index + 9]
+                object_text.set_text(f'Object: {toi_and_next_five}')
+            elif "TIC" in object_name[frame]:
+                # Find the index where "TIC" starts
+                tic_index = object_name[frame].find("TIC")
+                # Extract "TIC" and the next 5 letters
+                tic_and_next_five = object_name[frame][tic_index:tic_index + 13]
+                object_text.set_text(f'Object: {tic_and_next_five}')
+            else:
+                object_text.set_text(f'Object: {object_name[frame][:11]}')
+            return [im, time_text, object_text, frame_text, info_text]
+
+        animation = FuncAnimation(fig, update, frames=len(images_with_large_shift), blit=True)
+        animation.save(gif_file_path, writer='imagemagick', fps=5)
+        print(f"Animation saved to: {gif_file_path}\n")
 
 
 def utc_to_jd(utc_time_str):
