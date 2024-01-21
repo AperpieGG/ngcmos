@@ -104,8 +104,8 @@ def add_text_elements(ax, images):
 def create_blink_animation(images, save_path):
     # Default output path with object name and date
     object_name = images[0][4][:11]
-    timestamp = datetime.now().strftime('%Y%m%d')
-    output_name = f"donuts_{object_name}_{timestamp}.gif"
+    timestamp_yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
+    output_name = f"control_{object_name}_{timestamp_yesterday}.gif"
     output_path = os.path.join(save_path, output_name)
 
     # Create the base path directory if it doesn't exist
