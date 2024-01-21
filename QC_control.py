@@ -111,63 +111,44 @@ def create_blink_animation(images, save_path):
     # Create the base path directory if it doesn't exist
     os.makedirs(save_path, exist_ok=True)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
+    fig, ax1 = plt.subplots(figsize=(8, 8))  # Only one subplot
 
     zscale_interval = ZScaleInterval()
     norm = ImageNormalize(interval=zscale_interval, stretch=SqrtStretch())
 
     # Plot for full frame data
-    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
+    im1 = ax1.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
     ax1.set_xlabel('X-axis [pix]')
     ax1.set_ylabel('Y-axis [pix]')
     ax1.set_title('Zoom in Image')
 
-    # Plot for cropped data
-    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
-    ax2.set_xlabel('X-axis [pix]')
-    ax2.set_ylabel('Y-axis [pix]')
-    ax2.set_title('Full frame Image')
-
-    # Add text elements to both axes
+    # Add text elements to the axis
     time_text1, frame_text1, info_text1, object_text1 = add_text_elements(ax1, images)
-    time_text2, frame_text2, info_text2, object_text2 = add_text_elements(ax2, images)
 
     def update(frame):
         # Update for full frame data
-        im1.set_array(images[frame][0][450:550, 600:700])
-        # Update for cropped data
-        im2.set_array(images[frame][0])
+        im1.set_array(images[frame][0])
 
         time_text1.set_text(f'DATE-OBS: {images[frame][1]}')
         frame_text1.set_text(f'Frame: {frame + 1}')
         info_text1.set_text(f'RA: {images[frame][2]}, DEC: {images[frame][3]}')
         object_text1.set_text(f'Object: {images[frame][4][:11]}')
 
-        time_text2.set_text(f'DATE-OBS: {images[frame][1]}')
-        frame_text2.set_text(f'Frame: {frame + 1}')
-        info_text2.set_text(f'RA: {images[frame][2]}, DEC: {images[frame][3]}')
-        object_text2.set_text(f'Object: {images[frame][4][:11]}')
-
         if "TOI" in images[frame][4]:
             toi_index = images[frame][4].find("TOI")
             toi_and_next_five = images[frame][4][toi_index:toi_index + 9]
-            object_text2.set_text(f'Object: {toi_and_next_five}')
             object_text1.set_text(f'Object: {toi_and_next_five}')
         elif "TIC" in images[frame][4]:
             tic_index = images[frame][4].find("TIC")
             tic_and_next_five = images[frame][4][tic_index:tic_index + 12]
-            object_text2.set_text(f'Object: {tic_and_next_five}')
             object_text1.set_text(f'Object: {tic_and_next_five}')
         else:
-            object_text2.set_text(f'Object: {images[frame][4][:11]}')
             object_text1.set_text(f'Object: {images[frame][4][:11]}')
 
-        return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2,
-                info_text2]
+        return [im1, time_text1, object_text1, frame_text1, info_text1]
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='imagemagick', fps=5)
-
 
 def find_current_night_directory(file_path):
     # Get the current date in the format YYYYMMDD
