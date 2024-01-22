@@ -96,7 +96,8 @@ def add_text_elements(ax, images):
         object_text = ax.text(0.70, 0.02, '', transform=ax.transAxes, color='white',
                               fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
     else:
-        pass
+        object_text = ax.text(0.76, 0.02, '', transform=ax.transAxes, color='white',
+                              fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
 
     return time_text, frame_text, info_text, object_text
 
