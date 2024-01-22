@@ -219,7 +219,8 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix):
             object_text = ax.text(0.72, 0.02, '', transform=ax.transAxes, color='white',
                                   fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
         else:
-            pass
+            object_text = ax.text(0.70, 0.02, '', transform=ax.transAxes, color='white',
+                                  fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.8))
 
         def update(frame):
             im.set_array(fits.getdata(images_with_large_shift[frame]))
