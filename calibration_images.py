@@ -122,9 +122,9 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
 
 
 if __name__ == '__main__':
-    calibration_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'
-    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
-    out_path = '/Users/u5500483/Documents/GitHub/ngcmos/'  # to be changed for nuc (home/ops/calibration_images)
+    calibration_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'  # (home/ops/data/20231212
+    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'  # (home/ops/data)
+    out_path = '/Users/u5500483/Documents/GitHub/ngcmos/'  # to be changed for nuc (home/ops/data/calibration_images)
     master_bias = bias(calibration_path, out_path)
     master_dark = dark(calibration_path, out_path, master_bias)
     master_flat = flat(base_path, out_path, master_bias, master_dark)
