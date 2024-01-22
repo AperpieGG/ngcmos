@@ -10,7 +10,8 @@ def bias(base_path, out_path):
     master_bias_path = os.path.join(out_path, 'master_bias.fits')
 
     if os.path.exists(master_bias_path):
-        print('Master bias already exists')
+        print('Found master bias in {}'.format(master_bias_path))
+        return fits.getdata(master_bias_path)
     else:
         print('Creating master bias')
 
@@ -32,7 +33,8 @@ def dark(base_path, out_path, master_bias):
     master_dark_path = os.path.join(out_path, 'master_dark.fits')
 
     if os.path.exists(master_dark_path):
-        print('Master dark already exists')
+        print('Found master dark in {}'.format(master_dark_path))
+        return fits.getdata(master_dark_path)
     else:
         print('Creating master dark')
 
@@ -67,19 +69,13 @@ def find_current_night_directory(base_path):
 def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     current_night_directory = find_current_night_directory(base_path)
 
-    if current_night_directory is None:
-        print('Current night directory not found')
-        return
-
     if os.path.exists(os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits')):
-        print('Master flat already exists')
-        return
+        print('Found master flat in {}'.format(
+            os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits')))
+        return fits.getdata(os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits'))
 
     files = [f for f in glob.glob(os.path.join(current_night_directory, 'evening*.fits')) if
              'HDR' in fits.getheader(f)['READMODE']]
-    if not files:
-        print('No HDR flat files found.')
-        return
 
     print('Creating master flat')
     # take only the first 21
@@ -94,21 +90,42 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     master_flat = np.median(cube, axis=2)
     fits.PrimaryHDU(master_flat).writeto(
         os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits'), overwrite=True)
-    del cube
-    del master_flat
+    return master_flat
 
 
-def flat_up_one_directory(calibration_path, out_path, master_bias, master_dark, dark_exposure=10):
-    # Get the parent directory of the calibration_path
-    flat_path = os.path.abspath(os.path.join(calibration_path, os.pardir))
+def reduce_images(base_path, master_bias, master_dark, master_flat):
+    current_night_directory = find_current_night_directory(base_path)
+    if current_night_directory is None:
+        print('Current night directory not found')
+    else:
+        print('Current night directory found {} will reduce images'.format(current_night_directory))
+        for filename in sorted(glob.glob(os.path.join(current_night_directory, '*.fits'))):
+            exclude = ['bias', 'dark', 'flat', 'evening', '_r']
+            if any([e in filename for e in exclude]):
+                continue
+            try:
+                fd, fh = fits.getdata(filename, header=True)
+                fd = (fd - master_bias - master_dark * fh['EXPTIME'] / 10) / master_flat
+                fd_data_uint = fd.astype('uint16')
+                limits = np.iinfo(fd_data_uint.dtype)
+                fd_data_uint[fd < limits.min] = limits.min
+                fd_data_uint[fd > limits.max] = limits.max
+                fd = fd_data_uint
+            except Exception as e:
+                print(f'Failed to process {filename}. Exception: {str(e)}')
+                continue
 
-    # Call the flat function with the modified flat_path
-    flat(flat_path, out_path, master_bias, master_dark, dark_exposure)
+            # Save the reduced image with _r.fits suffix
+            output_filename = os.path.join(current_night_directory,
+                                           f"{os.path.splitext(os.path.basename(filename))[0]}_r.fits")
+            fits.PrimaryHDU(fd, fh).writeto(output_filename, overwrite=True)
 
 
 if __name__ == '__main__':
     calibration_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'
+    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
     out_path = '/Users/u5500483/Documents/GitHub/ngcmos/'  # to be changed for nuc (home/ops/calibration_images)
     master_bias = bias(calibration_path, out_path)
     master_dark = dark(calibration_path, out_path, master_bias)
-    flat_up_one_directory(calibration_path, out_path, master_bias, master_dark)
+    master_flat = flat(base_path, out_path, master_bias, master_dark)
+    reduce_images(base_path, master_bias, master_dark, master_flat)
