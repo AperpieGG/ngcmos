@@ -9,7 +9,9 @@ def bias(base_path, out_path):
     if os.path.exists(out_path + 'master_bias.fits'):
         print('Master bias already exists')
         pass
-    files = glob.glob(base_path + 'bias-*.fits')
+
+    # Find and read the bias for hdr mode
+    files = [f for f in glob.glob(base_path + 'bias*.fits') if 'HDR' in fits.getheader(f)['READMODE']]
 
     # Limit the number of files to the first 21
     files = files[:21]
@@ -26,25 +28,25 @@ def dark(base_path, out_path, master_bias):
     if os.path.exists(out_path + 'master_dark.fits'):
         print('Master dark already exists')
         pass
-    files = glob.glob(base_path + 'dark*.fits')
+
+    # Find and read the darks for hdr mode
+    files = [f for f in glob.glob(base_path + 'dark*.fits') if 'HDR' in fits.getheader(f)['READMODE']]
 
     # Limit the number of files to the first 21
     files = files[:21]
 
     cube = np.zeros((2048, 2048, len(files)))
     for i, f in enumerate(files):
-        print(f)
         cube[:, :, i] = fits.getdata(f)
     master_dark = np.median(cube, axis=2) - master_bias
     fits.PrimaryHDU(master_dark).writeto('master-dark.fits', overwrite=True)
     return master_dark
 
 
-def flat(base_path, out_path):
-    master_bias = fits.getdata('master-bias.fits')
-    master_dark = fits.getdata('master-dark.fits')
-    dark_exposure = 10
-
+def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10, prefix):
+    if os.path.exists(out_path + 'master_flat.fits'):
+        print('Master flat already exists')
+        pass
     # Mask out the non-imaging areas of the sensor
     h = fits.getheader(glob.glob(f'/data/20240109/evening-flat-*-*.fits')[0])
     r = re.search(r'^\[(\d+):(\d+),(\d+):(\d+)\]$', h['IMAG-RGN']).groups()
