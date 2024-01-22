@@ -45,7 +45,7 @@ def find_fits(file_path):
     print(f"Initial images found: {len(total_files)}")
     filtered_files = [item for item in total_files if
                       "flat" not in item.lower() and "bias" not in item.lower() and "dark" not in item.lower()]
-    raw_images = sorted(filtered_files[::5])
+    raw_images = sorted(filtered_files[::6])
     return raw_images
 
 
@@ -149,6 +149,7 @@ def create_blink_animation(images, save_path):
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='imagemagick', fps=5)
+
 
 def find_current_night_directory(file_path):
     # Get the current date in the format YYYYMMDD
