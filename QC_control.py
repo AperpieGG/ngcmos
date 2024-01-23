@@ -43,6 +43,7 @@ def find_fits(file_path):
     print(f"Initial images found: {len(total_files)}")
     filtered_files = [item for item in total_files if
                       "flat" not in item.lower() and "bias" not in item.lower() and "dark" not in item.lower()]
+    print(f"Exclude flats, bias and darks, filtered images found: {len(filtered_files)}")
     raw_images = sorted(filtered_files[::6])
     return raw_images
 
@@ -101,7 +102,7 @@ def create_blink_animation(images, save_path):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
     norm_1 = ImageNormalize(vmin=100, vmax=1000)
-    norm_2 = ImageNormalize(vmin=100, vmax=500)
+    norm_2 = ImageNormalize(vmin=100, vmax=1000)
 
     # Plot for full frame data
     # Plot for full frame data
@@ -211,22 +212,21 @@ def process_images_by_prefix(base_path, save_path):
 
 def main():
     plot_images()
-
     # First directory
     base_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
-    save_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
-
     # Second directory
     base_path_2 = '/home/ops/data/'
-    save_path_2 = '/home/ops/data/shifts_plots/'
 
     # Check if the first directory exists
     if os.path.exists(base_path_1):
         base_path = base_path_1
-        save_path = save_path_1
     else:
         base_path = base_path_2
-        save_path = save_path_2
+
+    save_path = base_path + 'shifts_plots/'
+    # Ensure the save path exists
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
     # Process images for each prefix in the current night directory
     process_images_by_prefix(base_path, save_path)
