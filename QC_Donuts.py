@@ -195,14 +195,6 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
         gif_file_path = os.path.join(save_path, f"{base_file_name}.gif")
 
         fig, ax = plt.subplots(figsize=(8, 8))
-
-        zscale_interval = ZScaleInterval()
-
-        vmin = 100  # Adjust this value based on your data
-        vmax = 2000  # Adjust this value based on your data
-
-        norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
-        im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=norm)
         ax.set_xlabel('X-axis [pix]')
         ax.set_ylabel('Y-axis [pix]')
         ax.set_title('QC guiding')
