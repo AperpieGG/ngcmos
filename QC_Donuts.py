@@ -2,7 +2,6 @@
 import json
 import os
 from datetime import datetime, timedelta
-
 from astropy.visualization import ZScaleInterval, ImageNormalize, SqrtStretch, LinearStretch
 from donuts import Donuts
 import glob
