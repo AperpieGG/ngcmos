@@ -6,9 +6,10 @@ import os
 
 import numpy as np
 from astropy.io import fits
-from astropy.visualization import ImageNormalize, SqrtStretch, ZScaleInterval, BaseInterval
+from astropy.visualization import ImageNormalize, SqrtStretch, ZScaleInterval, BaseInterval, LinearStretch
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.colors import Normalize
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
@@ -104,17 +105,18 @@ def create_blink_animation(images, save_path):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
-    zscale = ZScaleInterval()
-    norm = ImageNormalize(images[0][0], interval=zscale, stretch=SqrtStretch())
+    # Manually set the vmin and vmax for color scaling
+    vmin = 100  # Set your desired minimum value
+    vmax = 3000  # Set your desired maximum value
 
     # Plot for full frame data
-    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
+    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
     ax1.set_xlabel('X-axis [pix]')
     ax1.set_ylabel('Y-axis [pix]')
     ax1.set_title('Zoom in Image')
 
     # Plot for cropped data
-    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
+    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
     ax2.set_xlabel('X-axis [pix]')
     ax2.set_ylabel('Y-axis [pix]')
     ax2.set_title('Full frame Image')

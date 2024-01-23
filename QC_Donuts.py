@@ -10,6 +10,7 @@ import warnings
 from astropy.io import fits
 from astropy.time import Time
 from matplotlib.animation import FuncAnimation
+from matplotlib.colors import Normalize
 
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
 warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
@@ -196,11 +197,11 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
 
         fig, ax = plt.subplots(figsize=(8, 8))
 
-        zscale_interval = ZScaleInterval()
+        # Manually set the vmin and vmax for color scaling
+        vmin = 100  # Set your desired minimum value
+        vmax = 3000  # Set your desired maximum value
 
-        norm = ImageNormalize(zscale_interval, stretch=SqrtStretch())
-
-        im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=norm)
+        im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
         ax.set_xlabel('X-axis [pix]')
         ax.set_ylabel('Y-axis [pix]')
         ax.set_title('QC guiding')
