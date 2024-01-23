@@ -3,6 +3,8 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 import glob
 import os
+
+import numpy as np
 from astropy.io import fits
 from astropy.visualization import ImageNormalize, SqrtStretch, ZScaleInterval, BaseInterval
 import matplotlib.pyplot as plt
@@ -104,11 +106,10 @@ def create_blink_animation(images, save_path):
 
     zscale_interval = ZScaleInterval()
 
-    vmin = 100  # Adjust this value based on your data
-    vmax = 2000  # Adjust this value based on your data
+    vmin = np.median(images[0][0])
+    vmax = 10000  # Adjust this value based on your data
 
-    norm = ImageNormalize(vmin=zscale_interval.get_limits(images[0][0])[0],
-                          vmax=zscale_interval.get_limits(images[0][0])[1], stretch=SqrtStretch())
+    norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
 
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
