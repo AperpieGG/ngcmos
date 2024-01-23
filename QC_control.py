@@ -107,7 +107,8 @@ def create_blink_animation(images, save_path):
     vmin = 100  # Adjust this value based on your data
     vmax = 2000  # Adjust this value based on your data
 
-    norm = ImageNormalize(vmin=vmin, vmax=vmax)
+    norm = ImageNormalize(vmin=zscale_interval.get_limits(images[0][0])[0],
+                          vmax=zscale_interval.get_limits(images[0][0])[1], stretch=SqrtStretch())
 
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
