@@ -108,7 +108,9 @@ def create_blink_animation(images, save_path):
     # Manually set the vmin and vmax for color scaling
     vmin = 100  # Set your desired minimum value
     vmax = 3000  # Set your desired maximum value
-
+    for imges in images:
+        median_each_image = np.median(imges[0])
+        print(f"Median of each image: {median_each_image}")
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
     ax1.set_xlabel('X-axis [pix]')
