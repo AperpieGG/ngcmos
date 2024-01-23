@@ -106,8 +106,8 @@ def create_blink_animation(images, save_path):
 
     zscale_interval = ZScaleInterval()
 
-    vmin = np.median(images[0][0])
-    vmax = 10000  # Adjust this value based on your data
+    vmin = np.percentile(images[0][0], 5)
+    vmax = np.percentile(images[0][0], 95)
 
     norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
 
