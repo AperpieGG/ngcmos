@@ -108,9 +108,8 @@ def create_blink_animation(images, save_path):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
-    # Manually set the vmin and vmax for color scaling
-    vmin = 100  # Set your desired minimum value
-    vmax = 3000  # Set your desired maximum value
+    zscaled = ZScaleInterval()
+    vmin, vmax = zscaled.get_limits(images[0][0])
 
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
