@@ -80,6 +80,9 @@ def add_text_elements(ax, images):
     info_text = ax.text(0.02, 0.02, '', transform=ax.transAxes, color='white',
                         fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
 
+    median_text = ax.text(0.02, 0.91, '', transform=ax.transAxes, color='white',
+                          fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
+
     if "TOI" in images[0][4]:
         object_text = ax.text(0.76, 0.02, '', transform=ax.transAxes, color='white',
                               fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
@@ -90,7 +93,7 @@ def add_text_elements(ax, images):
         object_text = ax.text(0.70, 0.02, '', transform=ax.transAxes, color='white',
                               fontsize=10, verticalalignment='bottom', bbox=dict(facecolor='black', alpha=0.6))
 
-    return time_text, frame_text, info_text, object_text
+    return time_text, frame_text, info_text, median_text, object_text
 
 
 def create_blink_animation(images, save_path):
@@ -108,9 +111,7 @@ def create_blink_animation(images, save_path):
     # Manually set the vmin and vmax for color scaling
     vmin = 100  # Set your desired minimum value
     vmax = 3000  # Set your desired maximum value
-    for imges in images:
-        median_each_image = np.median(imges[0])
-        print(f"Median of each image: {median_each_image}")
+
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
     ax1.set_xlabel('X-axis [pix]')
@@ -124,8 +125,8 @@ def create_blink_animation(images, save_path):
     ax2.set_title('Full frame Image')
 
     # Add text elements to both axes
-    time_text1, frame_text1, info_text1, object_text1 = add_text_elements(ax1, images)
-    time_text2, frame_text2, info_text2, object_text2 = add_text_elements(ax2, images)
+    time_text1, frame_text1, info_text1, median_text_1, object_text1 = add_text_elements(ax1, images)
+    time_text2, frame_text2, info_text2,  median_text_2, object_text2, = add_text_elements(ax2, images)
 
     def update(frame):
         # Update for cropped data
@@ -141,6 +142,7 @@ def create_blink_animation(images, save_path):
         time_text2.set_text(f'DATE-OBS: {images[frame][1]}')
         frame_text2.set_text(f'Frame: {frame + 1}')
         info_text2.set_text(f'RA: {images[frame][2]}, DEC: {images[frame][3]}')
+        median_text_2.set_text(f'Median: {np.median(images[frame][0])} [cts]')
         object_text2.set_text(f'Object: {images[frame][4][:11]}')
 
         if "TOI" in images[frame][4]:
@@ -159,7 +161,7 @@ def create_blink_animation(images, save_path):
             object_text2.set_text(f'Object: {images[frame][4][:11]}')
 
         return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2,
-                info_text2]
+                info_text2, median_text_1, median_text_2]
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='ffmpeg', fps=5)
