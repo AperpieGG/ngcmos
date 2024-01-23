@@ -5,7 +5,7 @@ import glob
 import os
 import numpy as np
 from astropy.io import fits
-from astropy.visualization import SqrtStretch, ImageNormalize, ZScaleInterval
+from astropy.visualization import SqrtStretch, ImageNormalize, ZScaleInterval, LinearStretch, MinMaxInterval
 from image_registration import chi2_shift
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -63,21 +63,10 @@ def read_fits(file_path):
 
 
 def register_images(images):
-    reference_image, reference_date, reference_ra, reference_dec, obj = images[0]
-    reference_data = reference_image
-
-    registered_images_list = [(reference_data, reference_date, reference_ra, reference_dec, obj)]
-    for img, date_obs, tel_ra, tel_dec, obj in images[1:]:
-        shift_result = chi2_shift(reference_data, img)
-        shifted_image_data = np.roll(img, shift_result[0].astype(int), axis=0)
-        registered_images_list.append((shifted_image_data, date_obs, tel_ra, tel_dec, obj))
-
-    return registered_images_list
+    return images
 
 
 def add_text_elements(ax, images):
-    zscale_interval = ZScaleInterval()
-    norm = ImageNormalize(interval=zscale_interval, stretch=SqrtStretch())
 
     time_text = ax.text(0.02, 0.98, '', transform=ax.transAxes, color='white',
                         fontsize=10, verticalalignment='top', bbox=dict(facecolor='black', alpha=0.6))
@@ -112,41 +101,59 @@ def create_blink_animation(images, save_path):
     # Create the base path directory if it doesn't exist
     os.makedirs(save_path, exist_ok=True)
 
-    fig, ax1 = plt.subplots(figsize=(8, 8))  # Only one subplot
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
-    zscale_interval = ZScaleInterval()
-    norm = ImageNormalize(interval=zscale_interval, stretch=SqrtStretch())
+    norm = ImageNormalize(vmin=100, vmax=3000)
 
     # Plot for full frame data
-    im1 = ax1.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
+    # Plot for full frame data
+    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
     ax1.set_xlabel('X-axis [pix]')
     ax1.set_ylabel('Y-axis [pix]')
     ax1.set_title('Zoom in Image')
 
-    # Add text elements to the axis
+    # Plot for cropped data
+    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
+    ax2.set_xlabel('X-axis [pix]')
+    ax2.set_ylabel('Y-axis [pix]')
+    ax2.set_title('Full frame Image')
+
+    # Add text elements to both axes
     time_text1, frame_text1, info_text1, object_text1 = add_text_elements(ax1, images)
+    time_text2, frame_text2, info_text2, object_text2 = add_text_elements(ax2, images)
 
     def update(frame):
+        # Update for cropped data
+        im1.set_array(images[frame][0][450:550, 600:700])
         # Update for full frame data
-        im1.set_array(images[frame][0])
+        im2.set_array(images[frame][0])
 
         time_text1.set_text(f'DATE-OBS: {images[frame][1]}')
         frame_text1.set_text(f'Frame: {frame + 1}')
         info_text1.set_text(f'RA: {images[frame][2]}, DEC: {images[frame][3]}')
         object_text1.set_text(f'Object: {images[frame][4][:11]}')
 
+        time_text2.set_text(f'DATE-OBS: {images[frame][1]}')
+        frame_text2.set_text(f'Frame: {frame + 1}')
+        info_text2.set_text(f'RA: {images[frame][2]}, DEC: {images[frame][3]}')
+        object_text2.set_text(f'Object: {images[frame][4][:11]}')
+
         if "TOI" in images[frame][4]:
             toi_index = images[frame][4].find("TOI")
             toi_and_next_five = images[frame][4][toi_index:toi_index + 9]
             object_text1.set_text(f'Object: {toi_and_next_five}')
+            object_text2.set_text(f'Object: {toi_and_next_five}')
         elif "TIC" in images[frame][4]:
             tic_index = images[frame][4].find("TIC")
             tic_and_next_five = images[frame][4][tic_index:tic_index + 12]
             object_text1.set_text(f'Object: {tic_and_next_five}')
+            object_text2.set_text(f'Object: {tic_and_next_five}')
+
         else:
             object_text1.set_text(f'Object: {images[frame][4][:11]}')
+            object_text2.set_text(f'Object: {images[frame][4][:11]}')
 
-        return [im1, time_text1, object_text1, frame_text1, info_text1]
+        return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2, info_text2]
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='imagemagick', fps=5)
@@ -204,6 +211,7 @@ def process_images_by_prefix(base_path, save_path):
 
 
 if __name__ == "__main__":
+    plot_images()
     base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
     save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
 
