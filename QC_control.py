@@ -3,10 +3,8 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 import glob
 import os
-import numpy as np
 from astropy.io import fits
-from astropy.visualization import SqrtStretch, ImageNormalize, ZScaleInterval, LinearStretch, MinMaxInterval
-from image_registration import chi2_shift
+from astropy.visualization import ImageNormalize
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
