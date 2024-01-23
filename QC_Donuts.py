@@ -196,7 +196,12 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
 
         fig, ax = plt.subplots(figsize=(8, 8))
 
-        norm = ImageNormalize(vmin=100, vmax=1000)
+        zscale_interval = ZScaleInterval()
+
+        vmin = 100  # Adjust this value based on your data
+        vmax = 2000  # Adjust this value based on your data
+
+        norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
         im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=norm)
         ax.set_xlabel('X-axis [pix]')
         ax.set_ylabel('Y-axis [pix]')
