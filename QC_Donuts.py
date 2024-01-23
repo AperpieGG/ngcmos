@@ -37,10 +37,7 @@ def plot_images():
     plt.rcParams['ytick.major.left'] = True
     plt.rcParams['ytick.minor.right'] = True
     plt.rcParams['ytick.minor.left'] = True
-
-    plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['font.size'] = 12
-
     plt.rcParams['legend.frameon'] = True
     plt.rcParams['legend.framealpha'] = 0.8
     plt.rcParams['legend.loc'] = 'best'
@@ -63,7 +60,7 @@ def find_current_night_directory(base_path):
         return None
 
 
-def find_first_image_of_each_prefix(directory):
+def find_first_image_of_each_prefix(directory, save_path):
     # List all items (files and directories) in the given directory
     items = os.listdir(directory)
 
@@ -103,13 +100,13 @@ def find_first_image_of_each_prefix(directory):
     for prefix, first_image in first_image_of_each_prefix.items():
         print(f"Prefix: {prefix}, First Image: {first_image}")
         # Assuming you have a run_donuts function defined
-        run_donuts(directory, prefix)
+        run_donuts(directory, prefix, save_path)
 
     if not first_image_of_each_prefix:
         print(f"No images found in {directory} with the specified prefix.")
 
 
-def run_donuts(directory, prefix):
+def run_donuts(directory, prefix, save_path):
     path = directory + '/'
     image_names = glob.glob(path + f'{prefix}*.fits')
     image_names = sorted(image_names)
@@ -170,10 +167,10 @@ def run_donuts(directory, prefix):
 
     plot_shifts(x_shifts, y_shifts, save_path, prefix, time)
 
-    create_blink_animation(science_image_names, x_shifts, y_shifts, prefix)
+    create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save_path)
 
 
-def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix):
+def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save_path):
     images_with_large_shift = [image for image, x, y in zip(science_image_names, x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5]
 
     if not images_with_large_shift:
@@ -199,8 +196,8 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix):
         gif_file_path = os.path.join(save_path, f"{base_file_name}.gif")
 
         fig, ax = plt.subplots(figsize=(8, 8))
-        zscale_interval = ZScaleInterval()
-        norm = ImageNormalize(interval=zscale_interval, stretch=LinearStretch())
+
+        norm = ImageNormalize(vmin=100, vmax=1000)
         im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=norm)
         ax.set_xlabel('X-axis [pix]')
         ax.set_ylabel('Y-axis [pix]')
@@ -342,10 +339,20 @@ def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, sc
     print(f"JSON results saved to: {json_file_path}")
 
 
-if __name__ == "__main__":
-    # Specify the base path
-    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
-    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
+def main():
+    # First directory
+    base_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+    # Second directory
+    base_path_2 = '/home/ops/data/'
+
+    # Check if the first directory exists
+    if os.path.exists(base_path_1):
+        base_path = base_path_1
+    else:
+        base_path = base_path_2
+
+    save_path = base_path + 'shifts_plots/'
+    # Ensure the save path exists
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
@@ -354,10 +361,13 @@ if __name__ == "__main__":
 
     if current_night_directory:
         print(f"Current night directory found: {current_night_directory}")
-        find_first_image_of_each_prefix(current_night_directory)
+        find_first_image_of_each_prefix(current_night_directory, save_path)
     else:
         print("No current night directory found.")
 
+
+if __name__ == "__main__":
+    main()
 
 
 
