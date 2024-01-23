@@ -96,7 +96,7 @@ def create_blink_animation(images, save_path):
     # Default output path with object name and date
     object_name = images[0][4][:11]
     timestamp_yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y%m%d')
-    output_name = f"control_{object_name}_{timestamp_yesterday}.gif"
+    output_name = f"control_{object_name}_{timestamp_yesterday}.mp4"
     output_path = os.path.join(save_path, output_name)
 
     # Create the base path directory if it doesn't exist
@@ -155,7 +155,7 @@ def create_blink_animation(images, save_path):
                 info_text2]
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
-    animation.save(output_path, writer='imagemagick', fps=5)
+    animation.save(output_path, writer='ffmpeg', fps=5)
     print(f"Animation saved to: {output_path}")
 
 
