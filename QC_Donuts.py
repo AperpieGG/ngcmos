@@ -192,9 +192,15 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
         base_file_name = f"donuts_{prefix}_{timestamp_yesterday}"
 
         # Construct the full file path within the "shifts_plots" directory
-        gif_file_path = os.path.join(save_path, f"{base_file_name}.mp4")
+        gif_file_path = os.path.join(save_path, f"{base_file_name}.gif")
 
         fig, ax = plt.subplots(figsize=(8, 8))
+
+        zscale_interval = ZScaleInterval()
+
+        norm = ImageNormalize(zscale_interval, stretch=SqrtStretch())
+
+        im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=norm)
         ax.set_xlabel('X-axis [pix]')
         ax.set_ylabel('Y-axis [pix]')
         ax.set_title('QC guiding')
@@ -239,7 +245,7 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
             return [im, time_text, object_text, frame_text, info_text]
 
         animation = FuncAnimation(fig, update, frames=len(images_with_large_shift), blit=True)
-        animation.save(gif_file_path, writer='ffmpeg', fps=5)
+        animation.save(gif_file_path, writer='imagemagick', fps=5)
         print(f"Animation saved to: {gif_file_path}\n")
 
 

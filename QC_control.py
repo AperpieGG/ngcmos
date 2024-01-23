@@ -104,14 +104,17 @@ def create_blink_animation(images, save_path):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
+    zscale = ZScaleInterval()
+    norm = ImageNormalize(images[0][0], interval=zscale, stretch=SqrtStretch())
+
     # Plot for full frame data
-    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower')
+    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
     ax1.set_xlabel('X-axis [pix]')
     ax1.set_ylabel('Y-axis [pix]')
     ax1.set_title('Zoom in Image')
 
     # Plot for cropped data
-    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower')
+    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
     ax2.set_xlabel('X-axis [pix]')
     ax2.set_ylabel('Y-axis [pix]')
     ax2.set_title('Full frame Image')
