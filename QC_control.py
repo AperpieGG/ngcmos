@@ -107,7 +107,7 @@ def create_blink_animation(images, save_path):
     vmin = 100  # Adjust this value based on your data
     vmax = 2000  # Adjust this value based on your data
 
-    norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=SqrtStretch())
+    norm = ImageNormalize(vmin=vmin, vmax=vmax)
 
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
@@ -161,6 +161,7 @@ def create_blink_animation(images, save_path):
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='imagemagick', fps=5)
+    print(f"Animation saved to: {output_path}")
 
 
 def find_current_night_directory(file_path):
