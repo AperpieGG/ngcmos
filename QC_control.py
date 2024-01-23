@@ -65,7 +65,6 @@ def register_images(images):
 
 
 def add_text_elements(ax, images):
-
     time_text = ax.text(0.02, 0.98, '', transform=ax.transAxes, color='white',
                         fontsize=10, verticalalignment='top', bbox=dict(facecolor='black', alpha=0.6))
 
@@ -152,7 +151,8 @@ def create_blink_animation(images, save_path):
             object_text1.set_text(f'Object: {images[frame][4][:11]}')
             object_text2.set_text(f'Object: {images[frame][4][:11]}')
 
-        return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2, info_text2]
+        return [im1, im2, time_text1, object_text1, frame_text1, info_text1, time_text2, object_text2, frame_text2,
+                info_text2]
 
     animation = FuncAnimation(fig, update, frames=len(images), blit=True)
     animation.save(output_path, writer='imagemagick', fps=5)
@@ -209,13 +209,28 @@ def process_images_by_prefix(base_path, save_path):
         print("No current night directory found.")
 
 
-if __name__ == "__main__":
+def main():
     plot_images()
-    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
-    save_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
 
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    # First directory
+    base_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+    save_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/shifts_plots/'
+
+    # Second directory
+    base_path_2 = '/home/ops/data/'
+    save_path_2 = '/home/ops/data/shifts_plots/'
+
+    # Check if the first directory exists
+    if os.path.exists(base_path_1):
+        base_path = base_path_1
+        save_path = save_path_1
+    else:
+        base_path = base_path_2
+        save_path = save_path_2
 
     # Process images for each prefix in the current night directory
     process_images_by_prefix(base_path, save_path)
+
+
+if __name__ == "__main__":
+    main()
