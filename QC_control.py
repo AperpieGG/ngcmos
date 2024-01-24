@@ -108,10 +108,8 @@ def create_blink_animation(images, save_path):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
-    median_first_image = np.median(images[0][0])
-
     # Create a custom normalization based on the median of the first image
-    norm = LogNorm(vmin=median_first_image / 2, vmax=median_first_image * 2)
+    norm = ImageNormalize(vmin=0., vmax=65536, stretch=LogStretch())
 
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
