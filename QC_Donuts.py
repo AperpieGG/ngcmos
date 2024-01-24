@@ -2,8 +2,11 @@
 import json
 import os
 from datetime import datetime, timedelta
+
+import numpy as np
 from astropy.visualization import ZScaleInterval, ImageNormalize, SqrtStretch, LinearStretch
 from donuts import Donuts
+import sep
 import glob
 from matplotlib import pyplot as plt
 import warnings
@@ -171,7 +174,8 @@ def run_donuts(directory, prefix, save_path):
 
 
 def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save_path):
-    images_with_large_shift = [image for image, x, y in zip(science_image_names, x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5]
+    images_with_large_shift = [image for image, x, y in zip(science_image_names, x_shifts, y_shifts)
+                               if abs(x) >= 0.5 or abs(y) >= 0.5]
 
     if not images_with_large_shift:
         print("No images with shifts greater than 0.5 pixels.")
@@ -193,15 +197,16 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
         base_file_name = f"donuts_{prefix}_{timestamp_yesterday}"
 
         # Construct the full file path within the "shifts_plots" directory
-        gif_file_path = os.path.join(save_path, f"{base_file_name}.gif")
+        gif_file_path = os.path.join(save_path, f"{base_file_name}.mp4")
 
         fig, ax = plt.subplots(figsize=(8, 8))
 
-        # Manually set the vmin and vmax for color scaling
-        vmin = 100  # Set your desired minimum value
-        vmax = 3000  # Set your desired maximum value
+        data_image = fits.getdata(images_with_large_shift[0])
+        vmin = np.median(data_image[0]) - 0.2 * np.median(data_image[0])
+        vmax = np.median(data_image[0]) + 0.2 * np.median(data_image[0])
+        norm = Normalize(vmin=vmin, vmax=vmax)
 
-        im = ax.imshow(fits.getdata(images_with_large_shift[0]), cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
+        im = ax.imshow(data_image, cmap='hot', origin='lower', norm=norm)
         ax.set_xlabel('X-axis [pix]')
         ax.set_ylabel('Y-axis [pix]')
         ax.set_title('QC guiding')
@@ -224,6 +229,14 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
 
         def update(frame):
             im.set_array(fits.getdata(images_with_large_shift[frame]))
+            data_images = fits.getdata(images_with_large_shift[frame])
+            vmin = np.median(data_images) - 0.2 * np.median(data_images)
+            vmax = np.median(data_images) + 0.2 * np.median(data_images)
+
+            # Update normalization plots
+            norm = Normalize(vmin=vmin, vmax=vmax)
+            im.set_norm(norm)
+
             time_text.set_text(f'DATE-OBS: {date_obs[frame]}')
             frame_text.set_text(f'Frame: {frame + 1}')
             object_ra_dec_text = f'RA: {ra[frame]}\nDEC: {dec[frame]}'
@@ -243,10 +256,11 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
                 object_text.set_text(f'Object: {tic_and_next_five}')
             else:
                 object_text.set_text(f'Object: {object_name[frame][:11]}')
+
             return [im, time_text, object_text, frame_text, info_text]
 
         animation = FuncAnimation(fig, update, frames=len(images_with_large_shift), blit=True)
-        animation.save(gif_file_path, writer='imagemagick', fps=5)
+        animation.save(gif_file_path, writer='ffmpeg', fps=5)
         print(f"Animation saved to: {gif_file_path}\n")
 
 
