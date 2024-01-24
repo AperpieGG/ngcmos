@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 from astropy.io import fits
-from astropy.visualization import ImageNormalize, SqrtStretch, ZScaleInterval, BaseInterval, LinearStretch
+from astropy.visualization import ImageNormalize, SqrtStretch, ZScaleInterval, LogStretch
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import Normalize
@@ -108,24 +108,24 @@ def create_blink_animation(images, save_path):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
-    zscaled = ZScaleInterval()
-    vmin, vmax = zscaled.get_limits(images[0][0])
+    zscale_interval = ZScaleInterval()
+    norm = ImageNormalize(interval=zscale_interval, stretch=LogStretch())
 
     # Plot for full frame data
-    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
+    im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
     ax1.set_xlabel('X-axis [pix]')
     ax1.set_ylabel('Y-axis [pix]')
     ax1.set_title('Zoom in Image')
 
     # Plot for cropped data
-    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=Normalize(vmin=vmin, vmax=vmax))
+    im2 = ax2.imshow(images[0][0], cmap='hot', origin='lower', norm=norm)
     ax2.set_xlabel('X-axis [pix]')
     ax2.set_ylabel('Y-axis [pix]')
     ax2.set_title('Full frame Image')
 
     # Add text elements to both axes
     time_text1, frame_text1, info_text1, median_text_1, object_text1 = add_text_elements(ax1, images)
-    time_text2, frame_text2, info_text2,  median_text_2, object_text2, = add_text_elements(ax2, images)
+    time_text2, frame_text2, info_text2, median_text_2, object_text2, = add_text_elements(ax2, images)
 
     def update(frame):
         # Update for cropped data
