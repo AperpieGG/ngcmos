@@ -108,8 +108,8 @@ def create_blink_animation(images, save_path):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
-    vmin = np.median(images[0][0]) - 0.5 * np.median(images[0][0])
-    vmax = np.median(images[0][0]) + 0.5 * np.median(images[0][0])
+    vmin = np.median(images[0][0]) - 0.2 * np.median(images[0][0])
+    vmax = np.median(images[0][0]) + 0.2 * np.median(images[0][0])
     norm = Normalize(vmin=vmin, vmax=vmax)
 
     # Plot for full frame data
@@ -161,8 +161,8 @@ def create_blink_animation(images, save_path):
             object_text2.set_text(f'Object: {images[frame][4][:11]}')
 
         # Calculate vmin and vmax based on the median of the current frame
-        vmin = np.median(images[frame][0]) - 0.5 * np.median(images[frame][0])
-        vmax = np.median(images[frame][0]) + 0.5 * np.median(images[frame][0])
+        vmin = np.median(images[frame][0]) - 0.2 * np.median(images[frame][0])
+        vmax = np.median(images[frame][0]) + 0.2 * np.median(images[frame][0])
 
         # Update normalization for both subplots
         norm = Normalize(vmin=vmin, vmax=vmax)
