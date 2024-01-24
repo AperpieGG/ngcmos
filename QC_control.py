@@ -6,10 +6,10 @@ import os
 
 import numpy as np
 from astropy.io import fits
-from astropy.visualization import ImageNormalize, SqrtStretch, ZScaleInterval, LogStretch
+from astropy.visualization import ImageNormalize, SqrtStretch, ZScaleInterval, LogStretch, MinMaxInterval
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, LogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
@@ -108,8 +108,10 @@ def create_blink_animation(images, save_path):
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))  # Two subplots side by side
 
-    zscale_interval = ZScaleInterval()
-    norm = ImageNormalize(interval=zscale_interval, stretch=LogStretch())
+    median_first_image = np.median(images[0][0])
+
+    # Create a custom normalization based on the median of the first image
+    norm = LogNorm(vmin=median_first_image / 2, vmax=median_first_image * 2)
 
     # Plot for full frame data
     im1 = ax1.imshow(images[0][0][450:550, 600:700], cmap='hot', origin='lower', norm=norm)
