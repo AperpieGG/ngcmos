@@ -31,7 +31,8 @@ def solve_reference_image(refimage):
 
         # Build the astrometry.net command
         command = (
-            f"/opt/homebrew/bin/solve-field {refimage} "
+            # f"/opt/homebrew/bin/solve-field {refimage} " # for full path on Mac
+            f"solve-field {refimage} "
             f"--ra {ra:.6f} --dec {dec:.6f} "
             "--radius 5 "
             "--overwrite "
