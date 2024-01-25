@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 from astropy.io import fits
 
@@ -32,9 +33,9 @@ def solve_reference_image(refimage):
         command = (
             f"/opt/homebrew/bin/solve-field {refimage} "
             f"--ra {ra:.6f} --dec {dec:.6f} "
-            "--radius 5"
-            "--overwrite"
-            "--no-plots --overwrite --no-verify -z 2 --tweak-order 3 --cpulimit 600"
+            "--radius 5 "
+            "--overwrite "
+            "--no-plots --no-verify -z 2 --tweak-order 3 --cpulimit 600"
         )
 
         try:
@@ -71,6 +72,3 @@ def solve_all_images_in_directory(directory):
 # Example usage:
 directory_path = "/Users/u5500483/Downloads/DATA_MAC/CMOS/testing/"
 solve_all_images_in_directory(directory_path)
-
-
-
