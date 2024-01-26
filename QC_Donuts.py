@@ -347,6 +347,10 @@ def save_results(x_shifts, y_shifts, reference_image_name, save_path, prefix, sc
         },
         "The name of the images with shifts greater than 0.5 pixels is":
             [image for image, x, y in zip(science_image_names, x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5],
+        "And shifts of this/them": {
+            "X Shifts": [x for x, y in zip(x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5],
+            "Y Shifts": [y for x, y in zip(x_shifts, y_shifts) if abs(x) >= 0.5 or abs(y) >= 0.5]
+        },
         "X Shifts and Y Shifts": list(zip(x_shifts, y_shifts)),
     }
 
