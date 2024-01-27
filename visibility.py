@@ -162,7 +162,7 @@ for target, targaltaz, moon_sep, sky_coordinate in zip(targets, targaltazs, moon
           f" {floor(((target_end - target_start).value * 24 % 1) * 60):<2}m - from {target_start.strftime('%H:%M')} to {target_end.strftime('%H:%M')} - Mean lunar separation: {target_up_moon_sep.mean():.1f}° ({target_up_moon_sep.min():.1f}° to {target_up_moon_sep.max():.1f}°)")
     if plot:
         sc = plt.scatter(delta_midnight, targaltaz.alt, label=target, s=1,
-                         alpha=[1 if is_v and is_night else 0.2 for is_v, is_night in zip(visibility, dark_time)])
+                         alpha=[1 if is_v and is_night else 0.1 for is_v, is_night in zip(visibility, dark_time)])
         color = list(sc.get_facecolor()[0])[:3]
         lat_diff = dec - paranal.lat.value
         for i, vis in zip(range(len(times) - 1), visibility[:-2]):
