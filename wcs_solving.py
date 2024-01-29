@@ -38,7 +38,9 @@ def solve_reference_image(refimage, backup_folder):
             f"--ra {ra:.6f} --dec {dec:.6f} "
             "--radius 5 "
             "--overwrite "
-            "--no-plots --no-verify -z 2 --tweak-order 3 --cpulimit 600"
+            "--scale-units arcsecperpix \
+             --scale-low 3.9 --scale-high 4.3"
+            "--skip-solved --no-plots --no-verify -z 2 --tweak-order 3 --cpulimit 600"
         )
 
         try:
