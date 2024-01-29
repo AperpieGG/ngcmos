@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
 import os
 from datetime import datetime, timedelta
 from astropy.io import fits
+import shutil
 
 
-def solve_reference_image(refimage):
+def solve_reference_image(refimage, backup_folder):
     """
     Solve the reference image to obtain better WCS
 
@@ -12,6 +12,8 @@ def solve_reference_image(refimage):
     ----------
     refimage : string
         path to the reference image for solving
+    backup_folder : string
+        path to the folder to store backup files
 
     Returns
     -------
@@ -32,7 +34,6 @@ def solve_reference_image(refimage):
 
         # Build the astrometry.net command
         command = (
-            # f"/opt/homebrew/bin/solve-field {refimage} " # for full path on Mac
             f"solve-field {refimage} "
             f"--ra {ra:.6f} --dec {dec:.6f} "
             "--radius 5 "
@@ -46,12 +47,12 @@ def solve_reference_image(refimage):
             print(f"Error solving image: {e}")
             return False
 
-        # Remove the original .fits file
+        # Backup the original .fits file
         try:
-            os.remove(refimage)
-            print(f"Removed original file: {refimage}")
+            shutil.move(refimage, os.path.join(backup_folder, os.path.basename(refimage)))
+            print(f"Moved original file to backup folder: {os.path.basename(refimage)}")
         except Exception as e:
-            print(f"Error removing original file {refimage}: {e}")
+            print(f"Error moving original file to backup folder: {e}")
 
         # Rename the solved image to use .fits instead of .new
         os.rename(solved_refimage, f"{os.path.splitext(refimage)[0]}.fits")
@@ -60,7 +61,7 @@ def solve_reference_image(refimage):
     return os.path.exists(f"{os.path.splitext(refimage)[0]}.fits")
 
 
-def solve_all_images_in_directory(directory):
+def solve_all_images_in_directory(directory, backup_folder):
     """
     Solve WCS for all FITS images in the specified directory
 
@@ -81,7 +82,7 @@ def solve_all_images_in_directory(directory):
 
     for filename in fits_files:
         filepath = os.path.join(directory, filename)
-        if solve_reference_image(filepath):
+        if solve_reference_image(filepath, backup_folder):
             print(f"WCS solved successfully for {filename}")
         else:
             print(f"Failed to solve WCS for {filename}")
@@ -115,15 +116,35 @@ def find_current_night_directory(file_path):
         return None
 
 
+def zip_backup_folder(backup_folder):
+    # Zip the contents of the backup folder directly
+    zip_filename = f"{os.path.splitext(backup_folder)[0]}"
+    shutil.make_archive(zip_filename, 'zip', os.path.dirname(backup_folder), os.path.basename(backup_folder))
+    print(f"Backup folder zipped successfully: {zip_filename}")
+
+
 def main():
     file_path = "/Users/u5500483/Downloads/DATA_MAC/CMOS/"
-
     current_night_directory = find_current_night_directory(file_path)
 
+    # Rest of the code remains the same
     if current_night_directory:
         print(f"Current night directory found: {current_night_directory}")
-        solve_all_images_in_directory(current_night_directory)
+
+        # Directly create the backup zip file without creating a backup folder
+        previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+        backup_folder = os.path.join(current_night_directory, f"backup_{previous_date}")
+        os.mkdir(backup_folder)
+        print(f"Backup folder created: {backup_folder}")
+        # Proceed with solving and other operations
+        solve_all_images_in_directory(current_night_directory, backup_folder)
         remove_unwanted_files(current_night_directory)
+
+        # Zip the backup folder
+        zip_backup_folder(backup_folder)
+        shutil.rmtree(backup_folder)
+        print(f"Backup folder zipped successfully: {backup_folder}")
+
     else:
         print("No current night directory found.")
 
