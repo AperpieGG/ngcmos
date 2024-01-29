@@ -140,7 +140,7 @@ def create_directory_if_not_exists(directory):
 if __name__ == '__main__':
     calibration_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'  # (home/ops/data/20231212
     base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'  # (home/ops/data)
-    out_path = '/Users/u5500483/Documents/GitHub/ngcmos/'  # to be changed for nuc (home/ops/data/calibration_images)
+    out_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/calibration_images/'  # to be changed for nuc (home/ops/data/calibration_images)
 
     # Create the output directory if it doesn't exist
     create_directory_if_not_exists(out_path)
