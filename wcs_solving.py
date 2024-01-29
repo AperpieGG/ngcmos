@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 from datetime import datetime, timedelta
-
 from astropy.io import fits
 
 
@@ -46,12 +45,19 @@ def solve_reference_image(refimage):
         except Exception as e:
             print(f"Error solving image: {e}")
             return False
-        # Rename the solved image to use _s.fits instead of .new
-        new_name = f"{os.path.splitext(refimage)[0]}_s.fits"
-        os.rename(solved_refimage, new_name)
-        print(f"Renamed solved image to: {new_name}")
 
-    return os.path.exists(solved_refimage)
+        # Remove the original .fits file
+        try:
+            os.remove(refimage)
+            print(f"Removed original file: {refimage}")
+        except Exception as e:
+            print(f"Error removing original file {refimage}: {e}")
+
+        # Rename the solved image to use .fits instead of .new
+        os.rename(solved_refimage, f"{os.path.splitext(refimage)[0]}.fits")
+        print(f"Renamed solved image to: {os.path.splitext(refimage)[0]}.fits")
+
+    return os.path.exists(f"{os.path.splitext(refimage)[0]}.fits")
 
 
 def solve_all_images_in_directory(directory):
@@ -69,16 +75,16 @@ def solve_all_images_in_directory(directory):
     """
     exclude_words = ["evening", "morning", "flat", "bias", "dark"]
 
-    # Filter filenames based on exclude_words
-    filtered_files = [filename for filename in os.listdir(directory) if not any(word in filename.lower() for word in exclude_words)]
+    # Get a sorted list of FITS files in the directory
+    fits_files = sorted([filename for filename in os.listdir(directory) if filename.endswith(".fits")
+                         and not any(word in filename.lower() for word in exclude_words)])
 
-    for filename in filtered_files:
-        if filename.endswith(".fits"):
-            filepath = os.path.join(directory, filename)
-            if solve_reference_image(filepath):
-                print(f"WCS solved successfully for {filename}")
-            else:
-                print(f"Failed to solve WCS for {filename}")
+    for filename in fits_files:
+        filepath = os.path.join(directory, filename)
+        if solve_reference_image(filepath):
+            print(f"WCS solved successfully for {filename}")
+        else:
+            print(f"Failed to solve WCS for {filename}")
 
 
 def remove_unwanted_files(directory):
