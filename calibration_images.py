@@ -74,8 +74,19 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
             os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits')))
         return fits.getdata(os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits'))
 
-    files = [f for f in glob.glob(os.path.join(current_night_directory, 'evening*.fits')) if
-             'HDR' in fits.getheader(f)['READMODE']]
+    evening_files = [f for f in glob.glob(os.path.join(current_night_directory, 'evening*.fits')) if
+                     'HDR' in fits.getheader(f)['READMODE']]
+
+    if evening_files:
+        files = evening_files
+    else:
+        # If evening files don't exist, use morning files
+        files = [f for f in glob.glob(os.path.join(current_night_directory, 'morning*.fits')) if
+                 'HDR' in fits.getheader(f)['READMODE']]
+
+    if not files:
+        print('No suitable flat field files found.')
+        return None  # or handle the case where no files are found
 
     print('Creating master flat')
     # take only the first 21
