@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 process_leowasp.py - Reduce and extract aperture photometry from LEOWASP
 
@@ -15,6 +16,7 @@ import jastro as j
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=FITSFixedWarning)
+
 
 # pylint: disable = invalid-name
 # pylint: disable = redefined-outer-name
@@ -49,6 +51,7 @@ def arg_parse():
                    help="make master calib frames only?",
                    action='store_true')
     return p.parse_args()
+
 
 if __name__ == '__main__':
     # parse the command line arguments
@@ -88,12 +91,12 @@ if __name__ == '__main__':
 
     # make master flat
     master_flat = j.reduce.make_master_flat_osc(images, night_config['filter'],
-        overscan_keyword=inst_config['imager']['overscan_keyword'],
-        master_dark=master_dark, dark_exp=dark_exp,
-        flat_keyword=inst_config['imager']['flat_keyword'],
-        exptime_keyword=inst_config['imager']['exptime_keyword'],
-        master_flat_filename=night_config['master_flat_filename'],
-        med_bias=med_bias)
+                                                overscan_keyword=inst_config['imager']['overscan_keyword'],
+                                                master_dark=master_dark, dark_exp=dark_exp,
+                                                flat_keyword=inst_config['imager']['flat_keyword'],
+                                                exptime_keyword=inst_config['imager']['exptime_keyword'],
+                                                master_flat_filename=night_config['master_flat_filename'],
+                                                med_bias=med_bias)
     if master_flat is not None and ds9:
         j.ds9.display(ds9_window_id, night_config['master_flat_filename'])
         time.sleep(5)
@@ -108,14 +111,15 @@ if __name__ == '__main__':
                 j.ds9.display(ds9_window_id, filename)
             # correct the times and reduce the images
             data, jd, bjd, hjd = j.reduce.correct_data_osc(filename, night_config['filter'],
-                location, master_dark=master_dark,
-                overscan_keyword=inst_config['imager']['overscan_keyword'],
-                master_flat=master_flat, dark_exp=dark_exp,
-                exptime_keyword=inst_config['imager']['exptime_keyword'],
-                ra_keyword=inst_config['imager']['ra_keyword'],
-                dec_keyword=inst_config['imager']['dec_keyword'],
-                dateobs_start_keyword=inst_config['imager']['dateobs_start_keyword'],
-                med_bias=med_bias)
+                                                           location, master_dark=master_dark,
+                                                           overscan_keyword=inst_config['imager']['overscan_keyword'],
+                                                           master_flat=master_flat, dark_exp=dark_exp,
+                                                           exptime_keyword=inst_config['imager']['exptime_keyword'],
+                                                           ra_keyword=inst_config['imager']['ra_keyword'],
+                                                           dec_keyword=inst_config['imager']['dec_keyword'],
+                                                           dateobs_start_keyword=inst_config['imager'][
+                                                               'dateobs_start_keyword'],
+                                                           med_bias=med_bias)
 
             # inspect shifts between images
             shift = d.measure_shift(filename)
@@ -139,4 +143,4 @@ if __name__ == '__main__':
                               phot_filename_prefix=f"rtp_{night_config['filter']}",
                               index_offset=inst_config['ds9']['index_offset'])
             t2 = datetime.utcnow()
-            print(t2-t1)
+            print(t2 - t1)
