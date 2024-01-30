@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+"""
+This script is used to create a mp4 movie of the images taken during the night.
+"""
+
 from collections import defaultdict
 from datetime import datetime, timedelta
 import glob
