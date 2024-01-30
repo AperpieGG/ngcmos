@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
+
+"""
+This is a script to run Donuts on a set of images, compute the shifts, and save the results to a JSON file.
+It also created an mp4 animation of the images with shifts greater than 0.5 pixels.
+"""
+
 import json
 import os
 from datetime import datetime, timedelta
-
 import numpy as np
-from astropy.visualization import ZScaleInterval, ImageNormalize, SqrtStretch, LinearStretch
 from donuts import Donuts
-import sep
 import glob
 from matplotlib import pyplot as plt
 import warnings
