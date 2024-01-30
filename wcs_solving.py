@@ -1,3 +1,8 @@
+
+"""
+This script solves the WCS for all FITS images in the specified directory
+and removes unwanted files.
+"""
 import os
 from datetime import datetime, timedelta
 from astropy.io import fits
