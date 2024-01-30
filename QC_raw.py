@@ -1,3 +1,8 @@
+"""
+This script is used to download the WCS solution for a set of FITS files using
+Astrometry.net. The WCS solution is saved to the FITS header of each file.
+"""
+
 from astroquery.astrometry_net import AstrometryNet, core
 from astropy.io import fits
 import glob
