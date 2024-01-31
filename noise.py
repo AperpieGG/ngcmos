@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import math
 
 # pylint: disable=superfluous-parens
 # pylint: disable=invalid-name
@@ -42,6 +42,32 @@ def plot_images():
     plt.rcParams['legend.loc'] = 'best'
     plt.rcParams['legend.fancybox'] = True
     plt.rcParams['legend.fontsize'] = 14
+
+
+def calculate_camera_spec():
+
+    # Camera specifications
+    pixel_size_mm = 11e-3  # 11 microns converted to millimeters
+    sensor_resolution = (2048, 2048)
+
+    # Telescope specifications
+    telescope_focal_length_mm = 560  # NGTS telescope focal length in mm
+
+    # Calculate horizontal and vertical FOV in degrees
+    fov_x_deg = math.degrees(2 * math.atan((sensor_resolution[0] * pixel_size_mm) / (2 * telescope_focal_length_mm)))
+    fov_y_deg = math.degrees(2 * math.atan((sensor_resolution[1] * pixel_size_mm) / (2 * telescope_focal_length_mm)))
+
+    # Calculate diagonal FOV using Pythagorean theorem
+    fov_diagonal_deg = math.sqrt(fov_x_deg ** 2 + fov_y_deg ** 2)
+
+    # Calculate pixel scale in arcseconds
+    pixel_scale_arcsec = 11 * 206.265 / telescope_focal_length_mm
+
+    print(f"Pixel Scale: {pixel_scale_arcsec:.2f} arcseconds per pixel")
+
+    print(f"Diagonal FOV: {fov_diagonal_deg:.2f} degrees")
+
+    print(f"FOV in arcminutes: {fov_diagonal_deg * 60:.2f} arcminutes")
 
 
 def noise_sources():
@@ -133,6 +159,7 @@ plot_images()
 flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise = noise_sources()
 noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise)
 
+calculate_camera_spec()
+
 # TODO add noise model for the Ikon-L
-# TODO check James code that slaves the Ikon-L with Marana
-# TODO generate a automatic json file for marana (talk to Paul for the packages)
+
