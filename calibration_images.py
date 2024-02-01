@@ -176,8 +176,8 @@ if __name__ == '__main__':
 
     # Second directory
     calibration_path_2 = '/home/ops/data/20231212/'
-    base_path_2 = 'home/ops/data/'
-    out_path_2 = 'home/ops/data/calibration_images/'
+    base_path_2 = '/home/ops/data/'
+    out_path_2 = '/home/ops/data/calibration_images/'
 
     # Check if the first directory exists
     if os.path.exists(base_path_1):
