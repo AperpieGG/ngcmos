@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 from astropy.io import fits
 import numpy as np
+import shutil
 
 
 def bias(base_path, out_path):
@@ -151,6 +152,21 @@ def create_directory_if_not_exists(directory):
         os.makedirs(directory)
 
 
+def copy_master_files(master_bias_path, master_flat_path, master_dark_path, current_night_directory):
+    # Copy master bias to the current night directory
+    shutil.copy(master_bias_path, os.path.join(current_night_directory, 'master_bias.fits'))
+
+    # Copy and rename master flat to the current night directory
+    new_master_flat_path = os.path.join(current_night_directory, 'master_flat.fits')
+    shutil.copy(master_flat_path, new_master_flat_path)
+
+    # Copy master dark to the current night directory
+    shutil.copy(master_dark_path, os.path.join(current_night_directory, 'master_dark.fits'))
+
+    print('Master files copied to the current night directory.')
+    return new_master_flat_path
+
+
 if __name__ == '__main__':
     calibration_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'  # (home/ops/data/20231212
     base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'  # (home/ops/data)
@@ -158,8 +174,22 @@ if __name__ == '__main__':
 
     # Create the output directory if it doesn't exist
     create_directory_if_not_exists(out_path)
-    
+
     master_bias = bias(calibration_path, out_path)
     master_dark = dark(calibration_path, out_path, master_bias)
     master_flat = flat(base_path, out_path, master_bias, master_dark)
     # reduce_images(base_path, master_bias, master_dark, master_flat)
+
+    current_night_directory = find_current_night_directory(base_path)
+
+    if current_night_directory:
+        new_master_flat_path = copy_master_files(os.path.join(out_path, 'master_bias.fits'),
+                                                 os.path.join(out_path,
+                                                              f'master_flat_{os.path.basename(current_night_directory)}.fits'),
+                                                 os.path.join(out_path, 'master_dark.fits'),
+                                                 current_night_directory)
+
+        # Rename the master flat file to "master_flat.fits"
+        os.rename(new_master_flat_path, os.path.join(current_night_directory, 'master_flat.fits'))
+    else:
+        print('Current night directory not found')
