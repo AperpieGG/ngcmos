@@ -3,7 +3,6 @@ import os
 from datetime import datetime, timedelta
 from astropy.io import fits
 import numpy as np
-import re
 
 
 def bias(base_path, out_path):
@@ -25,7 +24,11 @@ def bias(base_path, out_path):
         for i, f in enumerate(files):
             cube[:, :, i] = fits.getdata(f)
         master_bias = np.median(cube, axis=2)
-        fits.PrimaryHDU(master_bias).writeto(master_bias_path, overwrite=True)
+
+        # Copy header from one of the input files
+        header = fits.getheader(files[0])
+
+        fits.PrimaryHDU(master_bias, header=header).writeto(master_bias_path, overwrite=True)
         return master_bias
 
 
@@ -48,7 +51,11 @@ def dark(base_path, out_path, master_bias):
         for i, f in enumerate(files):
             cube[:, :, i] = fits.getdata(f)
         master_dark = np.median(cube, axis=2) - master_bias
-        fits.PrimaryHDU(master_dark).writeto(master_dark_path, overwrite=True)
+
+        # Copy header from one of the input files
+        header = fits.getheader(files[0])
+
+        fits.PrimaryHDU(master_dark, header=header).writeto(master_dark_path, overwrite=True)
         return master_dark
 
 
@@ -99,8 +106,15 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         cube[:, :, i] = cube[:, :, i] / np.average(cube[:, :, i])
 
     master_flat = np.median(cube, axis=2)
-    fits.PrimaryHDU(master_flat).writeto(
-        os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits'), overwrite=True)
+
+    # Copy header from one of the input files
+    header = fits.getheader(files[0])
+
+    # Write the master flat with the copied header
+    output_path = os.path.join(out_path, f'master_flat_{os.path.basename(current_night_directory)}.fits')
+    hdu = fits.PrimaryHDU(master_flat, header=header)
+    hdu.writeto(output_path, overwrite=True)
+
     return master_flat
 
 
