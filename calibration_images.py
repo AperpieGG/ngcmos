@@ -169,9 +169,25 @@ def copy_master_files(master_bias_path, master_flat_path, master_dark_path, curr
 
 
 if __name__ == '__main__':
-    calibration_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'  # (home/ops/data/20231212
-    base_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'  # (home/ops/data)
-    out_path = '/Users/u5500483/Downloads/DATA_MAC/CMOS/calibration_images/'  # change for nuc (home/ops/data/calibration_images)
+    # First directories
+    calibration_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'
+    base_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
+    out_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/calibration_images/'
+
+    # Second directory
+    calibration_path_2 = '/home/ops/data/20231212/'
+    base_path_2 = 'home/ops/data/'
+    out_path_2 = 'home/ops/data/calibration_images/'
+
+    # Check if the first directory exists
+    if os.path.exists(base_path_1):
+        calibration_path = calibration_path_1
+        base_path = base_path_1
+        out_path = out_path_1
+    else:
+        base_path = base_path_2
+        calibration_path = calibration_path_2
+        out_path = out_path_2
 
     # Create the output directory if it doesn't exist
     create_directory_if_not_exists(out_path)
