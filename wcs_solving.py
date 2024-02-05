@@ -31,7 +31,7 @@ def find_current_night_directory(file_path):
     str or None
         Path to the current night directory if found, otherwise None.
     """
-    
+
     # Get the current date in the format YYYYMMDD
     current_date = datetime.now().strftime("%Y%m%d") + '/'
     previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + '/'
