@@ -2,8 +2,17 @@
 """
 This script solves the WCS for all FITS images in the specified directory
 and removes unwanted files.
+
+Usage:
+python wcs_solving.py all
+python wcs_solving.py first
+
+The first command will solve the WCS for all FITS images in the current night directory
+and remove unwanted files. The second command will solve the WCS for the first FITS image
 """
+
 import os
+import sys
 from datetime import datetime, timedelta
 from astropy.io import fits
 import shutil
@@ -170,18 +179,33 @@ def main():
     file_path = "/Users/u5500483/Downloads/DATA_MAC/CMOS/"
     current_night_directory = find_current_night_directory(file_path)
 
-    # Rest of the code remains the same
-    if current_night_directory:
-        print(f"Current night directory found: {current_night_directory}")
-
-        # Proceed with solving and other operations
-        solve_all_images_in_directory(current_night_directory)
-        remove_unwanted_files(current_night_directory)
-
-        # Check CTYPE1 and CTYPE2 in the headers
-        check_headers(current_night_directory)
+    # Check if the user provided an argument
+    if len(sys.argv) > 1:
+        argument = sys.argv[1].lower()
+        if argument == 'all':
+            # Run for all images
+            if current_night_directory:
+                print(f"Current night directory found: {current_night_directory}")
+                solve_all_images_in_directory(current_night_directory)
+                remove_unwanted_files(current_night_directory)
+                check_headers(current_night_directory)
+            else:
+                print("No current night directory found.")
+        elif argument == 'first':
+            # Run only for the first image
+            if current_night_directory:
+                print(f"Current night directory found: {current_night_directory}")
+                # Assuming there is at least one FITS file
+                first_image = os.path.join(current_night_directory, next(
+                    filename for filename in os.listdir(current_night_directory) if filename.endswith(".fits")))
+                solve_reference_image(first_image)
+                remove_unwanted_files(current_night_directory)
+            else:
+                print("No current night directory found.")
+        else:
+            print("Invalid argument. Use 'all' or 'first'.")
     else:
-        print("No current night directory found.")
+        print("No argument provided. Use 'all' or 'first'.")
 
 
 if __name__ == "__main__":
