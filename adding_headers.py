@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+
+"""
+
+This script adds headers to the FITS files in the specified directory
+
+Usage:
+python adding_headers.py
+
+"""
 import glob
 from datetime import datetime, timedelta
 from astropy.io import fits
