@@ -41,3 +41,7 @@ def update_header(data_path):
 def main():
     data_path = '/home/ops/data/testing_photo/'
     update_header(data_path)
+
+
+if __name__ == "__main__":
+    main()
