@@ -177,52 +177,48 @@ def check_headers(directory):
 
 
 def main():
-    # Check if the user provided an argument
-    if len(sys.argv) > 1:
-        argument = sys.argv[1].lower()
+    parser = argparse.ArgumentParser(description="Solve WCS for FITS images and remove unwanted files.")
+    parser.add_argument("command", choices=["all", "first"], help="Choose 'all' or 'first' command.")
+    parser.add_argument("--directory", help="Specify the directory. If not provided, the current night directory will "
+                                            "be used.")
 
-        if argument == 'all':
-            # If --directory option is provided, use the custom directory
-            if len(sys.argv) > 3 and sys.argv[2] == '--directory':
-                custom_directory = sys.argv[3]
-                print(f"Custom directory provided: {custom_directory}")
-            else:
-                # Otherwise, use the current night directory
-                custom_directory = find_current_night_directory("/Users/u5500483/Downloads/DATA_MAC/CMOS/")
-                if custom_directory:
-                    print(f"Current night directory found: {custom_directory}")
-                else:
-                    print("No current night directory found.")
-                    return
+    args = parser.parse_args()
 
-            solve_all_images_in_directory(custom_directory)
-            remove_unwanted_files(custom_directory)
-            check_headers(custom_directory)
-
-        elif argument == 'first':
-            # If --directory option is provided, use the custom directory
-            if len(sys.argv) > 3 and sys.argv[2] == '--directory':
-                custom_directory = sys.argv[3]
-                print(f"Custom directory provided: {custom_directory}")
-            else:
-                # Otherwise, use the current night directory
-                custom_directory = find_current_night_directory("/Users/u5500483/Downloads/DATA_MAC/CMOS/")
-                if custom_directory:
-                    print(f"Current night directory found: {custom_directory}")
-                else:
-                    print("No current night directory found.")
-                    return
-
-            # Assuming there is at least one FITS file
-            first_image = os.path.join(custom_directory, next(
-                (filename for filename in os.listdir(custom_directory) if filename.endswith(".fits")), None))
-            solve_reference_image(first_image)
-            remove_unwanted_files(custom_directory)
-
+    if args.command == 'all':
+        if args.directory:
+            custom_directory = args.directory
+            print(f"Custom directory provided: {custom_directory}")
         else:
-            print("Invalid argument. Use 'all' or 'first'.")
+            custom_directory = find_current_night_directory("/Users/u5500483/Downloads/DATA_MAC/CMOS/")
+            if custom_directory:
+                print(f"Current night directory found: {custom_directory}")
+            else:
+                print("No current night directory found.")
+                return
+
+        solve_all_images_in_directory(custom_directory)
+        remove_unwanted_files(custom_directory)
+        check_headers(custom_directory)
+
+    elif args.command == 'first':
+        if args.directory:
+            custom_directory = args.directory
+            print(f"Custom directory provided: {custom_directory}")
+        else:
+            custom_directory = find_current_night_directory("/Users/u5500483/Downloads/DATA_MAC/CMOS/")
+            if custom_directory:
+                print(f"Current night directory found: {custom_directory}")
+            else:
+                print("No current night directory found.")
+                return
+
+        first_image = os.path.join(custom_directory, next(
+            (filename for filename in os.listdir(custom_directory) if filename.endswith(".fits")), None))
+        solve_reference_image(first_image)
+        remove_unwanted_files(custom_directory)
+
     else:
-        print("No argument provided. Use 'all' or 'first'.")
+        print("Invalid argument. Use 'all' or 'first'.")
 
 
 if __name__ == "__main__":
