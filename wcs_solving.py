@@ -5,21 +5,33 @@ This script solves the WCS for all FITS images in the specified directory
 and removes unwanted files.
 
 Usage:
-python wcs_solving.py all [--directory <your_directory>]
-python wcs_solving.py first [--directory <your_directory>]
+python wcs_solving.py [--directory <your_directory>] all
+python wcs_solving.py [--directory <your_directory>] first
 
 The first command will solve the WCS for all FITS images in the specified or current directory
 and remove unwanted files. The second command will solve the WCS for the first FITS image
 """
 import argparse
 import os
-import sys
 from datetime import datetime, timedelta
 from astropy.io import fits
-import shutil
 
 
 def find_current_night_directory(file_path):
+    """
+    Find the directory for the current night based on the current date.
+
+    Parameters
+    ----------
+    file_path : str
+        Base path for the directory.
+
+    Returns
+    -------
+    str or None
+        Path to the current night directory if found, otherwise None.
+    """
+    
     # Get the current date in the format YYYYMMDD
     current_date = datetime.now().strftime("%Y%m%d") + '/'
     previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + '/'
@@ -36,21 +48,17 @@ def find_current_night_directory(file_path):
 
 def solve_reference_image(refimage):
     """
-    Solve the reference image to obtain better WCS if not already present
+    Solve the reference image to obtain better WCS if not already present.
 
     Parameters
     ----------
-    refimage : string
-        path to the reference image for solving
+    refimage : str
+        Path to the reference image for solving.
 
     Returns
     -------
-    solved : boolean
-        Did the image solve ok?
-
-    Raises
-    ------
-    None
+    bool
+        True if the image was solved successfully, False otherwise.
     """
     with fits.open(refimage) as hdulist:
         header = hdulist[0].header
@@ -84,16 +92,12 @@ def solve_reference_image(refimage):
 
 def solve_all_images_in_directory(directory):
     """
-    Solve WCS for all FITS images in the specified directory
+    Solve WCS for all FITS images in the specified directory.
 
     Parameters
     ----------
-    directory : string
-        path to the directory containing FITS images
-
-    Returns
-    -------
-    None
+    directory : str
+        Path to the directory containing FITS images.
     """
     exclude_words = ["evening", "morning", "flat", "bias", "dark"]
 
@@ -108,7 +112,12 @@ def solve_all_images_in_directory(directory):
 
 def remove_unwanted_files(directory):
     """
-    When finished with the wcs it removes all unwanted files and renames the .new files to .fits
+    Remove unwanted files and rename .new files to .fits.
+
+    Parameters
+    ----------
+    directory : str
+        Path to the directory.
     """
     unwanted_extensions = ['.xyls', '.axy', '.corr', '.match', '.rdls', '.solved', '.wcs']
 
@@ -131,19 +140,12 @@ def remove_unwanted_files(directory):
 
 def check_headers(directory):
     """
-
-    When finished with the wcs it Checks the headers of all FITS files in the specified directory for CTYPE1 and CTYPE2
-    and moves the files that don't have them to a subdirectory called 'no_wcs'.
+    Check headers of all FITS files for CTYPE1 and CTYPE2.
 
     Parameters
     ----------
-    directory : string
-        path to the directory containing FITS images
-
-    Returns
-    -------
-    None
-
+    directory : str
+        Path to the directory.
     """
     no_wcs = os.path.join(directory, 'no_wcs')
 
