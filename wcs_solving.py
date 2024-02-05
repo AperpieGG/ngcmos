@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
+
 """
 This script solves the WCS for all FITS images in the specified directory
 and removes unwanted files.
 
 Usage:
-python wcs_solving.py all
-python wcs_solving.py first
+python wcs_solving.py all [--directory <your_directory>]
+python wcs_solving.py first [--directory <your_directory>]
 
-The first command will solve the WCS for all FITS images in the current night directory
+The first command will solve the WCS for all FITS images in the specified or current directory
 and remove unwanted files. The second command will solve the WCS for the first FITS image
 """
-
+import argparse
 import os
 import sys
 from datetime import datetime, timedelta
@@ -176,32 +177,48 @@ def check_headers(directory):
 
 
 def main():
-    file_path = "/Users/u5500483/Downloads/DATA_MAC/CMOS/"
-    current_night_directory = find_current_night_directory(file_path)
-
     # Check if the user provided an argument
     if len(sys.argv) > 1:
         argument = sys.argv[1].lower()
+
         if argument == 'all':
-            # Run for all images
-            if current_night_directory:
-                print(f"Current night directory found: {current_night_directory}")
-                solve_all_images_in_directory(current_night_directory)
-                remove_unwanted_files(current_night_directory)
-                check_headers(current_night_directory)
+            # If --directory option is provided, use the custom directory
+            if len(sys.argv) > 3 and sys.argv[2] == '--directory':
+                custom_directory = sys.argv[3]
+                print(f"Custom directory provided: {custom_directory}")
             else:
-                print("No current night directory found.")
+                # Otherwise, use the current night directory
+                custom_directory = find_current_night_directory("/Users/u5500483/Downloads/DATA_MAC/CMOS/")
+                if custom_directory:
+                    print(f"Current night directory found: {custom_directory}")
+                else:
+                    print("No current night directory found.")
+                    return
+
+            solve_all_images_in_directory(custom_directory)
+            remove_unwanted_files(custom_directory)
+            check_headers(custom_directory)
+
         elif argument == 'first':
-            # Run only for the first image
-            if current_night_directory:
-                print(f"Current night directory found: {current_night_directory}")
-                # Assuming there is at least one FITS file
-                first_image = os.path.join(current_night_directory, next(
-                    filename for filename in os.listdir(current_night_directory) if filename.endswith(".fits")))
-                solve_reference_image(first_image)
-                remove_unwanted_files(current_night_directory)
+            # If --directory option is provided, use the custom directory
+            if len(sys.argv) > 3 and sys.argv[2] == '--directory':
+                custom_directory = sys.argv[3]
+                print(f"Custom directory provided: {custom_directory}")
             else:
-                print("No current night directory found.")
+                # Otherwise, use the current night directory
+                custom_directory = find_current_night_directory("/Users/u5500483/Downloads/DATA_MAC/CMOS/")
+                if custom_directory:
+                    print(f"Current night directory found: {custom_directory}")
+                else:
+                    print("No current night directory found.")
+                    return
+
+            # Assuming there is at least one FITS file
+            first_image = os.path.join(custom_directory, next(
+                (filename for filename in os.listdir(custom_directory) if filename.endswith(".fits")), None))
+            solve_reference_image(first_image)
+            remove_unwanted_files(custom_directory)
+
         else:
             print("Invalid argument. Use 'all' or 'first'.")
     else:
@@ -211,4 +228,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO - pass argument to run the script for a single image and see if it works, then proceed with the total code
