@@ -1,3 +1,12 @@
+"""
+This script converts a region file from one format to another. The input format is a DS9 region file, and the output
+format is a DS9 region file. The input file is read, and the point coordinates are extracted using regex. The extracted
+coordinates are then used to create a new region file in the desired format.
+
+usage:
+python region_transform.py
+"""
+
 import re
 
 
