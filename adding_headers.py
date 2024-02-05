@@ -15,6 +15,20 @@ import os
 
 
 def find_current_night_directory(file_path):
+    """
+    Find the directory for the current night based on the current date.
+
+    Parameters
+    ----------
+    file_path : str
+        Base path for the directory.
+
+    Returns
+    -------
+    str or None
+        Path to the current night directory if found, otherwise None.
+    """
+
     # Get the current date in the format YYYYMMDD
     current_date = datetime.now().strftime("%Y%m%d") + '/'
     previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + '/'
@@ -30,7 +44,15 @@ def find_current_night_directory(file_path):
 
 
 def update_header(data_path):
-    # Update header for TOI files
+    """
+    Update the header of FITS files in the specified directory.
+
+    Parameters
+    ----------
+    data_path : str
+        Path to the directory containing FITS files.
+    """
+
     files = glob.glob(data_path + 'NG*.fits')
     for f in files:
         with fits.open(f, mode='update') as hdul:
