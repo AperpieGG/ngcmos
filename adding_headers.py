@@ -56,7 +56,7 @@ def update_header(directory):
 
     for filename in sorted(glob.glob(os.path.join(directory, '*_r.fits'))):
         if 'FILTER' in fits.getheader(filename):
-            print(f"Header already present for {len(filename)}")
+            print(f"Header already present for {filename}")
             continue
         with fits.open(filename, mode='update') as hdul:
             if 'FILTER' not in hdul[0].header:
