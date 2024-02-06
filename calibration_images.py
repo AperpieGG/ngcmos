@@ -117,6 +117,10 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     hdu = fits.PrimaryHDU(master_flat, header=header)
     hdu.writeto(output_path, overwrite=True)
 
+    hdul = fits.open(output_path, mode='update')
+    hdul[0].header['FILTER'] = 'NGTS'
+    hdul.close()
+
     return master_flat
 
 
