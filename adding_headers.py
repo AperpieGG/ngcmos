@@ -67,3 +67,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# TODO: Add a function to check if the header is already present and skip the file if it is
+# TODO: add parse arguments to the main function for the directory path
