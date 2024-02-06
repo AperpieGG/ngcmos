@@ -8,6 +8,7 @@ Usage:
 python adding_headers.py
 
 """
+import argparse
 import glob
 from datetime import datetime, timedelta
 from astropy.io import fits
@@ -43,26 +44,41 @@ def find_current_night_directory(file_path):
         return None
 
 
-def update_header(data_path):
+def update_header(directory):
     """
     Update the header of FITS files in the specified directory.
 
     Parameters
     ----------
-    data_path : str
+    directory : str
         Path to the directory containing FITS files.
     """
 
-    files = glob.glob(data_path + 'NG*.fits')
-    for f in files:
-        with fits.open(f, mode='update') as hdul:
+    for filename in sorted(glob.glob(os.path.join(directory, '*_r.fits'))):
+        if 'FILTER' in fits.getheader(filename):
+            print(f"Header already present for {len(filename)}")
+            continue
+        with fits.open(filename, mode='update') as hdul:
             if 'FILTER' not in hdul[0].header:
                 hdul[0].header['FILTER'] = 'NGTS'
 
 
 def main():
-    data_path = '/home/ops/data/testing_photo/'
-    update_header(data_path)
+    """
+    Main function for the script
+    """
+
+    parser = argparse.ArgumentParser(description='Add headers to FITS files')
+    parser.add_argument('--directory', type=str, help='Path to the directory containing FITS files')
+    args = parser.parse_args()
+
+    if args.directory:
+        custom_directory = args.directory
+        update_header(custom_directory)
+        print(f"Using custom directory {custom_directory}")
+    else:
+        custom_directory = None
+        print("No custom directory specified")
 
 
 if __name__ == "__main__":
