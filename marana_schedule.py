@@ -52,22 +52,25 @@ def get_action_info(camera_id, night):
     return action_info
 
 
-def get_action_args(action_id):
+def get_action_info(camera_id, night):
     qry = """
-        SELECT arg_key, arg_value
-        FROM action_args
-        WHERE action_id=%s
-        AND arg_key IN ('campaign', 'field', 'exposureTime')
+        SELECT action_id, action, schedule_start_utc, schedule_end_utc
+        FROM action_list
+        WHERE camera_id=%s
+        AND night=%s
+        ORDER BY schedule_start_utc ASC
         """
-    qry_args = (action_id,)
-    with pymysql.connect(host='10.2.5.32', db='ngts_ops', user='ops') as conn:
+    qry_args = (camera_id, night)
+
+    conn = pymysql.connect(host='10.2.5.32', db='ngts_ops', user='ops')
+    try:
         with conn.cursor() as cur:
             cur.execute(qry, qry_args)
-            action_args = cur.fetchall()
-        act_args = {}
-        for aa in action_args:
-            act_args[aa[0]] = aa[1]
-    return act_args
+            action_info = cur.fetchall()
+    finally:
+        conn.close()
+
+    return action_info
 
 
 def get_field_coords(field):
@@ -77,10 +80,13 @@ def get_field_coords(field):
         WHERE field=%s
         """
     qry_args = (field,)
-    with pymysql.connect(host='10.2.5.32', db='ngts_ops', user='ops') as conn:
+    conn = pymysql.connect(host='10.2.5.32', db='ngts_ops', user='ops')
+    try:
         with conn.cursor() as cur:
             cur.execute(qry, qry_args)
             coords = cur.fetchone()
+    finally:
+        conn.close()
     return coords
 
 
