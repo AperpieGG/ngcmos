@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Fetch the scheduled observing sequence from a
 given NGTS camera and produce a JSON file for
