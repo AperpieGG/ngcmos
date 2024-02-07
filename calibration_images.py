@@ -199,18 +199,18 @@ if __name__ == '__main__':
     master_bias = bias(calibration_path, out_path)
     master_dark = dark(calibration_path, out_path, master_bias)
     master_flat = flat(base_path, out_path, master_bias, master_dark)
-    reduce_images(base_path, master_bias, master_dark, master_flat)
-
-    current_night_directory = find_current_night_directory(base_path)
-
-    if current_night_directory:
-        new_master_flat_path = copy_master_files(os.path.join(out_path, 'master_bias.fits'),
-                                                 os.path.join(out_path,
-                                                              f'master_flat_{os.path.basename(current_night_directory)}.fits'),
-                                                 os.path.join(out_path, 'master_dark.fits'),
-                                                 current_night_directory)
-
-        # Rename the master flat file to "master_flat.fits"
-        os.rename(new_master_flat_path, os.path.join(current_night_directory, 'master_flat.fits'))
-    else:
-        print('Current night directory not found')
+    # reduce_images(base_path, master_bias, master_dark, master_flat)
+    #
+    # current_night_directory = find_current_night_directory(base_path)
+    #
+    # if current_night_directory:
+    #     new_master_flat_path = copy_master_files(os.path.join(out_path, 'master_bias.fits'),
+    #                                              os.path.join(out_path,
+    #                                                           f'master_flat_{os.path.basename(current_night_directory)}.fits'),
+    #                                              os.path.join(out_path, 'master_dark.fits'),
+    #                                              current_night_directory)
+    #
+    #     # Rename the master flat file to "master_flat.fits"
+    #     os.rename(new_master_flat_path, os.path.join(current_night_directory, 'master_flat.fits'))
+    # else:
+    #     print('Current night directory not found')
