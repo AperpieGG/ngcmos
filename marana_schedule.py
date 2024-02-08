@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+#  Copyright 2023 James McCormac, All Rights Reserved
+
 """
 Fetch the scheduled observing sequence from a
 given NGTS camera and produce a JSON file for
@@ -54,6 +57,7 @@ def get_action_info(camera_id, night):
         conn.close()
     return action_info
 
+
 def get_action_args(action_id):
     qry = """
         SELECT arg_key, arg_value
@@ -73,6 +77,7 @@ def get_action_args(action_id):
     finally:
         conn.close()
     return act_args
+
 
 def get_field_coords(field):
     qry = """
@@ -133,7 +138,7 @@ if __name__ == "__main__":
                        "camera": {"exposure": exposure}
                        }
 
-            # finally plonk the action into the scedule
+            # finally plonk the action into the schedule
             OB['actions'].append(science)
 
     # schedule morning flats
