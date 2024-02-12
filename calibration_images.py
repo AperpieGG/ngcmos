@@ -4,7 +4,6 @@ import os
 from datetime import datetime, timedelta
 from astropy.io import fits
 import numpy as np
-import shutil
 
 
 def bias(base_path, out_path):
@@ -62,6 +61,21 @@ def dark(base_path, out_path, master_bias):
 
 
 def find_current_night_directory(base_path):
+    """
+    Find the directory for the current night based on the current date.
+    if not then use the current working directory.
+
+    Parameters
+    ----------
+    base_path : str
+        Base path for the directory.
+
+    Returns
+    -------
+    str or None
+        Path to the current night directory if found, otherwise None.
+    """
+
     # Get the previous date directory in the format YYYYMMDD
     previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
 
@@ -72,7 +86,8 @@ def find_current_night_directory(base_path):
     if os.path.isdir(current_date_directory):
         return current_date_directory
     else:
-        return None
+        # Use the current working directory
+        return os.getcwd()
 
 
 def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
@@ -146,30 +161,16 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
                 print(f'Failed to process {filename}. Exception: {str(e)}')
                 continue
 
-            # Save the reduced image with _r.fits suffix
-            output_filename = os.path.join(current_night_directory,
-                                           f"{os.path.splitext(os.path.basename(filename))[0]}_r.fits")
-            fits.PrimaryHDU(fd, fh).writeto(output_filename, overwrite=True)
+            # # Save the reduced image with _r.fits suffix
+            # output_filename = os.path.join(current_night_directory,
+            #                                f"{os.path.splitext(os.path.basename(filename))[0]}_r.fits")
+            # fits.PrimaryHDU(fd, fh).writeto(output_filename, overwrite=True)
+            print(f'Processed {filename}')
 
 
 def create_directory_if_not_exists(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
-
-
-def copy_master_files(master_bias_path, master_flat_path, master_dark_path, current_night_directory):
-    # Copy master bias to the current night directory
-    shutil.copy(master_bias_path, os.path.join(current_night_directory, 'master_bias.fits'))
-
-    # Copy and rename master flat to the current night directory
-    new_master_flat_path = os.path.join(current_night_directory, 'master_flat.fits')
-    shutil.copy(master_flat_path, new_master_flat_path)
-
-    # Copy master dark to the current night directory
-    shutil.copy(master_dark_path, os.path.join(current_night_directory, 'master_dark.fits'))
-
-    print('Master files copied to the current night directory.')
-    return new_master_flat_path
 
 
 if __name__ == '__main__':
@@ -199,18 +200,4 @@ if __name__ == '__main__':
     master_bias = bias(calibration_path, out_path)
     master_dark = dark(calibration_path, out_path, master_bias)
     master_flat = flat(base_path, out_path, master_bias, master_dark)
-    # reduce_images(base_path, master_bias, master_dark, master_flat)
-    #
-    # current_night_directory = find_current_night_directory(base_path)
-    #
-    # if current_night_directory:
-    #     new_master_flat_path = copy_master_files(os.path.join(out_path, 'master_bias.fits'),
-    #                                              os.path.join(out_path,
-    #                                                           f'master_flat_{os.path.basename(current_night_directory)}.fits'),
-    #                                              os.path.join(out_path, 'master_dark.fits'),
-    #                                              current_night_directory)
-    #
-    #     # Rename the master flat file to "master_flat.fits"
-    #     os.rename(new_master_flat_path, os.path.join(current_night_directory, 'master_flat.fits'))
-    # else:
-    #     print('Current night directory not found')
+    reduce_images(base_path, master_bias, master_dark, master_flat)
