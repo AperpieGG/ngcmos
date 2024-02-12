@@ -7,6 +7,21 @@ import numpy as np
 
 
 def bias(base_path, out_path):
+    """
+    Create the master bias from the bias files.
+
+    Parameters
+    ----------
+    base_path : str
+        Base path for the directory.
+    out_path : str
+        Path to the output directory.
+
+    Returns
+    -------
+    numpy.ndarray
+        Master bias.
+    """
     master_bias_path = os.path.join(out_path, 'master_bias.fits')
 
     if os.path.exists(master_bias_path):
@@ -34,6 +49,23 @@ def bias(base_path, out_path):
 
 
 def dark(base_path, out_path, master_bias):
+    """
+    Create the master dark from the dark files.
+
+    Parameters
+    ----------
+    base_path : str
+        Base path for the directory.
+    out_path : str
+        Path to the output directory.
+    master_bias : numpy.ndarray
+        Master bias.
+
+    Returns
+    -------
+    numpy.ndarray
+        Master dark.
+    """
     master_dark_path = os.path.join(out_path, 'master_dark.fits')
 
     if os.path.exists(master_dark_path):
@@ -91,6 +123,27 @@ def find_current_night_directory(base_path):
 
 
 def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
+    """
+    Create the master flat from the flat files.
+
+    Parameters
+    ----------
+    base_path : str
+        Base path for the directory.
+    out_path : str
+        Path to the output directory.
+    master_bias : numpy.ndarray
+        Master bias.
+    master_dark : numpy.ndarray
+        Master dark.
+    dark_exposure : int
+        Dark exposure time.
+
+    Returns
+    -------
+    numpy.ndarray
+        Master flat.
+    """
     current_night_directory = find_current_night_directory(base_path)
 
     # If current_night_directory is None, set it to the current working directory
@@ -164,6 +217,24 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
 
 
 def reduce_images(base_path, master_bias, master_dark, master_flat):
+    """
+    Reduce the images in the specified directory.
+
+    Parameters
+    ----------
+    base_path : str
+        Base path for the directory.
+    master_bias : numpy.ndarray
+        Master bias.
+    master_dark : numpy.ndarray
+        Master dark.
+    master_flat : numpy.ndarray
+        Master flat.
+
+    Returns
+    -------
+    None
+    """
     current_night_directory = find_current_night_directory(base_path)
     if current_night_directory is None:
         current_night_directory = os.getcwd()
