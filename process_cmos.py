@@ -87,23 +87,3 @@ def find_current_night_directory(directory):
         return os.getcwd()
 
 
-def load_apertures():
-    """
-    Load the apertures from the config file
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    apertures : array-like
-        array of apertures
-
-    Raises
-    ------
-    None
-    """
-    apertures = np.array([5, 10, 15, 20, 25, 30, 35, 40, 45, 50])
-    return apertures
-
