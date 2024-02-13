@@ -152,6 +152,7 @@ def convert_region_file(input_file, output_file, catalog_file):
     """
     # Read TIC IDs and coordinates from catalog file
     with fits.open(catalog_file) as hdul:
+        print(hdul)
         ra = hdul[1].data['pmRA']
         dec = hdul[1].data['pmDEC']
         tic_id = hdul[1].data['ID']
