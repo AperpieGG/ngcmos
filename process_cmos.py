@@ -152,10 +152,9 @@ def convert_region_file(input_file, output_file, catalog_file):
     """
     # Read TIC IDs and coordinates from catalog file
     with fits.open(catalog_file) as hdul:
-        print(hdul)
         ra = hdul[1].data['pmRA']
         dec = hdul[1].data['pmDEC']
-        tic_id = hdul[1].data['ID']
+        tic_id = hdul[1].data['tic_id']  # Assuming 'tic_id' is the column name for TIC IDs
 
     # Read lines from input region file
     with open(input_file, 'r') as f:
@@ -181,7 +180,6 @@ def convert_region_file(input_file, output_file, catalog_file):
     # Write converted lines to output file
     with open(output_file, 'w') as f:
         f.writelines(converted_lines)
-
 
 # Example usage:
 input_file = 'NG0547-0421_catalog_master.reg'
