@@ -236,6 +236,8 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
     None
     """
     current_night_directory = find_current_night_directory(base_path)
+    reduced_images = []
+
     if current_night_directory is None:
         current_night_directory = os.getcwd()
     else:
@@ -253,11 +255,14 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
             fd_data_uint[fd < limits.min] = limits.min
             fd_data_uint[fd > limits.max] = limits.max
             fd = fd_data_uint
+            reduced_images.append(fd)  # Append the reduced image to the list
         except Exception as e:
             print(f'Failed to process {filename}. Exception: {str(e)}')
             continue
 
         print(f'Processed {filename}')
+
+    return reduced_images
 
 
 def create_directory_if_not_exists(directory):
