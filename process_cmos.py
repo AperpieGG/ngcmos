@@ -210,7 +210,7 @@ def get_region(directory, prefix):
     pyregion.ShapeList or None
         Region shapes parsed from the region file if found, otherwise None.
     """
-    region_files = [f for f in os.listdir(directory) if f.startswith(prefix) and f.endswith('_master.reg')]
+    region_files = [f for f in os.listdir(directory) if f.startswith(prefix) and f.endswith('_input.reg')]
     print("Found region file {} for prefix {}".format(region_files, prefix))
     if region_files:
         region_file_path = os.path.join(directory, region_files[0])
