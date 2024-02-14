@@ -244,7 +244,7 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
         print('Current night directory found {} will reduce images'.format(current_night_directory))
 
     for filename in sorted(glob.glob(os.path.join(current_night_directory, '*.fits'))):
-        exclude = ['bias', 'dark', 'flat', 'evening', 'morning', '_r']
+        exclude = ['bias', 'dark', 'flat', 'evening', 'morning', '_r', 'catalog']
         if any([e in filename for e in exclude]):
             continue
         try:
