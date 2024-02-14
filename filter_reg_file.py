@@ -46,25 +46,34 @@ def find_current_night_directory(directory):
         return os.getcwd()
 
 
-def extract_prefix(region_file_name):
+def filter_region(directory):
     """
-    Extract the prefix from a region file name.
+    Filter the region files in the given directory, keeping only the shapes with color=green.
 
     Parameters
     ----------
-    region_file_name : str
-        Name of the region file.
+    directory : str
+        Path to the directory containing the region files.
 
     Returns
     -------
-    str
-        The prefix extracted from the region file name.
+    list of str
+        List of paths to the filtered region files.
     """
-    # Extract the prefix (first 11 characters)
-    return region_file_name[:11]
+    filtered_files = []
+
+    # Get all the region files in the directory
+    region_files = [f for f in os.listdir(directory) if f.endswith('_master.reg')]
+    if region_files:
+        # Extract unique prefixes from region file names
+        unique_prefixes = {f[:11] for f in region_files}
+        for prefix in unique_prefixes:
+            filtered_files.extend(filter_region_with_prefix(directory, prefix))
+
+    return filtered_files
 
 
-def filter_region(directory, prefix):
+def filter_region_with_prefix(directory, prefix):
     """
     Filter the region files in the given directory with the specified prefix,
     keeping only the shapes with color=green.
@@ -81,7 +90,7 @@ def filter_region(directory, prefix):
     list of str
         List of paths to the filtered region files.
     """
-    filtered_files = []
+    prefix_filtered_files = []
 
     region_files = [f for f in os.listdir(directory) if f.startswith(prefix) and f.endswith('_master.reg')]
     if region_files:
@@ -97,25 +106,32 @@ def filter_region(directory, prefix):
                 with open(filtered_region_file_path, 'w') as f:
                     for shape in filtered_shapes:
                         f.write(str(shape) + '\n')
-                filtered_files.append(filtered_region_file_path)
+                prefix_filtered_files.append(filtered_region_file_path)
             except Exception as e:
                 print(f"Error filtering region file {region_file_path}: {e}")
 
-    return filtered_files
+    return prefix_filtered_files
 
 
 def main():
     # Get the current night directory or use the current working directory
     current_night_directory = find_current_night_directory(base_path)
     if current_night_directory:
-        # Specify the prefix for the region files
-        prefix = "your_prefix_here"
-        filtered_region_files = filter_region(current_night_directory, prefix)
-        if filtered_region_files:
-            for filtered_file in filtered_region_files:
-                print(f"Filtered region file saved to: {filtered_file}")
+        # Find all unique prefixes from region file names
+        region_files = [f for f in os.listdir(current_night_directory) if f.endswith('_master.reg')]
+        prefixes = set(f[:11] for f in region_files)
+
+        if prefixes:
+            for prefix in prefixes:
+                filtered_files = filter_region_with_prefix(current_night_directory, prefix)
+                if filtered_files:
+                    print(f"Filtered region files with prefix '{prefix}' saved to:")
+                    for filtered_file in filtered_files:
+                        print(filtered_file)
+                else:
+                    print(f"No region files found with prefix '{prefix}' or error occurred during filtering.")
         else:
-            print("No region files found or error occurred during filtering.")
+            print("No region files found in the directory.")
     else:
         print("Current night directory not found.")
 
