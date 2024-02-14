@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 from astropy.io import fits
 
 # Open the FITS file
-with fits.open('your_file.fits') as hdul:
+with fits.open('NG0547-0421_catalog.fits') as hdul:
     # Print the information about the file
     hdul.info()
 
