@@ -183,9 +183,18 @@ def get_prefix(filename):
 
 # check donuts and measure shifts
 def check_donuts(filenames):
+    """
+    Check the donuts for each group of images and measure the shifts.
+
+    """
+    excluded_keywords = ['catalog', 'morning', 'evening', 'bias', 'flat', 'dark']
     first_image = filenames[0]
     d = Donuts(first_image)
     for filename in filenames[1:]:
+        # Check if the filename contains any of the excluded keywords
+        if any(keyword in filename for keyword in excluded_keywords):
+            # Skip this filename
+            continue
 
         shift = d.measure_shift(filename)
         sx = round(shift.x.value, 2)
@@ -202,8 +211,8 @@ def check_donuts(filenames):
             os.system(comm)
             continue
 
-
 # photometry
+
 
 def main():
     # Get the location of the observatory
