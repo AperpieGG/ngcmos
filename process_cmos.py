@@ -151,3 +151,7 @@ def main():
     # Get the coordinates from the header
     fits_file = 'NG0547-0421_catalog.fits'
     get_coords_from_header(fits_file)
+
+
+if __name__ == "__main__":
+    main()
