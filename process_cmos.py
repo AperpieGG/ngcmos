@@ -16,6 +16,7 @@ import pyregion
 from collections import defaultdict
 from calibration_images import reduce_images, bias, dark, flat
 from donuts import Donuts
+import warnings
 
 # First directory
 calibration_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'
@@ -196,7 +197,9 @@ def check_donuts(filenames):
             # Skip this filename
             continue
 
-        shift = d.measure_shift(filename)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            shift = d.measure_shift(filename)
         sx = round(shift.x.value, 2)
         sy = round(shift.y.value, 2)
         print(f'{filename} shift X: {sx} Y: {sy}')
@@ -222,13 +225,13 @@ def main():
     fits_files = calibrate_images(base_path)
 
     # Get coordinates from the headers of catalog FITS files
-    # Get coordinates from the headers of catalog FITS files
     catalog_files = {}
     for prefix in set(get_prefix(filename) for filename in fits_files):
         catalog_files[prefix] = [f for f in fits_files if f.startswith(prefix) and 'catalog' in f]
 
     # Process catalog files for each prefix
     for prefix, files in catalog_files.items():
+        print(f'Processing catalog files for prefix: {prefix}')
         get_coords_from_header(files)
 
     # Check donuts for each group
