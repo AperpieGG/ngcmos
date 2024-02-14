@@ -81,10 +81,14 @@ def filter_region(directory):
     return filtered_files
 
 
+import os
+import pyregion
+
+
 def filter_region_with_prefix(directory, prefix):
     """
     Filter the region files in the given directory with the specified prefix,
-    keeping only the shapes with color=green.
+    keeping only the shapes with shape=circle.
 
     Parameters
     ----------
@@ -106,16 +110,23 @@ def filter_region_with_prefix(directory, prefix):
             region_file_path = os.path.join(directory, region_file_name)
             print(f"Filtering region file: {region_file_path}")
             try:
-                region_shapes = pyregion.open(region_file_path)
-                # Filter shapes with color=green
-                filtered_shapes = [shape for shape in region_shapes if shape.name == 'circle']
+                # Read the region file
+                with open(region_file_path, 'r') as file:
+                    lines = file.readlines()
+
+                # Filter lines with 'circle()' and remove lines with 'point()'
+                filtered_lines = [line for line in lines if line.strip().startswith('circle(')]
+
                 # Create a new region file path for the filtered shapes
                 filtered_region_file_path = region_file_path.replace('_master.reg', '_filtered.reg')
+
                 # Write the filtered shapes to the new region file
-                with open(filtered_region_file_path, 'w') as f:
-                    for shape in filtered_shapes:
-                        f.write(str(shape) + '\n')
+                with open(filtered_region_file_path, 'w') as file:
+                    file.writelines(filtered_lines)
+
+                # Append the path of the filtered region file to the list
                 prefix_filtered_files.append(filtered_region_file_path)
+
                 print(f"Filtered region file saved to: {filtered_region_file_path}")
             except Exception as e:
                 print(f"Error filtering region file {region_file_path}: {e}")
