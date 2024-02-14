@@ -108,7 +108,7 @@ def filter_region_with_prefix(directory, prefix):
             try:
                 region_shapes = pyregion.open(region_file_path)
                 # Filter shapes with color=green
-                filtered_shapes = [shape for shape in region_shapes if 'green' in shape.attr]
+                filtered_shapes = [shape for shape in region_shapes if shape.name == 'circle']
                 # Create a new region file path for the filtered shapes
                 filtered_region_file_path = region_file_path.replace('_master.reg', '_filtered.reg')
                 # Write the filtered shapes to the new region file
