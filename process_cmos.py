@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 import sys
 import math
@@ -16,16 +14,6 @@ import re
 import pyregion
 from collections import defaultdict
 from calibration_images import reduce_images, bias, dark, flat
-
-
-# pylint: disable = invalid-name
-# pylint: disable = redefined-outer-name
-# pylint: disable = no-member
-# pylint: disable = too-many-locals
-# pylint: disable = too-many-arguments
-# pylint: disable = unused-variable
-# pylint: disable = line-too-long
-# pylint: disable = logging-fstring-interpolation
 
 # First directory
 calibration_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'
@@ -46,7 +34,6 @@ else:
     base_path = base_path_2
     calibration_path = calibration_path_2
     out_path = out_path_2
-
 
 def get_location():
     """
@@ -77,7 +64,6 @@ def get_location():
 
     return site_location, site_topos
 
-
 def find_current_night_directory(directory):
     """
     Find the directory for the current night based on the current date.
@@ -107,7 +93,6 @@ def find_current_night_directory(directory):
         # Use the current working directory
         return os.getcwd()
 
-
 def calibrate_images(directory):
     """
     Calibrate the images in the directory
@@ -133,57 +118,32 @@ def calibrate_images(directory):
     reduce_images(current_night_directory, master_bias, master_dark, master_flat)
 
 
-def convert_region_file(input_file, output_file, catalog_file):
-    """
-    Convert a region file from one format to another and label annuli with TIC IDs.
+def get_coords_from_header(fits_file):
+    # Open the FITS file
+    hdulist = fits.open(fits_file)
 
-    Parameters
-    ----------
-    input_file : str
-        Path to the input region file.
-    output_file : str
-        Path to the output region file.
-    catalog_file : str
-        Path to the catalog.fits file containing TIC IDs and coordinates.
+    # Get the binary table data
+    data = hdulist[1].data
 
-    Returns
-    -------
-    None
-    """
-    # Read TIC IDs and coordinates from catalog file
-    with fits.open(catalog_file) as hdul:
-        ra = hdul[1].data['pmRA']
-        dec = hdul[1].data['pmDEC']
-        tic_id = hdul[1].data['tic_id']  # Assuming 'tic_id' is the column name for TIC IDs
+    # Extract RA and DEC coordinates
+    RA = data['ra_deg']
+    DEC = data['dec_deg']
 
-    # Read lines from input region file
-    with open(input_file, 'r') as f:
-        lines = f.readlines()
+    # Print the first 10 entries as an example
+    for i in range(10):
+        print(f'Entry {i+1}: RA = {RA[i]}, DEC = {DEC[i]}')
 
-    converted_lines = []
-    for i, line in enumerate(lines):
-        if line.startswith('point'):
-            # Extract RA and Dec from point line
-            parts = line.split(',')
-            ra_dec = parts[0].split('(')[1].split(')')
-            ra_point, dec_point = float(ra_dec[0].split()[0]), float(ra_dec[1])
+    # Close the FITS file
+    hdulist.close()
 
-            # Find the closest TIC ID based on RA and Dec
-            distances = np.sqrt((ra - ra_point)**2 + (dec - dec_point)**2)
-            closest_index = np.argmin(distances)
-            closest_tic_id = tic_id[closest_index]
 
-            # Create annulus line with TIC ID label
-            converted_line = f"annulus({ra_point}, {dec_point}, 20.0, 30.0)  # text={{{closest_tic_id}}}\n"
-            converted_lines.append(converted_line)
+def main():
+    # Get the location of the observatory
+    site_location, site_topos = get_location()
 
-    # Write converted lines to output file
-    with open(output_file, 'w') as f:
-        f.writelines(converted_lines)
+    # Calibrate the images
+    calibrate_images(base_path)
 
-# Example usage:
-input_file = 'NG0547-0421_catalog_master.reg'
-output_file = 'testing_NG0547-0421_catalog_master.reg'
-catalog_file = 'NG0547-0421_catalog_filtered.fits'
-convert_region_file(input_file, output_file, catalog_file)
-
+    # Get the coordinates from the header
+    fits_file = 'NG0547-0421_catalog.fits'
+    get_coords_from_header(fits_file)
