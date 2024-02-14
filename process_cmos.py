@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import sys
 import math
@@ -35,6 +36,7 @@ else:
     calibration_path = calibration_path_2
     out_path = out_path_2
 
+
 def get_location():
     """
     Get the location of the observatory
@@ -64,6 +66,7 @@ def get_location():
 
     return site_location, site_topos
 
+
 def find_current_night_directory(directory):
     """
     Find the directory for the current night based on the current date.
@@ -92,6 +95,7 @@ def find_current_night_directory(directory):
     else:
         # Use the current working directory
         return os.getcwd()
+
 
 def calibrate_images(directory):
     """
@@ -131,7 +135,7 @@ def get_coords_from_header(fits_file):
 
     # Print the first 10 entries as an example
     for i in range(10):
-        print(f'Entry {i+1}: RA = {RA[i]}, DEC = {DEC[i]}')
+        print(f'Entry {i + 1}: RA = {RA[i]}, DEC = {DEC[i]}')
 
     # Close the FITS file
     hdulist.close()
