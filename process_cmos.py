@@ -169,7 +169,7 @@ def main():
     check_donuts(fits_files)
 
     # Get region files for each prefix
-    region_files = get_region_files(fits_files, base_path)
+    region_files = get_region_files(fits_files)
 
     # Print region files for each prefix
     for prefix, files in region_files.items():
@@ -183,7 +183,6 @@ def main():
     # Print the contents of region files
     for prefix, contents in region_contents.items():
         print(f"Prefix: {prefix}, Region Contents: {contents}")
-
 
 
 if __name__ == "__main__":
