@@ -110,6 +110,7 @@ def check_donuts(filenames):
 
 # Find region files for each prefix
 def get_region_files(filenames):
+    # TODO: Exclude flats, darks, biases, etc.
     """
     Find region files for each prefix.
 
@@ -127,6 +128,9 @@ def get_region_files(filenames):
 
     for filename in filenames:
         prefix = get_prefix(filename)
+        exclude_keywords = ['catalog', 'morning', 'evening', 'bias', 'flat', 'dark']
+        if any(keyword in filename for keyword in exclude_keywords):
+            continue
         region_files = [f for f in os.listdir() if f.startswith(prefix) and f.endswith('_input.reg')]
         grouped_region_files[prefix].update(region_files)
 
@@ -178,11 +182,12 @@ def main():
     # Read the contents of region files
     region_contents = {}
     for prefix, files in region_files.items():
+        files = [f for f in files if not any(keyword in f for keyword in exclude_keywords)]
         region_contents[prefix] = read_region_files(files)
 
     # Print the contents of region files
     for prefix, contents in region_contents.items():
-        print(f"Prefix: {prefix}, Region Contents: {contents}")
+        print(f"Prefix: {prefix}")
 
 
 if __name__ == "__main__":
