@@ -182,7 +182,6 @@ def main():
     # Read the contents of region files
     region_contents = {}
     for prefix, files in region_files.items():
-        files = [f for f in files if not any(keyword in f for keyword in exclude_keywords)]
         region_contents[prefix] = read_region_files(files)
 
     # Print the contents of region files
