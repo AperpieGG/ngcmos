@@ -124,7 +124,7 @@ def calibrate_images(directory):
     fits_files = [f for f in os.listdir(current_night_directory) if f.endswith('.fits') and 'catalog' not in f]
 
     # Reduce the images
-    fits_files = reduce_images(current_night_directory, master_bias, master_dark, master_flat, fits_files)
+    fits_files = reduce_images(current_night_directory, master_bias, master_dark, master_flat)
 
     return fits_files
 
