@@ -263,29 +263,28 @@ def main():
     site_location, site_topos = get_location()
 
     # Calibrate the images and get the list of FITS files
-    fits_files = calibrate_images(base_path)
+    # fits_files = calibrate_images(base_path)
 
-    # Get coordinates from the headers of catalog FITS files
-    catalog_files = {}
-    for prefix in set(get_prefix(filename) for filename in fits_files):
-        catalog_files[prefix] = [f for f in fits_files if f.startswith(prefix) and 'catalog' in f]
+    # # Get coordinates from the headers of catalog FITS files
+    # catalog_files = {}
+    # for prefix in set(get_prefix(filename) for filename in fits_files):
+    #     catalog_files[prefix] = [f for f in fits_files if f.startswith(prefix) and 'catalog' in f]
 
     # Check donuts for each group
     grouped_filenames = defaultdict(list)
-    for filename in fits_files:
-        prefix = get_prefix(filename)
-        grouped_filenames[prefix].append(filename)
+    # for filename in fits_files:
+    #     prefix = get_prefix(filename)
+    #     grouped_filenames[prefix].append(filename)
 
     # Check donuts for each group
     for filenames in grouped_filenames.values():
         check_donuts(filenames)
 
     # Find region files for each prefix
-    current_night_directory = find_current_night_directory(base_path)
     for filenames in grouped_filenames.values():
         for filename in filenames:
             prefix = get_prefix(filename)
-            region_file = get_region(current_night_directory, prefix)
+            region_file = get_region(prefix)
             if region_file:
                 print(f"Found region file {region_file} for prefix {prefix}")
             else:
