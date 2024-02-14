@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import sys
 import math
@@ -15,6 +14,7 @@ import re
 import pyregion
 from collections import defaultdict
 from calibration_images import reduce_images, bias, dark, flat
+from donuts import Donuts
 
 # First directory
 calibration_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'
@@ -108,7 +108,8 @@ def calibrate_images(directory):
 
     Returns
     -------
-    None
+    list
+        List of FITS files generated after calibration.
     """
 
     # Find the current night directory
@@ -118,39 +119,109 @@ def calibrate_images(directory):
     master_dark = dark(calibration_path, out_path, master_bias)
     master_flat = flat(base_path, out_path, master_bias, master_dark)
 
+    # Get all FITS files in the directory
+    fits_files = [f for f in os.listdir(current_night_directory) if f.endswith('.fits') and 'catalog' not in f]
+
     # Reduce the images
-    reduce_images(current_night_directory, master_bias, master_dark, master_flat)
+    fits_files = reduce_images(current_night_directory, master_bias, master_dark, master_flat, fits_files)
+
+    return fits_files
 
 
-def get_coords_from_header(fits_file):
-    # Open the FITS file
-    hdulist = fits.open(fits_file)
+def get_coords_from_header(fits_files):
+    """
+    Get the coordinates from the header of FITS files.
 
-    # Get the binary table data
-    data = hdulist[1].data
+    Parameters
+    ----------
+    fits_files : list
+        List of FITS files.
 
-    # Extract RA and DEC coordinates
-    RA = data['ra_deg']
-    DEC = data['dec_deg']
+    Returns
+    -------
+    None
+    """
+    for fits_file in fits_files:
+        # Open the FITS file
+        hdulist = fits.open(fits_file)
 
-    # Print the first 10 entries as an example
-    for i in range(10):
-        print(f'Entry {i + 1}: RA = {RA[i]}, DEC = {DEC[i]}')
+        # Get the binary table data
+        data = hdulist[1].data
 
-    # Close the FITS file
-    hdulist.close()
+        # Extract RA and DEC coordinates
+        RA = data['ra_deg']
+        DEC = data['dec_deg']
 
+        # Print the first 10 entries as an example
+        for i in range(10):
+            print(f'Entry {i + 1}: RA = {RA[i]}, DEC = {DEC[i]}')
+
+        # Close the FITS file
+        hdulist.close()
+
+
+def get_prefix(filename):
+    """
+    Extracts the prefix (first 11 letters) from the filename.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file.
+
+    Returns
+    -------
+    str
+        Prefix of the filename.
+    """
+    return filename[:11]
+
+
+# load aperture file
+
+# check donuts and measure shifts
+def check_donuts(filenames):
+    first_image = filenames[0]
+    for filename in filenames[1:]:
+        d = Donuts(first_image)
+
+        shift = d.measure_shift(filename)
+        sx = round(shift.x.value, 2)
+        sy = round(shift.y.value, 2)
+        # check for big shifts
+        shifts = np.array([abs(sx), abs(sy)])
+        if np.sum(shifts > 50) > 0:
+            print(f'{filename} image shift too big X: {sx} Y: {sy}')
+            if not os.path.exists('failed_donuts'):
+                os.mkdir('failed_donuts')
+            comm = f'mv {filename} failed_donuts/'
+            print(comm)
+            os.system(comm)
+            continue
+
+
+# photometry
 
 def main():
     # Get the location of the observatory
     site_location, site_topos = get_location()
 
-    # Calibrate the images
-    calibrate_images(base_path)
+    # Calibrate the images and get the list of FITS files
+    fits_files = calibrate_images(base_path)
 
-    # Get the coordinates from the header
-    fits_file = 'NG0547-0421_catalog.fits'
-    get_coords_from_header(fits_file)
+    # Get coordinates from the headers of catalog FITS files
+    catalog_files = [f for f in fits_files if 'catalog' in f]
+    get_coords_from_header(catalog_files)
+
+    # Check donuts for each group
+    grouped_filenames = defaultdict(list)
+    for filename in fits_files:
+        prefix = get_prefix(filename)
+        grouped_filenames[prefix].append(filename)
+
+    # Check donuts for each group
+    for filenames in grouped_filenames.values():
+        check_donuts(filenames)
 
 
 if __name__ == "__main__":
