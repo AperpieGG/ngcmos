@@ -124,8 +124,9 @@ def calibrate_images(directory):
     fits_files = [f for f in os.listdir(current_night_directory) if f.endswith('.fits') and 'catalog' not in f]
 
     # Reduce the images
-    fits_files = reduce_images(current_night_directory, master_bias, master_dark, master_flat)
+    reduce_images(current_night_directory, master_bias, master_dark, master_flat)
 
+    # Return the list of filenames
     return fits_files
 
 
@@ -183,12 +184,13 @@ def get_prefix(filename):
 # check donuts and measure shifts
 def check_donuts(filenames):
     first_image = filenames[0]
+    d = Donuts(first_image)
     for filename in filenames[1:]:
-        d = Donuts(first_image)
 
         shift = d.measure_shift(filename)
         sx = round(shift.x.value, 2)
         sy = round(shift.y.value, 2)
+        print(f'{filename} shift X: {sx} Y: {sy}')
         # check for big shifts
         shifts = np.array([abs(sx), abs(sy)])
         if np.sum(shifts > 50) > 0:
@@ -211,16 +213,20 @@ def main():
     fits_files = calibrate_images(base_path)
 
     # Get coordinates from the headers of catalog FITS files
-    catalog_files = [f for f in fits_files if 'catalog' in f]
-    get_coords_from_header(catalog_files)
+    # Get coordinates from the headers of catalog FITS files
+    catalog_files = {}
+    for prefix in set(get_prefix(filename) for filename in fits_files):
+        catalog_files[prefix] = [f for f in fits_files if f.startswith(prefix) and 'catalog' in f]
+
+    # Process catalog files for each prefix
+    for prefix, files in catalog_files.items():
+        get_coords_from_header(files)
 
     # Check donuts for each group
     grouped_filenames = defaultdict(list)
     for filename in fits_files:
         prefix = get_prefix(filename)
-        # Convert prefix to a tuple to make it hashable
-        prefix_tuple = tuple(prefix)
-        grouped_filenames[prefix_tuple].append(filename)
+        grouped_filenames[prefix].append(filename)
 
     # Check donuts for each group
     for filenames in grouped_filenames.values():
