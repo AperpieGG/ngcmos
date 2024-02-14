@@ -218,7 +218,9 @@ def main():
     grouped_filenames = defaultdict(list)
     for filename in fits_files:
         prefix = get_prefix(filename)
-        grouped_filenames[prefix].append(filename)
+        # Convert prefix to a tuple to make it hashable
+        prefix_tuple = tuple(prefix)
+        grouped_filenames[prefix_tuple].append(filename)
 
     # Check donuts for each group
     for filenames in grouped_filenames.values():
