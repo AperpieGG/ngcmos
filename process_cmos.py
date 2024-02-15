@@ -110,14 +110,12 @@ def check_donuts(filenames):
 
 # Find region files for each prefix
 def get_region_files(filenames):
-    # TODO: Exclude flats, darks, biases, etc.
     """
     Find region files for each prefix.
 
     Parameters
     ----------
-    filenames : list
-        List of filenames to search for region files.
+    filenames : list of filenames to search for region files.
 
     Returns
     -------
