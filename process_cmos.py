@@ -14,6 +14,14 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
 warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
 
+
+# pylint: disable = invalid-name
+# pylint: disable = redefined-outer-name
+# pylint: disable = no-member
+# pylint: disable = too-many-locals
+# pylint: disable = too-many-arguments
+# pylint: disable = unused-variable
+
 # Define directories
 calibration_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/'
 base_path_1 = '/Users/u5500483/Downloads/DATA_MAC/CMOS/'
@@ -51,6 +59,20 @@ def get_location():
 
 # Find current night directory
 def find_current_night_directory(directory):
+    """
+    Find the directory for the current night based on the current date.
+    if not then use the current working directory.
+
+    Parameters
+    ----------
+    directory : str
+        Base path for the directory.
+
+    Returns
+    -------
+    str or None
+        Path to the current night directory if found, otherwise None.
+    """
     previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
     current_date_directory = os.path.join(directory, previous_date)
     if os.path.isdir(current_date_directory):
@@ -61,11 +83,32 @@ def find_current_night_directory(directory):
 
 # Extract prefix from filename
 def get_prefix(filename):
+    """
+    Extract prefix from filename
+    """
     return filename[:11]
 
 
 # Calibrate images
 def calibrate_images(directory):
+    """
+     Reduce the images in the specified directory.
+
+     Parameters
+     ----------
+     directory : str
+         Base path for the directory.
+     master_bias : numpy.ndarray
+         Master bias.
+     master_dark : numpy.ndarray
+         Master dark.
+     master_flat : numpy.ndarray
+         Master flat.
+
+     Returns
+     -------
+     None
+     """
     current_night_directory = find_current_night_directory(directory)
     master_bias = bias(calibration_path, out_path)
     master_dark = dark(calibration_path, out_path, master_bias)
@@ -77,6 +120,10 @@ def calibrate_images(directory):
 
 # Check donuts for each group
 def check_donuts(filenames):
+    """
+    Check donuts for each group.
+
+    """
     excluded_keywords = ['catalog', 'morning', 'evening', 'bias', 'flat', 'dark']
     grouped_filenames = defaultdict(list)
     for filename in filenames:
