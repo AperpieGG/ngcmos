@@ -1,19 +1,23 @@
 #! /usr/bin/env python
 import os
+import sys
 from collections import defaultdict
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.coordinates import EarthLocation
+from astropy.wcs import WCS
 from skyfield.api import Topos
 import re
 from calibration_images import reduce_images, bias, dark, flat
 from donuts import Donuts
 from utils import source_extract, catalogue_to_pixels
 import warnings
+from astropy.io import fits
 
 # Suppress warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
 warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
+warnings.filterwarnings("ignore", category=UserWarning, module="FITsFixedWarning")
 
 
 # pylint: disable = invalid-name
@@ -67,7 +71,27 @@ def find_current_night_directory(directory):
         return os.getcwd()
 
 
-# Extract prefix from filename
+def find_first_image_of_each_prefix(filenames):
+    # Sort the filenames
+    sorted_filenames = sorted(filenames)
+
+    # Create a dictionary to store the first image of each prefix
+    first_images = {}
+
+    # Iterate over each filename
+    for filename in sorted_filenames:
+        # Extract the prefix from the filename
+        prefix = get_prefix(filename)
+
+        # Check if the prefix is not already in the dictionary
+        if prefix not in first_images:
+            # Add the filename to the dictionary
+            first_images[prefix] = filename
+
+    print(first_images)
+    return first_images
+
+
 def get_prefix(filename):
     """
     Extract prefix from filename
@@ -221,6 +245,42 @@ def parse_region_content(region_content):
     return ra_dec_coords
 
 
+def catalogue_to_pixels(filenames, ra_dec_coords):
+    """
+    Convert a list of catalogue positions to X and Y image
+    coordinates
+
+    Parameters
+    ----------
+    filenames : list
+        List of filenames
+    ra_dec_coords : list
+        List of (RA, Dec) coordinate tuples
+
+    Returns
+    -------
+    list of tuples
+        List of (X, Y) pixel coordinates
+    """
+    try:
+        _, hdr = fits.getdata(filenames, header=True)
+    except (OSError, IndexError, KeyError) as e:
+        print(f'CANNOT FIND HEADER INFORMATION IN {filenames}, EXITING...')
+        sys.exit(1)
+
+    # Load the WCS
+    w = WCS(hdr)
+
+    # Convert RA and Dec to pixel coordinates
+    pix = w.wcs_world2pix(ra_dec_coords, 0)
+    x, y = pix[:, 0], pix[:, 1]
+
+    # Create a list of tuples containing X and Y coordinates
+    xy_coordinates = [(xi, yi) for xi, yi in zip(x, y)]
+
+    return xy_coordinates
+
+
 def main():
     # Calibrate images and get FITS files
     fits_files = calibrate_images(base_path)
@@ -245,6 +305,11 @@ def main():
             # Extract RA and Dec from region content (assuming you have a function to parse the region file)
             ra_dec_coords = parse_region_content(region_content)
             print(ra_dec_coords)
+
+            first_images = (find_first_image_of_each_prefix(fits_files))
+            # Convert RA and Dec to pixel coordinates
+            xy_coordinates = catalogue_to_pixels(first_images[prefix], ra_dec_coords)
+            print(xy_coordinates)
 
 
 if __name__ == "__main__":
