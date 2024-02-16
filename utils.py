@@ -7,11 +7,9 @@ from datetime import datetime
 import sep
 import numpy as np
 from astropy.coordinates import SkyCoord, EarthLocation
-from skyfield.api import Topos
 from astropy.wcs import WCS
 import astropy.units as u
 import jastro.housekeeping as jhk
-import jastro.ds9 as jds9
 
 
 # pylint: disable=invalid-name
