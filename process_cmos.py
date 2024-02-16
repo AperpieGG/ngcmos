@@ -42,21 +42,6 @@ else:
     out_path = out_path_2
 
 
-# Define observatory location
-def get_location():
-    site_location = EarthLocation(
-        lat=-24.615662,
-        lon=-70.391809,
-        height=2433
-    )
-    site_topos = Topos(
-        latitude_degrees=site_location.lat.deg,
-        longitude_degrees=site_location.lon.deg,
-        elevation_m=site_location.height.to_value('m')
-    )
-    return site_location, site_topos
-
-
 # Find current night directory
 def find_current_night_directory(directory):
     """
