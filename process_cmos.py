@@ -314,3 +314,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# TODO: Add aditional annulus size for the region files (follow J MCMC code)
+# TODO: have the region files result in the format: np.array(x), np.array(y), np.array(rsi), np.array(rso)
