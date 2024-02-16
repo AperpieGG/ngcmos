@@ -4,6 +4,9 @@ import os
 from datetime import datetime, timedelta
 from astropy.io import fits
 import numpy as np
+from astropy.time import Time
+import astropy.units as u
+from utils import get_location, get_light_travel_times
 
 
 def bias(base_path, out_path):
@@ -237,6 +240,7 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
     """
     current_night_directory = find_current_night_directory(base_path)
     reduced_images = []
+    header_info = []
 
     if current_night_directory is None:
         current_night_directory = os.getcwd()
@@ -248,25 +252,47 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
         if any([e in filename for e in exclude]):
             continue
         try:
-            fd, fh = fits.getdata(filename, header=True)
-            fd = (fd - master_bias - master_dark * fh['EXPTIME'] / 10) / master_flat
+            fd, hdr = fits.getdata(filename, header=True)
+
+            # Additional calculations based on header information
+            data_exp = round(float(hdr['EXPTIME']), 2)
+            half_exptime = data_exp / 2.
+            time_isot = Time(hdr['DATE-OBS'], format='isot', scale='utc', location=get_location())
+            time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+            time_jd += half_exptime * u.second
+            ra = hdr['TELRAD']
+            dec = hdr['TELDECD']
+            ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
+            time_bary = time_jd.tdb + ltt_bary
+            time_helio = time_jd.utc + ltt_helio
+
+            # Reduce image
+            fd = (fd - master_bias - master_dark * hdr['EXPTIME'] / 10) / master_flat
             fd_data_uint = fd.astype('uint16')
             limits = np.iinfo(fd_data_uint.dtype)
             fd_data_uint[fd < limits.min] = limits.min
             fd_data_uint[fd > limits.max] = limits.max
             fd = fd_data_uint
             reduced_images.append(fd)  # Append the reduced image to the list
+
+            # Append additional header information to header_info list
+            header_info.append({
+                'data_exp': data_exp,
+                'half_exptime': half_exptime,
+                'time_bary': time_bary,
+                'time_helio': time_helio,
+                'ra': ra,
+                'dec': dec
+            })
         except Exception as e:
             print(f'Failed to process {filename}. Exception: {str(e)}')
             continue
 
         print(f'Processed {filename}')
 
-    return reduced_images
+    return reduced_images, header_info
 
 
 def create_directory_if_not_exists(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
-
-
