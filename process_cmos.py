@@ -108,11 +108,11 @@ def calibrate_images(directory):
      ----------
      directory : str
          Base path for the directory.
-     master_bias : numpy.ndarray
+     master-bias : numpy.ndarray
          Master bias.
-     master_dark : numpy.ndarray
+     master-dark : numpy.ndarray
          Master dark.
-     master_flat : numpy.ndarray
+     master-flat : numpy.ndarray
          Master flat.
 
      Returns
