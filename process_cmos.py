@@ -193,9 +193,6 @@ def read_region_files(region_files):
 
 # Main function
 def main():
-    # Get observatory location
-    site_location, site_topos = get_location()
-
     # Calibrate images and get FITS files
     fits_files = calibrate_images(base_path)
 
