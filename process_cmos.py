@@ -4,7 +4,6 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timedelta
 import numpy as np
-from astropy.coordinates import EarthLocation
 from astropy.wcs import WCS
 from skyfield.api import Topos
 import re
@@ -13,6 +12,7 @@ from donuts import Donuts
 from utils import source_extract, catalogue_to_pixels
 import warnings
 from astropy.io import fits
+
 
 # Suppress warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
