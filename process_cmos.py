@@ -8,6 +8,7 @@ from skyfield.api import Topos
 import re
 from calibration_images import reduce_images, bias, dark, flat
 from donuts import Donuts
+from utils import source_extract, catalogue_to_pixels
 import warnings
 
 # Suppress warnings
@@ -191,7 +192,35 @@ def read_region_files(region_files):
     return region_contents
 
 
-# Main function
+def parse_region_content(region_content):
+    """
+    Parse the content of a region file to extract RA and Dec coordinates.
+
+    Parameters
+    ----------
+    region_content : str
+        Content of the region file.
+
+    Returns
+    -------
+    list of tuples
+        List of (RA, Dec) coordinate tuples extracted from the region content.
+    """
+    ra_dec_coords = []
+    # Split the region content into lines
+    lines = region_content.split('\n')
+    for line in lines:
+        # Assuming each line represents a circular region with RA and Dec coordinates
+        # Extract the RA and Dec coordinates from the line
+        if line.startswith('circle'):
+            # Example line format: "circle(123.456, 78.901, 2.0)"
+            parts = line.split('(')[1].split(')')[0].split(',')
+            ra = float(parts[0])
+            dec = float(parts[1])
+            ra_dec_coords.append((ra, dec))
+    return ra_dec_coords
+
+
 def main():
     # Calibrate images and get FITS files
     fits_files = calibrate_images(base_path)
@@ -211,9 +240,11 @@ def main():
     for prefix, files in region_files.items():
         region_contents[prefix] = read_region_files(files)
 
-    # Print the contents of region files
     for prefix, contents in region_contents.items():
-        print(f"Prefix: {prefix}")
+        for region_file, region_content in contents.items():
+            # Extract RA and Dec from region content (assuming you have a function to parse the region file)
+            ra_dec_coords = parse_region_content(region_content)
+            print(ra_dec_coords)
 
 
 if __name__ == "__main__":
