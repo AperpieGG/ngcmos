@@ -259,8 +259,8 @@ def catalogue_to_pixels(filenames, ra_dec_coords):
 
     Returns
     -------
-    list of tuples
-        List of (X, Y) pixel coordinates
+    numpy.ndarray, numpy.ndarray
+        Arrays of X and Y pixel coordinates
     """
     try:
         _, hdr = fits.getdata(filenames, header=True)
@@ -275,10 +275,7 @@ def catalogue_to_pixels(filenames, ra_dec_coords):
     pix = w.wcs_world2pix(ra_dec_coords, 0)
     x, y = pix[:, 0], pix[:, 1]
 
-    # Create a list of tuples containing X and Y coordinates
-    xy_coordinates = [(xi, yi) for xi, yi in zip(x, y)]
-
-    return xy_coordinates
+    return np.array(x), np.array(y)
 
 
 def main():
@@ -306,14 +303,17 @@ def main():
             ra_dec_coords = parse_region_content(region_content)
             print(f"Prefix: {prefix}, Region File: {region_file}, cordinates: {ra_dec_coords}")
 
-            first_images = (find_first_image_of_each_prefix(fits_files))
-            # Convert RA and Dec to pixel coordinates
-            xy_coordinates = catalogue_to_pixels(first_images[prefix], ra_dec_coords)
-            print(xy_coordinates)
+            first_images = find_first_image_of_each_prefix(fits_files)
+            if prefix in first_images:  # Check if the prefix exists in the fits_files dictionary
+                # Convert RA and Dec to pixel coordinates
+                xy_coordinates = catalogue_to_pixels(first_images[prefix], ra_dec_coords)
+                print("X coordinates:", xy_coordinates[0])
+                print("Y coordinates:", xy_coordinates[1])
+            else:
+                print(f"No image found for prefix {prefix}")
 
 
 if __name__ == "__main__":
     main()
 
 # TODO: Add aditional annulus size for the region files (follow J MCMC code)
-# TODO: have the region files result in the format: np.array(x), np.array(y), np.array(rsi), np.array(rso)
