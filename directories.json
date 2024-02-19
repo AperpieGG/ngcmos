@@ -1,0 +1,14 @@
+{
+  "calibration_paths": [
+    "/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/",
+    "/home/ops/data/20231212/"
+  ],
+  "base_paths": [
+    "/Users/u5500483/Downloads/DATA_MAC/CMOS/",
+    "/home/ops/data/"
+  ],
+  "out_paths": [
+    "/Users/u5500483/Downloads/DATA_MAC/CMOS/calibration_images/",
+    "/home/ops/data/calibration_images/"
+  ]
+}
