@@ -216,16 +216,13 @@ def parse_region_content(region_content):
 
 def main():
     # Calibrate images and get FITS files
-    current_night_directory = find_current_night_directory(base_path)
-    data, jd_list, bjd_list, hjd_list = reduce_images(base_path, out_path)
-    fits_files = [f for f in os.listdir(current_night_directory) if f.endswith('.fits')]
-    fits_files = sorted(fits_files)
+    reduced_data, jd_list, bjd_list, hjd_list, filenames = reduce_images(base_path, out_path)
 
     # Check donuts for each group
-    check_donuts(fits_files)
+    check_donuts(filenames)
 
     # Get region files for each prefix
-    region_files = get_region_files(fits_files)
+    region_files = get_region_files(filenames)
 
     # Print region files for each prefix
     for prefix, files in region_files.items():
@@ -237,7 +234,7 @@ def main():
         region_contents[prefix] = read_region_files(files)
 
     for prefix, contents in region_contents.items():
-        first_images = find_first_image_of_each_prefix(fits_files)
+        first_images = find_first_image_of_each_prefix(filenames)
         for region_file, region_content in contents.items():
             # Extract RA and Dec from region content (assuming you have a function to parse the region file)
             ra_dec_coords = parse_region_content(region_content)
