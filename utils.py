@@ -109,6 +109,35 @@ def catalogue_to_pixels(filenames, ra_dec_coords):
     return x, y
 
 
+def parse_region_content(region_content):
+    """
+    Parse the content of a region file to extract RA and Dec coordinates.
+
+    Parameters
+    ----------
+    region_content : str
+        Content of the region file.
+
+    Returns
+    -------
+    list of tuples
+        List of (RA, Dec) coordinate tuples extracted from the region content.
+    """
+    ra_dec_coords = []
+    # Split the region content into lines
+    lines = region_content.split('\n')
+    for line in lines:
+        # Assuming each line represents a circular region with RA and Dec coordinates
+        # Extract the RA and Dec coordinates from the line
+        if line.startswith('circle'):
+            # Example line format: "circle(123.456, 78.901, 2.0)"
+            parts = line.split('(')[1].split(')')[0].split(',')
+            ra = float(parts[0])
+            dec = float(parts[1])
+            ra_dec_coords.append((ra, dec))
+    return ra_dec_coords
+
+
 def extract_background(filename, sigma):
     """
     Extract background from the image using SEP
