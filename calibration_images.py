@@ -243,6 +243,7 @@ def reduce_images(base_path, out_path):
     jd_list = []
     bjd_list = []
     hjd_list = []
+    filenames = []
 
     if current_night_directory is None:
         current_night_directory = os.getcwd()
@@ -282,13 +283,16 @@ def reduce_images(base_path, out_path):
             bjd_list.append(time_bary.jd)
             hjd_list.append(time_helio.jd)
 
+            # Append the filename to the filenames list
+            filenames.append(os.path.basename(filename))
+
         except Exception as e:
             print(f'Failed to process {filename}. Exception: {str(e)}')
             continue
 
         print(f'Processed {filename}')
 
-    return reduced_data, jd_list, bjd_list, hjd_list
+    return reduced_data, jd_list, bjd_list, hjd_list, filenames
 
 
 def create_directory_if_not_exists(directory):
