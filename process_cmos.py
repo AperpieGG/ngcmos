@@ -304,7 +304,7 @@ def main():
         for region_file, region_content in contents.items():
             # Extract RA and Dec from region content (assuming you have a function to parse the region file)
             ra_dec_coords = parse_region_content(region_content)
-            print(ra_dec_coords)
+            print(f"Prefix: {prefix}, Region File: {region_file}, cordinates: {ra_dec_coords}")
 
             first_images = (find_first_image_of_each_prefix(fits_files))
             # Convert RA and Dec to pixel coordinates
