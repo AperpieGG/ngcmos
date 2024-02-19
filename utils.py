@@ -4,6 +4,7 @@ Functions for handling on-sky or on chip coordinates
 import sys
 import math
 from datetime import datetime
+from astropy.io import fits
 import sep
 import numpy as np
 from astropy.coordinates import SkyCoord, EarthLocation
@@ -77,41 +78,32 @@ def get_light_travel_times(ra, dec, time_to_correct):
     return ltt_bary, ltt_helio
 
 
-def catalogue_to_pixels(astrometry_image, catalogue_coords):
+def catalogue_to_pixels(filenames, ra_dec_coords):
     """
     Convert a list of catalogue positions to X and Y image
     coordinates
 
     Parameters
     ----------
-    astrometry_image : str
-        Name of the FITS file with solved WCS solution
-    catalogue_coords : array-like
-        RA and Dec in degrees of the targets positions to
-        convert to pixels
+    filenames : list of filenames
+    ra_dec_coords : list of (RA, Dec) coordinate tuples
 
     Returns
     -------
-    x_checked : array-like
-        X positions of stars found in the astrometry_image
-    y_checked : array-like
-        Y positions of stars found in the astrometry_image
-
-    Raises
-    ------
-    None
+    numpy.ndarray, numpy.ndarray
+        Arrays of X and Y pixel coordinates
     """
     try:
-        _, hdr = jhk.load_fits_image(astrometry_image)
-    except OSError:
-        print(f'CANNOT FIND {astrometry_image}, EXITING...')
+        _, hdr = fits.getdata(filenames, header=True)
+    except (OSError, IndexError, KeyError) as e:
+        print(f'CANNOT FIND HEADER INFORMATION IN {filenames}, EXITING...')
         sys.exit(1)
 
-    # load the WCS
+    # Load the WCS
     w = WCS(hdr)
-    # 0 is C indexing
-    # 1 is Fortran indexing
-    pix = w.wcs_world2pix(catalogue_coords, 0)
+
+    # Convert RA and Dec to pixel coordinates
+    pix = w.wcs_world2pix(ra_dec_coords, 0)
     x, y = pix[:, 0], pix[:, 1]
 
     return x, y
