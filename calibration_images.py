@@ -239,7 +239,7 @@ def reduce_images(base_path, out_path):
     master_flat = flat(base_path, out_path, master_bias, master_dark)
 
     current_night_directory = find_current_night_directory(base_path)
-    reduced_images = []
+    reduced_data = []
     jd_list = []
     bjd_list = []
     hjd_list = []
@@ -275,7 +275,7 @@ def reduce_images(base_path, out_path):
             fd_data_uint[fd < limits.min] = limits.min
             fd_data_uint[fd > limits.max] = limits.max
             fd = fd_data_uint
-            reduced_images.append(fd)  # Append the reduced image to the list
+            reduced_data.append(fd)  # Append the reduced image to the list
 
             # Append additional header information to header_info list
             jd_list.append(time_jd.jd)
@@ -288,7 +288,7 @@ def reduce_images(base_path, out_path):
 
         print(f'Processed {filename}')
 
-    return reduced_images, jd_list, bjd_list, hjd_list
+    return reduced_data, jd_list, bjd_list, hjd_list
 
 
 def create_directory_if_not_exists(directory):
