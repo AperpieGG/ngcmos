@@ -219,7 +219,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         return None
 
 
-def reduce_images(base_path, master_bias, master_dark, master_flat):
+def reduce_images(base_path, out_path):
     """
     Reduce the images in the specified directory.
 
@@ -227,20 +227,22 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
     ----------
     base_path : str
         Base path for the directory.
-    master_bias : numpy.ndarray
-        Master bias.
-    master_dark : numpy.ndarray
-        Master dark.
-    master_flat : numpy.ndarray
-        Master flat.
+    out_path : str
+        Path to the output directory.
 
     Returns
     -------
     None
     """
+    master_bias = bias(base_path, out_path)
+    master_dark = dark(base_path, out_path, master_bias)
+    master_flat = flat(base_path, out_path, master_bias, master_dark)
+
     current_night_directory = find_current_night_directory(base_path)
     reduced_images = []
-    header_info = []
+    jd_list = []
+    bjd_list = []
+    hjd_list = []
 
     if current_night_directory is None:
         current_night_directory = os.getcwd()
@@ -276,21 +278,17 @@ def reduce_images(base_path, master_bias, master_dark, master_flat):
             reduced_images.append(fd)  # Append the reduced image to the list
 
             # Append additional header information to header_info list
-            header_info.append({
-                'data_exp': data_exp,
-                'half_exptime': half_exptime,
-                'time_bary': time_bary,
-                'time_helio': time_helio,
-                'ra': ra,
-                'dec': dec
-            })
+            jd_list.append(time_jd.jd)
+            bjd_list.append(time_bary.jd)
+            hjd_list.append(time_helio.jd)
+
         except Exception as e:
             print(f'Failed to process {filename}. Exception: {str(e)}')
             continue
 
         print(f'Processed {filename}')
 
-    return reduced_images, header_info
+    return reduced_images, jd_list, bjd_list, hjd_list
 
 
 def create_directory_if_not_exists(directory):
