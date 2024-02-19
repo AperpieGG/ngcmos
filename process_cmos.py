@@ -13,12 +13,10 @@ from utils import source_extract, catalogue_to_pixels
 import warnings
 from astropy.io import fits
 
-
 # Suppress warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
 warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
 warnings.filterwarnings("ignore", category=UserWarning, module="FITsFixedWarning")
-
 
 # pylint: disable = invalid-name
 # pylint: disable = redefined-outer-name
@@ -245,39 +243,6 @@ def parse_region_content(region_content):
     return ra_dec_coords
 
 
-def catalogue_to_pixels(filenames, ra_dec_coords):
-    """
-    Convert a list of catalogue positions to X and Y image
-    coordinates
-
-    Parameters
-    ----------
-    filenames : list
-        List of filenames
-    ra_dec_coords : list
-        List of (RA, Dec) coordinate tuples
-
-    Returns
-    -------
-    numpy.ndarray, numpy.ndarray
-        Arrays of X and Y pixel coordinates
-    """
-    try:
-        _, hdr = fits.getdata(filenames, header=True)
-    except (OSError, IndexError, KeyError) as e:
-        print(f'CANNOT FIND HEADER INFORMATION IN {filenames}, EXITING...')
-        sys.exit(1)
-
-    # Load the WCS
-    w = WCS(hdr)
-
-    # Convert RA and Dec to pixel coordinates
-    pix = w.wcs_world2pix(ra_dec_coords, 0)
-    x, y = pix[:, 0], pix[:, 1]
-
-    return np.array(x), np.array(y)
-
-
 def main():
     # Calibrate images and get FITS files
     fits_files = calibrate_images(base_path)
@@ -298,12 +263,12 @@ def main():
         region_contents[prefix] = read_region_files(files)
 
     for prefix, contents in region_contents.items():
+        first_images = find_first_image_of_each_prefix(fits_files)
         for region_file, region_content in contents.items():
             # Extract RA and Dec from region content (assuming you have a function to parse the region file)
             ra_dec_coords = parse_region_content(region_content)
             print(f"Prefix: {prefix}, Region File: {region_file}, cordinates: {ra_dec_coords}")
 
-            first_images = find_first_image_of_each_prefix(fits_files)
             if prefix in first_images:  # Check if the prefix exists in the fits_files dictionary
                 # Convert RA and Dec to pixel coordinates
                 xy_coordinates = catalogue_to_pixels(first_images[prefix], ra_dec_coords)
