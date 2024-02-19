@@ -7,7 +7,7 @@ import numpy as np
 from astropy.wcs import WCS
 from skyfield.api import Topos
 import re
-from calibration_images import reduce_images, bias, dark, flat
+from calibration_images import reduce_images
 from donuts import Donuts
 from utils import source_extract, catalogue_to_pixels
 import warnings
@@ -95,35 +95,6 @@ def get_prefix(filename):
     Extract prefix from filename
     """
     return filename[:11]
-
-
-# Calibrate images
-def calibrate_images(directory):
-    """
-     Reduce the images in the specified directory.
-
-     Parameters
-     ----------
-     directory : str
-         Base path for the directory.
-     master-bias : numpy.ndarray
-         Master bias.
-     master-dark : numpy.ndarray
-         Master dark.
-     master-flat : numpy.ndarray
-         Master flat.
-
-     Returns
-     -------
-     None
-     """
-    current_night_directory = find_current_night_directory(directory)
-    master_bias = bias(calibration_path, out_path)
-    master_dark = dark(calibration_path, out_path, master_bias)
-    master_flat = flat(base_path, out_path, master_bias, master_dark)
-    fits_files = [f for f in os.listdir(current_night_directory) if f.endswith('.fits') and 'catalog' not in f]
-    reduce_images(current_night_directory, master_bias, master_dark, master_flat)
-    return fits_files
 
 
 # Check donuts for each group
@@ -245,7 +216,10 @@ def parse_region_content(region_content):
 
 def main():
     # Calibrate images and get FITS files
-    fits_files = calibrate_images(base_path)
+    current_night_directory = find_current_night_directory(base_path)
+    data, jd_list, bjd_list, hjd_list = reduce_images(base_path, out_path)
+    fits_files = [f for f in os.listdir(current_night_directory) if f.endswith('.fits')]
+    fits_files = sorted(fits_files)
 
     # Check donuts for each group
     check_donuts(fits_files)
