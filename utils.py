@@ -138,6 +138,7 @@ def parse_region_content(region_content):
     return ra_dec_coords
 
 
+# TODO: Fix the following functions for the pipeline
 def extract_background(filename, sigma):
     """
     Extract background from the image using SEP
