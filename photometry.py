@@ -322,7 +322,7 @@ def main():
     # Iterate over each filename to get the prefix
     for filename in filenames:
         prefix = get_prefix(filename)
-        print(f"Prefix for {filename}: {prefix}")
+        print(f"Found prefixes: {prefix}")
 
     # Check headers for CTYPE1 and CTYPE2
     check_headers(directory, filenames)
