@@ -95,11 +95,11 @@ def filter_filenames(directory):
     return sorted(filtered_filenames)
 
 
-def get_prefix(filenames):
+def get_prefix(filename):
     """
     Extract prefix from filename
     """
-    return filenames[:11]
+    return filename[:11]
 
 
 def check_headers(directory, filenames):
@@ -320,7 +320,7 @@ def main():
     print(f"Number of files: {len(filenames)}")
 
     # get the prefix for the files
-    prefix = get_prefix(filenames)
+    prefix = get_prefix()
     print(f"Prefix: {prefix}")
 
     # Check headers for CTYPE1 and CTYPE2
