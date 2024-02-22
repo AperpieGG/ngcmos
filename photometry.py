@@ -319,9 +319,10 @@ def main():
     filenames = filter_filenames(directory)
     print(f"Number of files: {len(filenames)}")
 
-    # get the prefix for the files
-    prefix = get_prefix()
-    print(f"Prefix: {prefix}")
+    # Iterate over each filename to get the prefix
+    for filename in filenames:
+        prefix = get_prefix(filename)
+        print(f"Prefix for {filename}: {prefix}")
 
     # Check headers for CTYPE1 and CTYPE2
     check_headers(directory, filenames)
