@@ -102,9 +102,9 @@ def get_prefix(filename):
     return filename[:11]
 
 
-def check_headers(directory):
+def check_headers(directory, filenames):
     """
-    Check headers of all FITS files for CTYPE1 and CTYPE2.
+    Check headers of all files for CTYPE1 and CTYPE2.
 
     Parameters
     ----------
@@ -115,24 +115,21 @@ def check_headers(directory):
     if not os.path.exists(no_wcs):
         os.makedirs(no_wcs)
 
-    for filename in filter_filenames(directory):
-        if filename.endswith('.fits'):
-            file_path = os.path.join(directory, filename)
+    for file in filenames:
+        try:
+            with fits.open(os.path.join(directory, file)) as hdulist:
+                header = hdulist[0].header
+                ctype1 = header.get('CTYPE1')
+                ctype2 = header.get('CTYPE2')
 
-            try:
-                with fits.open(file_path) as hdulist:
-                    header = hdulist[0].header
-                    ctype1 = header.get('CTYPE1')
-                    ctype2 = header.get('CTYPE2')
+                if ctype1 is None or ctype2 is None:
+                    print(f"Warning: {file} does not have CTYPE1 and/or CTYPE2 in the header. Moving to "
+                          f"'no_wcs' directory.")
+                    new_path = os.path.join(no_wcs, file)
+                    os.rename(os.path.join(directory, file), new_path)
 
-                    if ctype1 is None or ctype2 is None:
-                        print(f"Warning: {filename} does not have CTYPE1 and/or CTYPE2 in the header. Moving to "
-                              f"'no_wcs' directory.")
-                        new_path = os.path.join(no_wcs, filename)
-                        os.rename(file_path, new_path)
-
-            except Exception as e:
-                print(f"Error checking header for {filename}: {e}")
+        except Exception as e:
+            print(f"Error checking header for {file}: {e}")
 
     print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
 
