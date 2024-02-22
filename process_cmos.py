@@ -69,14 +69,14 @@ def filter_filenames(directory):
     filtered_filenames = []
     for filename in os.listdir(directory):
         if filename.endswith('.fits'):
-            exclude_words = ["evening", "morning", "flat", "bias", "dark"]
+            exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog"]
             if any(word in filename.lower() for word in exclude_words):
                 continue
             filtered_filenames.append(filename)  # Append only the filename without the directory path
     return sorted(filtered_filenames)
 
 
-def check_headers(directory):
+def check_headers(directory, filenames):
     """
     Check headers of all files for CTYPE1 and CTYPE2.
 
@@ -89,9 +89,8 @@ def check_headers(directory):
     if not os.path.exists(no_wcs):
         os.makedirs(no_wcs)
 
-    files = os.listdir(directory)
-    for filename in files:
-        file_path = os.path.join(directory, filename)
+    for file in filenames:
+        file_path = os.path.join(directory, file)
 
         try:
             with fits.open(file_path) as hdulist:
@@ -100,13 +99,13 @@ def check_headers(directory):
                 ctype2 = header.get('CTYPE2')
 
                 if ctype1 is None or ctype2 is None:
-                    print(f"Warning: {filename} does not have CTYPE1 and/or CTYPE2 in the header. Moving to "
+                    print(f"Warning: {file} does not have CTYPE1 and/or CTYPE2 in the header. Moving to "
                           f"'no_wcs' directory.")
-                    new_path = os.path.join(no_wcs, filename)
+                    new_path = os.path.join(no_wcs, file)
                     os.rename(file_path, new_path)
 
         except Exception as e:
-            print(f"Error checking header for {filename}: {e}")
+            print(f"Error checking header for {file}: {e}")
 
     print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
 
@@ -189,7 +188,7 @@ def main():
     filenames = filter_filenames(directory)
 
     # Check headers for CTYPE1 and CTYPE2
-    check_headers(directory)
+    check_headers(directory, filenames)
 
     # Check donuts for each group
     check_donuts(filenames)
