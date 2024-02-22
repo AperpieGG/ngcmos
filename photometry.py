@@ -95,6 +95,13 @@ def filter_filenames(directory):
     return sorted(filtered_filenames)
 
 
+def get_prefix(filename):
+    """
+    Extract prefix from filename
+    """
+    return filename[:11]
+
+
 def check_headers(directory):
     """
     Check headers of all FITS files for CTYPE1 and CTYPE2.
@@ -161,13 +168,6 @@ def check_donuts(filenames):
                 comm = f'mv {filename} failed_donuts/'
                 print(comm)
                 os.system(comm)
-
-
-def get_prefix(filename):
-    """
-    Extract prefix from filename
-    """
-    return filename[:11]
 
 
 def find_first_image_of_each_prefix(filenames):
@@ -317,10 +317,13 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.12):
 def main():
     # set directory for the current night or use the current working directory
     directory = find_current_night_directory(base_path)
-    print(f"Using directory: {directory}")
 
     # filter filenames only for .fits data files
     filenames = filter_filenames(directory)
+
+    # get the prefix for the files
+    prefix = get_prefix(filenames)
+    print(f"Prefix: {prefix}")
 
     # Check headers for CTYPE1 and CTYPE2
     check_headers(directory)
@@ -331,18 +334,26 @@ def main():
     # Calibrate images and get FITS files
     reduce_images(base_path, out_path)
 
-    # build output file preamble
-    frame_ids = [fitsfile for i in range(len(phot_x))]
-    frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value,
-                            hjd_list.value, bjd_list.value, phot_x, phot_y],
-                           names=("frame_id", "gaia_id", "jd_mid", "hjd_mid",
-                                  "bjd_mid", "x", "y"))
+    # get data from the catalog
+    phot_cat = get_catalog(f"{base_path}/{prefix}_catalog_input.fits", ext=1)
+    # convert the ra and dec to pixel coordinates
+    phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix, filenames)
+    print(f"X coordinates: {phot_x}")
+    print(f"Y coordinates: {phot_y}")
 
-    # extract photometry at locations
-    frame_phot = wcs_phot(frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=1.12)
 
-    # stack the phot and preamble
-    frame_output = hstack([frame_preamble, frame_phot])
+    # # build output file preamble
+    # frame_ids = [fitsfile for i in range(len(phot_x))]
+    # frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value,
+    #                         hjd_list.value, bjd_list.value, phot_x, phot_y],
+    #                        names=("frame_id", "gaia_id", "jd_mid", "hjd_mid",
+    #                               "bjd_mid", "x", "y"))
+    #
+    # # extract photometry at locations
+    # frame_phot = wcs_phot(frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=1.12)
+    #
+    # # stack the phot and preamble
+    # frame_output = hstack([frame_preamble, frame_phot])
 
 
 if __name__ == "__main__":
