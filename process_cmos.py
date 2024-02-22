@@ -90,10 +90,8 @@ def check_headers(directory, filenames):
         os.makedirs(no_wcs)
 
     for file in filenames:
-        file_path = os.path.join(directory, file)
-
         try:
-            with fits.open(file_path) as hdulist:
+            with fits.open(os.path.join(directory, file)) as hdulist:
                 header = hdulist[0].header
                 ctype1 = header.get('CTYPE1')
                 ctype2 = header.get('CTYPE2')
@@ -102,7 +100,7 @@ def check_headers(directory, filenames):
                     print(f"Warning: {file} does not have CTYPE1 and/or CTYPE2 in the header. Moving to "
                           f"'no_wcs' directory.")
                     new_path = os.path.join(no_wcs, file)
-                    os.rename(file_path, new_path)
+                    os.rename(os.path.join(directory, file), new_path)
 
         except Exception as e:
             print(f"Error checking header for {file}: {e}")
