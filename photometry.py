@@ -323,7 +323,7 @@ def main():
     print(f"Prefix: {prefix}")
 
     # Check headers for CTYPE1 and CTYPE2
-    check_headers(directory)
+    check_headers(directory, filenames)
 
     # Check donuts for each group
     check_donuts(filenames)
