@@ -95,11 +95,11 @@ def filter_filenames(directory):
     return sorted(filtered_filenames)
 
 
-def get_prefix(filename):
+def get_prefix(filenames):
     """
     Extract prefix from filename
     """
-    return filename[:11]
+    return filenames[:11]
 
 
 def check_headers(directory, filenames):
