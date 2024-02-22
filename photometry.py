@@ -317,6 +317,7 @@ def main():
 
     # filter filenames only for .fits data files
     filenames = filter_filenames(directory)
+    print(f"Number of files: {len(filenames)}")
 
     # get the prefix for the files
     prefix = get_prefix(filenames)
