@@ -448,7 +448,7 @@ def main():
     # Iterate over each filename to get the prefix
     prefixes = get_prefix(filenames)
     print(f"The prefixes are: {prefixes}")
-    
+
     # Get filenames corresponding to each prefix
     prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
 
@@ -477,10 +477,10 @@ def main():
 
         # get data from the catalog
         phot_cat = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-        print(f"Found the catalog for {prefix} with the name {phot_cat}")
+        print(f"Found the catalog for {prefix} with the name: {prefix}_catalog_input.fits")
 
         # convert the ra and dec to pixel coordinates
-        phot_x, phot_y = convert_coords_to_pixels(phot_cat, filenames)
+        phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix_filenames)
         print(f"X coordinates: {phot_x}")
         print(f"Y coordinates: {phot_y}")
 
