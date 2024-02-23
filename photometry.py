@@ -492,7 +492,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     #     sys.exit(TOO_FEW_OBJECTS)
 
     # Load the photometry catalog
-    phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+    phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog.fits", ext=1)
     print(f"Found catalog with name {prefix}_catalog_input.fits")
     # Convert RA and DEC to pixel coordinates using the WCS information from the header
     wcs = WCS(wcs_header)
