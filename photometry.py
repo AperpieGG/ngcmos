@@ -17,7 +17,6 @@ from astropy.wcs import WCS
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
 
-
 GAIN = 1.0
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
@@ -95,11 +94,25 @@ def filter_filenames(directory):
     return sorted(filtered_filenames)
 
 
-def get_prefix(filename):
+def get_prefix(filenames):
     """
-    Extract prefix from filename
+    Extract unique prefixes from a list of filenames.
+
+    Parameters
+    ----------
+    filenames : list of str
+        List of filenames.
+
+    Returns
+    -------
+    set of str
+        Set of unique prefixes extracted from the filenames.
     """
-    return filename[:11]
+    prefixes = set()
+    for filename in filenames:
+        prefix = filename[:11]
+        prefixes.add(prefix)
+    return prefixes
 
 
 def check_headers(directory, filenames):
@@ -134,30 +147,30 @@ def check_headers(directory, filenames):
     print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
 
 
-def check_donuts(filenames):
+def check_donuts(filenames, prefixes):
     """
     Check donuts for each group of images.
 
     Parameters
     ----------
     filenames : list of filenames.
+    prefixes : list of prefixes.
 
     """
-    grouped_filenames = defaultdict(list)
-    for filename in filenames:
-        prefix = get_prefix(filename)
-        grouped_filenames[prefix].append(filename)
+    for prefix in prefixes:
+        group_filenames = [filename for filename in filenames if filename.startswith(prefix)]
+        group_filenames.sort()
 
-    for prefix, filenames in grouped_filenames.items():
-        filenames.sort()
-        reference_image = filenames[0]
+        reference_image = group_filenames[0]
         d = Donuts(reference_image)
-        for filename in filenames[1:]:
+
+        for filename in group_filenames[1:]:
             shift = d.measure_shift(filename)
             sx = round(shift.x.value, 2)
             sy = round(shift.y.value, 2)
             print(f'{filename} shift X: {sx} Y: {sy}')
             shifts = np.array([abs(sx), abs(sy)])
+
             if np.sum(shifts > 50) > 0:
                 print(f'{filename} image shift too big X: {sx} Y: {sy}')
                 if not os.path.exists('failed_donuts'):
@@ -277,8 +290,8 @@ def find_max_pixel_value(data, x, y, radius):
     ------
     None
     """
-    return round(data[int(y-radius):int(y+radius),
-                      int(x-radius):int(x+radius)].ravel().max(), 2)
+    return round(data[int(y - radius):int(y + radius),
+                 int(x - radius):int(x + radius)].ravel().max(), 2)
 
 
 def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.12):
@@ -298,14 +311,14 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.12):
                                                       subpix=0,
                                                       gain=gain)
         # calculate the max pixel value in each aperture
-        max_pixel_value = np.array([find_max_pixel_value(data, int(i), int(j), int(r+1)) for i, j in zip(x, y)])
+        max_pixel_value = np.array([find_max_pixel_value(data, int(i), int(j), int(r + 1)) for i, j in zip(x, y)])
         # build this photometry into a table
         if Tout is None:
             Tout = Table([flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
-                          names=tuple([f"{c}_{r}" for c in col_labels]))
+                         names=tuple([f"{c}_{r}" for c in col_labels]))
         else:
             T = Table([flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
-                       names=tuple([f"{c}_{r}" for c in col_labels]))
+                      names=tuple([f"{c}_{r}" for c in col_labels]))
             # stack the new columns onto the RHS of the table
             Tout = hstack([Tout, T])
     return Tout
@@ -320,18 +333,17 @@ def main():
     print(f"Number of files: {len(filenames)}")
 
     # Iterate over each filename to get the prefix
-    for filename in filenames:
-        prefix = get_prefix(filename)
-        print(f"Found prefixes: {prefix}")
+    prefixes = get_prefix(filenames)
+    print(f"The prefixes are: {prefixes}")
 
     # Check headers for CTYPE1 and CTYPE2
     check_headers(directory, filenames)
 
     # Check donuts for each group
-    check_donuts(filenames)
+    check_donuts(filenames, prefixes)
 
     # Calibrate images and get FITS files
-    reduce_images(base_path, out_path)
+    reduced_data, jd_list, bjd_list, hjd_list, filenames = reduce_images(base_path, out_path)
 
     # get data from the catalog
     phot_cat = get_catalog(f"{base_path}/{prefix}_catalog_input.fits", ext=1)
@@ -340,19 +352,18 @@ def main():
     print(f"X coordinates: {phot_x}")
     print(f"Y coordinates: {phot_y}")
 
-
     # # build output file preamble
-    # frame_ids = [fitsfile for i in range(len(phot_x))]
-    # frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value,
-    #                         hjd_list.value, bjd_list.value, phot_x, phot_y],
-    #                        names=("frame_id", "gaia_id", "jd_mid", "hjd_mid",
-    #                               "bjd_mid", "x", "y"))
-    #
-    # # extract photometry at locations
-    # frame_phot = wcs_phot(frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=1.12)
-    #
-    # # stack the phot and preamble
-    # frame_output = hstack([frame_preamble, frame_phot])
+    frame_ids = [fitsfile for i in range(len(phot_x))]
+    frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value,
+                            hjd_list.value, bjd_list.value, phot_x, phot_y],
+                           names=("frame_id", "gaia_id", "jd_mid", "hjd_mid",
+                                  "bjd_mid", "x", "y"))
+
+    # extract photometry at locations
+    frame_phot = wcs_phot(frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=1.12)
+
+    # stack the phot and preamble
+    frame_output = hstack([frame_preamble, frame_phot])
 
 
 if __name__ == "__main__":
