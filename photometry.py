@@ -441,7 +441,7 @@ def main():
         # check_donuts(filenames, prefix)
 
         # Calibrate images and get FITS files
-        reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path, prefix)
+        reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path)
 
         ref_frame_data, ref_header = load_fits_image(prefix_filenames[0])
         ref_frame_bg = sep.Background(ref_frame_data)
