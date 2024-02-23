@@ -465,7 +465,10 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Load WCS information from the first processed image
     first_processed_image = prefix_filenames[0]
-    ref_frame_data, ref_header = load_fits_image(first_processed_image)
+    #ref_frame_data, ref_header = load_fits_image(first_processed_image)
+    with fits.open(first_processed_image) as ff:
+        ref_frame_data = ff[0].data
+        ref_header = ff[0].header
 
     wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
     wcs_header = {}
