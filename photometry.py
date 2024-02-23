@@ -467,8 +467,7 @@ def main():
         # Load WCS information from the first processed image
         first_processed_image = prefix_filenames[0]
         ref_frame_data, ref_header = load_fits_image(first_processed_image)
-        wcs_header = ref_header
-        print(wcs_header)
+        print("Header keys:", ref_header.keys())
 
         ref_frame_bg = sep.Background(ref_frame_data)
         ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
@@ -482,15 +481,6 @@ def main():
         if len(ref_objects) < N_OBJECTS_LIMIT:
             print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
             sys.exit(TOO_FEW_OBJECTS)
-
-        if ref_header is None:
-            print("Error: FITS header is None.")
-            sys.exit()
-
-        # Check if WCS information is present in the header
-        if 'CTYPE1' not in ref_header or 'CTYPE2' not in ref_header:
-            print("Error: WCS information not found in the FITS header.")
-            sys.exit()
 
         # Load the photometry catalog
         phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
