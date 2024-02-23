@@ -210,7 +210,7 @@ def get_catalog(filename, ext=0):
     return data, header
 
 
-def load_fits_image(filename, ext=0, force_float=False):
+def load_fits_image(filename, ext=0, force_float=True):
     """
     Read a fits image and header with fitsio
 
@@ -221,7 +221,7 @@ def load_fits_image(filename, ext=0, force_float=False):
     ext : int
         extension to load
     force_float : bool
-        force image data to be float on load
+        force image data to be floated on load
 
     Returns
     -------
