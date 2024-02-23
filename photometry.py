@@ -461,7 +461,11 @@ def main():
         # Calibrate images and get FITS files
         reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path)
 
-        ref_frame_data, ref_header = load_fits_image(prefix_filenames[0])
+        # Load WCS information from the first processed image
+        first_processed_image = prefix_filenames[0]
+        ref_frame_data, ref_header = load_fits_image(first_processed_image)
+        wcs_header = ref_header
+
         ref_frame_bg = sep.Background(ref_frame_data)
         ref_frame_data_no_bg = ref_frame_data - ref_frame_bg
         estimate_coord = SkyCoord(ra=ref_header['TELRA'],
@@ -480,7 +484,9 @@ def main():
         print(f"Found the catalog for {prefix} with the name: {prefix}_catalog_input.fits")
 
         # convert the ra and dec to pixel coordinates
-        phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix_filenames)
+        # convert the ra and dec to pixel coordinates using WCS information
+        phot_x, phot_y = WCS(wcs_header).all_world2pix(phot_cat['ra_deg_corr'],
+                                                       phot_cat['dec_deg_corr'], 1)
         print(f"X coordinates: {phot_x}")
         print(f"Y coordinates: {phot_y}")
 
