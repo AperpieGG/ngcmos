@@ -467,20 +467,20 @@ def main():
         # Load WCS information from the first processed image
         first_processed_image = prefix_filenames[0]
         ref_frame_data, ref_header = load_fits_image(first_processed_image)
-        print("Header keys:", ref_header.keys())
+        print("Header information:", ref_header)
 
-        ref_frame_bg = sep.Background(ref_frame_data)
-        ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
-        estimate_coord = SkyCoord(ra=ref_header['TELRA'],
-                                  dec=ref_header['TELDEC'],
-                                  unit=(u.deg, u.deg))
-        estimate_coord_radius = 3 * u.deg
-
-        ref_objects = _detect_objects_sep(ref_frame_data_corr_no_bg, ref_frame_bg.globalrms,
-                                          AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
-        if len(ref_objects) < N_OBJECTS_LIMIT:
-            print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
-            sys.exit(TOO_FEW_OBJECTS)
+        # ref_frame_bg = sep.Background(ref_frame_data)
+        # ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
+        # estimate_coord = SkyCoord(ra=ref_header['TELRA'],
+        #                           dec=ref_header['TELDEC'],
+        #                           unit=(u.deg, u.deg))
+        # estimate_coord_radius = 3 * u.deg
+        #
+        # ref_objects = _detect_objects_sep(ref_frame_data_corr_no_bg, ref_frame_bg.globalrms,
+        #                                   AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
+        # if len(ref_objects) < N_OBJECTS_LIMIT:
+        #     print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
+        #     sys.exit(TOO_FEW_OBJECTS)
 
         # Load the photometry catalog
         phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
