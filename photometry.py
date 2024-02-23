@@ -486,8 +486,6 @@ def main():
         # get data from the catalog
         phot_cat = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
         print(f"Found the catalog for {prefix} with the name: {prefix}_catalog_input.fits")
-        print(f"Catalog columns: {phot_cat.columns}")
-        print(f"Catalog length: {len(phot_cat)}")
 
         # convert the ra and dec to pixel coordinates using WCS information
         phot_x, phot_y = WCS(wcs_header).all_world2pix(phot_cat['ra_deg_corr'],
