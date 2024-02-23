@@ -422,6 +422,7 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.12):
 def main():
     # set directory for the current night or use the current working directory
     directory = find_current_night_directory(base_path)
+    print(f"Directory: {directory}")
 
     # filter filenames only for .fits data files
     filenames = filter_filenames(directory)
@@ -446,8 +447,8 @@ def main():
         ref_frame_data, ref_header = load_fits_image(prefix_filenames[0])
         ref_frame_bg = sep.Background(ref_frame_data)
         ref_frame_data_no_bg = ref_frame_data - ref_frame_bg
-        estimate_coord = SkyCoord(ra=ref_header['CMD_RA'],
-                                  dec=ref_header['CMD_DEC'],
+        estimate_coord = SkyCoord(ra=ref_header['TELRA'],
+                                  dec=ref_header['TELDEC'],
                                   unit=(u.deg, u.deg))
         estimate_coord_radius = 3 * u.deg
         # do a source extraction on reference image
@@ -458,8 +459,9 @@ def main():
             sys.exit(TOO_FEW_OBJECTS)
 
         # get data from the catalog
-        phot_cat = get_catalog(f"{base_path}/{prefix}_catalog_input.fits", ext=1)
+        phot_cat = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
         print(f"Found the catalog for {prefix} with the name {phot_cat}")
+
         # convert the ra and dec to pixel coordinates
         phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix)
         print(f"X coordinates: {phot_x}")
