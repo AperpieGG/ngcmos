@@ -460,7 +460,7 @@ def main():
 
         # Calibrate images and get FITS files
         reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path)
-
+        print(prefix_filenames[0])
         ref_frame_data, ref_header = load_fits_image(prefix_filenames[0])
         ref_frame_bg = sep.Background(ref_frame_data)
         ref_frame_data_no_bg = ref_frame_data - ref_frame_bg
@@ -480,7 +480,7 @@ def main():
         print(f"Found the catalog for {prefix} with the name {prefix}_catalog_input.fits")
 
         # convert the ra and dec to pixel coordinates
-        phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix)
+        phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix_filenames)
         print(f"X coordinates: {phot_x}")
         print(f"Y coordinates: {phot_y}")
 
