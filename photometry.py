@@ -237,16 +237,16 @@ def load_fits_image(filename, ext=0, force_float=True):
     return data, header
 
 
-def convert_coords_to_pixels(cat, ref_image_path):
+def convert_coords_to_pixels(cat, filenames):
     """
-    Convert RA and DEC coordinates to pixel coordinates
+    Convert RA and DEC coordinates to pixel coordinates using the first image for each prefix.
 
     Parameters
     ----------
     cat : astropy.table.table.Table
         Catalog containing the RA and DEC coordinates
-    ref_image_path : str
-        Path to the reference image with WCS information
+    filenames : list of str
+        List of filenames corresponding to each prefix
 
     Returns
     -------
@@ -257,15 +257,32 @@ def convert_coords_to_pixels(cat, ref_image_path):
     ------
     None
     """
-    # Load the reference image and extract the WCS information
-    with fits.open(ref_image_path) as hdul:
-        wcs_header = hdul[0].header
+    # Initialize lists to store pixel coordinates
+    all_x = []
+    all_y = []
 
-        # Convert the ra and dec to pixel coordinates
-        wcs = WCS(wcs_header)
-        x, y = wcs.all_world2pix(cat['ra_deg_corr'], cat['dec_deg_corr'], 1)
+    # Iterate over each set of filenames corresponding to each prefix
+    for prefix_filenames in filenames:
+        # Take the first filename for the current prefix
+        filename = prefix_filenames[0]
 
-    return x, y
+        # Open the FITS file and extract the WCS information
+        with fits.open(filename) as hdul:
+            wcs_header = hdul[0].header
+
+            # Convert the RA and DEC to pixel coordinates
+            wcs = WCS(wcs_header)
+            x, y = wcs.all_world2pix(cat['ra_deg_corr'], cat['dec_deg_corr'], 1)
+
+            # Append the pixel coordinates to the lists
+            all_x.append(x)
+            all_y.append(y)
+
+    # Convert lists to numpy arrays
+    all_x = np.concatenate(all_x)
+    all_y = np.concatenate(all_y)
+
+    return all_x, all_y
 
 
 def _detect_objects_sep(data, background_rms, area_min, area_max,
@@ -460,7 +477,7 @@ def main():
 
         # get data from the catalog
         phot_cat = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-        print(f"Found the catalog for {prefix} with the name {phot_cat}")
+        print(f"Found the catalog for {prefix} with the name {prefix}_catalog_input.fits")
 
         # convert the ra and dec to pixel coordinates
         phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix)
