@@ -210,7 +210,7 @@ def get_catalog(filename, ext=0):
     return data, header
 
 
-def load_fits_image(filename, ext=0):
+def load_fits_image(filename, ext=0, force_float=False):
     """
     Read a fits image and header with fitsio
 
@@ -220,6 +220,8 @@ def load_fits_image(filename, ext=0):
         filename to load
     ext : int
         extension to load
+    force_float : bool
+        force image data to be float on load
 
     Returns
     -------
@@ -233,9 +235,9 @@ def load_fits_image(filename, ext=0):
     None
     """
     data, header = fitsio.read(filename, header=True, ext=ext)
-    data = data.astype(float)
-    print("Loaded image:", filename)
-    print("Header:", header)
+    if force_float:
+        data = data.astype(float)
+    print('The data is:', data)
     return data, header
 
 
@@ -484,6 +486,8 @@ def main():
         # get data from the catalog
         phot_cat = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
         print(f"Found the catalog for {prefix} with the name: {prefix}_catalog_input.fits")
+        print(f"Catalog columns: {phot_cat.columns}")
+        print(f"Catalog length: {len(phot_cat)}")
 
         # convert the ra and dec to pixel coordinates using WCS information
         phot_x, phot_y = WCS(wcs_header).all_world2pix(phot_cat['ra_deg_corr'],
