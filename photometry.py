@@ -237,7 +237,6 @@ def load_fits_image(filename, ext=0, force_float=True):
     data, header = fitsio.read(filename, header=True, ext=ext)
     if force_float:
         data = data.astype(float)
-    print('The data is:', data)
     return data, header
 
 
@@ -469,29 +468,37 @@ def main():
         first_processed_image = prefix_filenames[0]
         ref_frame_data, ref_header = load_fits_image(first_processed_image)
         wcs_header = ref_header
+        print(wcs_header)
 
         ref_frame_bg = sep.Background(ref_frame_data)
-        ref_frame_data_no_bg = ref_frame_data - ref_frame_bg
-        estimate_coord = SkyCoord(ra=ref_header['TELRA'],
-                                  dec=ref_header['TELDEC'],
+        ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
+        estimate_coord = SkyCoord(ra=ref_header['CMD_RA'],
+                                  dec=ref_header['CMD_DEC'],
                                   unit=(u.deg, u.deg))
         estimate_coord_radius = 3 * u.deg
-        # do a source extraction on reference image
-        ref_objects = _detect_objects_sep(ref_frame_data_no_bg, ref_frame_bg.globalrms,
+
+        ref_objects = _detect_objects_sep(ref_frame_data_corr_no_bg, ref_frame_bg.globalrms,
                                           AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
         if len(ref_objects) < N_OBJECTS_LIMIT:
             print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
             sys.exit(TOO_FEW_OBJECTS)
 
-        # get data from the catalog
-        phot_cat = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-        print(f"Found the catalog for {prefix} with the name: {prefix}_catalog_input.fits")
+        if ref_header is None:
+            print("Error: FITS header is None.")
+            sys.exit()
 
-        # convert the ra and dec to pixel coordinates using WCS information
-        phot_x, phot_y = WCS(wcs_header).all_world2pix(phot_cat['ra_deg_corr'],
-                                                       phot_cat['dec_deg_corr'], 1)
-        print(f"X coordinates: {phot_x}")
-        print(f"Y coordinates: {phot_y}")
+        # Check if WCS information is present in the header
+        if 'CTYPE1' not in ref_header or 'CTYPE2' not in ref_header:
+            print("Error: WCS information not found in the FITS header.")
+            sys.exit()
+
+        # Load the photometry catalog
+        phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+        # Convert RA and DEC to pixel coordinates using the WCS information from the header
+        wcs = WCS(ref_header)
+        phot_x, phot_y = wcs.all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+
+        print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
 
 if __name__ == "__main__":
