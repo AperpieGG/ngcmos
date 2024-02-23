@@ -1,23 +1,25 @@
 #! /usr/bin/env python
 import os
+import sys
 from datetime import datetime, timedelta
 from collections import defaultdict
 from calibration_images import reduce_images
 from donuts import Donuts
 import numpy as np
-from utils import catalogue_to_pixels, parse_region_content
+from astropy.coordinates import SkyCoord
 import json
 import warnings
 from astropy.io import fits
 from astropy.table import Table, hstack
 import fitsio
 import sep
+from astropy import units as u
 from astropy.wcs import WCS
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
 
-GAIN = 1.0
+GAIN = 1.12
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
 APERTURE_RADII = [2, 3, 4, 5, 6]
@@ -30,6 +32,8 @@ SCALE_MIN = 4.5
 SCALE_MAX = 5.5
 DETECTION_SIGMA = 3
 ZP_CLIP_SIGMA = 3
+
+OK, TOO_FEW_OBJECTS, UNKNOWN = range(3)
 
 
 def load_config(filename):
@@ -180,36 +184,6 @@ def check_donuts(filenames, prefixes):
                 os.system(comm)
 
 
-def find_first_image_of_each_prefix(filenames):
-    first_images = {}
-    for filename in sorted(filenames):
-        prefix = get_prefix(filename)
-        if prefix not in first_images:
-            first_images[prefix] = filename
-    return first_images
-
-
-def get_region_files(filenames):
-    grouped_region_files = defaultdict(set)
-    for filename in filenames:
-        prefix = get_prefix(filename)
-        exclude_keywords = ['catalog', 'morning', 'evening', 'bias', 'flat', 'dark']
-        if any(keyword in filename for keyword in exclude_keywords):
-            continue
-        region_files = [f for f in os.listdir() if f.startswith(prefix) and f.endswith('_input.reg')]
-        grouped_region_files[prefix].update(region_files)
-    return grouped_region_files
-
-
-def read_region_files(region_files):
-    region_contents = {}
-    for region_file in region_files:
-        with open(region_file, 'r') as file:
-            contents = file.read()
-            region_contents[region_file] = contents
-    return region_contents
-
-
 def get_catalog(filename, ext=0):
     """
     Read a fits image and header with fitsio
@@ -236,33 +210,154 @@ def get_catalog(filename, ext=0):
     return data, header
 
 
-def convert_coords_to_pixels(cat, prefix, filenames):
+def load_fits_image(filename, ext=0, force_float=True):
+    """
+    Read a fits image and header with fitsio
+
+    Parameters
+    ----------
+    filename : str
+        filename to load
+    ext : int
+        extension to load
+
+    Returns
+    -------
+    data : array
+        data from the corresponding extension
+    header : fitsio.header.FITSHDR
+        list from file header
+
+    Raises
+    ------
+    None
+    """
+    data, header = fitsio.read(filename, header=True, ext=ext)
+    data = data.astype(float)
+    return data, header
+
+
+def convert_coords_to_pixels(cat, ref_image_path):
     """
     Convert RA and DEC coordinates to pixel coordinates
 
     Parameters
     ----------
-    data : array
-        The image to search
     cat : astropy.table.table.Table
-        Table containing the RA and DEC coordinates
+        Catalog containing the RA and DEC coordinates
+    ref_image_path : str
+        Path to the reference image with WCS information
 
     Returns
     -------
-    x, y : float
+    x, y : numpy arrays
         Pixel coordinates
 
     Raises
     ------
     None
     """
-    # get the reference image
-    cat = get_catalog()
-    # get the WCS
-    wcs_header = fits.getheader(find_first_image_of_each_prefix(filenames)[prefix])
-    # convert the ra and dec to pixel coordinates
-    x, y = WCS(wcs_header).all_world2pix(cat['ra_deg_corr'], cat['dec_deg_corr'], 1)
+    # Load the reference image and extract the WCS information
+    with fits.open(ref_image_path) as hdul:
+        wcs_header = hdul[0].header
+
+        # Convert the ra and dec to pixel coordinates
+        wcs = WCS(wcs_header)
+        x, y = wcs.all_world2pix(cat['ra_deg_corr'], cat['dec_deg_corr'], 1)
+
     return x, y
+
+
+def _detect_objects_sep(data, background_rms, area_min, area_max,
+                        detection_sigma, defocus_mm, trim_border=10):
+    """
+    Find objects in an image array using SEP
+
+    Parameters
+    ----------
+    data : array
+        Image array to source detect on
+    background_rms
+        Std of the sky background
+    area_min : int
+        Minimum number of pixels for an object to be valid
+    area_max : int
+        Maximum number of pixels for an object to be valid
+    detection_sigma : float
+        Number of sigma above the background for source detecting
+    defocus_mm : float
+        Level of defocus. Used to select kernel for source detect
+    trim_border : int
+        Number of pixels to exclude from the edge of the image array
+
+    Returns
+    -------
+    objects : astropy Table
+        A list of detected objects in astropy Table format
+
+    Raises
+    ------
+    None
+    """
+    # set up some defocused kernels for sep
+    kernel1 = np.array([[1, 1, 1, 1, 1],
+                        [1, 2, 3, 2, 1],
+                        [1, 3, 1, 3, 1],
+                        [1, 2, 3, 2, 1],
+                        [1, 1, 1, 1, 1]])
+    kernel2 = np.array([[1, 1, 1, 1, 1, 1],
+                        [1, 2, 3, 3, 2, 1],
+                        [1, 3, 1, 1, 3, 1],
+                        [1, 3, 1, 1, 3, 1],
+                        [1, 2, 3, 3, 2, 1],
+                        [1, 1, 1, 1, 1, 1]])
+    kernel3 = np.array([[1, 1, 1, 1, 1, 1, 1, 1],
+                        [1, 3, 3, 3, 3, 3, 3, 1],
+                        [1, 3, 2, 2, 2, 2, 3, 1],
+                        [1, 3, 2, 1, 1, 2, 3, 1],
+                        [1, 3, 2, 1, 1, 2, 3, 1],
+                        [1, 3, 2, 2, 2, 2, 3, 1],
+                        [1, 3, 3, 3, 3, 3, 3, 1],
+                        [1, 1, 1, 1, 1, 1, 1, 1]])
+
+    # check for defocus
+    if defocus_mm >= 0.15 and defocus_mm < 0.3:
+        print("Source detect using defocused kernel 1")
+        raw_objects = sep.extract(data, detection_sigma * background_rms,
+                                  minarea=area_min, filter_kernel=kernel1)
+    elif defocus_mm >= 0.3 and defocus_mm < 0.5:
+        print("Source detect using defocused kernel 2")
+        raw_objects = sep.extract(data, detection_sigma * background_rms,
+                                  minarea=area_min, filter_kernel=kernel2)
+    elif defocus_mm >= 0.5:
+        print("Source detect using defocused kernel 3")
+        raw_objects = sep.extract(data, detection_sigma * background_rms,
+                                  minarea=area_min, filter_kernel=kernel3)
+    else:
+        print("Source detect using default kernel")
+        raw_objects = sep.extract(data, detection_sigma * background_rms, minarea=area_min)
+
+    initial_objects = len(raw_objects)
+
+    raw_objects = Table(raw_objects[np.logical_and.reduce([
+        raw_objects['npix'] < area_max,
+        # Filter targets near the edge of the frame
+        raw_objects['xmin'] > trim_border,
+        raw_objects['xmax'] < data.shape[1] - trim_border,
+        raw_objects['ymin'] > trim_border,
+        raw_objects['ymax'] < data.shape[0] - trim_border
+    ])])
+
+    print(detection_sigma * background_rms, initial_objects, len(raw_objects))
+
+    # Astrometry.net expects 1-index pixel positions
+    objects = Table()
+    objects['X'] = raw_objects['x'] + 1
+    objects['Y'] = raw_objects['y'] + 1
+    objects['FLUX'] = raw_objects['cflux']
+    objects.sort('FLUX')
+    objects.reverse()
+    return objects
 
 
 def find_max_pixel_value(data, x, y, radius):
@@ -297,7 +392,7 @@ def find_max_pixel_value(data, x, y, radius):
 def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.12):
     """
     Take a corrected image array and extract photometry for a set of WCS driven
-    X and Y pixel positons. Do this for a series of aperture radii and apply
+    X and Y pixel positions. Do this for a series of aperture radii and apply
     a gain correction to the photometry
     """
     col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
@@ -336,34 +431,39 @@ def main():
     prefixes = get_prefix(filenames)
     print(f"The prefixes are: {prefixes}")
 
-    # Check headers for CTYPE1 and CTYPE2
-    check_headers(directory, filenames)
+    for prefix in prefixes:
+        print(f"Processing prefix: {prefix}")
 
-    # Check donuts for each group
-    check_donuts(filenames, prefixes)
+        # Check headers for CTYPE1 and CTYPE2
+        check_headers(directory, filenames)
 
-    # Calibrate images and get FITS files
-    reduced_data, jd_list, bjd_list, hjd_list, filenames = reduce_images(base_path, out_path)
+        # Check donuts for each group
+        # check_donuts(filenames, prefix)
 
-    # get data from the catalog
-    phot_cat = get_catalog(f"{base_path}/{prefix}_catalog_input.fits", ext=1)
-    # convert the ra and dec to pixel coordinates
-    phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix, filenames)
-    print(f"X coordinates: {phot_x}")
-    print(f"Y coordinates: {phot_y}")
+        # Calibrate images and get FITS files
+        reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path, prefix)
 
-    # # build output file preamble
-    frame_ids = [fitsfile for i in range(len(phot_x))]
-    frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value,
-                            hjd_list.value, bjd_list.value, phot_x, phot_y],
-                           names=("frame_id", "gaia_id", "jd_mid", "hjd_mid",
-                                  "bjd_mid", "x", "y"))
+        ref_frame_data, ref_header = load_fits_image(prefix_filenames[0])
+        ref_frame_bg = sep.Background(ref_frame_data)
+        ref_frame_data_no_bg = ref_frame_data - ref_frame_bg
+        estimate_coord = SkyCoord(ra=ref_header['CMD_RA'],
+                                  dec=ref_header['CMD_DEC'],
+                                  unit=(u.deg, u.deg))
+        estimate_coord_radius = 3 * u.deg
+        # do a source extraction on reference image
+        ref_objects = _detect_objects_sep(ref_frame_data_no_bg, ref_frame_bg.globalrms,
+                                          AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
+        if len(ref_objects) < N_OBJECTS_LIMIT:
+            print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
+            sys.exit(TOO_FEW_OBJECTS)
 
-    # extract photometry at locations
-    frame_phot = wcs_phot(frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=1.12)
-
-    # stack the phot and preamble
-    frame_output = hstack([frame_preamble, frame_phot])
+        # get data from the catalog
+        phot_cat = get_catalog(f"{base_path}/{prefix}_catalog_input.fits", ext=1)
+        print(f"Found the catalog for {prefix} with the name {phot_cat}")
+        # convert the ra and dec to pixel coordinates
+        phot_x, phot_y = convert_coords_to_pixels(phot_cat, prefix)
+        print(f"X coordinates: {phot_x}")
+        print(f"Y coordinates: {phot_y}")
 
 
 if __name__ == "__main__":
