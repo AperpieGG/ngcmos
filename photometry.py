@@ -472,8 +472,8 @@ def main():
 
         ref_frame_bg = sep.Background(ref_frame_data)
         ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
-        estimate_coord = SkyCoord(ra=ref_header['CMD_RA'],
-                                  dec=ref_header['CMD_DEC'],
+        estimate_coord = SkyCoord(ra=ref_header['TELRA'],
+                                  dec=ref_header['TELDEC'],
                                   unit=(u.deg, u.deg))
         estimate_coord_radius = 3 * u.deg
 
