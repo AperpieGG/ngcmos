@@ -467,7 +467,14 @@ def main():
         # Load WCS information from the first processed image
         first_processed_image = prefix_filenames[0]
         ref_frame_data, ref_header = load_fits_image(first_processed_image)
-        print("Header information:", ref_header)
+
+        wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
+        wcs_header = {}
+        for line in [ref_header[i:i + 80] for i in range(0, len(ref_header), 80)]:
+            key = line[0:8].strip()
+            if '=' in line and key not in wcs_ignore_cards:
+                card = fits.Card.fromstring(line)
+                wcs_header[card.keyword] = card.value
 
         # ref_frame_bg = sep.Background(ref_frame_data)
         # ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
@@ -486,7 +493,7 @@ def main():
         phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
         print(f"Found catalog with name {prefix}_catalog_input.fits")
         # Convert RA and DEC to pixel coordinates using the WCS information from the header
-        wcs = WCS(ref_header)
+        wcs = WCS(wcs_header)
         phot_x, phot_y = wcs.all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
         print(f"X and Y coordinates: {phot_x}, {phot_y}")
