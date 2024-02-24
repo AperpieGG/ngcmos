@@ -495,7 +495,17 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
     print(f"Found catalog with name {prefix}_catalog.fits")
     # Convert RA and DEC to pixel coordinates using the WCS information from the header
-    wcs = WCS(wcs_header)
-    phot_x, phot_y = wcs.all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+
+    phot_x, phot_y = WCS(ref_header).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
     print(f"X and Y coordinates: {phot_x}, {phot_y}")
+
+    # frame_ids = [fitsfile for i in range(len(phot_x))]
+    # frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value, phot_x, phot_y],
+    #                        names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
+    #
+    # # extract photometry at locations
+    # frame_phot = wcs_phot(frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+    #
+    # # stack the phot and preamble
+    # frame_output = hstack([frame_preamble, frame_phot])
