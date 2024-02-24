@@ -465,7 +465,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Load WCS information from the first processed image
     first_processed_image = prefix_filenames[0]
-    #ref_frame_data, ref_header = load_fits_image(first_processed_image)
+    # ref_frame_data, ref_header = load_fits_image(first_processed_image)
     with fits.open(first_processed_image) as ff:
         ref_frame_data = ff[0].data
         ref_header = ff[0].header
@@ -492,12 +492,10 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     #     sys.exit(TOO_FEW_OBJECTS)
 
     # Load the photometry catalog
-    phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog.fits", ext=1)
-    print(f"Found catalog with name {prefix}_catalog_input.fits")
+    phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+    print(f"Found catalog with name {prefix}_catalog.fits")
     # Convert RA and DEC to pixel coordinates using the WCS information from the header
     wcs = WCS(wcs_header)
     phot_x, phot_y = wcs.all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
     print(f"X and Y coordinates: {phot_x}, {phot_y}")
-
-
