@@ -15,6 +15,8 @@ import fitsio
 import sep
 from astropy import units as u
 from astropy.wcs import WCS
+from utils import get_location, get_light_travel_times
+from astropy.time import Time
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
@@ -498,9 +500,20 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
+    # do time conversions - one time value per format per target
+    half_exptime = ref_header['EXPOSURE'] / 2.
+    time_isot = Time([ref_header['DATE-OBS'] for i in range(len(phot_x))],
+                     format='isot', scale='utc', location=get_location())
+    time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+    # correct to mid-exposure time
+    time_jd = time_jd + half_exptime * u.second
+    ra = phot_cat['ra_deg_corr']
+    dec = phot_cat['dec_deg_corr']
+
     frame_ids = [first_processed_image for i in range(len(phot_x))]
     print(f"found {len(frame_ids)} frames")
-    frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list[0], phot_x, phot_y],
+
+    frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
                            names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
 
     # extract photometry at locations
