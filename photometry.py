@@ -234,7 +234,7 @@ def load_fits_image(filename, ext=0, force_float=True):
     ------
     None
     """
-    data, header = fitsio.read(filename, header=True, ext=ext)
+    data, header = fits.getdata(filename, header=True, ext=ext)
     if force_float:
         data = data.astype(float)
     return data, header
@@ -465,10 +465,8 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Load WCS information from the first processed image
     first_processed_image = prefix_filenames[0]
-    # ref_frame_data, ref_header = load_fits_image(first_processed_image)
-    with fits.open(first_processed_image) as ff:
-        ref_frame_data = ff[0].data
-        ref_header = ff[0].header
+    ref_frame_data, ref_header = load_fits_image(first_processed_image)
+
 
     wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
     wcs_header = {}
