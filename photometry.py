@@ -478,18 +478,18 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
             card = fits.Card.fromstring(line)
             wcs_header[card.keyword] = card.value
 
-    # ref_frame_bg = sep.Background(ref_frame_data)
-    # ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
-    # estimate_coord = SkyCoord(ra=ref_header['TELRA'],
-    #                           dec=ref_header['TELDEC'],
-    #                           unit=(u.deg, u.deg))
-    # estimate_coord_radius = 3 * u.deg
-    #
-    # ref_objects = _detect_objects_sep(ref_frame_data_corr_no_bg, ref_frame_bg.globalrms,
-    #                                   AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
-    # if len(ref_objects) < N_OBJECTS_LIMIT:
-    #     print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
-    #     sys.exit(TOO_FEW_OBJECTS)
+    ref_frame_bg = sep.Background(ref_frame_data)
+    ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
+    estimate_coord = SkyCoord(ra=ref_header['TELRA'],
+                              dec=ref_header['TELDEC'],
+                              unit=(u.deg, u.deg))
+    estimate_coord_radius = 3 * u.deg
+
+    ref_objects = _detect_objects_sep(ref_frame_data_corr_no_bg, ref_frame_bg.globalrms,
+                                      AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
+    if len(ref_objects) < N_OBJECTS_LIMIT:
+        print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
+        sys.exit(TOO_FEW_OBJECTS)
 
     # Load the photometry catalog
     phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
@@ -500,12 +500,16 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
-    # frame_ids = [fitsfile for i in range(len(phot_x))]
-    # frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value, phot_x, phot_y],
-    #                        names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
-    #
-    # # extract photometry at locations
-    # frame_phot = wcs_phot(frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
-    #
-    # # stack the phot and preamble
-    # frame_output = hstack([frame_preamble, frame_phot])
+    frame_ids = [first_processed_image for i in range(len(phot_x))]
+    frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list.value, phot_x, phot_y],
+                           names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
+
+    # extract photometry at locations
+    frame_phot = wcs_phot(ref_frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+
+    # stack the phot and preamble
+    frame_output = hstack([frame_preamble, frame_phot])
+
+    # save the photometry
+    frame_output.write(f"{prefix}_phot.fits", overwrite=True)
+    print(f"Saved photometry to {prefix}_phot.fits")
