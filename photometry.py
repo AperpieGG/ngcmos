@@ -499,6 +499,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
     frame_ids = [first_processed_image for i in range(len(phot_x))]
+    print(f"found {len(frame_ids)} frames")
     frame_preamble = Table([frame_ids, phot_cat['gaia_id'], jd_list[0], phot_x, phot_y],
                            names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
 
