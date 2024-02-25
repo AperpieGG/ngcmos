@@ -525,3 +525,5 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     # save the photometry
     frame_output.write(f"{prefix}_phot.fits", overwrite=True)
     print(f"Saved photometry to {prefix}_phot.fits")
+
+# TODO - do this for all of the images
