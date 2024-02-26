@@ -2,10 +2,6 @@
 import os
 import sys
 from datetime import datetime, timedelta
-from collections import defaultdict
-
-from numpy import vstack
-
 from calibration_images import reduce_images
 from donuts import Donuts
 import numpy as np
@@ -13,7 +9,7 @@ from astropy.coordinates import SkyCoord
 import json
 import warnings
 from astropy.io import fits
-from astropy.table import Table, hstack
+from astropy.table import Table, hstack, vstack
 import fitsio
 import sep
 from astropy import units as u
