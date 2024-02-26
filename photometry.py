@@ -466,7 +466,8 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     reduced_data, reduced_header, prefix_filenames = reduce_images(base_path, out_path)
 
     # Convert reduced_data to a dictionary with filenames as keys
-    reduced_data_dict = {filename: data for filename, data in zip(filenames, reduced_data)}
+    reduced_data_dict = {filename: (data, header) for filename, data, header in
+                         zip(filenames, reduced_data, reduced_header)}
 
     # Ensure prefix_filenames is sorted if needed
     filenames.sort()
