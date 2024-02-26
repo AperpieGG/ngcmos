@@ -463,11 +463,12 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     check_headers(directory, filenames)
 
     # Calibrate images and get FITS files
-    reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path)
+    # reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path)
 
     # Load WCS information from the first processed image
     first_processed_image = prefix_filenames[0]
     ref_frame_data, ref_header = load_fits_image(first_processed_image)
+    print(f" the data is {ref_frame_data}")
 
 
     wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
