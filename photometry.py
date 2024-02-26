@@ -467,6 +467,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Convert reduced_data to a dictionary with filenames as keys
     reduced_data_dict = {filename: data for filename, data in zip(filenames, reduced_data)}
+    print(f"The reduced data dictionary is: {reduced_data_dict}")
 
     # Ensure prefix_filenames is sorted if needed
     filenames.sort()
@@ -478,13 +479,13 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     ref_frame_data, ref_header = reduced_data_dict[first_processed_image][0], reduced_data_dict[first_processed_image][1]
     print(f"The data for {first_processed_image} is: {ref_frame_data}")
 
-    # wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
-    # wcs_header = {}
-    # for line in [ref_header[i:i + 80] for i in range(0, len(ref_header), 80)]:
-    #     key = line[0:8].strip()
-    #     if '=' in line and key not in wcs_ignore_cards:
-    #         card = fits.Card.fromstring(line)
-    #         wcs_header[card.keyword] = card.value
+    wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
+    wcs_header = {}
+    for line in [ref_header[i:i + 80] for i in range(0, len(ref_header), 80)]:
+        key = line[0:8].strip()
+        if '=' in line and key not in wcs_ignore_cards:
+            card = fits.Card.fromstring(line)
+            wcs_header[card.keyword] = card.value
 
     ref_frame_bg = sep.Background(ref_frame_data)
     ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
