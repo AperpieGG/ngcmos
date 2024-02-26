@@ -510,8 +510,8 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
     # do time conversions - one time value per format per target
-    half_exptime = ref_header['EXPTIME'] / 2.
-    time_isot = Time([ref_header['DATE-OBS'] for i in range(len(phot_x))],
+    half_exptime = ref_frame_hdr['EXPTIME'] / 2.
+    time_isot = Time([ref_frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
                      format='isot', scale='utc', location=get_location())
     time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
     # correct to mid-exposure time
