@@ -3,6 +3,9 @@ import os
 import sys
 from datetime import datetime, timedelta
 from collections import defaultdict
+
+from numpy import vstack
+
 from calibration_images import reduce_images
 from donuts import Donuts
 import numpy as np
@@ -469,6 +472,8 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     reduced_data_dict = {filename: (data, header) for filename, data, header in
                          zip(filenames, reduced_data, reduced_header)}
 
+    all_photometry = None
+
     # Iterate over each filename for the current prefix
     for filename in filenames:
         # Access the reduced data and header corresponding to the filename
@@ -530,6 +535,12 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
         # Define the filename for the photometry output
         phot_output_filename = f"phot_{prefix}.fits"
 
+        # Append the current frame's photometry to the accumulated photometry
+        if all_photometry is None:
+            all_photometry = frame_output
+        else:
+            all_photometry = vstack([all_photometry, frame_output])
+
     # Save the photometry
-    frame_output.write(phot_output_filename, overwrite=True)
+    all_photometry.write(phot_output_filename, overwrite=True)
     print(f"Saved photometry to {phot_output_filename}")
