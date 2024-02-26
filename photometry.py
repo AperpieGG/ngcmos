@@ -467,7 +467,6 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Convert reduced_data to a dictionary with filenames as keys
     reduced_data_dict = {filename: data for filename, data in zip(filenames, reduced_data)}
-    print(f"The reduced data and the headers are: {reduced_data_dict}, {reduced_header}")
 
     # Ensure prefix_filenames is sorted if needed
     filenames.sort()
@@ -476,12 +475,12 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     first_processed_image = filenames[0]
 
     # Access the reduced data corresponding to the first processed image
-    ref_frame_data = reduced_data_dict[first_processed_image]
-    print(f"The data for {first_processed_image} is: {ref_frame_data}")
+    ref_frame_data, ref_frame_hdr = reduced_data_dict[first_processed_image]
+    print(f"Reference frame data shape: {ref_frame_data.shape}")
 
     wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
     wcs_header = {}
-    for line in [ref_header[i:i + 80] for i in range(0, len(ref_header), 80)]:
+    for line in [ref_frame_hdr[i:i + 80] for i in range(0, len(ref_frame_hdr), 80)]:
         key = line[0:8].strip()
         if '=' in line and key not in wcs_ignore_cards:
             card = fits.Card.fromstring(line)
@@ -489,8 +488,8 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     ref_frame_bg = sep.Background(ref_frame_data)
     ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
-    estimate_coord = SkyCoord(ra=ref_header['TELRA'],
-                              dec=ref_header['TELDEC'],
+    estimate_coord = SkyCoord(ra=ref_frame_hdr['TELRA'],
+                              dec=ref_frame_hdr['TELDEC'],
                               unit=(u.deg, u.deg))
     estimate_coord_radius = 3 * u.deg
 
@@ -505,7 +504,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     print(f"Found catalog with name {prefix}_catalog.fits")
     # Convert RA and DEC to pixel coordinates using the WCS information from the header
 
-    phot_x, phot_y = WCS(ref_header).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+    phot_x, phot_y = WCS(ref_frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
     print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
