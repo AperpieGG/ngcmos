@@ -533,7 +533,12 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
         frame_output = hstack([frame_preamble, frame_phot])
 
         # Define the filename for the photometry output
-        phot_output_filename = f"{directory}/phot_{prefix}.fits"
+        phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")  # Include directory path
+
+        # Convert frame_output to a Table if it's not already
+        if not isinstance(frame_output, Table):
+            frame_output = Table(frame_output)
+
         # Append the current frame's photometry to the accumulated photometry
         if all_photometry is None:
             all_photometry = frame_output
@@ -541,5 +546,8 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
             all_photometry = vstack([all_photometry, frame_output])
 
     # Save the photometry
-    all_photometry.write(phot_output_filename, overwrite=True)
-    print(f"Saved photometry to {phot_output_filename}")
+    if all_photometry is not None:
+        all_photometry.write(phot_output_filename, overwrite=True)
+        print(f"Saved photometry to {phot_output_filename}")
+    else:
+        print("No photometry data to save.")
