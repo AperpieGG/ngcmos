@@ -464,7 +464,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Calibrate images and get FITS files
     reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path)
-    print(f"The first reduced data is: {reduced_data[prefix_filenames[0]]}")
+    print(f"The reduced data is: {reduced_data}")
     # Load WCS information from the first processed image
     first_processed_image = prefix_filenames[0]
     ref_frame_data, ref_header = reduced_data[first_processed_image]
