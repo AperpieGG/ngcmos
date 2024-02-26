@@ -469,70 +469,66 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     reduced_data_dict = {filename: (data, header) for filename, data, header in
                          zip(filenames, reduced_data, reduced_header)}
 
-    # Ensure prefix_filenames is sorted if needed
-    filenames.sort()
+    # Iterate over each filename for the current prefix
+    for filename in filenames:
+        # Access the reduced data and header corresponding to the filename
+        frame_data, frame_hdr = reduced_data_dict[filename]
 
-    # Get the first processed image
-    first_processed_image = filenames[0]
+        wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
+        wcs_header = {}
+        for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
+            key = line[0:8].strip()
+            if '=' in line and key not in wcs_ignore_cards:
+                card = fits.Card.fromstring(line)
+                wcs_header[card.keyword] = card.value
 
-    # Access the reduced data corresponding to the first processed image
-    ref_frame_data, ref_frame_hdr = reduced_data_dict[first_processed_image]
-    print(f"Reference frame data: {ref_frame_data}")
+        frame_bg = sep.Background(frame_data)
+        frame_data_corr_no_bg = frame_data - frame_bg
+        estimate_coord = SkyCoord(ra=frame_hdr['TELRA'],
+                                  dec=frame_hdr['TELDEC'],
+                                  unit=(u.deg, u.deg))
+        estimate_coord_radius = 3 * u.deg
 
-    wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
-    wcs_header = {}
-    for line in [ref_frame_hdr[i:i + 80] for i in range(0, len(ref_frame_hdr), 80)]:
-        key = line[0:8].strip()
-        if '=' in line and key not in wcs_ignore_cards:
-            card = fits.Card.fromstring(line)
-            wcs_header[card.keyword] = card.value
+        frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
+                                            AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
+        if len(frame_objects) < N_OBJECTS_LIMIT:
+            print(f"Fewer than {N_OBJECTS_LIMIT} found in {filename}, skipping!")
+            continue
 
-    ref_frame_bg = sep.Background(ref_frame_data)
-    ref_frame_data_corr_no_bg = ref_frame_data - ref_frame_bg
-    estimate_coord = SkyCoord(ra=ref_frame_hdr['TELRA'],
-                              dec=ref_frame_hdr['TELDEC'],
-                              unit=(u.deg, u.deg))
-    estimate_coord_radius = 3 * u.deg
+        # Load the photometry catalog
+        phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+        print(f"Found catalog with name {prefix}_catalog.fits")
+        # Convert RA and DEC to pixel coordinates using the WCS information from the header
 
-    ref_objects = _detect_objects_sep(ref_frame_data_corr_no_bg, ref_frame_bg.globalrms,
-                                      AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
-    if len(ref_objects) < N_OBJECTS_LIMIT:
-        print(f"Fewer than {N_OBJECTS_LIMIT} found in reference, quitting!")
-        sys.exit(TOO_FEW_OBJECTS)
+        phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
-    # Load the photometry catalog
-    phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-    print(f"Found catalog with name {prefix}_catalog.fits")
-    # Convert RA and DEC to pixel coordinates using the WCS information from the header
+        print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
-    phot_x, phot_y = WCS(ref_frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+        # Do time conversions - one time value per format per target
+        half_exptime = frame_hdr['EXPTIME'] / 2.
+        time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
+                         format='isot', scale='utc', location=get_location())
+        time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+        # Correct to mid-exposure time
+        time_jd = time_jd + half_exptime * u.second
+        ra = phot_cat['ra_deg_corr']
+        dec = phot_cat['dec_deg_corr']
 
-    print(f"X and Y coordinates: {phot_x}, {phot_y}")
+        frame_ids = [filename for i in range(len(phot_x))]
+        print(f"Found {len(frame_ids)} frames")
 
-    # do time conversions - one time value per format per target
-    half_exptime = ref_frame_hdr['EXPTIME'] / 2.
-    time_isot = Time([ref_frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
-                     format='isot', scale='utc', location=get_location())
-    time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
-    # correct to mid-exposure time
-    time_jd = time_jd + half_exptime * u.second
-    ra = phot_cat['ra_deg_corr']
-    dec = phot_cat['dec_deg_corr']
+        frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
+                               names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
 
-    frame_ids = [first_processed_image for i in range(len(phot_x))]
-    print(f"found {len(frame_ids)} frames")
+        # Extract photometry at locations
+        frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
 
-    frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
-                           names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
+        # Stack the photometry and preamble
+        frame_output = hstack([frame_preamble, frame_phot])
 
-    # extract photometry at locations
-    frame_phot = wcs_phot(ref_frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+        # Define the filename for the photometry output
+        phot_output_filename = f"{prefix}_phot.fits"
 
-    # stack the phot and preamble
-    frame_output = hstack([frame_preamble, frame_phot])
-
-    # save the photometry
-    frame_output.write(f"{prefix}_phot.fits", overwrite=True)
-    print(f"Saved photometry to {prefix}_phot.fits")
-
-# TODO - do this for all of the images
+    # Save the photometry
+    frame_output.write(phot_output_filename, overwrite=True)
+    print(f"Saved photometry to {phot_output_filename}")
