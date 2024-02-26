@@ -477,7 +477,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Access the reduced data corresponding to the first processed image
     ref_frame_data, ref_frame_hdr = reduced_data_dict[first_processed_image]
-    print(f"Reference frame data shape: {ref_frame_data.shape}")
+    print(f"Reference frame data: {ref_frame_data}")
 
     wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
     wcs_header = {}
