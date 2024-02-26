@@ -463,17 +463,20 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     check_headers(directory, filenames)
 
     # Calibrate images and get FITS files
-    reduced_data, jd_list, bjd_list, hjd_list, prefix_filenames = reduce_images(base_path, out_path)
+    reduced_data, prefix_filenames = reduce_images(base_path, out_path)
+
+    # Convert reduced_data to a dictionary with filenames as keys
+    reduced_data_dict = {filename: data for filename, data in zip(filenames, reduced_data)}
+
+    # Ensure prefix_filenames is sorted if needed
+    filenames.sort()
 
     # Get the first processed image
-    prefix_filenames.sort()
-
-    # Get the first processed image
-    first_processed_image = prefix_filenames[0]
+    first_processed_image = filenames[0]
 
     # Access the reduced data corresponding to the first processed image
-    ref_frame_data, ref_header = reduced_data[first_processed_image]
-    print(f" the data is {ref_frame_data}")
+    ref_frame_data, ref_header = reduced_data_dict[first_processed_image]
+    print(f"The data for {first_processed_image} is: {ref_frame_data}")
 
     wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
     wcs_header = {}
