@@ -292,7 +292,7 @@ def reduce_images(base_path, out_path):
 
         print(f'Processed {filename}')
 
-    return reduced_data, jd_list, bjd_list, hjd_list, filenames
+    return reduced_data, filenames
 
 
 def create_directory_if_not_exists(directory):
