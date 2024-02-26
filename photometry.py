@@ -473,6 +473,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
     for filename in filenames:
         # Access the reduced data and header corresponding to the filename
         frame_data, frame_hdr = reduced_data_dict[filename]
+        print(f"Extracting photometry for {filename}")
 
         wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
         wcs_header = {}
@@ -527,7 +528,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
         frame_output = hstack([frame_preamble, frame_phot])
 
         # Define the filename for the photometry output
-        phot_output_filename = f"{prefix}_phot.fits"
+        phot_output_filename = f"phot_{prefix}.fits"
 
     # Save the photometry
     frame_output.write(phot_output_filename, overwrite=True)
