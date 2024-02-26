@@ -467,7 +467,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
 
     # Load WCS information from the first processed image
     first_processed_image = prefix_filenames[0]
-    ref_frame_data, ref_header = load_fits_image(first_processed_image)
+    ref_frame_data, ref_header = reduced_data[first_processed_image]
     print(f" the data is {ref_frame_data}")
 
     wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
