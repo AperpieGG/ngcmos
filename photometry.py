@@ -533,8 +533,7 @@ for prefix, filenames in zip(prefixes, prefix_filenames):
         frame_output = hstack([frame_preamble, frame_phot])
 
         # Define the filename for the photometry output
-        phot_output_filename = f"phot_{prefix}.fits"
-
+        phot_output_filename = f"{directory}/phot_{prefix}.fits"
         # Append the current frame's photometry to the accumulated photometry
         if all_photometry is None:
             all_photometry = frame_output
