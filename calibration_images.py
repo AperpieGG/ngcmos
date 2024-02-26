@@ -272,11 +272,11 @@ def reduce_images(base_path, out_path):
 
             # Reduce image
             fd = (fd - master_bias - master_dark * hdr['EXPTIME'] / 10) / master_flat
-            fd_data_uint = fd.astype('uint16')
-            limits = np.iinfo(fd_data_uint.dtype)
-            fd_data_uint[fd < limits.min] = limits.min
-            fd_data_uint[fd > limits.max] = limits.max
-            fd = fd_data_uint
+            # fd_data_uint = fd.astype('uint16')
+            # limits = np.iinfo(fd_data_uint.dtype)
+            # fd_data_uint[fd < limits.min] = limits.min
+            # fd_data_uint[fd > limits.max] = limits.max
+            # fd = fd_data_uint
             reduced_data.append(fd)  # Append the reduced image to the list
             reduced_header_info.append(hdr)
 
