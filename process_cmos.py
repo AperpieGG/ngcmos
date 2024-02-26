@@ -1,17 +1,39 @@
 #! /usr/bin/env python
 import os
-from datetime import datetime, timedelta
 from collections import defaultdict
+from datetime import datetime, timedelta
 from calibration_images import reduce_images
 from donuts import Donuts
 import numpy as np
-from utils import catalogue_to_pixels, parse_region_content
+from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog
 import json
 import warnings
 from astropy.io import fits
+from astropy.table import Table, hstack, vstack
+from astropy.wcs import WCS
+import sep
+from astropy.time import Time
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
+
+GAIN = 1.12
+MAX_ALLOWED_PIXEL_SHIFT = 50
+N_OBJECTS_LIMIT = 200
+APERTURE_RADII = [2, 3, 4, 5, 6]
+RSI = 15
+RSO = 20
+DEFOCUS = 0.0
+AREA_MIN = 10
+AREA_MAX = 200
+SCALE_MIN = 4.5
+SCALE_MAX = 5.5
+DETECTION_SIGMA = 3
+ZP_CLIP_SIGMA = 3
+
+OK, TOO_FEW_OBJECTS, UNKNOWN = range(3)
 
 
 def load_config(filename):
@@ -76,6 +98,27 @@ def filter_filenames(directory):
     return sorted(filtered_filenames)
 
 
+def get_prefix(filenames):
+    """
+    Extract unique prefixes from a list of filenames.
+
+    Parameters
+    ----------
+    filenames : list of str
+        List of filenames.
+
+    Returns
+    -------
+    set of str
+        Set of unique prefixes extracted from the filenames.
+    """
+    prefixes = set()
+    for filename in filenames:
+        prefix = filename[:11]
+        prefixes.add(prefix)
+    return prefixes
+
+
 def check_headers(directory, filenames):
     """
     Check headers of all files for CTYPE1 and CTYPE2.
@@ -108,30 +151,32 @@ def check_headers(directory, filenames):
     print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
 
 
-def check_donuts(filenames):
+def check_donuts(file_groups, filenames):
     """
-    Check donuts for each group of images.
+    Check donuts for each group of images with the same prefix.
 
     Parameters
     ----------
-    filenames : list of filenames.
-
+    file_groups : list of str
+        Prefixes for the groups of images.
+    filenames : list of str
+        List of lists of filenames for the groups of images.
     """
-    grouped_filenames = defaultdict(list)
-    for filename in filenames:
-        prefix = get_prefix(filename)
-        grouped_filenames[prefix].append(filename)
+    for filename, file_group in zip(filenames, file_groups):
+        # Using the first filename as the reference image
+        reference_image = file_group[0]
+        print(f"Reference image: {reference_image}")
 
-    for prefix, filenames in grouped_filenames.items():
-        filenames.sort()
-        reference_image = filenames[0]
+        # Assuming Donuts class and measure_shift function are defined elsewhere
         d = Donuts(reference_image)
-        for filename in filenames[1:]:
+
+        for filename in file_group[1:]:
             shift = d.measure_shift(filename)
             sx = round(shift.x.value, 2)
             sy = round(shift.y.value, 2)
             print(f'{filename} shift X: {sx} Y: {sy}')
             shifts = np.array([abs(sx), abs(sy)])
+
             if np.sum(shifts > 50) > 0:
                 print(f'{filename} image shift too big X: {sx} Y: {sy}')
                 if not os.path.exists('failed_donuts'):
@@ -141,83 +186,119 @@ def check_donuts(filenames):
                 os.system(comm)
 
 
-def get_prefix(filename):
-    """
-    Extract prefix from filename
-    """
-    return filename[:11]
-
-
-def find_first_image_of_each_prefix(filenames):
-    first_images = {}
-    for filename in sorted(filenames):
-        prefix = get_prefix(filename)
-        if prefix not in first_images:
-            first_images[prefix] = filename
-    return first_images
-
-
-def get_region_files(filenames):
-    grouped_region_files = defaultdict(set)
-    for filename in filenames:
-        prefix = get_prefix(filename)
-        exclude_keywords = ['catalog', 'morning', 'evening', 'bias', 'flat', 'dark']
-        if any(keyword in filename for keyword in exclude_keywords):
-            continue
-        region_files = [f for f in os.listdir() if f.startswith(prefix) and f.endswith('_input.reg')]
-        grouped_region_files[prefix].update(region_files)
-    return grouped_region_files
-
-
-def read_region_files(region_files):
-    region_contents = {}
-    for region_file in region_files:
-        with open(region_file, 'r') as file:
-            contents = file.read()
-            region_contents[region_file] = contents
-    return region_contents
-
-
 def main():
     # set directory for the current night or use the current working directory
     directory = find_current_night_directory(base_path)
+    print(f"Directory: {directory}")
 
     # filter filenames only for .fits data files
     filenames = filter_filenames(directory)
+    print(f"Number of files: {len(filenames)}")
 
-    # Check headers for CTYPE1 and CTYPE2
-    check_headers(directory, filenames)
+    # Iterate over each filename to get the prefix
+    prefixes = get_prefix(filenames)
+    print(f"The prefixes are: {prefixes}")
 
-    # Check donuts for each group
-    check_donuts(filenames)
+    # Get filenames corresponding to each prefix
+    prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
 
-    # Calibrate images and get FITS files
-    reduced_data, jd_list, bjd_list, hjd_list, filenames = reduce_images(base_path, out_path)
+    for prefix, filenames in zip(prefixes, prefix_filenames):
+        # Check headers for CTYPE1 and CTYPE2
+        check_headers(directory, filenames)
 
-    # Get region files for each prefix
-    region_files = get_region_files(filenames)
+        # Check donuts for each group
+        check_donuts(prefix_filenames, filenames)
 
-    # Read the contents of region files
-    region_contents = {}
-    for prefix, files in region_files.items():
-        region_contents[prefix] = read_region_files(files)
+        # Calibrate images and get FITS files
+        reduced_data, reduced_header, prefix_filenames = reduce_images(base_path, out_path)
 
-    for prefix, contents in region_contents.items():
-        first_images = find_first_image_of_each_prefix(filenames)
-        for region_file, region_content in contents.items():
-            ra_dec_coords = parse_region_content(region_content)
-            print(f"Prefix: {prefix}, Region File: {region_file}, coordinates: {ra_dec_coords}")
+        # Convert reduced_data to a dictionary with filenames as keys
+        reduced_data_dict = {filename: (data, header) for filename, data, header in
+                             zip(filenames, reduced_data, reduced_header)}
 
-            if prefix in first_images:
-                xy_coordinates = catalogue_to_pixels(first_images[prefix], ra_dec_coords)
-                print("X coordinates:", xy_coordinates[0])
-                print("Y coordinates:", xy_coordinates[1])
+        all_photometry = None
+
+        # Iterate over each filename for the current prefix
+        for filename in filenames:
+            # Access the reduced data and header corresponding to the filename
+            frame_data, frame_hdr = reduced_data_dict[filename]
+            print(f"Extracting photometry for {filename}")
+
+            wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
+            wcs_header = {}
+            for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
+                key = line[0:8].strip()
+                if '=' in line and key not in wcs_ignore_cards:
+                    card = fits.Card.fromstring(line)
+                    wcs_header[card.keyword] = card.value
+
+            frame_bg = sep.Background(frame_data)
+            frame_data_corr_no_bg = frame_data - frame_bg
+            estimate_coord = SkyCoord(ra=frame_hdr['TELRA'],
+                                      dec=frame_hdr['TELDEC'],
+                                      unit=(u.deg, u.deg))
+            estimate_coord_radius = 3 * u.deg
+
+            frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
+                                                AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
+            if len(frame_objects) < N_OBJECTS_LIMIT:
+                print(f"Fewer than {N_OBJECTS_LIMIT} found in {filename}, skipping!")
+                continue
+
+            # Load the photometry catalog
+            phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+            print(f"Found catalog with name {prefix}_catalog.fits")
+            # Convert RA and DEC to pixel coordinates using the WCS information from the header
+
+            phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+
+            print(f"X and Y coordinates: {phot_x}, {phot_y}")
+
+            # Do time conversions - one time value per format per target
+            half_exptime = frame_hdr['EXPTIME'] / 2.
+            time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
+                             format='isot', scale='utc', location=get_location())
+            time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+            # Correct to mid-exposure time
+            time_jd = time_jd + half_exptime * u.second
+            ra = phot_cat['ra_deg_corr']
+            dec = phot_cat['dec_deg_corr']
+
+            frame_ids = [filename for i in range(len(phot_x))]
+            print(f"Found {len(frame_ids)} frames")
+
+            frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
+                                   names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
+
+            # Extract photometry at locations
+            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+
+            # Stack the photometry and preamble
+            frame_output = hstack([frame_preamble, frame_phot])
+
+            # Define the filename for the photometry output
+            phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")  # Include directory path
+
+            # Convert frame_output to a Table if it's not already
+            if not isinstance(frame_output, Table):
+                frame_output = Table(frame_output)
+
+            # Append the current frame's photometry to the accumulated photometry
+            if all_photometry is None:
+                all_photometry = frame_output
             else:
-                print(f"No image found for prefix {prefix}")
+                all_photometry = vstack([all_photometry, frame_output])
+
+        # Save the photometry
+        if all_photometry is not None:
+            all_photometry.write(phot_output_filename, overwrite=True)
+            print(f"Saved photometry to {phot_output_filename}")
+        else:
+            print("No photometry data to save.")
+
+        print("Done!")
 
 
 if __name__ == "__main__":
     main()
 
-
-# TODO: Script working from path/to/data but not from random directory
