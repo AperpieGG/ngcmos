@@ -132,103 +132,84 @@ def main():
     prefixes = get_prefix(filenames)
     print(f"The prefixes are: {prefixes}")
 
-    for prefix in prefixes:
+    for filename in filenames:
+        prefix = get_prefix([filename]).pop()
         phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
 
         if os.path.exists(phot_output_filename):
-            print(f"Photometry file for prefix {prefix} already exists, skipping photometry and reduce_images.")
+            print(f"Photometry file for prefix {prefix} already exists, skipping photometry for {filename}.")
             continue
 
-        # Get filenames corresponding to the current prefix
-        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
-
-        # Calibrate images and get FITS files
-        reduced_data, reduced_header, prefix_filenames = reduce_images(base_path, out_path)
+        # Calibrate image and get FITS file
+        reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
 
         # Convert reduced_data to a dictionary with filenames as keys
-        reduced_data_dict = {filename: (data, header) for filename, data, header in
-                             zip(prefix_filenames, reduced_data, reduced_header)}
+        reduced_data_dict = {filename: (data, header) for data, header in zip(reduced_data, reduced_header)}
 
-        all_photometry = None
+        # Access the reduced data and header corresponding to the filename
+        frame_data, frame_hdr = reduced_data_dict[filename]
+        print(f"Extracting photometry for {filename}")
 
-        # Iterate over each filename for the current prefix
-        for filename in prefix_filenames:
-            # Access the reduced data and header corresponding to the filename
-            frame_data, frame_hdr = reduced_data_dict[filename]
-            print(f"Extracting photometry with prefix {prefix} for filename {filename}")
+        wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
+        wcs_header = {}
+        for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
+            key = line[0:8].strip()
+            if '=' in line and key not in wcs_ignore_cards:
+                card = fits.Card.fromstring(line)
+                wcs_header[card.keyword] = card.value
 
-            wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
-            wcs_header = {}
-            for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
-                key = line[0:8].strip()
-                if '=' in line and key not in wcs_ignore_cards:
-                    card = fits.Card.fromstring(line)
-                    wcs_header[card.keyword] = card.value
+        frame_bg = sep.Background(frame_data)
+        frame_data_corr_no_bg = frame_data - frame_bg
+        estimate_coord = SkyCoord(ra=frame_hdr['TELRA'],
+                                  dec=frame_hdr['TELDEC'],
+                                  unit=(u.deg, u.deg))
+        estimate_coord_radius = 3 * u.deg
 
-            frame_bg = sep.Background(frame_data)
-            frame_data_corr_no_bg = frame_data - frame_bg
-            estimate_coord = SkyCoord(ra=frame_hdr['TELRA'],
-                                      dec=frame_hdr['TELDEC'],
-                                      unit=(u.deg, u.deg))
-            estimate_coord_radius = 3 * u.deg
+        frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
+                                            AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
+        if len(frame_objects) < N_OBJECTS_LIMIT:
+            print(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!")
+            continue
 
-            frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
-                                                AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
-            if len(frame_objects) < N_OBJECTS_LIMIT:
-                print(f"Fewer than {N_OBJECTS_LIMIT} found in {filename}, skipping!")
-                continue
+        # Load the photometry catalog
+        phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+        print(f"Found catalog with name {prefix}_catalog.fits")
+        # Convert RA and DEC to pixel coordinates using the WCS information from the header
+        phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+        print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
-            # Load the photometry catalog
-            phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-            print(f"Found catalog with name {prefix}_catalog.fits")
-            # Convert RA and DEC to pixel coordinates using the WCS information from the header
+        # Do time conversions - one time value per format per target
+        half_exptime = frame_hdr['EXPTIME'] / 2.
+        time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
+                         format='isot', scale='utc', location=get_location())
+        time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+        # Correct to mid-exposure time
+        time_jd = time_jd + half_exptime * u.second
+        ra = phot_cat['ra_deg_corr']
+        dec = phot_cat['dec_deg_corr']
 
-            phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+        frame_ids = [filename for i in range(len(phot_x))]
+        print(f"Found {len(frame_ids)} frames")
 
-            print(f"X and Y coordinates: {phot_x}, {phot_y}")
+        frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
+                               names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
 
-            # Do time conversions - one time value per format per target
-            half_exptime = frame_hdr['EXPTIME'] / 2.
-            time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
-                             format='isot', scale='utc', location=get_location())
-            time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
-            # Correct to mid-exposure time
-            time_jd = time_jd + half_exptime * u.second
-            ra = phot_cat['ra_deg_corr']
-            dec = phot_cat['dec_deg_corr']
+        # Extract photometry at locations
+        frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
 
-            frame_ids = [filename for i in range(len(phot_x))]
-            print(f"Found {len(frame_ids)} frames")
+        # Stack the photometry and preamble
+        frame_output = hstack([frame_preamble, frame_phot])
 
-            frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
-                                   names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
+        # Convert frame_output to a Table if it's not already
+        if not isinstance(frame_output, Table):
+            frame_output = Table(frame_output)
 
-            # Extract photometry at locations
-            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+        # Save the photometry directly
+        frame_output.write(phot_output_filename, overwrite=True)
+        print(f"Saved photometry for {filename} to {phot_output_filename}")
 
-            # Stack the photometry and preamble
-            frame_output = hstack([frame_preamble, frame_phot])
-
-            # Convert frame_output to a Table if it's not already
-            if not isinstance(frame_output, Table):
-                frame_output = Table(frame_output)
-
-            # Append the current frame's photometry to the accumulated photometry
-            if all_photometry is None:
-                all_photometry = frame_output
-            else:
-                all_photometry = vstack([all_photometry, frame_output])
-
-        # Save the photometry
-        if all_photometry is not None:
-            all_photometry.write(phot_output_filename, overwrite=True)
-            print(f"Saved photometry to {phot_output_filename}")
-        else:
-            print("No photometry data to save.")
-
-        print("Done!")
+    print("Done!")
 
 
 if __name__ == "__main__":
     main()
-
