@@ -151,17 +151,17 @@ def plot_first_gaia_id_vs_jd_mid(table):
         frame_data = table[mask]
 
         # Get the first gaia_id and first jd_mid
-        first_gaia_id = frame_data['gaia_id'][0]
+        first_flux_2 = frame_data['flux_2'][0]
         first_jd_mid = frame_data['jd_mid'][0]
+        first_gaia_id = frame_data['gaia_id'][0]
 
         # Plot first_gaia_id vs first_jd_mid
-        plt.scatter(first_jd_mid, first_gaia_id, label=frame_id)
+        plt.scatter(first_jd_mid, first_flux_2, label=first_gaia_id)
 
     # Add labels and legend
     plt.xlabel('JD Mid')
     plt.ylabel('First Gaia ID')
     plt.title('First Gaia ID vs JD Mid for Each Frame')
-    plt.legend()
     plt.show()
 
 
@@ -184,6 +184,7 @@ def main():
         for phot_file in phot_files:
             phot_tab = read_phot_file(phot_file, first_prefix)
             if phot_tab is not None:
+                print('Plotting...')
                 plot_first_gaia_id_vs_jd_mid(phot_tab)
 
 
