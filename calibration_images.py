@@ -273,7 +273,7 @@ def reduce_images(base_path, out_path, prefix_filenames):
             print(f'Failed to process {filename}. Exception: {str(e)}')
             continue
 
-        print(f'Processed {filename}')
+        print(f'Reduced {filename}')
 
     return reduced_data, reduced_header_info, filenames
 
