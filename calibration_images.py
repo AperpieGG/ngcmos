@@ -219,7 +219,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         return None
 
 
-def reduce_images(base_path, out_path):
+def reduce_images(base_path, out_path, prefix_filenames):
     """
     Reduce the images in the specified directory.
 
@@ -229,32 +229,23 @@ def reduce_images(base_path, out_path):
         Base path for the directory.
     out_path : str
         Path to the output directory.
+    prefix_filenames : list of str
+        List of filenames for the prefix.
 
     Returns
     -------
-    None
+    tuple
+        Tuple containing reduced data, reduced header information, and filenames.
     """
     master_bias = bias(base_path, out_path)
     master_dark = dark(base_path, out_path, master_bias)
     master_flat = flat(base_path, out_path, master_bias, master_dark)
 
-    current_night_directory = find_current_night_directory(base_path)
     reduced_data = []
     reduced_header_info = []
-    jd_list = []
-    bjd_list = []
-    hjd_list = []
     filenames = []
 
-    if current_night_directory is None:
-        current_night_directory = os.getcwd()
-    else:
-        print('Current night directory found {} will reduce images'.format(current_night_directory))
-
-    for filename in sorted(glob.glob(os.path.join(current_night_directory, '*.fits'))):
-        exclude = ['bias', 'dark', 'flat', 'evening', 'morning', '_r', 'catalog']
-        if any([e in filename for e in exclude]):
-            continue
+    for filename in prefix_filenames:
         try:
             fd, hdr = fits.getdata(filename, header=True)
 
@@ -272,18 +263,8 @@ def reduce_images(base_path, out_path):
 
             # Reduce image
             fd = (fd - master_bias - master_dark * hdr['EXPTIME'] / 10) / master_flat
-            # fd_data_uint = fd.astype('uint16')
-            # limits = np.iinfo(fd_data_uint.dtype)
-            # fd_data_uint[fd < limits.min] = limits.min
-            # fd_data_uint[fd > limits.max] = limits.max
-            # fd = fd_data_uint
             reduced_data.append(fd)  # Append the reduced image to the list
             reduced_header_info.append(hdr)
-
-            # Append additional header information to header_info list
-            jd_list.append(time_jd.jd)
-            bjd_list.append(time_bary.jd)
-            hjd_list.append(time_helio.jd)
 
             # Append the filename to the filenames list
             filenames.append(os.path.basename(filename))
