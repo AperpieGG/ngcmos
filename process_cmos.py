@@ -216,7 +216,7 @@ def main():
             else:
                 phot_table = vstack([phot_table, frame_output])
 
-            print(f"Processed {filename}\n")
+            print(f"Finished with filename {filename}\n")
 
         # Save the photometry for the current prefix
         if phot_table is not None:
