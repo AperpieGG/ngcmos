@@ -104,9 +104,10 @@ def plot_first_gaia_id_vs_jd_mid(table):
     # Get jd_mid and flux_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
+    fluxerr_2 = gaia_id_data['fluxerr_2']
 
     # Plot jd_mid vs flux_2
-    plt.scatter(jd_mid, flux_2)
+    plt.errorbar(jd_mid, flux_2, yerr=fluxerr_2, fmt='o', color='black')
 
     # Add labels and title
     plt.xlabel('JD Mid')
