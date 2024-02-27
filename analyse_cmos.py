@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table
+from matplotlib import pyplot as plt
 
 
 def load_config(filename):
@@ -140,6 +141,30 @@ def read_phot_file(filename, prefix):
         return None
 
 
+def plot_first_gaia_id_vs_jd_mid(table):
+    # Get unique frame_ids
+    unique_frame_ids = set(table['frame_id'])
+
+    for frame_id in unique_frame_ids:
+        # Select rows corresponding to the current frame_id
+        mask = table['frame_id'] == frame_id
+        frame_data = table[mask]
+
+        # Get the first gaia_id and first jd_mid
+        first_gaia_id = frame_data['gaia_id'][0]
+        first_jd_mid = frame_data['jd_mid'][0]
+
+        # Plot first_gaia_id vs first_jd_mid
+        plt.scatter(first_jd_mid, first_gaia_id, label=frame_id)
+
+    # Add labels and legend
+    plt.xlabel('JD Mid')
+    plt.ylabel('First Gaia ID')
+    plt.title('First Gaia ID vs JD Mid for Each Frame')
+    plt.legend()
+    plt.show()
+
+
 def main():
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
@@ -152,14 +177,14 @@ def main():
     prefixes = get_prefix(filenames)
     print(f"The prefixes are: {prefixes}")
 
-    # Process each prefix
-    for prefix in prefixes:
-        phot_files = get_phot_files(current_night_directory, prefix)
-        print(f"Photometry files for {prefix}: {phot_files}")
+    first_prefix = next(iter(prefixes), None)
+    if first_prefix is not None:
+        phot_files = get_phot_files(current_night_directory, first_prefix)
+        print(f"Photometry files for {first_prefix}: {phot_files}")
         for phot_file in phot_files:
-            phot_tab = read_phot_file(phot_file, prefix)
+            phot_tab = read_phot_file(phot_file, first_prefix)
             if phot_tab is not None:
-                print(f"Photometry table for {prefix}: {phot_tab}")
+                plot_first_gaia_id_vs_jd_mid(phot_tab)
 
 
 if __name__ == "__main__":
