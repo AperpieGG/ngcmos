@@ -95,29 +95,23 @@ def read_phot_file(filename):
 
 
 def plot_first_gaia_id_vs_jd_mid(table):
-    # Select data for the first image
-    first_image_data = table[table['frame_id'] == table['frame_id'][0]]
+    # Get the first gaia_id from the first row
+    first_gaia_id = table['gaia_id'][0]
 
-    # Get unique gaia_ids in the first image
-    unique_gaia_ids = set(first_image_data['gaia_id'])
+    # Select rows with the same gaia_id as the first one
+    gaia_id_data = table[table['gaia_id'] == first_gaia_id]
 
-    # Iterate over each unique gaia_id
-    for gaia_id in unique_gaia_ids:
-        # Select rows corresponding to the current gaia_id
-        mask = first_image_data['gaia_id'] == gaia_id
-        gaia_id_data = first_image_data[mask]
+    # Get jd_mid and flux_2 for the selected rows
+    jd_mid = gaia_id_data['jd_mid']
+    flux_2 = gaia_id_data['flux_2']
 
-        # Get the first jd_mid and flux_2 for the current gaia_id
-        first_jd_mid = gaia_id_data['jd_mid'][0]
-        first_flux_2 = gaia_id_data['flux_2'][0]
+    # Plot jd_mid vs flux_2
+    plt.scatter(jd_mid, flux_2)
 
-        # Plot jd_mid vs flux_2 for the current gaia_id
-        plt.scatter(first_jd_mid, first_flux_2, label=gaia_id)
-
-    # Add labels and legend
+    # Add labels and title
     plt.xlabel('JD Mid')
     plt.ylabel('Flux 2')
-    plt.title('First Image: Flux 2 vs JD Mid for Each Gaia ID')
+    plt.title(f'JD Mid vs Flux 2 for Gaia ID {first_gaia_id}')
     plt.show()
 
 
