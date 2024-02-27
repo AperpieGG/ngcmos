@@ -95,22 +95,29 @@ def read_phot_file(filename):
 
 
 def plot_first_gaia_id_vs_jd_mid(table):
-    # Get unique frame_ids
-    unique_frame_ids = set(table['frame_id'])
-    for frame_id in unique_frame_ids:
-        # Select rows corresponding to the current frame_id
-        mask = table['frame_id'] == frame_id
-        frame_data = table[mask]
-        # Get the first gaia_id and first jd_mid
-        first_flux_2 = frame_data['flux_2'][0]
-        first_jd_mid = frame_data['jd_mid'][0]
-        first_gaia_id = frame_data['gaia_id'][0]
-        # Plot first_gaia_id vs first_jd_mid
-        plt.scatter(first_jd_mid, first_flux_2, color='black')
+    # Select data for the first image
+    first_image_data = table[table['frame_id'] == table['frame_id'][0]]
+
+    # Get unique gaia_ids in the first image
+    unique_gaia_ids = set(first_image_data['gaia_id'])
+
+    # Iterate over each unique gaia_id
+    for gaia_id in unique_gaia_ids:
+        # Select rows corresponding to the current gaia_id
+        mask = first_image_data['gaia_id'] == gaia_id
+        gaia_id_data = first_image_data[mask]
+
+        # Get the first jd_mid and flux_2 for the current gaia_id
+        first_jd_mid = gaia_id_data['jd_mid'][0]
+        first_flux_2 = gaia_id_data['flux_2'][0]
+
+        # Plot jd_mid vs flux_2 for the current gaia_id
+        plt.scatter(first_jd_mid, first_flux_2, label=gaia_id)
+
     # Add labels and legend
     plt.xlabel('JD Mid')
-    plt.ylabel('First Gaia ID')
-    plt.title('Gaia id: {}'.format(first_gaia_id))
+    plt.ylabel('Flux 2')
+    plt.title('First Image: Flux 2 vs JD Mid for Each Gaia ID')
     plt.show()
 
 
