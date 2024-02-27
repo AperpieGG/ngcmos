@@ -1,10 +1,11 @@
-#! /usr/bin/env python
 import datetime
-import fnmatch
 import json
 import os
+import fnmatch
 from datetime import datetime, timedelta
+import numpy as np
 from astropy.io import fits
+from astropy.table import Table
 from matplotlib import pyplot as plt
 
 
@@ -19,7 +20,6 @@ config = load_config('directories.json')
 calibration_paths = config["calibration_paths"]
 base_paths = config["base_paths"]
 out_paths = config["out_paths"]
-
 
 # Select directory based on existence
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
@@ -49,7 +49,7 @@ def find_current_night_directory(directory):
 
 def get_phot_files(directory):
     """
-    Get photometry files with the specified prefix from the directory.
+    Get photometry files with the pattern 'phot_*.fits' from the directory.
 
     Parameters
     ----------
@@ -59,35 +59,13 @@ def get_phot_files(directory):
     Returns
     -------
     list of str
-        List of photometry files.
+        List of photometry files matching the pattern.
     """
     phot_files = []
-    prefix_pattern = "phot_.fits"
     for filename in os.listdir(directory):
-        if fnmatch.fnmatch(filename, prefix_pattern):
+        if fnmatch.fnmatch(filename, 'phot_*.fits'):
             phot_files.append(os.path.join(directory, filename))
     return phot_files
-
-
-def get_prefix(filenames):
-    """
-    Extract unique prefixes from a list of filenames.
-
-    Parameters
-    ----------
-    filenames : list of str
-        List of filenames.
-
-    Returns
-    -------
-    set of str
-        Set of unique prefixes extracted from the filenames.
-    """
-    prefixes = set()
-    for filename in filenames:
-        prefix = filename[:11]
-        prefixes.add(prefix)
-    return prefixes
 
 
 def read_phot_file(filename):
@@ -115,50 +93,31 @@ def read_phot_file(filename):
         return None
 
 
-def plot_first_gaia_id_vs_jd_mid(table):
-    # Get unique frame_ids
-    unique_frame_ids = set(table['frame_id'])
-
-    for frame_id in unique_frame_ids:
-        # Select rows corresponding to the current frame_id
-        mask = table['frame_id'] == frame_id
-        frame_data = table[mask]
-
-        # Get the first gaia_id and first jd_mid
-        first_flux_2 = frame_data['flux_2'][0]
-        first_jd_mid = frame_data['jd_mid'][0]
-        first_gaia_id = frame_data['gaia_id'][0]
-
-        # Plot first_gaia_id vs first_jd_mid
-        plt.scatter(first_jd_mid, first_flux_2, color='black')
-
-    # Add labels and legend
-    plt.xlabel('JD Mid')
-    plt.ylabel('First Gaia ID')
-    plt.title('Gaia id: {}'.format(first_gaia_id))
-    plt.show()
+def plot_first_phot_file(phot_files):
+    if phot_files:
+        phot_file = phot_files[0]  # Get the first photometry file
+        phot_tab = read_phot_file(phot_file)
+        if phot_tab is not None:
+            # Plot the data from the first photometry file
+            plt.scatter(phot_tab['jd_mid'], phot_tab['flux_2'], color='black')
+            plt.xlabel('JD Mid')
+            plt.ylabel('Flux 2')
+            plt.title('First Photometry File')
+            plt.show()
+    else:
+        print("No photometry files found")
 
 
 def main():
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
-    # Get photometry files
+    # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
+    print(f"Photometry files: {phot_files}")
 
-    # Extract unique prefixes from the photometry files
-    prefixes = get_prefix(phot_files)
-    print(f"The prefixes are: {prefixes}")
-
-    # Use the first prefix
-    first_prefix = next(iter(prefixes), None)
-    if first_prefix is not None:
-        print(f"Photometry files for {first_prefix}: {phot_files}")
-        for phot_file in phot_files:
-            phot_tab = read_phot_file(phot_file)
-            if phot_tab is not None:
-                print('Plotting...')
-                plot_first_gaia_id_vs_jd_mid(phot_tab)
+    # Plot the first photometry file
+    plot_first_phot_file(phot_files)
 
 
 if __name__ == "__main__":
