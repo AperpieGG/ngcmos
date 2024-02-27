@@ -108,7 +108,7 @@ def get_phot_files(directory, prefix):
     """
     phot_files = []
     for filename in os.listdir(directory):
-        if filename.startswith('phot') and filename.endswith(prefix):
+        if filename.startswith(f"phot_{prefix}") and filename.endswith('.fits'):
             phot_files.append(filename)
     return phot_files
 
