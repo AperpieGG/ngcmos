@@ -48,30 +48,6 @@ def find_current_night_directory(directory):
     return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
 
 
-def filter_filenames(directory):
-    """
-    Filter filenames based on specific criteria.
-
-    Parameters
-    ----------
-    directory : str
-        Directory containing the files.
-
-    Returns
-    -------
-    list of str
-        Filtered list of filenames.
-    """
-    filtered_filenames = []
-    for filename in os.listdir(directory):
-        if filename.endswith('.fits'):
-            exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog", "phot"]
-            if any(word in filename.lower() for word in exclude_words):
-                continue
-            filtered_filenames.append(filename)  # Append only the filename without the directory path
-    return sorted(filtered_filenames)
-
-
 def get_prefix(filenames):
     """
     Extract unique prefixes from a list of filenames.
@@ -169,8 +145,6 @@ def plot_first_gaia_id_vs_jd_mid(table):
 
 
 def main():
-    # Your existing code for loading configurations and finding the current night directory
-
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
@@ -187,3 +161,7 @@ def main():
             if phot_tab is not None:
                 print('Plotting...')
                 plot_first_gaia_id_vs_jd_mid(phot_tab)
+
+
+if __name__ == "__main__":
+    main()
