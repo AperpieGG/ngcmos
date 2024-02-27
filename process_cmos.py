@@ -137,11 +137,11 @@ def main():
 
         # Open the photometry file for the current prefix
         if os.path.exists(phot_output_filename):
-            print(f"Photometry file for prefix {prefix} already exists, opening for append.")
-            phot_table = Table.read(phot_output_filename)
-        else:
-            print(f"Creating new photometry file for prefix {prefix}.")
-            phot_table = None
+            print(f"Photometry file for prefix {prefix} already exists, skipping to the next prefix.\n")
+            continue
+
+        print(f"Creating new photometry file for prefix {prefix}.\n")
+        phot_table = None
 
         # Iterate over filenames with the current prefix
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
@@ -154,7 +154,7 @@ def main():
 
             # Access the reduced data and header corresponding to the filename
             frame_data, frame_hdr = reduced_data_dict[filename]
-            print(f"Extracting photometry for {filename}")
+            print(f"Extracting photometry for {filename}\n")
 
             wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
             wcs_header = {}
@@ -174,15 +174,14 @@ def main():
             frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
                                                 AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
             if len(frame_objects) < N_OBJECTS_LIMIT:
-                print(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!")
+                print(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!\n")
                 continue
 
             # Load the photometry catalog
             phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-            print(f"Found catalog with name {prefix}_catalog.fits")
+            print(f"Found catalog with name {prefix}_catalog.fits\n")
             # Convert RA and DEC to pixel coordinates using the WCS information from the header
             phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
-            print(f"X and Y coordinates: {phot_x}, {phot_y}")
 
             # Do time conversions - one time value per format per target
             half_exptime = frame_hdr['EXPTIME'] / 2.
@@ -195,7 +194,7 @@ def main():
             dec = phot_cat['dec_deg_corr']
 
             frame_ids = [filename for i in range(len(phot_x))]
-            print(f"Found {len(frame_ids)} frames")
+            print(f"Found {len(frame_ids)} frames\n")
 
             frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
                                    names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
@@ -216,16 +215,16 @@ def main():
             else:
                 phot_table = vstack([phot_table, frame_output])
 
-            print(f"Processed {filename}")
+            print(f"Processed {filename}\n")
 
         # Save the photometry for the current prefix
         if phot_table is not None:
             phot_table.write(phot_output_filename, overwrite=True)
-            print(f"Saved photometry for prefix {prefix} to {phot_output_filename}")
+            print(f"Saved photometry for prefix {prefix} to {phot_output_filename}\n")
         else:
-            print(f"No photometry data for prefix {prefix}.")
+            print(f"No photometry data for prefix {prefix}.\n")
 
-    print("Done!")
+    print("Done!\n")
 
 
 if __name__ == "__main__":
