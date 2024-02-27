@@ -196,7 +196,7 @@ def main():
             dec = phot_cat['dec_deg_corr']
 
             frame_ids = [filename for i in range(len(phot_x))]
-            print(f"Found {len(frame_ids)} sources\n")
+            print(f"Found {len(frame_ids)} sources")
 
             frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
                                    names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
