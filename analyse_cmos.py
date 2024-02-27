@@ -118,6 +118,7 @@ def main():
     print(f"Photometry files: {phot_files}")
 
     # Plot the first photometry file
+    print(f"Plotting the first photometry file {phot_files[0]}...")
     plot_first_phot_file(phot_files)
 
 
