@@ -136,6 +136,11 @@ def main():
     prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
 
     for prefix, filenames in zip(prefixes, prefix_filenames):
+        phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
+        if os.path.exists(phot_output_filename):
+            print(f"Photometry file for prefix {prefix} already exists, skipping photometry.")
+            continue
+
         # Calibrate images and get FITS files
         reduced_data, reduced_header, prefix_filenames = reduce_images(base_path, out_path)
 
@@ -202,9 +207,6 @@ def main():
 
             # Stack the photometry and preamble
             frame_output = hstack([frame_preamble, frame_phot])
-
-            # Define the filename for the photometry output
-            phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")  # Include directory path
 
             # Convert frame_output to a Table if it's not already
             if not isinstance(frame_output, Table):
