@@ -158,7 +158,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         current_night_master_flat_path = os.path.join(out_path, current_night_master_flat_filename)
 
         if os.path.exists(current_night_master_flat_path):
-            print(f'Found master flat for current night directory in {current_night_master_flat_path} \n')
+            print(f'Found master flat for current night directory in {current_night_master_flat_path}')
             return fits.getdata(current_night_master_flat_path)
 
         # If the master flat for the current night directory doesn't exist, create it
@@ -209,7 +209,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         master_flat_filename = 'master_flat.fits'
         master_flat_path = os.path.join(out_path, master_flat_filename)
         if os.path.exists(master_flat_path):
-            print(f'Found master flat in {master_flat_path}')
+            print(f'Found master flat in {master_flat_path}\n')
             return fits.getdata(master_flat_path)
         else:
             print("Master flat file not found in out path:", master_flat_path)
