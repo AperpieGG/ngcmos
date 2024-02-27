@@ -1,10 +1,7 @@
 #! /usr/bin/env python
 import os
-from collections import defaultdict
 from datetime import datetime, timedelta
 from calibration_images import reduce_images
-from donuts import Donuts
-import numpy as np
 from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog
 import json
 import warnings
@@ -15,9 +12,13 @@ import sep
 from astropy.time import Time
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+from astropy.utils.exceptions import AstropyWarning
+
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
+
 
 GAIN = 1.12
 MAX_ALLOWED_PIXEL_SHIFT = 50
