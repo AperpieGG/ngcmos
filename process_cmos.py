@@ -128,30 +128,31 @@ def main():
     filenames = filter_filenames(directory)
     print(f"Number of files: {len(filenames)}")
 
-    # Iterate over each filename to get the prefix
+    # Get prefixes for each set of images
     prefixes = get_prefix(filenames)
     print(f"The prefixes are: {prefixes}")
 
-    # Get filenames corresponding to each prefix
-    prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
-
-    for prefix, filenames in zip(prefixes, prefix_filenames):
+    for prefix in prefixes:
         phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
+
         if os.path.exists(phot_output_filename):
-            print(f"Photometry file for prefix {prefix} already exists, skipping photometry.")
+            print(f"Photometry file for prefix {prefix} already exists, skipping photometry and reduce_images.")
             continue
 
+        # Get filenames corresponding to the current prefix
+        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
+
         # Calibrate images and get FITS files
-        reduced_data, reduced_header, prefix_filenames = reduce_images(base_path, out_path)
+        reduced_data, reduced_header, _ = reduce_images(base_path, out_path, prefix_filenames)
 
         # Convert reduced_data to a dictionary with filenames as keys
         reduced_data_dict = {filename: (data, header) for filename, data, header in
-                             zip(filenames, reduced_data, reduced_header)}
+                             zip(prefix_filenames, reduced_data, reduced_header)}
 
         all_photometry = None
 
         # Iterate over each filename for the current prefix
-        for filename in filenames:
+        for filename in prefix_filenames:
             # Access the reduced data and header corresponding to the filename
             frame_data, frame_hdr = reduced_data_dict[filename]
             print(f"Extracting photometry with prefix {prefix} for filename {filename}")
