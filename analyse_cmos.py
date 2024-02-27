@@ -96,7 +96,7 @@ def read_phot_file(filename):
 
 def plot_first_gaia_id_vs_jd_mid(table):
     # Get the first gaia_id from the first row
-    first_gaia_id = table['gaia_id'][100]
+    first_gaia_id = table['gaia_id'][1400]
 
     # Select rows with the same gaia_id as the first one
     gaia_id_data = table[table['gaia_id'] == first_gaia_id]
