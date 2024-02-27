@@ -105,13 +105,16 @@ def plot_first_gaia_id_vs_jd_mid(table):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-
+    flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
+    fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
+    
     # Plot jd_mid vs flux_2
     plt.errorbar(jd_mid, flux_2, yerr=fluxerr_2, fmt='o', color='black')
+    plt.errorbar(jd_mid, flux_w_sky_2, yerr=fluxerr_w_sky_2, fmt='o', color='red')
 
     # Add labels and title
-    plt.xlabel('JD Mid')
-    plt.ylabel('Flux 2')
+    plt.xlabel('JD Mid [days]')
+    plt.ylabel('Flux_2 [e-]')
     plt.title(f'JD Mid vs Flux 2 for Gaia ID {first_gaia_id}')
     plt.show()
 
