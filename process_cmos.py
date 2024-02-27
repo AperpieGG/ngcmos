@@ -147,7 +147,7 @@ def main():
         # Iterate over filenames with the current prefix
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
-            print(f"Processing filename {filename}...\n")
+            print(f"Processing filename {filename}......")
             # Calibrate image and get FITS file
             reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
 
