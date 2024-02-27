@@ -95,22 +95,25 @@ def get_prefix(filenames):
 
 def get_phot_files(directory, prefix):
     """
-    Get photometry files from the directory.
+    Get photometry files with the specified prefix from the directory.
 
     Parameters
     ----------
     directory : str
         Directory containing the files.
+    prefix : str
+        Prefix to match in filenames.
 
     Returns
     -------
     list of str
-        List of photometry files.
+        List of photometry files matching the prefix.
     """
     phot_files = []
+    prefix_pattern = f"phot_{prefix}"
     for filename in os.listdir(directory):
-        if filename.startswith(f"phot_{prefix}") and filename.endswith('.fits'):
-            phot_files.append(filename)
+        if filename.startswith(prefix_pattern) and filename.endswith('.fits'):
+            phot_files.append(os.path.join(directory, filename))
     return phot_files
 
 
@@ -156,27 +159,25 @@ def plot_first_gaia_id_vs_jd_mid(table):
         first_gaia_id = frame_data['gaia_id'][0]
 
         # Plot first_gaia_id vs first_jd_mid
-        plt.scatter(first_jd_mid, first_flux_2, label=first_gaia_id)
+        plt.scatter(first_jd_mid, first_flux_2, color='black')
 
     # Add labels and legend
     plt.xlabel('JD Mid')
     plt.ylabel('First Gaia ID')
-    plt.title('First Gaia ID vs JD Mid for Each Frame')
+    plt.title('Gaia id: {}'.format(first_gaia_id))
     plt.show()
 
 
 def main():
+    # Your existing code for loading configurations and finding the current night directory
+
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
-    # Filter filenames based on specific criteria
-    filenames = filter_filenames(current_night_directory)
-    print(f"Number of files: {len(filenames)}")
-
-    # Extract unique prefixes from the filenames
-    prefixes = get_prefix(filenames)
+    prefixes = get_prefix(current_night_directory)
     print(f"The prefixes are: {prefixes}")
 
+    # Use the first prefix
     first_prefix = next(iter(prefixes), None)
     if first_prefix is not None:
         phot_files = get_phot_files(current_night_directory, first_prefix)
@@ -186,7 +187,3 @@ def main():
             if phot_tab is not None:
                 print('Plotting...')
                 plot_first_gaia_id_vs_jd_mid(phot_tab)
-
-
-if __name__ == "__main__":
-    main()
