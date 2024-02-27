@@ -1,5 +1,5 @@
-#! /usr/bin/env python
 import datetime
+import fnmatch
 import json
 import os
 from datetime import datetime, timedelta
@@ -48,6 +48,28 @@ def find_current_night_directory(directory):
     return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
 
 
+def get_phot_files(directory):
+    """
+    Get photometry files with the specified prefix from the directory.
+
+    Parameters
+    ----------
+    directory : str
+        Directory containing the files.
+
+    Returns
+    -------
+    list of str
+        List of photometry files.
+    """
+    phot_files = []
+    prefix_pattern = "phot_.fits"
+    for filename in os.listdir(directory):
+        if fnmatch.fnmatch(filename, prefix_pattern):
+            phot_files.append(os.path.join(directory, filename))
+    return phot_files
+
+
 def get_prefix(filenames):
     """
     Extract unique prefixes from a list of filenames.
@@ -69,31 +91,7 @@ def get_prefix(filenames):
     return prefixes
 
 
-def get_phot_files(directory, prefix):
-    """
-    Get photometry files with the specified prefix from the directory.
-
-    Parameters
-    ----------
-    directory : str
-        Directory containing the files.
-    prefix : str
-        Prefix to match in filenames.
-
-    Returns
-    -------
-    list of str
-        List of photometry files matching the prefix.
-    """
-    phot_files = []
-    prefix_pattern = f"phot_{prefix}"
-    for filename in os.listdir(directory):
-        if filename.startswith(prefix_pattern) and filename.endswith('.fits'):
-            phot_files.append(os.path.join(directory, filename))
-    return phot_files
-
-
-def read_phot_file(filename, prefix):
+def read_phot_file(filename):
     """
     Read the photometry file.
 
@@ -101,8 +99,6 @@ def read_phot_file(filename, prefix):
     ----------
     filename : str
         Photometry file to read.
-    prefix : str
-        Prefix for the photometry file.
 
     Returns
     -------
@@ -148,16 +144,19 @@ def main():
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
-    prefixes = get_prefix(current_night_directory)
+    # Get photometry files
+    phot_files = get_phot_files(current_night_directory)
+
+    # Extract unique prefixes from the photometry files
+    prefixes = get_prefix(phot_files)
     print(f"The prefixes are: {prefixes}")
 
     # Use the first prefix
     first_prefix = next(iter(prefixes), None)
     if first_prefix is not None:
-        phot_files = get_phot_files(current_night_directory, first_prefix)
         print(f"Photometry files for {first_prefix}: {phot_files}")
         for phot_file in phot_files:
-            phot_tab = read_phot_file(phot_file, first_prefix)
+            phot_tab = read_phot_file(phot_file)
             if phot_tab is not None:
                 print('Plotting...')
                 plot_first_gaia_id_vs_jd_mid(phot_tab)
