@@ -20,6 +20,7 @@ calibration_paths = config["calibration_paths"]
 base_paths = config["base_paths"]
 out_paths = config["out_paths"]
 
+
 # Select directory based on existence
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
@@ -124,10 +125,12 @@ def main():
 
     # Extract unique prefixes from the filenames
     prefixes = get_prefix(filenames)
+    print(f"The prefixes are: {prefixes}")
 
     # Process each prefix
     for prefix in prefixes:
         phot_files = get_phot_files(current_night_directory, prefix)
+        print(f"Photometry files for {prefix}: {phot_files}")
         for phot_file in phot_files:
             phot_tab = read_phot_file(phot_file, prefix)
             if phot_tab is not None:
