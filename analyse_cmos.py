@@ -94,19 +94,24 @@ def read_phot_file(filename):
         return None
 
 
-def plot_first_phot_file(phot_files):
-    if phot_files:
-        phot_file = phot_files[0]  # Get the first photometry file
-        phot_tab = read_phot_file(phot_file)
-        if phot_tab is not None:
-            # Plot the data from the first photometry file
-            plt.scatter(phot_tab['jd_mid'], phot_tab['flux_2'], color='black')
-            plt.xlabel('JD Mid')
-            plt.ylabel('Flux 2')
-            plt.title('First Photometry File')
-            plt.show()
-    else:
-        print("No photometry files found")
+def plot_first_gaia_id_vs_jd_mid(table):
+    # Get unique frame_ids
+    unique_frame_ids = set(table['frame_id'])
+    for frame_id in unique_frame_ids:
+        # Select rows corresponding to the current frame_id
+        mask = table['frame_id'] == frame_id
+        frame_data = table[mask]
+        # Get the first gaia_id and first jd_mid
+        first_flux_2 = frame_data['flux_2'][0]
+        first_jd_mid = frame_data['jd_mid'][0]
+        first_gaia_id = frame_data['gaia_id'][0]
+        # Plot first_gaia_id vs first_jd_mid
+        plt.scatter(first_jd_mid, first_flux_2, color='black')
+    # Add labels and legend
+    plt.xlabel('JD Mid')
+    plt.ylabel('First Gaia ID')
+    plt.title('Gaia id: {}'.format(first_gaia_id))
+    plt.show()
 
 
 def main():
@@ -119,7 +124,8 @@ def main():
 
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
-    plot_first_phot_file(phot_files)
+    phot_table = read_phot_file(phot_files[0])
+    plot_first_gaia_id_vs_jd_mid(phot_table)
 
 
 if __name__ == "__main__":
