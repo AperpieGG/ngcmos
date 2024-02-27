@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
+from astropy.table import Table
 
 
 def load_config(filename):
@@ -87,6 +88,33 @@ def get_phot_files(directory, prefix):
     return phot_files
 
 
+def read_phot_file(filename, prefix):
+    """
+    Read the photometry file.
+
+    Parameters
+    ----------
+    filename : str
+        Photometry file to read.
+    prefix : str
+        Prefix for the photometry file.
+
+    Returns
+    -------
+    astropy.table.table.Table
+        Table containing the photometry data.
+    """
+    # Read the photometry file here using fits or any other appropriate method
+    try:
+        with fits.open(filename) as ff:
+            # Access the data in the photometry file as needed
+            tab = ff[1].data
+            return tab
+    except Exception as e:
+        print(f"Error reading photometry file {filename}: {e}")
+        return None
+
+
 def main():
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
@@ -99,25 +127,11 @@ def main():
 
     # Process each prefix
     for prefix in prefixes:
-        # Get photometry files for the current prefix
         phot_files = get_phot_files(current_night_directory, prefix)
-
-        # Process photometry files
         for phot_file in phot_files:
-            # Construct the full path to the photometry file
-            phot_file_path = os.path.join(current_night_directory, phot_file)
-
-            # Read the photometry file
-            # You can read the photometry file here using fits or any other appropriate method
-
-            # Example: Reading photometry file using fits
-            try:
-                with fits.open(phot_file_path) as ff:
-                    # Access the data in the photometry file as needed
-                    tab = ff[1].data
-                    print(tab)
-            except Exception as e:
-                print(f"Error reading photometry file {phot_file}: {e}")
+            phot_tab = read_phot_file(phot_file, prefix)
+            if phot_tab is not None:
+                print(f"Photometry table for {prefix}: {phot_tab}")
 
 
 if __name__ == "__main__":
