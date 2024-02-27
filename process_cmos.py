@@ -119,73 +119,6 @@ def get_prefix(filenames):
     return prefixes
 
 
-def check_headers(directory, filenames):
-    """
-    Check headers of all files for CTYPE1 and CTYPE2.
-
-    Parameters
-    ----------
-    directory : str
-        Path to the directory.
-    """
-    no_wcs = os.path.join(directory, 'no_wcs')
-    if not os.path.exists(no_wcs):
-        os.makedirs(no_wcs)
-
-    for file in filenames:
-        try:
-            with fits.open(os.path.join(directory, file)) as hdulist:
-                header = hdulist[0].header
-                ctype1 = header.get('CTYPE1')
-                ctype2 = header.get('CTYPE2')
-
-                if ctype1 is None or ctype2 is None:
-                    print(f"Warning: {file} does not have CTYPE1 and/or CTYPE2 in the header. Moving to "
-                          f"'no_wcs' directory.")
-                    new_path = os.path.join(no_wcs, file)
-                    os.rename(os.path.join(directory, file), new_path)
-
-        except Exception as e:
-            print(f"Error checking header for {file}: {e}")
-
-    print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
-
-
-def check_donuts(file_groups, filenames):
-    """
-    Check donuts for each group of images with the same prefix.
-
-    Parameters
-    ----------
-    file_groups : list of str
-        Prefixes for the groups of images.
-    filenames : list of str
-        List of lists of filenames for the groups of images.
-    """
-    for filename, file_group in zip(filenames, file_groups):
-        # Using the first filename as the reference image
-        reference_image = file_group[0]
-        print(f"Reference image: {reference_image}")
-
-        # Assuming Donuts class and measure_shift function are defined elsewhere
-        d = Donuts(reference_image)
-
-        for filename in file_group[1:]:
-            shift = d.measure_shift(filename)
-            sx = round(shift.x.value, 2)
-            sy = round(shift.y.value, 2)
-            print(f'{filename} shift X: {sx} Y: {sy}')
-            shifts = np.array([abs(sx), abs(sy)])
-
-            if np.sum(shifts > 50) > 0:
-                print(f'{filename} image shift too big X: {sx} Y: {sy}')
-                if not os.path.exists('failed_donuts'):
-                    os.mkdir('failed_donuts')
-                comm = f'mv {filename} failed_donuts/'
-                print(comm)
-                os.system(comm)
-
-
 def main():
     # set directory for the current night or use the current working directory
     directory = find_current_night_directory(base_path)
@@ -203,12 +136,6 @@ def main():
     prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
 
     for prefix, filenames in zip(prefixes, prefix_filenames):
-        # Check headers for CTYPE1 and CTYPE2
-        check_headers(directory, filenames)
-
-        # Check donuts for each group
-        check_donuts(prefix_filenames, filenames)
-
         # Calibrate images and get FITS files
         reduced_data, reduced_header, prefix_filenames = reduce_images(base_path, out_path)
 
@@ -222,7 +149,7 @@ def main():
         for filename in filenames:
             # Access the reduced data and header corresponding to the filename
             frame_data, frame_hdr = reduced_data_dict[filename]
-            print(f"Extracting photometry for {filename}")
+            print(f"Extracting photometry with prefix {prefix} for filename {filename}")
 
             wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
             wcs_header = {}
@@ -302,4 +229,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO - remove check headers and donuts from the main function
