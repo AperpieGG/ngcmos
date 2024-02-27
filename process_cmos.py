@@ -143,7 +143,7 @@ def main():
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
 
         # Calibrate images and get FITS files
-        reduced_data, reduced_header, _ = reduce_images(base_path, out_path, prefix_filenames)
+        reduced_data, reduced_header, prefix_filenames = reduce_images(base_path, out_path)
 
         # Convert reduced_data to a dictionary with filenames as keys
         reduced_data_dict = {filename: (data, header) for filename, data, header in
