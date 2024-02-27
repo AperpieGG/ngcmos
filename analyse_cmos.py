@@ -116,6 +116,7 @@ def plot_first_gaia_id_vs_jd_mid(table):
     plt.xlabel('JD Mid [days]')
     plt.ylabel('Flux_2 [e-]')
     plt.title(f'JD Mid vs Flux 2 for Gaia ID {first_gaia_id}')
+    plt.legend()
     plt.show()
 
 
