@@ -147,7 +147,7 @@ def main():
         # Iterate over filenames with the current prefix
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
-            print(f" >> Started of filename {filename}\n")
+            print(f" >> Started of filename {filename} << ")
             # Calibrate image and get FITS file
             reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
 
@@ -217,7 +217,7 @@ def main():
             else:
                 phot_table = vstack([phot_table, frame_output])
 
-            print(f" >> Finished of filename {filename}\n")
+            print(f" >> Finished of filename {filename} << ")
 
         # Save the photometry for the current prefix
         if phot_table is not None:
