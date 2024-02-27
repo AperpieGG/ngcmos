@@ -1,4 +1,9 @@
 #! /usr/bin/env python
+
+"""
+photometry.py - Extract photometry from a set of images
+This file has been archived and is not used in the current version of the pipeline
+"""
 import os
 import sys
 from datetime import datetime, timedelta
