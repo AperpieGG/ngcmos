@@ -1,11 +1,10 @@
+#! /usr/bin/env python
 import datetime
 import fnmatch
 import json
 import os
 from datetime import datetime, timedelta
-import numpy as np
 from astropy.io import fits
-from astropy.table import Table
 from matplotlib import pyplot as plt
 
 
