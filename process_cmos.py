@@ -147,7 +147,7 @@ def main():
         # Iterate over filenames with the current prefix
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
-            print(f" >> Started of filename {filename} << ")
+            print(f"Processing filename {filename}...\n")
             # Calibrate image and get FITS file
             reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
 
@@ -196,7 +196,7 @@ def main():
             dec = phot_cat['dec_deg_corr']
 
             frame_ids = [filename for i in range(len(phot_x))]
-            print(f"Found {len(frame_ids)} frames\n")
+            print(f"Found {len(frame_ids)} sources\n")
 
             frame_preamble = Table([frame_ids, phot_cat['gaia_id'], time_jd.value, phot_x, phot_y],
                                    names=("frame_id", "gaia_id", "jd_mid", "x", "y"))
@@ -217,7 +217,7 @@ def main():
             else:
                 phot_table = vstack([phot_table, frame_output])
 
-            print(f" >> Finished of filename {filename} << ")
+            print(f"Finished photometry for {filename}\n")
 
         # Save the photometry for the current prefix
         if phot_table is not None:
