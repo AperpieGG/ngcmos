@@ -158,6 +158,9 @@ def plot_noise_vs_sqrt_flux(table):
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
+
+    gaia_id_to_plot = table['gaia_id'][150]
+
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
@@ -169,7 +172,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
 
     relative_flux = flux_2 / trend
-    
+
     relative_err = fluxerr_2 / trend
 
     # Plot jd_mid vs flux_2
@@ -207,7 +210,8 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     if gaia_id_to_plot is None:
-        plot_noise_vs_sqrt_flux(phot_table)
+        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
+        # plot_noise_vs_sqrt_flux(phot_table)
     else:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
         # plot_lc(phot_table, gaia_id_to_plot, bin_size)
