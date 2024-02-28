@@ -156,7 +156,7 @@ def plot_noise_vs_sqrt_flux(table):
     plt.show()
 
 
-def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size=1):
+def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
@@ -164,25 +164,12 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size=1):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
-    fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
-    sky_2 = flux_w_sky_2 - flux_2
-    skyerr_2 = np.sqrt(fluxerr_2**2 + fluxerr_w_sky_2**2)
 
     # Detrend the light curve
     lc = wotan.flatten(jd_mid, flux_2, method='lowess', window_length=0.5, return_trend=True)
 
-    # Bin the data
-    jd_mid_binned = [np.mean(jd_mid[i:i+bin_size]) for i in range(0, len(jd_mid), bin_size)]
-    flux_2_binned = [np.mean(flux_2[i:i+bin_size]) for i in range(0, len(flux_2), bin_size)]
-    fluxerr_2_binned = [np.sqrt(np.sum(fluxerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr_2), bin_size)]
-    sky_2_binned = [np.mean(sky_2[i:i+bin_size]) for i in range(0, len(sky_2), bin_size)]
-    skyerr_2_binned = [np.sqrt(np.sum(skyerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(skyerr_2), bin_size)]
-
     # Plot jd_mid vs flux_2 with detrended light curve
-    plt.errorbar(jd_mid_binned, flux_2_binned - lc, yerr=fluxerr_2_binned, fmt='o', color='black', label='Detrended '
-                                                                                                         'Flux')
-    plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
+    plt.errorbar(jd_mid, flux_2 / lc, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
