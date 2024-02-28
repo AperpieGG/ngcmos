@@ -166,7 +166,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
     # Fit a first-order polynomial (straight line) to the data
-    f_init = models.Polynomial1D(degree=1)
+    f_init = models.Polynomial1D(degree=2)
     f_fit = fitting.LinearLSQFitter()
     fitted_model = f_fit(f_init, jd_mid, flux_2)
 
