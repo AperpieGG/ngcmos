@@ -193,6 +193,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.tight_layout()
     plt.show()
 
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -220,8 +221,8 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
         # plot_noise_vs_sqrt_flux(phot_table)
     else:
-        # plot_lc_with_detrend(phot_table, gaia_id_to_plot)
-        plot_lc(phot_table, gaia_id_to_plot, bin_size)
+        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
+        # plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
     plt.show()
 
