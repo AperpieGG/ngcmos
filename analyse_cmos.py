@@ -8,9 +8,9 @@ import argparse
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
-from wotan import flatten
 from matplotlib import pyplot as plt
 from utils import plot_images
+from astropy.modeling import models, fitting
 
 
 def load_config(filename):
@@ -165,15 +165,16 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
-    # Fit a second-order polynomial
-    coeffs = np.polyfit(jd_mid, flux_2, 2)
-    trend = np.polyval(coeffs, jd_mid)
+    # Fit a first-order polynomial (straight line) to the data
+    f_init = models.Polynomial1D(degree=1)
+    f_fit = fitting.LinearLSQFitter()
+    fitted_model = f_fit(f_init, jd_mid, flux_2)
 
-    # Detrend the light curve
-    detrended_flux = flux_2 - trend
+    # Subtract the fitted polynomial from the original flux to obtain the detrended flux
+    detrended_flux = flux_2 - fitted_model(jd_mid)
 
     # Plot jd_mid vs detrended flux
-    plt.plot(jd_mid, trend, color='red', label='Trend')
+    plt.plot(jd_mid, fitted_model(jd_mid), color='red', label='Trend')
     plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
 
     # Add labels and title
@@ -182,6 +183,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
     plt.legend()
     plt.show()
+
 
 def main():
     # Parse command-line arguments
