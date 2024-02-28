@@ -165,24 +165,29 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
 
 
 def plot_noise_vs_sqrt_flux(table, bin_size=10):
-    # Get unique frame_ids
-    unique_frame_ids = set(table['frame_id'])
+    # Get unique Gaia IDs
+    unique_gaia_ids = set(table['gaia_id'])
 
-    for frame_id in unique_frame_ids:
-        # Select rows corresponding to the current frame_id
-        mask = table['frame_id'] == frame_id
-        frame_data = table[mask]
+    for gaia_id in unique_gaia_ids:
+        # Select rows corresponding to the current Gaia ID
+        gaia_id_data = table[table['gaia_id'] == gaia_id]
 
         # Get flux and flux errors
-        flux = frame_data['flux_2']
-        fluxerr = frame_data['fluxerr_2']
+        flux = gaia_id_data['flux_2']
+        fluxerr = gaia_id_data['fluxerr_2']
 
         # Bin the data
         flux_binned = [np.mean(flux[i:i+bin_size]) for i in range(0, len(flux), bin_size)]
         fluxerr_binned = [np.sqrt(np.sum(fluxerr[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr), bin_size)]
 
         # Plot square root of flux vs noise
-        plt.errorbar(np.sqrt(flux_binned), fluxerr_binned, fmt='o', label=f'Frame {frame_id}')
+        plt.errorbar(np.sqrt(flux_binned), fluxerr_binned, fmt='o', label=f'Gaia ID {gaia_id}')
+
+    # Add labels and legend
+    plt.xlabel('Square Root of Flux')
+    plt.ylabel('Noise')
+    plt.title('Noise vs Square Root of Flux')
+    plt.show()
 
     # Add labels and legend
     plt.xlabel('Square Root of Flux')
