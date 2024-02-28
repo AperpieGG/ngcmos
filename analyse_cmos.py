@@ -164,31 +164,25 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     plt.show()
 
 
-def plot_noise_vs_sqrt_flux(table, bin_size=60):
-    # Get unique gaia_ids
-    unique_gaia_ids = set(table['gaia_id'])
+def plot_noise_vs_sqrt_flux(table):
+    # Get unique frame_ids
+    unique_frame_ids = set(table['frame_id'])
 
-    for gaia_id in unique_gaia_ids:
-        # Select rows corresponding to the current gaia_id
-        mask = table['gaia_id'] == gaia_id
-        gaia_id_data = table[mask]
+    for frame_id in unique_frame_ids:
+        # Select rows corresponding to the current frame_id
+        mask = table['frame_id'] == frame_id
+        frame_data = table[mask]
 
-        # Get flux and flux errors
-        flux = gaia_id_data['flux_2']
-        fluxerr = gaia_id_data['fluxerr_2']
+        # Get flux and flux errors for the current frame_id
+        flux = frame_data['flux_2']
+        fluxerr = frame_data['fluxerr_2']
 
-        # Check if flux values are non-negative
-        valid_indices = flux >= 0
+        # Plot each flux_2 value vs its square root
+        for flux_value, fluxerr_value in zip(flux, fluxerr):
+            if flux_value >= 0:  # Check if flux value is non-negative
+                plt.errorbar(flux_value, np.sqrt(flux_value), yerr=fluxerr_value, fmt='o', color='black')
 
-        # Bin the data
-        flux_binned = [np.mean(flux[i:i+bin_size]) for i in range(0, len(flux), bin_size) if valid_indices[i:i+bin_size].all()]
-        fluxerr_binned = [np.sqrt(np.sum(fluxerr[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr), bin_size) if valid_indices[i:i+bin_size].all()]
-
-        # Plot flux vs square root of flux
-        plt.errorbar(flux_binned, np.sqrt(flux_binned), yerr=fluxerr_binned, fmt='o',
-                     label=f'Gaia ID {gaia_id}', color='black')
-
-    # Add labels and legend
+    # Add labels and title
     plt.xlabel('Flux [e-]')
     plt.ylabel('Square Root of Flux')
     plt.xscale('log')
@@ -223,7 +217,7 @@ def main():
     if gaia_id_to_plot is None:
         plot_noise_vs_sqrt_flux(phot_table, bin_size)
     else:
-        plot_lc(phot_table, gaia_id_to_plot, bin_size)
+        plot_lc(phot_table)
 
     plt.show()
 
