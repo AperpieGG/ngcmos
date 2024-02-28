@@ -180,7 +180,8 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size=1):
     skyerr_2_binned = [np.sqrt(np.sum(skyerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(skyerr_2), bin_size)]
 
     # Plot jd_mid vs flux_2 with detrended light curve
-    plt.errorbar(jd_mid_binned, flux_2_binned - lc, yerr=fluxerr_2_binned, fmt='o', color='black', label='Detrended Flux')
+    plt.errorbar(jd_mid_binned, flux_2_binned - lc, yerr=fluxerr_2_binned, fmt='o', color='black', label='Detrended '
+                                                                                                         'Flux')
     plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
 
     # Add labels and title
