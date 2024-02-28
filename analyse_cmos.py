@@ -159,7 +159,7 @@ def plot_noise_vs_sqrt_flux(table):
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
 
-    gaia_id_to_plot = table['gaia_id'][150]
+    # gaia_id_to_plot = table['gaia_id'][150]
 
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
