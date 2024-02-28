@@ -55,7 +55,7 @@ def plot_images():
     plt.rcParams['ytick.minor.left'] = True
 
     # Font and fontsize
-    plt.rcParams['font.family'] = 'Times New Roman'
+    plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.size'] = 14
 
     # Legend
@@ -156,6 +156,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=10):
     plt.legend()
     plt.show()
 
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -176,7 +177,7 @@ def main():
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
-    plot_lc(phot_table, gaia_id_to_plot, bin_size=10)
+    plot_lc(phot_table, gaia_id_to_plot, bin_size=6)
 
 
 if __name__ == "__main__":
