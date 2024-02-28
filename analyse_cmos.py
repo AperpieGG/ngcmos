@@ -215,9 +215,9 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     if gaia_id_to_plot is None:
-        plot_noise_vs_sqrt_flux(phot_table, bin_size)
+        plot_noise_vs_sqrt_flux(phot_table)
     else:
-        plot_lc(phot_table)
+        plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
     plt.show()
 
