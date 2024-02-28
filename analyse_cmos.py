@@ -140,8 +140,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    sky_2 = gaia_id_data['sky_2']
-    skyerr_2 = gaia_id_data['skyerr_2']
+    flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
+    fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
+    sky_2 = flux_2 - flux_w_sky_2
+    skyerr_2 = np.sqrt(fluxerr_2**2 + fluxerr_w_sky_2**2)
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i+bin_size]) for i in range(0, len(jd_mid), bin_size)]
