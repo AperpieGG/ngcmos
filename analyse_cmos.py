@@ -174,8 +174,6 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     detrended_flux = flux_2 - fitted_model(jd_mid)
 
     # Plot jd_mid vs detrended flux
-    plt.plot(jd_mid, fitted_model(jd_mid), color='red', label='Trend')
-
     plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
 
     # Add labels and title
