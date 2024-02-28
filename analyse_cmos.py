@@ -166,7 +166,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
     # Fit a first-order polynomial (straight line) to the data
-    f_init = models.Polynomial1D(degree=2)
+    f_init = models.Polynomial1D(degree=1)
     f_fit = fitting.LinearLSQFitter()
     fitted_model = f_fit(f_init, jd_mid, flux_2)
 
@@ -175,6 +175,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # Plot jd_mid vs detrended flux
     plt.plot(jd_mid, fitted_model(jd_mid), color='red', label='Trend')
+
     plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
 
     # Add labels and title
