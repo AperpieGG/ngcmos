@@ -206,8 +206,8 @@ def main():
     print(f"Photometry files: {phot_files}")
 
     # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[0]}...")
-    phot_table = read_phot_file(phot_files[0])
+    print(f"Plotting the first photometry file {phot_files[1]}...")
+    phot_table = read_phot_file(phot_files[1])
 
     if gaia_id_to_plot is None:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
