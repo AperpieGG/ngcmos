@@ -164,7 +164,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     plt.show()
 
 
-def plot_noise_vs_sqrt_flux(table, bin_size=10):
+def plot_noise_vs_sqrt_flux(table, bin_size=60):
     # Get unique gaia_ids
     unique_gaia_ids = set(table['gaia_id'])
 
@@ -191,7 +191,6 @@ def plot_noise_vs_sqrt_flux(table, bin_size=10):
     plt.xlabel('Flux [e-]')
     plt.ylabel('Square Root of Flux')
     plt.title('Square Root of Flux vs Flux')
-    plt.legend()
     plt.show()
 
 
