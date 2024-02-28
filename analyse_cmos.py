@@ -165,34 +165,32 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
 
 
 def plot_noise_vs_sqrt_flux(table, bin_size=10):
-    # Get unique Gaia IDs
+    # Get unique gaia_ids
     unique_gaia_ids = set(table['gaia_id'])
 
     for gaia_id in unique_gaia_ids:
-        # Select rows corresponding to the current Gaia ID
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
+        # Select rows corresponding to the current gaia_id
+        mask = table['gaia_id'] == gaia_id
+        gaia_id_data = table[mask]
 
         # Get flux and flux errors
         flux = gaia_id_data['flux_2']
         fluxerr = gaia_id_data['fluxerr_2']
 
-        # Bin the data
-        flux_binned = [np.mean(flux[i:i+bin_size]) for i in range(0, len(flux), bin_size)]
-        fluxerr_binned = [np.sqrt(np.sum(fluxerr[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr), bin_size)]
+        # Check if flux values are non-negative
+        valid_indices = flux >= 0
 
-        # Plot square root of flux vs noise
+        # Bin the data
+        flux_binned = [np.mean(flux[i:i+bin_size]) for i in range(0, len(flux), bin_size) if valid_indices[i:i+bin_size].all()]
+        fluxerr_binned = [np.sqrt(np.sum(fluxerr[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr), bin_size) if valid_indices[i:i+bin_size].all()]
+
+        # Plot flux vs square root of flux
         plt.errorbar(flux_binned, np.sqrt(flux_binned), yerr=fluxerr_binned, fmt='o', label=f'Gaia ID {gaia_id}')
 
     # Add labels and legend
-    plt.xlabel('Square Root of Flux')
-    plt.ylabel('Noise')
-    plt.title('Noise vs Square Root of Flux')
-    plt.show()
-
-    # Add labels and legend
-    plt.xlabel('Square Root of Flux')
-    plt.ylabel('Noise')
-    plt.title('Noise vs Square Root of Flux')
+    plt.xlabel('Flux [e-]')
+    plt.ylabel('Square Root of Flux')
+    plt.title('Square Root of Flux vs Flux')
     plt.legend()
     plt.show()
 
