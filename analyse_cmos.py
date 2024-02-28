@@ -132,7 +132,7 @@ def read_phot_file(filename):
         return None
 
 
-def plot_lc(table, gaia_id_to_plot):
+def plot_lc(table, gaia_id_to_plot, bin_size=10):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
@@ -140,14 +140,14 @@ def plot_lc(table, gaia_id_to_plot):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
-    fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
-    sky_2 = flux_w_sky_2 - flux_2
-    skyerr_2 = np.sqrt(fluxerr_2 ** 2 + fluxerr_w_sky_2 ** 2)
+
+    # Bin the data
+    jd_mid_binned = [np.mean(jd_mid[i:i+bin_size]) for i in range(0, len(jd_mid), bin_size)]
+    flux_2_binned = [np.mean(flux_2[i:i+bin_size]) for i in range(0, len(flux_2), bin_size)]
+    fluxerr_2_binned = [np.sqrt(np.sum(fluxerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr_2), bin_size)]
 
     # Plot jd_mid vs flux_2
-    plt.errorbar(jd_mid, flux_2, yerr=fluxerr_2, fmt='o', color='black', label='Flux 2')
-    plt.errorbar(jd_mid, sky_2, yerr=skyerr_2, fmt='o', color='red', label='Sky bgk 2')
+    plt.errorbar(jd_mid_binned, flux_2_binned, yerr=fluxerr_2_binned, fmt='o', color='black', label='Flux 2')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
@@ -155,7 +155,6 @@ def plot_lc(table, gaia_id_to_plot):
     plt.title(f'LC for Gaia ID {gaia_id_to_plot}')
     plt.legend()
     plt.show()
-
 
 def main():
     # Parse command-line arguments
@@ -177,7 +176,7 @@ def main():
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
-    plot_lc(phot_table, gaia_id_to_plot)
+    plot_lc(phot_table, gaia_id_to_plot, bin_size=10)
 
 
 if __name__ == "__main__":
