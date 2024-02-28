@@ -170,8 +170,8 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # Plot jd_mid vs detrended flux
     # plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
-    plt.plot(jd_mid, trend, color='red', label='Trend')
     plt.plot(jd_mid, flux_2, 'o', color='black', label='Flux 2')
+    plt.plot(jd_mid, trend, color='red', label='Trend')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
