@@ -107,11 +107,12 @@ def plot_lc(table):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
     fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
-    sky_2 = fluxerr_w_sky_2 - flux_2
+    sky_2 = flux_w_sky_2 - flux_2
+    skyerr_2 = np.sqrt(fluxerr_2 ** 2 + fluxerr_w_sky_2 ** 2)
 
     # Plot jd_mid vs flux_2
     plt.errorbar(jd_mid, flux_2, yerr=fluxerr_2, fmt='o', color='black', label='Flux 2')
-    plt.errorbar(jd_mid, sky_2, yerr=fluxerr_w_sky_2, fmt='o', color='red', label='Sky bgk 2')
+    plt.errorbar(jd_mid, sky_2, yerr=skyerr_2, fmt='o', color='red', label='Sky bgk 2')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
