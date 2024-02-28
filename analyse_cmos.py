@@ -142,7 +142,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
     fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
-    sky_2 = flux_2 - flux_w_sky_2
+    sky_2 = flux_w_sky_2 - flux_2
     skyerr_2 = np.sqrt(fluxerr_2**2 + fluxerr_w_sky_2**2)
 
     # Bin the data
