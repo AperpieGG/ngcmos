@@ -94,7 +94,7 @@ def read_phot_file(filename):
         return None
 
 
-def plot_first_gaia_id_vs_jd_mid(table):
+def plot_lc(table):
     # Get the first gaia_id from the first row
     first_gaia_id = table['gaia_id'][700]
 
@@ -131,7 +131,7 @@ def main():
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
-    plot_first_gaia_id_vs_jd_mid(phot_table)
+    plot_lc(phot_table)
 
 
 if __name__ == "__main__":
