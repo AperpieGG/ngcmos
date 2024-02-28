@@ -168,9 +168,13 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     # use wotan
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
 
-    plt.plot(jd_mid, flux_2, 'o', color='black', label='Flux 2')
-    plt.plot(jd_mid, trend, color='red', label='Trend')
+    relative_flux = flux_2 / trend
     
+    relative_err = fluxerr_2 / trend
+
+    # Plot jd_mid vs flux_2
+    plt.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Flux 2')
+
     # Add labels and title
     plt.xlabel('MJD [days]')
     plt.ylabel('Detrended Flux [e-]')
