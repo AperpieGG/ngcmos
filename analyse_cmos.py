@@ -187,7 +187,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Plot detrended flux
     ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
-    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}')
+    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax2.legend()
 
     plt.tight_layout()
