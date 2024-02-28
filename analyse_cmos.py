@@ -164,6 +164,34 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     plt.show()
 
 
+def plot_noise_vs_sqrt_flux(table, bin_size=10):
+    # Get unique frame_ids
+    unique_frame_ids = set(table['frame_id'])
+
+    for frame_id in unique_frame_ids:
+        # Select rows corresponding to the current frame_id
+        mask = table['frame_id'] == frame_id
+        frame_data = table[mask]
+
+        # Get flux and flux errors
+        flux = frame_data['flux_2']
+        fluxerr = frame_data['fluxerr_2']
+
+        # Bin the data
+        flux_binned = [np.mean(flux[i:i+bin_size]) for i in range(0, len(flux), bin_size)]
+        fluxerr_binned = [np.sqrt(np.sum(fluxerr[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr), bin_size)]
+
+        # Plot square root of flux vs noise
+        plt.errorbar(np.sqrt(flux_binned), fluxerr_binned, fmt='o', label=f'Frame {frame_id}')
+
+    # Add labels and legend
+    plt.xlabel('Square Root of Flux')
+    plt.ylabel('Noise')
+    plt.title('Noise vs Square Root of Flux')
+    plt.legend()
+    plt.show()
+
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -187,6 +215,11 @@ def main():
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
     plot_lc(phot_table, gaia_id_to_plot, bin_size)
+
+    if 'bin' not in vars(args):
+        plot_noise_vs_sqrt_flux(phot_table, bin_size)
+
+    plt.show()
 
 
 if __name__ == "__main__":
