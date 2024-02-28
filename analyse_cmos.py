@@ -10,7 +10,7 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import plot_images
-from astropy.modeling import models, fitting
+from wotan import flatten
 
 
 def load_config(filename):
@@ -165,17 +165,12 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
-    # Fit a first-order polynomial (straight line) to the data
-    f_init = models.Polynomial1D(degree=1)
-    f_fit = fitting.LinearLSQFitter()
-    fitted_model = f_fit(f_init, jd_mid, flux_2)
+    # use wotan
+    detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
 
-    # Subtract the fitted polynomial from the original flux to obtain the detrended flux
-    detrended_flux = flux_2 - fitted_model(jd_mid)
-
-    # Plot jd_mid vs detrended flux
-    plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
-
+    plt.plot(jd_mid, flux_2, 'o', color='black', label='Flux 2')
+    plt.plot(jd_mid, trend, color='red', label='Trend')
+    
     # Add labels and title
     plt.xlabel('MJD [days]')
     plt.ylabel('Detrended Flux [e-]')
