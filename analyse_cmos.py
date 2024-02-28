@@ -181,7 +181,7 @@ def plot_noise_vs_sqrt_flux(table, bin_size=10):
         fluxerr_binned = [np.sqrt(np.sum(fluxerr[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr), bin_size)]
 
         # Plot square root of flux vs noise
-        plt.errorbar(np.sqrt(flux_binned), fluxerr_binned, fmt='o', label=f'Gaia ID {gaia_id}')
+        plt.errorbar(flux_binned, np.sqrt(flux_binned), yerr=fluxerr_binned, fmt='o', label=f'Gaia ID {gaia_id}')
 
     # Add labels and legend
     plt.xlabel('Square Root of Flux')
