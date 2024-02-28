@@ -8,7 +8,7 @@ import argparse
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
-import wotan
+from wotan import flatten
 from matplotlib import pyplot as plt
 from utils import plot_images
 
@@ -166,12 +166,14 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
     # Detrend the light curve
-    detrended_flux, trend = wotan.flatten(jd_mid, flux_2, method='mean', window_length=0.5, return_trend=True)
+    detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.75, return_trend=True)
+    detrended_flux_1, trend_1 = flatten(jd_mid, flux_2, method='biweight', window_length=0.75, return_trend=True)
 
     # Plot jd_mid vs detrended flux
     # plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
     plt.plot(jd_mid, trend, color='red', label='Trend')
     plt.plot(jd_mid, flux_2, 'o', color='black', label='Flux 2')
+    plt.plot(jd_mid, detrended_flux_1, 'o', color='blue', label='Detrended Flux 1')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
