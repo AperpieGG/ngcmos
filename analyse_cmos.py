@@ -158,9 +158,6 @@ def plot_noise_vs_sqrt_flux(table):
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
-
-    # gaia_id_to_plot = table['gaia_id'][150]
-
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
@@ -168,22 +165,31 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
-    # use wotan
+    # Use wotan to detrend the light curve
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
 
     relative_flux = flux_2 / trend
-
     relative_err = fluxerr_2 / trend
 
-    # Plot jd_mid vs flux_2
-    plt.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Flux 2')
+    # Create subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
-    # Add labels and title
-    plt.xlabel('MJD [days]')
-    plt.ylabel('Detrended Flux [e-]')
-    plt.title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
-    plt.legend()
+    # Plot detrended flux
+    ax1.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
+    ax1.set_ylabel('Detrended Flux [e-]')
+    ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
+    ax1.legend()
+
+    # Plot raw flux with wotan model
+    ax2.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
+    ax2.plot(jd_mid, trend, color='red', label='Wotan Model')
+    ax2.set_xlabel('MJD [days]')
+    ax2.set_ylabel('Flux [e-]')
+    ax2.legend()
+
+    plt.tight_layout()
     plt.show()
+
 
 
 def main():
@@ -206,8 +212,8 @@ def main():
     print(f"Photometry files: {phot_files}")
 
     # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[1]}...")
-    phot_table = read_phot_file(phot_files[1])
+    print(f"Plotting the first photometry file {phot_files[0]}...")
+    phot_table = read_phot_file(phot_files[0])
 
     if gaia_id_to_plot is None:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
