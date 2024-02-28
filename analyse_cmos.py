@@ -219,10 +219,11 @@ def main():
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
-    plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
-    if vars(args) is None:
+    if gaia_id_to_plot is None:
         plot_noise_vs_sqrt_flux(phot_table, bin_size)
+    else:
+        plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
     plt.show()
 
