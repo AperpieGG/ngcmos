@@ -1,8 +1,10 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
+
 import datetime
 import json
 import os
 import fnmatch
+import argparse
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
@@ -29,6 +31,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
 
 
 def plot_images():
+    # Set plot parameters
     plt.rcParams['figure.dpi'] = 100
     plt.rcParams['xtick.top'] = True
     plt.rcParams['xtick.labeltop'] = False
@@ -52,12 +55,10 @@ def plot_images():
     plt.rcParams['ytick.minor.left'] = True
 
     # Font and fontsize
-
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['font.size'] = 14
 
     # Legend
-
     plt.rcParams['legend.frameon'] = True
     plt.rcParams['legend.framealpha'] = 0.8
     plt.rcParams['legend.loc'] = 'best'
@@ -131,12 +132,9 @@ def read_phot_file(filename):
         return None
 
 
-def plot_lc(table):
-    # Get the first gaia_id from the first row
-    first_gaia_id = table['gaia_id'][950]
-
-    # Select rows with the same gaia_id as the first one
-    gaia_id_data = table[table['gaia_id'] == first_gaia_id]
+def plot_lc(table, gaia_id_to_plot):
+    # Select rows with the specified Gaia ID
+    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
     # Get jd_mid and flux_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
@@ -154,14 +152,19 @@ def plot_lc(table):
     # Add labels and title
     plt.xlabel('MJD [days]')
     plt.ylabel('Flux 2 [e-]')
-    plt.title(f'LC for Gaia ID {first_gaia_id}')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot}')
     plt.legend()
     plt.show()
 
 
 def main():
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('gaia_id', type=int, help='The Gaia ID of the star to plot')
+    args = parser.parse_args()
+    gaia_id_to_plot = args.gaia_id
 
-    # set plot parameters
+    # Set plot parameters
     plot_images()
 
     # Get the current night directory
@@ -174,7 +177,7 @@ def main():
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
-    plot_lc(phot_table)
+    plot_lc(phot_table, gaia_id_to_plot)
 
 
 if __name__ == "__main__":
