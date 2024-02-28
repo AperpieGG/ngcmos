@@ -96,7 +96,7 @@ def read_phot_file(filename):
 
 def plot_lc(table):
     # Get the first gaia_id from the first row
-    first_gaia_id = table['gaia_id'][700]
+    first_gaia_id = table['gaia_id'][750]
 
     # Select rows with the same gaia_id as the first one
     gaia_id_data = table[table['gaia_id'] == first_gaia_id]
@@ -107,15 +107,16 @@ def plot_lc(table):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
     fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
+    sky_2 = fluxerr_w_sky_2 - flux_2
 
     # Plot jd_mid vs flux_2
     plt.errorbar(jd_mid, flux_2, yerr=fluxerr_2, fmt='o', color='black', label='Flux 2')
-    plt.errorbar(jd_mid, flux_w_sky_2, yerr=fluxerr_w_sky_2, fmt='o', color='red', label='Flux Sky Bgk 2')
+    plt.errorbar(jd_mid, sky_2, yerr=fluxerr_w_sky_2, fmt='o', color='red', label='Sky bgk 2')
 
     # Add labels and title
-    plt.xlabel('JD Mid [days]')
-    plt.ylabel('Flux_2 [e-]')
-    plt.title(f'JD Mid vs Flux 2 for Gaia ID {first_gaia_id}')
+    plt.xlabel('MJD [days]')
+    plt.ylabel('Flux 2 [e-]')
+    plt.title(f'LC for Gaia ID {first_gaia_id}')
     plt.legend()
     plt.show()
 
