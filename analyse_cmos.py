@@ -160,6 +160,10 @@ def plot_lc(table):
 
 
 def main():
+
+    # set plot parameters
+    plot_images()
+
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
