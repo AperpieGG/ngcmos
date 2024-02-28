@@ -216,7 +216,7 @@ def main():
     phot_table = read_phot_file(phot_files[0])
     plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
-    if 'bin' not in vars(args):
+    if vars(args) is None:
         plot_noise_vs_sqrt_flux(phot_table, bin_size)
 
     plt.show()
