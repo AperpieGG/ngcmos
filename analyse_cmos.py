@@ -195,7 +195,7 @@ def plot_noise_vs_sqrt_flux(table, bin_size=10):
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('gaia_id', type=int, help='The Gaia ID of the star to plot')
+    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     gaia_id_to_plot = args.gaia_id
@@ -216,7 +216,7 @@ def main():
     phot_table = read_phot_file(phot_files[0])
     plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
-    if 'bin' and 'gaia_id' not in vars(args):
+    if 'bin' not in vars(args):
         plot_noise_vs_sqrt_flux(phot_table, bin_size)
 
     plt.show()
