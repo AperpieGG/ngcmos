@@ -8,8 +8,9 @@ import argparse
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
-from astropy.table import Table
+import wotan
 from matplotlib import pyplot as plt
+from utils import plot_images
 
 
 def load_config(filename):
@@ -28,42 +29,6 @@ out_paths = config["out_paths"]
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
         break
-
-
-def plot_images():
-    # Set plot parameters
-    plt.rcParams['figure.dpi'] = 100
-    plt.rcParams['xtick.top'] = True
-    plt.rcParams['xtick.labeltop'] = False
-    plt.rcParams['xtick.labelbottom'] = True
-    plt.rcParams['xtick.bottom'] = True
-    plt.rcParams['xtick.direction'] = 'in'
-    plt.rcParams['ytick.direction'] = 'in'
-    plt.rcParams['xtick.minor.visible'] = True
-    plt.rcParams['xtick.major.top'] = True
-    plt.rcParams['xtick.minor.top'] = True
-    plt.rcParams['xtick.minor.bottom'] = True
-    plt.rcParams['xtick.alignment'] = 'center'
-
-    plt.rcParams['ytick.left'] = True
-    plt.rcParams['ytick.labelleft'] = True
-    plt.rcParams['ytick.right'] = True
-    plt.rcParams['ytick.minor.visible'] = True
-    plt.rcParams['ytick.major.right'] = True
-    plt.rcParams['ytick.major.left'] = True
-    plt.rcParams['ytick.minor.right'] = True
-    plt.rcParams['ytick.minor.left'] = True
-
-    # Font and fontsize
-    plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.size'] = 14
-
-    # Legend
-    plt.rcParams['legend.frameon'] = True
-    plt.rcParams['legend.framealpha'] = 0.8
-    plt.rcParams['legend.loc'] = 'best'
-    plt.rcParams['legend.fancybox'] = True
-    plt.rcParams['legend.fontsize'] = 14
 
 
 def find_current_night_directory(directory):
@@ -191,6 +156,41 @@ def plot_noise_vs_sqrt_flux(table):
     plt.show()
 
 
+def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size=1):
+    # Select rows with the specified Gaia ID
+    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
+
+    # Get jd_mid, flux_2, and sky_2 for the selected rows
+    jd_mid = gaia_id_data['jd_mid']
+    flux_2 = gaia_id_data['flux_2']
+    fluxerr_2 = gaia_id_data['fluxerr_2']
+    flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
+    fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
+    sky_2 = flux_w_sky_2 - flux_2
+    skyerr_2 = np.sqrt(fluxerr_2**2 + fluxerr_w_sky_2**2)
+
+    # Detrend the light curve
+    lc = wotan.flatten(jd_mid, flux_2, method='lowess', window_length=0.5, return_trend=True)
+
+    # Bin the data
+    jd_mid_binned = [np.mean(jd_mid[i:i+bin_size]) for i in range(0, len(jd_mid), bin_size)]
+    flux_2_binned = [np.mean(flux_2[i:i+bin_size]) for i in range(0, len(flux_2), bin_size)]
+    fluxerr_2_binned = [np.sqrt(np.sum(fluxerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr_2), bin_size)]
+    sky_2_binned = [np.mean(sky_2[i:i+bin_size]) for i in range(0, len(sky_2), bin_size)]
+    skyerr_2_binned = [np.sqrt(np.sum(skyerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(skyerr_2), bin_size)]
+
+    # Plot jd_mid vs flux_2 with detrended light curve
+    plt.errorbar(jd_mid_binned, flux_2_binned - lc, yerr=fluxerr_2_binned, fmt='o', color='black', label='Detrended Flux')
+    plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
+
+    # Add labels and title
+    plt.xlabel('MJD [days]')
+    plt.ylabel('Detrended Flux [e-]')
+    plt.title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
+    plt.legend()
+    plt.show()
+
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -217,6 +217,7 @@ def main():
     if gaia_id_to_plot is None:
         plot_noise_vs_sqrt_flux(phot_table)
     else:
+        plot_lc_with_detrend(phot_table, gaia_id_to_plot, bin_size)
         plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
     plt.show()
