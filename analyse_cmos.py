@@ -165,20 +165,23 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
+    # Fit a second-order polynomial
+    coeffs = np.polyfit(jd_mid, flux_2, 2)
+    trend = np.polyval(coeffs, jd_mid)
+
     # Detrend the light curve
-    detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
+    detrended_flux = flux_2 - trend
 
     # Plot jd_mid vs detrended flux
-    # plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
-    plt.plot(jd_mid, flux_2, 'o', color='black', label='Flux 2')
     plt.plot(jd_mid, trend, color='red', label='Trend')
+    plt.errorbar(jd_mid, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
     plt.ylabel('Detrended Flux [e-]')
     plt.title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
+    plt.legend()
     plt.show()
-
 
 def main():
     # Parse command-line arguments
