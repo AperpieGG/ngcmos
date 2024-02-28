@@ -132,26 +132,31 @@ def read_phot_file(filename):
         return None
 
 
-def plot_lc(table, gaia_id_to_plot, bin_size=10):
+def plot_lc(table, gaia_id_to_plot, bin_size=1):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
-    # Get jd_mid and flux_2 for the selected rows
+    # Get jd_mid, flux_2, and sky_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
+    sky_2 = gaia_id_data['sky_2']
+    skyerr_2 = gaia_id_data['skyerr_2']
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i+bin_size]) for i in range(0, len(jd_mid), bin_size)]
     flux_2_binned = [np.mean(flux_2[i:i+bin_size]) for i in range(0, len(flux_2), bin_size)]
     fluxerr_2_binned = [np.sqrt(np.sum(fluxerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr_2), bin_size)]
+    sky_2_binned = [np.mean(sky_2[i:i+bin_size]) for i in range(0, len(sky_2), bin_size)]
+    skyerr_2_binned = [np.sqrt(np.sum(skyerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(skyerr_2), bin_size)]
 
     # Plot jd_mid vs flux_2
     plt.errorbar(jd_mid_binned, flux_2_binned, yerr=fluxerr_2_binned, fmt='o', color='black', label='Flux 2')
+    plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
-    plt.ylabel('Flux 2 [e-]')
+    plt.ylabel('Flux [e-]')
     plt.title(f'LC for Gaia ID {gaia_id_to_plot}')
     plt.legend()
     plt.show()
@@ -161,8 +166,10 @@ def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('gaia_id', type=int, help='The Gaia ID of the star to plot')
+    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     gaia_id_to_plot = args.gaia_id
+    bin_size = args.bin
 
     # Set plot parameters
     plot_images()
@@ -177,7 +184,7 @@ def main():
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
-    plot_lc(phot_table, gaia_id_to_plot, bin_size=6)
+    plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
 
 if __name__ == "__main__":
