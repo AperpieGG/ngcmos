@@ -205,8 +205,8 @@ def main():
     if gaia_id_to_plot is None:
         plot_noise_vs_sqrt_flux(phot_table)
     else:
-        plot_lc_with_detrend(phot_table, gaia_id_to_plot, bin_size)
-        plot_lc(phot_table, gaia_id_to_plot, bin_size)
+        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
+        # plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
     plt.show()
 
