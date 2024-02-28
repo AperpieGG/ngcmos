@@ -108,14 +108,16 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
     fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
     sky_2 = flux_w_sky_2 - flux_2
-    skyerr_2 = np.sqrt(fluxerr_2**2 + fluxerr_w_sky_2**2)
+    skyerr_2 = np.sqrt(fluxerr_2 ** 2 + fluxerr_w_sky_2 ** 2)
 
     # Bin the data
-    jd_mid_binned = [np.mean(jd_mid[i:i+bin_size]) for i in range(0, len(jd_mid), bin_size)]
-    flux_2_binned = [np.mean(flux_2[i:i+bin_size]) for i in range(0, len(flux_2), bin_size)]
-    fluxerr_2_binned = [np.sqrt(np.sum(fluxerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(fluxerr_2), bin_size)]
-    sky_2_binned = [np.mean(sky_2[i:i+bin_size]) for i in range(0, len(sky_2), bin_size)]
-    skyerr_2_binned = [np.sqrt(np.sum(skyerr_2[i:i+bin_size]**2)) / bin_size for i in range(0, len(skyerr_2), bin_size)]
+    jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
+    flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
+    fluxerr_2_binned = [np.sqrt(np.sum(fluxerr_2[i:i + bin_size] ** 2)) / bin_size for i in
+                        range(0, len(fluxerr_2), bin_size)]
+    sky_2_binned = [np.mean(sky_2[i:i + bin_size]) for i in range(0, len(sky_2), bin_size)]
+    skyerr_2_binned = [np.sqrt(np.sum(skyerr_2[i:i + bin_size] ** 2)) / bin_size for i in
+                       range(0, len(skyerr_2), bin_size)]
 
     # Plot jd_mid vs flux_2
     plt.errorbar(jd_mid_binned, flux_2_binned, yerr=fluxerr_2_binned, fmt='o', color='black', label='Flux 2')
@@ -174,22 +176,21 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
-    # Plot detrended flux
-    ax1.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
-    ax1.set_ylabel('Detrended Flux [e-]')
-    ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
+    # Plot raw flux with wotan model
+    ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
+    ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
+    ax1.set_xlabel('MJD [days]')
+    ax1.set_ylabel('Flux [e-]')
     ax1.legend()
 
-    # Plot raw flux with wotan model
-    ax2.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
-    ax2.plot(jd_mid, trend, color='red', label='Wotan Model')
-    ax2.set_xlabel('MJD [days]')
-    ax2.set_ylabel('Flux [e-]')
+    # Plot detrended flux
+    ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
+    ax2.set_ylabel('Detrended Flux [e-]')
+    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
     ax2.legend()
 
     plt.tight_layout()
     plt.show()
-
 
 
 def main():
@@ -219,8 +220,8 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
         # plot_noise_vs_sqrt_flux(phot_table)
     else:
-        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
-        # plot_lc(phot_table, gaia_id_to_plot, bin_size)
+        # plot_lc_with_detrend(phot_table, gaia_id_to_plot)
+        plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
     plt.show()
 
