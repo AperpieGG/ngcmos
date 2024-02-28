@@ -160,22 +160,21 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
-    # Get jd_mid, flux_2, and sky_2 for the selected rows
+    # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
 
     # Detrend the light curve
-    lc = wotan.flatten(jd_mid, flux_2, method='lowess', window_length=0.5, return_trend=True)
+    jd, detrended_flux, trend = wotan.flatten(jd_mid, flux_2, method='lowess', window_length=0.5, return_trend=True)
 
-    # Plot jd_mid vs flux_2 with detrended light curve
-    plt.errorbar(jd_mid, flux_2 / lc, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
+    # Plot jd_mid vs detrended flux
+    plt.errorbar(jd, detrended_flux, yerr=fluxerr_2, fmt='o', color='black', label='Detrended Flux')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
     plt.ylabel('Detrended Flux [e-]')
     plt.title(f'Detrended LC for Gaia ID {gaia_id_to_plot}')
-    plt.legend()
     plt.show()
 
 
