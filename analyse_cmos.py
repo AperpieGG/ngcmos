@@ -125,10 +125,15 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     plt.errorbar(jd_mid_binned, flux_2_binned, yerr=fluxerr_2_binned, fmt='o', color='black', label='Flux 2')
     plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
 
+    # Determine the bin label for the y-axis
+    bin_label = f'binned {bin_size} sec'
+    if bin_size != 1:
+        bin_label += f' * {bin_size}'
+
     # Add labels and title
     plt.xlabel('MJD [days]')
-    plt.ylabel('Flux [e-]')
-    plt.title(f'LC for Gaia ID {gaia_id_to_plot} with Tmag = {tmag:.2f} mag')
+    plt.ylabel(f'Flux [e-] {bin_label}')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot}')
     plt.legend()
     plt.show()
 
