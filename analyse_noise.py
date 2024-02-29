@@ -137,7 +137,6 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # Plot airmass on top x-axis
     ax2 = ax1.twiny()
-    ax2.plot(jd_mid, airmass_values, color='blue')
     ax2.set_xlabel('Airmass')
 
     plt.tight_layout()
