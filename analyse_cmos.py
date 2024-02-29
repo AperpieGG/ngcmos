@@ -129,9 +129,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
         axs[row, col].errorbar(jd_mid_binned, sky_binned[i], yerr=skyerrs_binned[i], fmt='o', color='blue', label=f'Sky {i+2}')
         axs[row, col].set_xlabel('MJD [days]')
         axs[row, col].set_ylabel(f'Flux [e-] {bin_label}')
-        axs[row, col].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
         axs[row, col].legend()
 
+    fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
     plt.tight_layout()
     plt.show()
 
