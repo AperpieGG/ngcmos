@@ -67,7 +67,7 @@ def get_phot_files(directory):
     phot_files = []
     for filename in os.listdir(directory):
         if fnmatch.fnmatch(filename, 'phot_*.fits'):
-            phot_files.append(os.path.join(directory, filename))
+            phot_files.append(filename)
     return phot_files
 
 
