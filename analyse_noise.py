@@ -166,7 +166,32 @@ def main():
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
 
-    plot_detrended_lc(phot_table, gaia_id_to_plot)
+    plot_detrended_lc(phot_table, gaia_id_to_plot)    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
+    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    args = parser.parse_args()
+    gaia_id_to_plot = args.gaia_id
+    bin_size = args.bin
+
+    # Set plot parameters
+    plot_images()
+
+    # Get the current night directory
+    current_night_directory = find_current_night_directory(base_path)
+
+    # Get photometry files with the pattern 'phot_*.fits'
+    phot_files = get_phot_files(current_night_directory)
+    print(f"Photometry files: {phot_files}")
+
+    # Plot the first photometry file
+    print(f"Plotting the first photometry file {phot_files[0]}...")
+    phot_table = read_phot_file(phot_files[0])
+
+    plot_detrended_lc_for_all_stars(phot_table)
+
+    plt.show()
+
 
     plt.show()
 
