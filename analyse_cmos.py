@@ -97,7 +97,7 @@ def read_phot_file(filename):
         return None
 
 
-def plot_lc(table, gaia_id_to_plot, bin_size=1):
+def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
@@ -126,9 +126,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
 
     # Determine the bin label for the y-axis
-    bin_label = f'binned {bin_size} sec'
-    if bin_size != 1:
-        bin_label += f' * {bin_size}'
+    bin_label = f'binned {bin_size * exposure_time} sec'
 
     # Add labels and title
     plt.xlabel('MJD [days]')
