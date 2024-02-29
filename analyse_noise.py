@@ -99,32 +99,27 @@ def read_phot_file(filename):
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
-
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    tmag = gaia_id_data['Tmag']  # Extract Tmag for the first row
-
+    tmag = gaia_id_data['Tmag'][0]
     # Use wotan to detrend the light curve
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
-
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
-
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-
     # Plot raw flux with wotan model
     ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
     ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-
     # Plot detrended flux
     ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
+    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}')
     ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax2.legend()
 
