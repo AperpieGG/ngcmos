@@ -110,15 +110,18 @@ def plot_lc_detrend_all_stars(table):
             tmag = gaia_id_data['Tmag'].iloc[0]  # Get Tmag for the first row of the selected Gaia ID
 
             # Plot light curve and detrended light curve
-            plot_lc_with_detrend(gaia_id_data, gaia_id_to_plot, tmag)
+            plot_detrended_lc(gaia_id_data, gaia_id_to_plot, tmag)
 
 
-def plot_lc_with_detrend(gaia_id_data, gaia_id_to_plot, tmag):
+def plot_detrended_lc(table, gaia_id_to_plot):
+    # Select rows with the specified Gaia ID
+    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
+    tmag = gaia_id_data['Tmag']
 
     # Use wotan to detrend the light curve
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
@@ -144,7 +147,6 @@ def plot_lc_with_detrend(gaia_id_data, gaia_id_to_plot, tmag):
 
     plt.tight_layout()
     plt.show()
-
 
 def main():
     # Set plot parameters
