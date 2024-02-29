@@ -107,7 +107,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     fluxes = [gaia_id_data[f'flux_{i}'] for i in range(2, 7)]
     fluxerrs = [gaia_id_data[f'fluxerr_{i}'] for i in range(2, 7)]
     sky = [gaia_id_data[f'flux_w_sky_{i}'] - gaia_id_data[f'flux_{i}'] for i in range(2, 7)]
-    skyerrs = [np.sqrt(fluxerrs[i] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(5)]
+    skyerrs = [np.sqrt(fluxerrs[i] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(2, 7)]
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
