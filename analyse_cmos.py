@@ -120,12 +120,13 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
         [np.sqrt(np.sum(skyerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(0, len(skyerrs[i]), bin_size)] for i
         in range(4)]
 
-    # Plot jd_mid vs flux_2
+    # Plot jd_mid vs flux_[i]
     plt.figure(figsize=(12, 10))
 
-    for i in range(5):
-        plt.errorbar(jd_mid_binned, fluxes_binned[i], yerr=fluxerrs_binned[i], fmt='o', color='black', label=f'Flux {i+2}')
-        plt.errorbar(jd_mid_binned, sky_binned[i], yerr=skyerrs_binned[i], fmt='o', color='blue', label=f'Sky {i+2}')
+    for i in range(4):  # Adjusted range to match the number of fluxes (4 fluxes: flux_2 to flux_5)
+        plt.errorbar(jd_mid_binned, fluxes_binned[i], yerr=fluxerrs_binned[i], fmt='o', color='black',
+                     label=f'Flux {i + 2}')
+        plt.errorbar(jd_mid_binned, sky_binned[i], yerr=skyerrs_binned[i], fmt='o', color='blue', label=f'Sky {i + 2}')
 
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
