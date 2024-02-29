@@ -126,7 +126,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
 
     # Determine the bin label for the y-axis
-    bin_label = f'binned {bin_size * exposure_time} sec'
+    bin_label = f'binned {bin_size * exposure_time / 60} min'
 
     # Add labels and title
     plt.xlabel('MJD [days]')
