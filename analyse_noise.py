@@ -105,7 +105,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     # tmag = gaia_id_data['Tmag'][0]
     # Use wotan to detrend the light curve
-    detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
+    detrended_flux, trend = flatten(jd_mid, flux_2, method='gp', window_length=0.5, break_tolerance=0.5, return_trend=True)
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
     # Create subplots
