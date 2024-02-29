@@ -131,6 +131,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.tight_layout()
     plt.show()
 
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -157,6 +158,7 @@ def main():
     if gaia_id_to_plot is not None:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
+        print("No Gaia ID specified, plotting light curve for all stars...")
         pass
     plt.show()
 
