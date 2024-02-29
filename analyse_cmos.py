@@ -106,33 +106,112 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
+    flux_3 = gaia_id_data['flux_3']
+    fluxerr_3 = gaia_id_data['fluxerr_3']
+    flux_4 = gaia_id_data['flux_4']
+    fluxerr_4 = gaia_id_data['fluxerr_4']
+    flux_5 = gaia_id_data['flux_5']
+    fluxerr_5 = gaia_id_data['fluxerr_5']
+    flux_6 = gaia_id_data['flux_6']
+    fluxerr_6 = gaia_id_data['fluxerr_6']
     flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
     fluxerr_w_sky_2 = gaia_id_data['fluxerr_w_sky_2']
+    flux_w_sky_3 = gaia_id_data['flux_w_sky_3']
+    fluxerr_w_sky_3 = gaia_id_data['fluxerr_w_sky_3']
+    flux_w_sky_4 = gaia_id_data['flux_w_sky_4']
+    fluxerr_w_sky_4 = gaia_id_data['fluxerr_w_sky_4']
+    flux_w_sky_5 = gaia_id_data['flux_w_sky_5']
+    fluxerr_w_sky_5 = gaia_id_data['fluxerr_w_sky_5']
+    flux_w_sky_6 = gaia_id_data['flux_w_sky_6']
+    fluxerr_w_sky_6 = gaia_id_data['fluxerr_w_sky_6']
     sky_2 = flux_w_sky_2 - flux_2
     skyerr_2 = np.sqrt(fluxerr_2 ** 2 + fluxerr_w_sky_2 ** 2)
+    sky_3 = flux_w_sky_3 - flux_3
+    skyerr_3 = np.sqrt(fluxerr_3 ** 2 + fluxerr_w_sky_3 ** 2)
+    sky_4 = flux_w_sky_4 - flux_4
+    skyerr_4 = np.sqrt(fluxerr_4 ** 2 + fluxerr_w_sky_4 ** 2)
+    sky_5 = flux_w_sky_5 - flux_5
+    skyerr_5 = np.sqrt(fluxerr_5 ** 2 + fluxerr_w_sky_5 ** 2)
+    sky_6 = flux_w_sky_6 - flux_6
+    skyerr_6 = np.sqrt(fluxerr_6 ** 2 + fluxerr_w_sky_6 ** 2)
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
     flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
     fluxerr_2_binned = [np.sqrt(np.sum(fluxerr_2[i:i + bin_size] ** 2)) / bin_size for i in
                         range(0, len(fluxerr_2), bin_size)]
+    flux_3_binned = [np.mean(flux_3[i:i + bin_size]) for i in range(0, len(flux_3), bin_size)]
+    fluxerr_3_binned = [np.sqrt(np.sum(fluxerr_3[i:i + bin_size] ** 2)) / bin_size for i in
+                        range(0, len(fluxerr_3), bin_size)]
+    flux_4_binned = [np.mean(flux_4[i:i + bin_size]) for i in range(0, len(flux_4), bin_size)]
+    fluxerr_4_binned = [np.sqrt(np.sum(fluxerr_4[i:i + bin_size] ** 2)) / bin_size for i in
+                        range(0, len(fluxerr_4), bin_size)]
+    flux_5_binned = [np.mean(flux_5[i:i + bin_size]) for i in range(0, len(flux_5), bin_size)]
+    fluxerr_5_binned = [np.sqrt(np.sum(fluxerr_5[i:i + bin_size] ** 2)) / bin_size for i in
+                        range(0, len(fluxerr_5), bin_size)]
+    flux_6_binned = [np.mean(flux_6[i:i + bin_size]) for i in range(0, len(flux_6), bin_size)]
+    fluxerr_6_binned = [np.sqrt(np.sum(fluxerr_6[i:i + bin_size] ** 2)) / bin_size for i in
+                        range(0, len(fluxerr_6), bin_size)]
     sky_2_binned = [np.mean(sky_2[i:i + bin_size]) for i in range(0, len(sky_2), bin_size)]
     skyerr_2_binned = [np.sqrt(np.sum(skyerr_2[i:i + bin_size] ** 2)) / bin_size for i in
                        range(0, len(skyerr_2), bin_size)]
+    sky_3_binned = [np.mean(sky_3[i:i + bin_size]) for i in range(0, len(sky_3), bin_size)]
+    skyerr_3_binned = [np.sqrt(np.sum(skyerr_3[i:i + bin_size] ** 2)) / bin_size for i in
+                       range(0, len(skyerr_3), bin_size)]
+    sky_4_binned = [np.mean(sky_4[i:i + bin_size]) for i in range(0, len(sky_4), bin_size)]
+    skyerr_4_binned = [np.sqrt(np.sum(skyerr_4[i:i + bin_size] ** 2)) / bin_size for i in
+                       range(0, len(skyerr_4), bin_size)]
+    sky_5_binned = [np.mean(sky_5[i:i + bin_size]) for i in range(0, len(sky_5), bin_size)]
+    skyerr_5_binned = [np.sqrt(np.sum(skyerr_5[i:i + bin_size] ** 2)) / bin_size for i in
+                       range(0, len(skyerr_5), bin_size)]
+    sky_6_binned = [np.mean(sky_6[i:i + bin_size]) for i in range(0, len(sky_6), bin_size)]
+    skyerr_6_binned = [np.sqrt(np.sum(skyerr_6[i:i + bin_size] ** 2)) / bin_size for i in
+                       range(0, len(skyerr_6), bin_size)]
 
     # Plot jd_mid vs flux_2
     plt.figure(figsize=(12, 10))
+
+    plt.subplot(3, 2, 1)
     plt.errorbar(jd_mid_binned, flux_2_binned, yerr=fluxerr_2_binned, fmt='o', color='black', label='Flux 2')
     plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
-
-    # Determine the bin label for the y-axis
-    bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
-
-    # Add labels and title
     plt.xlabel('MJD [days]')
-    plt.ylabel(f'Flux [e-] {bin_label}')
-    plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
+    plt.ylabel(f'Flux [e-] {bin_size * exposure_time / 60:.2f} min')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
     plt.legend()
+
+    plt.subplot(3, 2, 2)
+    plt.errorbar(jd_mid_binned, flux_3_binned, yerr=fluxerr_3_binned, fmt='o', color='red', label='Flux 3')
+    plt.errorbar(jd_mid_binned, sky_3_binned, yerr=skyerr_3_binned, fmt='o', color='green', label='Sky 3')
+    plt.xlabel('MJD [days]')
+    plt.ylabel(f'Flux [e-] {bin_size * exposure_time / 60:.2f} min')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
+    plt.legend()
+
+    plt.subplot(3, 2, 3)
+    plt.errorbar(jd_mid_binned, flux_4_binned, yerr=fluxerr_4_binned, fmt='o', color='orange', label='Flux 4')
+    plt.errorbar(jd_mid_binned, sky_4_binned, yerr=skyerr_4_binned, fmt='o', color='purple', label='Sky 4')
+    plt.xlabel('MJD [days]')
+    plt.ylabel(f'Flux [e-] {bin_size * exposure_time / 60:.2f} min')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
+    plt.legend()
+
+    plt.subplot(3, 2, 4)
+    plt.errorbar(jd_mid_binned, flux_5_binned, yerr=fluxerr_5_binned, fmt='o', color='magenta', label='Flux 5')
+    plt.errorbar(jd_mid_binned, sky_5_binned, yerr=skyerr_5_binned, fmt='o', color='cyan', label='Sky 5')
+    plt.xlabel('MJD [days]')
+    plt.ylabel(f'Flux [e-] {bin_size * exposure_time / 60:.2f} min')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
+    plt.legend()
+
+    plt.subplot(3, 2, 5)
+    plt.errorbar(jd_mid_binned, flux_6_binned, yerr=fluxerr_6_binned, fmt='o', color='brown', label='Flux 6')
+    plt.errorbar(jd_mid_binned, sky_6_binned, yerr=skyerr_6_binned, fmt='o', color='gray', label='Sky 6')
+    plt.xlabel('MJD [days]')
+    plt.ylabel(f'Flux [e-] {bin_size * exposure_time / 60:.2f} min')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
+    plt.legend()
+
+    plt.tight_layout()
     plt.show()
 
 
