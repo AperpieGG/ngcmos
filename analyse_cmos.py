@@ -131,31 +131,14 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
     plt.show()
 
 
-def plot_noise_vs_sqrt_flux(table):
-    # Get unique frame_ids
-    unique_frame_ids = set(table['frame_id'])
+def plot_lc_for_all_stars(table, bin_size=1):
+    # Get unique Gaia IDs from the table
+    unique_gaia_ids = np.unique(table['gaia_id'])
 
-    for frame_id in unique_frame_ids:
-        # Select rows corresponding to the current frame_id
-        mask = table['frame_id'] == frame_id
-        frame_data = table[mask]
-
-        # Get flux and flux errors for the current frame_id
-        flux = frame_data['flux_2']
-        fluxerr = frame_data['fluxerr_2']
-
-        # Plot each flux_2 value vs its square root
-        for flux_value, fluxerr_value in zip(flux, fluxerr):
-            if flux_value >= 0:  # Check if flux value is non-negative
-                plt.errorbar(flux_value, np.sqrt(flux_value), yerr=fluxerr_value, fmt='o', color='black')
-
-    # Add labels and title
-    plt.xlabel('Flux [e-]')
-    plt.ylabel('Square Root of Flux')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.title('Square Root of Flux vs Flux')
-    plt.show()
+    # Iterate over each unique Gaia ID
+    for gaia_id_to_plot in unique_gaia_ids:
+        # Plot the light curve for the current Gaia ID
+        plot_lc(table, gaia_id_to_plot, bin_size)
 
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
@@ -218,11 +201,9 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     if gaia_id_to_plot is None:
-        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
-        # plot_noise_vs_sqrt_flux(phot_table)
+        plot_lc_for_all_stars(phot_table, bin_size)
     else:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
-        # plot_lc(phot_table, gaia_id_to_plot, bin_size)
 
     plt.show()
 
