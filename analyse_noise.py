@@ -103,7 +103,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    tmag = gaia_id_data['Tmag'][0]
+    # tmag = gaia_id_data['Tmag'][0]
     # Use wotan to detrend the light curve
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
     relative_flux = flux_2 / trend
@@ -119,8 +119,8 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Plot detrended flux
     ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
-    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}')
-    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
+    # ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}')
+    # ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax2.legend()
 
     plt.tight_layout()
