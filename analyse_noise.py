@@ -8,8 +8,11 @@ from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
-from utils import plot_images
+from utils import plot_images, get_location
 from wotan import flatten
+from astropy.coordinates import AltAz, SkyCoord
+from astropy.time import Time
+import astropy.units as u
 
 
 def load_config(filename):
@@ -105,12 +108,25 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
+    # Calculate airmass for each observation
+    observation_time = Time(jd_mid, format='mjd')
+    observer_location = get_location()
+
+    # Create SkyCoord object for the target using RA and Dec
+    target_coords = SkyCoord(ra=86.83689*u.deg, dec=-4.3537*u.deg)
+
+    # Transform target coordinates to AltAz coordinates
+    target_altaz = target_coords.transform_to(AltAz(obstime=observation_time, location=observer_location))
+
+    # Extract airmass values
+    airmass_values = target_altaz.secz
+
     # Use wotan to detrend the light curve
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
     # Create subplots
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
+    fig, ax1 = plt.subplots(figsize=(10, 8))
     # Plot raw flux with wotan model
     ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
     ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
@@ -118,10 +134,11 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-    # Plot detrended flux
-    ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
-    ax2.set_ylabel('Detrended Flux [e-]')
-    ax2.legend()
+
+    # Plot airmass on top x-axis
+    ax2 = ax1.twiny()
+    ax2.plot(jd_mid, airmass_values, color='blue')
+    ax2.set_xlabel('Airmass')
 
     plt.tight_layout()
     plt.show()
