@@ -97,17 +97,17 @@ def read_phot_file(filename):
         return None
 
 
-def plot_lc_for_all_stars(table, bin_size=1):
+def plot_detrended_lc_for_all_stars(table):
     # Get unique Gaia IDs from the table
     unique_gaia_ids = np.unique(table['gaia_id'])
 
     # Iterate over each unique Gaia ID
     for gaia_id_to_plot in unique_gaia_ids:
-        # Plot the light curve for the current Gaia ID
-        plot_lc_with_detrend(table, gaia_id_to_plot)
+        # Plot the detrended light curve for the current Gaia ID
+        plot_detrended_lc(table, gaia_id_to_plot)
 
 
-def plot_lc_with_detrend(table, gaia_id_to_plot):
+def plot_detrended_lc(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
@@ -142,7 +142,6 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.tight_layout()
     plt.show()
 
-
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -166,7 +165,7 @@ def main():
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
 
-    plot_lc_with_detrend(phot_table, gaia_id_to_plot)
+    plot_detrended_lc(phot_table, gaia_id_to_plot)
 
     plt.show()
 
