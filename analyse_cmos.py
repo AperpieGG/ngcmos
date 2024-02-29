@@ -104,16 +104,16 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
 
     # Get jd_mid, flux_2, and sky_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
-    fluxes = [gaia_id_data[f'flux_{i}'] for i in range(2, 6)]
-    fluxerrs = [gaia_id_data[f'fluxerr_{i}'] for i in range(2, 6)]
-    sky = [gaia_id_data[f'flux_w_sky_{i}'] - gaia_id_data[f'flux_{i}'] for i in range(2, 6)]
-    skyerrs = [np.sqrt(gaia_id_data[f'fluxerr_{i}'] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(2, 6)]
+    fluxes = [gaia_id_data[f'flux_{i}'] for i in range(2, 7)]
+    fluxerrs = [gaia_id_data[f'fluxerr_{i}'] for i in range(2, 7)]
+    sky = [gaia_id_data[f'flux_w_sky_{i}'] - gaia_id_data[f'flux_{i}'] for i in range(2, 7)]
+    skyerrs = [np.sqrt(gaia_id_data[f'fluxerr_{i}'] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(2, 7)]
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(2, len(jd_mid), bin_size)]
     fluxes_binned = [[np.mean(fluxes[i][j:j + bin_size]) for j in range(2, len(fluxes[i]), bin_size)] for i in range(5)]
     fluxerrs_binned = [[np.sqrt(np.sum(fluxerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(2, len(fluxerrs[i]), bin_size)] for i in range(5)]
-    sky_binned = [[np.mean(sky[i][j:j + bin_size]) for j in range(2, len(sky[i]), bin_size)] for i in range(4)]
+    sky_binned = [[np.mean(sky[i][j:j + bin_size]) for j in range(2, len(sky[i]), bin_size)] for i in range(5)]
     skyerrs_binned = [[np.sqrt(np.sum(skyerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(2, len(skyerrs[i]), bin_size)] for i in range(5)]
 
     # Determine the bin label for the y-axis
