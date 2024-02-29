@@ -4,7 +4,6 @@ import datetime
 import json
 import os
 import fnmatch
-import argparse
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
@@ -146,15 +145,8 @@ def plot_lc_with_detrend(gaia_id_data, gaia_id_to_plot, tmag):
     plt.tight_layout()
     plt.show()
 
+
 def main():
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
-    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    args = parser.parse_args()
-    gaia_id_to_plot = args.gaia_id
-    bin_size = args.bin
-
     # Set plot parameters
     plot_images()
 
@@ -165,36 +157,18 @@ def main():
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[0]}...")
-    phot_table = read_phot_file(phot_files[0])
+    # Plot each photometry file
+    for phot_file in phot_files:
+        print(f"Plotting photometry file {phot_file}...")
+        phot_table = read_phot_file(phot_file)
 
-    plot_detrended_lc(phot_table, gaia_id_to_plot)    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
-    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    args = parser.parse_args()
-    gaia_id_to_plot = args.gaia_id
-    bin_size = args.bin
+        # Plot detrended light curves for all stars in the photometry file
+        plot_lc_detrend_all_stars(phot_table)
 
-    # Set plot parameters
-    plot_images()
-
-    # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
-
-    # Get photometry files with the pattern 'phot_*.fits'
-    phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
-
-    # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[0]}...")
-    phot_table = read_phot_file(phot_files[0])
-
-    plot_detrended_lc_for_all_stars(phot_table)
-
-    plt.show()
+        plt.show()
 
 
 if __name__ == "__main__":
     main()
+
+
