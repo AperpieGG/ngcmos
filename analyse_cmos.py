@@ -130,8 +130,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
 
     # Add labels and title
     plt.xlabel('MJD [days]')
-    plt.ylabel(f'Flux [e-] {bin_label}')
-    plt.title(f'LC for Gaia ID {gaia_id_to_plot}')
+    plt.ylabel(f'Flux [e-] {bin_label:.2f}')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     plt.legend()
     plt.show()
 
