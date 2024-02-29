@@ -114,14 +114,13 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Plot raw flux with wotan model
     ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
     ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
+    ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
     # Plot detrended flux
     ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
-    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}')
-    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax2.legend()
 
     plt.tight_layout()
