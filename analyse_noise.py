@@ -151,7 +151,7 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     # Plot the light curve for the specified Gaia ID
-    if phot_table is None:
+    if gaia_id_to_plot is None:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         print("Error reading photometry file, exiting...")
