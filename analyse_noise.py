@@ -155,13 +155,11 @@ def main():
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
 
-    if gaia_id_to_plot is None:
+    # Plot the light curve for the specified Gaia ID
+    if phot_table is not None:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
-        print("No Gaia ID specified, plotting light curve for all stars...")
-        # Implement your logic for plotting all stars here
-        pass
-    plt.show()
+        print("Error reading photometry file, exiting...")
 
 
 if __name__ == "__main__":
