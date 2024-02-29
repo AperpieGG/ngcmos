@@ -100,6 +100,7 @@ def read_phot_file(filename):
 def plot_lc(table, gaia_id_to_plot, bin_size=1):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
+    tmag = gaia_id_data['Tmag'][0]
 
     # Get jd_mid, flux_2, and sky_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
@@ -120,13 +121,14 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1):
                        range(0, len(skyerr_2), bin_size)]
 
     # Plot jd_mid vs flux_2
+    plt.figure(figsize=(12, 10))
     plt.errorbar(jd_mid_binned, flux_2_binned, yerr=fluxerr_2_binned, fmt='o', color='black', label='Flux 2')
     plt.errorbar(jd_mid_binned, sky_2_binned, yerr=skyerr_2_binned, fmt='o', color='blue', label='Sky 2')
 
     # Add labels and title
     plt.xlabel('MJD [days]')
     plt.ylabel('Flux [e-]')
-    plt.title(f'LC for Gaia ID {gaia_id_to_plot}')
+    plt.title(f'LC for Gaia ID {gaia_id_to_plot} with Tmag = {tmag:.2f}')
     plt.legend()
     plt.show()
 
