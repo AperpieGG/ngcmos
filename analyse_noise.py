@@ -115,7 +115,7 @@ def plot_detrended_lc(table, gaia_id_to_plot):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    tmag = gaia_id_data['Tmag'][0]
+    tmag = gaia_id_data['Tmag']
 
     # Use wotan to detrend the light curve
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
@@ -141,6 +141,7 @@ def plot_detrended_lc(table, gaia_id_to_plot):
 
     plt.tight_layout()
     plt.show()
+
 
 def main():
     # Parse command-line arguments
