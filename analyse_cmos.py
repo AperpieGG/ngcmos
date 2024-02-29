@@ -119,16 +119,21 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
+    fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+
     # Plot jd_mid vs flux_2
     for i in range(4):
-        plt.figure(figsize=(12, 10))
-        plt.errorbar(jd_mid_binned, fluxes_binned[i], yerr=fluxerrs_binned[i], fmt='o', color='black', label=f'Flux {i+2}')
-        plt.errorbar(jd_mid_binned, sky_binned[i], yerr=skyerrs_binned[i], fmt='o', color='blue', label=f'Sky {i+2}')
-        plt.xlabel('MJD [days]')
-        plt.ylabel(f'Flux [e-] {bin_label}')
-        plt.title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
-        plt.legend()
-        plt.show()
+        row = i // 2
+        col = i % 2
+        axs[row, col].errorbar(jd_mid_binned, fluxes_binned[i], yerr=fluxerrs_binned[i], fmt='o', color='black', label=f'Flux {i+2}')
+        axs[row, col].errorbar(jd_mid_binned, sky_binned[i], yerr=skyerrs_binned[i], fmt='o', color='blue', label=f'Sky {i+2}')
+        axs[row, col].set_xlabel('MJD [days]')
+        axs[row, col].set_ylabel(f'Flux [e-] {bin_label}')
+        axs[row, col].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
+        axs[row, col].legend()
+
+    plt.tight_layout()
+    plt.show()
 
 
 
