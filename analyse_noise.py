@@ -143,8 +143,8 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
-    flux_2 = gaia_id_data['flux_2']
-    fluxerr_2 = gaia_id_data['fluxerr_2']
+    flux_2 = gaia_id_data['flux_3']
+    fluxerr_2 = gaia_id_data['fluxerr_3']
     tmag = gaia_id_data['Tmag'][0]
 
     # Use wotan to detrend the light curve
