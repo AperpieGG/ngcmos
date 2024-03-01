@@ -179,11 +179,11 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=50):
     return mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list
 
 
-def plot_noise_model(mean_flux_list, RMS_list, mean_unbinned, rms_unbinned):
+def plot_noise_model(mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list):
     # Plot the noise model
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
     ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model')
-    ax.plot(mean_unbinned, rms_unbinned, 'o', color='red', label='Unbinned')
+    ax.plot(mean_unbinned_list, rms_unbinned_list, 'o', color='red', label='Unbinned')
     ax.set_xlabel('Mean Flux [e-]')
     ax.set_ylabel('RMS [e-]')
     ax.set_title('Noise Model')
@@ -262,8 +262,8 @@ def main():
     else:
         # Calculate mean and RMS for the noise model
         mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
-        print(f"Mean flux list: {mean_flux_list}")
-        print(f"Mean unbinned list: {mean_unbinned_list}")
+        print(f"Mean flux list: {len(mean_flux_list)}")
+        print(f"Mean unbinned list: {len(mean_unbinned_list)}")
         plot_noise_model(mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list)
 
 
