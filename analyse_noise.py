@@ -149,16 +149,18 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_3']
     tmag = gaia_id_data['Tmag'][0]
 
-    # use astropy to detrend the light curve
     p_init = models.Polynomial1D(degree=1)
+
+    # Choose a fitting algorithm and configure fitting options
     fit_p = fitting.FittingWithOutlierRemoval(fitting.LevMarLSQFitter(), sigma_clip, niter=3, sigma=3.0)
 
-    # Fit the model to the data
+    # Fit the model to your data
     p = fit_p(p_init, jd_mid, flux_2)
 
     # Detrend the light curve
     trend = p(jd_mid)
 
+    # Compute relative flux and errors
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
 
