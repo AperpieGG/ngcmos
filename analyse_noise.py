@@ -142,10 +142,10 @@ def plot_noise_model(mean_flux_list, RMS_list):
     plt.show()
 
 
-def fit_function(x, *params):
+def fit_function(x, a, b, c):
     # Define the function to fit (e.g., a polynomial)
     # For example, a quadratic polynomial:
-    return params[0] * x ** 2 + params[1] * x + params[2]
+    return a * x**2 + b * x + c
 
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
@@ -157,8 +157,11 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    # Fit the detrending function to the data
-    params, _ = curve_fit(fit_function, jd_mid, flux_2)
+    # Provide initial guesses for the parameters
+    initial_guess = [1, 1, 1]  # Example initial guesses for a, b, and c
+
+    # Fit the quadratic function to the data
+    params, _ = curve_fit(fit_function, jd_mid, flux_2, p0=initial_guess)
 
     # Compute the trend using the fitted parameters
     trend = fit_function(jd_mid, *params)
