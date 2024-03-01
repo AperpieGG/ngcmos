@@ -7,6 +7,8 @@ import fnmatch
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
+from astropy.modeling import fitting, models
+from astropy.stats import sigma_clip
 from matplotlib import pyplot as plt
 from utils import plot_images
 from wotan import flatten
@@ -109,8 +111,10 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
         flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
 
-        # Use wotan to detrend the light curve
-        detrended_flux, trend = flatten(jd_mid_binned, flux_2_binned, method='mean', window_length=0.05, return_trend=True)
+        # Use astropy fitting
+        p_init = models.Polynomial1D(degree=2)
+        fit_p = fitting.LevMarLSQFitter()
+        trend = fit_p(p_init, jd_mid_binned, flux_2_binned)
         dt_flux = flux_2_binned / trend
 
         # Calculate mean flux and RMS
