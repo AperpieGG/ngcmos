@@ -110,7 +110,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
     # Create subplots
-    fig, (ax1, ax2) = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
     # Plot raw flux with wotan model
     ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
     ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
