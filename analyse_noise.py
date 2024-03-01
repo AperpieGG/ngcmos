@@ -102,8 +102,8 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
-        flux_2 = gaia_id_data['flux_2']
-        fluxerr_2 = gaia_id_data['fluxerr_2']
+        flux_2 = gaia_id_data['flux_3']
+        fluxerr_2 = gaia_id_data['fluxerr_3']
 
         # Bin the data
         jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
