@@ -110,6 +110,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     skyerrs = [np.sqrt(gaia_id_data[f'fluxerr_{i}'] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(2, 7)]
     x = gaia_id_data['x']
     y = gaia_id_data['y']
+    print(len(x), len(y))
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
