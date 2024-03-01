@@ -149,7 +149,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_3']
     tmag = gaia_id_data['Tmag'][0]
 
-    p_init = models.Polynomial1D(degree=1)
+    p_init = models.Polynomial1D(degree=2)
 
     # Choose a fitting algorithm and configure fitting options
     fit_p = fitting.FittingWithOutlierRemoval(fitting.LevMarLSQFitter(), sigma_clip, niter=3, sigma=3.0)
