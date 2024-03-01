@@ -101,8 +101,8 @@ def read_phot_file(filename):
 def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
     mean_flux_list = []
     RMS_list = []
-    mean_unbinned = []
-    rms_unbinned = []
+    mean_unbinned_list = []
+    rms_unbinned_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -133,7 +133,10 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
 
-    return mean_flux_list, RMS_list, mean_unbinned, rms_unbinned
+        mean_unbinned_list.append(mean_unbinned)
+        rms_unbinned_list.append(rms_unbinned)
+
+    return mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list
 
 
 def plot_noise_model(mean_flux_list, RMS_list, mean_unbinned, rms_unbinned):
@@ -218,8 +221,8 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, mean_unbinned, rms_unbinned = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
-        plot_noise_model(mean_flux_list, RMS_list, mean_unbinned, rms_unbinned)
+        mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
+        plot_noise_model(mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list)
 
 
 if __name__ == "__main__":
