@@ -150,7 +150,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     tmag = gaia_id_data['Tmag'][0]
 
     coefficients = np.polyfit(jd_mid, flux_2, 2)
-    trend, _ = np.polyval(coefficients, jd_mid, full=True)
+    trend, _ = np.polyval(coefficients, jd_mid)
 
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
