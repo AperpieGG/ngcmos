@@ -155,7 +155,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fit_p = fitting.FittingWithOutlierRemoval(fitting.LevMarLSQFitter(), sigma_clip, niter=3, sigma=3.0)
 
     # Fit the model to your data
-    p = fit_p(p_init, jd_mid, flux_2)
+    p, _ = fit_p(p_init, jd_mid, flux_2)
 
     # Detrend the light curve
     trend = p(jd_mid)
