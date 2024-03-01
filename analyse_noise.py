@@ -111,11 +111,9 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
         flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
 
-        # Use astropy fitting
-        p_init = models.Polynomial1D(degree=1)
-        fit_p = fitting.FittingWithOutlierRemoval(fitting.LinearLSQFitter(), sigma_clip, niter=3, sigma=3.0)
-        trend = fit_p(p_init, jd_mid_binned, flux_2_binned)
-        dt_flux = flux_2_binned - trend(jd_mid_binned)
+        # Use wotan to detrend the light curve
+        detrended_flux, trend = flatten(jd_mid_binned, flux_2_binned, method='mean', window_length=0.05, return_trend=True)
+        dt_flux = flux_2_binned / trend
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2_binned)
@@ -151,8 +149,12 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_3']
     tmag = gaia_id_data['Tmag'][0]
 
-    # Use wotan to detrend the light curve
-    detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
+    # use astropy to detrend the light curve
+    p_init = models.Polynomial1D(degree=1)
+    fit_p = fitting.FittingWithOutlierRemoval(fitting.LinearLSQFitter(), sigma_clip, niter=3, sigma=3.0)
+    p = fit_p(p_init, jd_mid, flux_2)
+    trend = p(jd_mid)
+
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
 
