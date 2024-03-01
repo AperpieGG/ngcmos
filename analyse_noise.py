@@ -98,6 +98,52 @@ def read_phot_file(filename):
         return None
 
 
+def bin_time_flux_error(time, flux, error, bin_fact):
+    """
+    Use reshape to bin light curve data, clip under filled bins
+    Works with 2D arrays of flux and errors
+
+    Note: under filled bins are clipped off the end of the series
+
+    Parameters
+    ----------
+    times : array
+        Array of times to bin
+    flux : array
+        Array of flux values to bin
+    error : array
+        Array of error values to bin
+    bin_fact : int
+        Number of measurements to combine
+
+    Returns
+    -------
+    times_b : array
+        Binned times
+    flux_b : array
+        Binned fluxes
+    error_b : array
+        Binned errors
+
+    Raises
+    ------
+    None
+    """
+    n_binned = int(len(time)/bin_fact)
+    clip = n_binned*bin_fact
+    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
+    # determine if 1 or 2d flux/err inputs
+    if len(flux.shape) == 1:
+        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
+        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact)**2, axis=1))/bin_fact
+    else:
+        # assumed 2d with 1 row per star
+        n_stars = len(flux)
+        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
+        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact))**2, axis=2))/bin_fact
+    return time_b, flux_b, error_b
+
+
 def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
     mean_flux_list = []
     RMS_list = []
@@ -107,20 +153,13 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
-        flux_2 = gaia_id_data['flux_3']
-        fluxerr_2 = gaia_id_data['fluxerr_3']
+        flux_2 = gaia_id_data['flux_2']
+        fluxerr_2 = gaia_id_data['fluxerr_2']
 
-        # # Bin the data
-        # jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
-        # flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
-
-        # Use wotan to detrend the light curve detrended_flux, trend = flatten(jd_mid_binned, flux_2_binned,
-        # method='mean', window_length=0.01, return_trend=True)
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_2 / trend
 
-        # bin the detrdended flux
-        dt_flux_binned = [np.mean(dt_flux[i:i + bin_size]) for i in range(0, len(dt_flux), bin_size)]
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, fluxerr_2, bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2)
