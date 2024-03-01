@@ -144,7 +144,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
+def calculate_mean_rms_binned(table, bin_size=60, num_stars=50):
     mean_flux_list = []
     RMS_list = []
     mean_unbinned_list = []
@@ -158,25 +158,23 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_2 / trend
+        dt_fluxerr = fluxerr_2 / trend
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, fluxerr_2, bin_size)
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2)
         RMS = np.std(dt_flux_binned)
 
-        mean_unbinned = np.mean(flux_2)
-        rms_unbinned = np.std(dt_flux)
-
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
 
+        mean_unbinned = np.mean(flux_2)
+        rms_unbinned = np.std(dt_flux)
+
         mean_unbinned_list.append(mean_unbinned)
         rms_unbinned_list.append(rms_unbinned)
-
-        print(f"Length of binned flux: {len(dt_flux_binned)}")
-        print(f"Length of unbinned flux: {len(dt_flux)}")
 
     return mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list
 
@@ -264,6 +262,8 @@ def main():
     else:
         # Calculate mean and RMS for the noise model
         mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
+        print(f"Mean flux list: {mean_flux_list}")
+        print(f"Mean unbinned list: {mean_unbinned_list}")
         plot_noise_model(mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list)
 
 
