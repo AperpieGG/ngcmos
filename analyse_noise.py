@@ -144,7 +144,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
+def calculate_mean_rms_binned(table, bin_size=60, num_stars=50):
     mean_flux_list = []
     RMS_list = []
     RMS_unbinned_list = []
