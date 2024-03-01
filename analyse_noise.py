@@ -157,14 +157,16 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    # Provide initial guesses for the parameters
-    initial_guess = [1, 1, 1]  # Example initial guesses for a, b, and c
-
     # Fit the quadratic function to the data
-    params, _ = curve_fit(fit_function, jd_mid, flux_2, p0=initial_guess)
+    popt, _ = curve_fit(fit_function, jd_mid, flux_2)
 
-    # Compute the trend using the fitted parameters
-    trend = fit_function(jd_mid, *params)
+    # Create a model using the fitted parameters
+    model = models.Polynomial1D(degree=2, c0=popt[2], c1=popt[1], c2=popt[0])
+    fitter = fitting.LinearLSQFitter()
+    fit = fitter(model, jd_mid, flux_2)
+
+    # Compute the trend
+    trend = fit(jd_mid)
 
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
