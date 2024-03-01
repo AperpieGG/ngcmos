@@ -7,11 +7,9 @@ import fnmatch
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
-from astropy.modeling import fitting, models
-from astropy.stats import sigma_clip
 from matplotlib import pyplot as plt
-from scipy.optimize import curve_fit
-
+from sklearn.base import TransformerMixin
+import sklearn
 from utils import plot_images
 from wotan import flatten
 
@@ -151,9 +149,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    # Use wotan to detrend the light curve
-    flatten_lc, trend = flatten(jd_mid, flux_2, break_tolerance=0.1, window_length=1, method='hspline',
-                                return_trend=True)
+    flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.75, return_trend=True, method='biweight')
 
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
