@@ -152,7 +152,8 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     tmag = gaia_id_data['Tmag'][0]
 
     # Use wotan to detrend the light curve
-    flatten_lc, trend = flatten(jd_mid, flux_2, method='biweight', window_length=0.5, return_trend=True)
+    flatten_lc, trend = flatten(jd_mid, flux_2, break_tolerance=0.1, window_length=1, method='hspline',
+                                return_trend=True)
 
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
