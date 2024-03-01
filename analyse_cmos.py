@@ -112,7 +112,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     y = gaia_id_data['y']
 
     # Bin the data
-    jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(2, len(jd_mid), bin_size)]
+    jd_mid_binned = [[np.mean(jd_mid[i][j:j + bin_size]) for j in range(2, len(jd_mid[i]), bin_size)] for i in range(5)]
     fluxes_binned = [[np.mean(fluxes[i][j:j + bin_size]) for j in range(2, len(fluxes[i]), bin_size)] for i in range(5)]
     fluxerrs_binned = [[np.sqrt(np.sum(fluxerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(2, len(fluxerrs[i]), bin_size)] for i in range(5)]
     sky_binned = [[np.mean(sky[i][j:j + bin_size]) for j in range(2, len(sky[i]), bin_size)] for i in range(5)]
