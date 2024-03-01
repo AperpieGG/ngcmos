@@ -116,9 +116,12 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_2 / trend
 
+        # bin the detrdended flux
+        dt_flux_binned = [np.mean(dt_flux[i:i + bin_size]) for i in range(0, len(dt_flux), bin_size)]
+
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2)
-        RMS = np.std(dt_flux)
+        RMS = np.std(dt_flux_binned)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
