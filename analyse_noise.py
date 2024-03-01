@@ -107,17 +107,17 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         flux_2 = gaia_id_data['flux_3']
         fluxerr_2 = gaia_id_data['fluxerr_3']
 
-        # Bin the data
-        jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
-        flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
+        # # Bin the data
+        # jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
+        # flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
 
         # Use wotan to detrend the light curve detrended_flux, trend = flatten(jd_mid_binned, flux_2_binned,
         # method='mean', window_length=0.01, return_trend=True)
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_2_binned / trend
+        dt_flux = flux_2 / trend
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_2_binned)
+        mean_flux = np.mean(flux_2)
         RMS = np.std(dt_flux)
 
         # Append to lists
