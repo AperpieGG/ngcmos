@@ -10,6 +10,8 @@ from astropy.io import fits
 from astropy.modeling import fitting, models
 from astropy.stats import sigma_clip
 from matplotlib import pyplot as plt
+from scipy.optimize import curve_fit
+
 from utils import plot_images
 from wotan import flatten
 
@@ -140,6 +142,12 @@ def plot_noise_model(mean_flux_list, RMS_list):
     plt.show()
 
 
+def fit_function(x, *params):
+    # Define the function to fit (e.g., a polynomial)
+    # For example, a quadratic polynomial:
+    return params[0] * x ** 2 + params[1] * x + params[2]
+
+
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
@@ -149,9 +157,18 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    # Use scipy to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid, flux_2, 1), jd_mid)
-    
+    # Fit the detrending function to the data
+    params, _ = curve_fit(fit_function, jd_mid, flux_2)
+
+    # Compute the trend using the fitted parameters
+    trend = fit_function(jd_mid, *params)
+
+    # Compute Detrended flux and errors
+    relative_flux = flux_2 / trend
+    relative_err = fluxerr_2 / trend
+    rms = np.std(relative_flux)
+    print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
+
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
