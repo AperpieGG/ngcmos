@@ -149,9 +149,9 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    coefficients = np.polyfit(jd_mid, flux_2, 2)
-    trend, _ = np.polyval(coefficients, jd_mid)
-
+    # Use scipy to detrend the light curve
+    trend = np.polyval(np.polyfit(jd_mid, flux_2, 1), jd_mid)
+    
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
