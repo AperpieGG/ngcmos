@@ -257,10 +257,8 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
-        print(f"Mean flux list: {len(mean_flux_list)}")
-        print(f"Mean unbinned list: {len(mean_unbinned_list)}")
-        plot_noise_model(mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list)
+        mean_flux_list, RMS_list, rms_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
+        plot_noise_model(mean_flux_list, RMS_list, rms_unbinned_list)
 
 
 if __name__ == "__main__":
