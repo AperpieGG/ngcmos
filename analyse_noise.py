@@ -152,7 +152,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     p_init = models.Polynomial1D(degree=2)
 
     # Choose a fitting algorithm and configure fitting options
-    fit_p = fitting.FittingWithOutlierRemoval(fitting.LinearLSQFitter(), sigma_clip, niter=3, sigma=3.0)
+    fit_p = fitting.FittingWithOutlierRemoval(fitting.LevMarLSQFitter(), sigma_clip, niter=3, sigma=3.0)
 
     # Fit the model to your data
     p, _ = fit_p(p_init, jd_mid, flux_2)
