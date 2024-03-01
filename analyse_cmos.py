@@ -134,8 +134,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
         axs[row, col].legend()
 
     # Plot x, y positions
-    axs[2, 1].plot(jd_mid_binned, x, 'o', color='red', label='X Position')
-    axs[2, 1].plot(jd_mid_binned, y, 'o', color='green', label='Y Position')
+    axs[2, 1].plot(jd_mid, x, 'o', color='red', label='X Position')
+    axs[2, 1].plot(jd_mid, y, 'o', color='green', label='Y Position')
     axs[2, 1].set_xlabel('MJD [days]')
     axs[2, 1].set_ylabel('Position')
     axs[2, 1].legend()
