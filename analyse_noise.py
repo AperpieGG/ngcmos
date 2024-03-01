@@ -142,12 +142,6 @@ def plot_noise_model(mean_flux_list, RMS_list):
     plt.show()
 
 
-def fit_function(x, a, b, c):
-    # Define the function to fit (e.g., a polynomial)
-    # For example, a quadratic polynomial:
-    return a * x**2 + b * x + c
-
-
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
@@ -157,16 +151,8 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    # Fit the quadratic function to the data
-    popt, _ = curve_fit(fit_function, jd_mid, flux_2)
-
-    # Create a model using the fitted parameters
-    model = models.Polynomial1D(degree=2, c0=popt[2], c1=popt[1], c2=popt[0])
-    fitter = fitting.LinearLSQFitter()
-    fit = fitter(model, jd_mid, flux_2)
-
-    # Compute the trend
-    trend = fit(jd_mid)
+    # Use wotan to detrend the light curve
+    flatten_lc, trend = flatten(jd_mid, flux_2, method='biweight', window_length=0.5, return_trend=True)
 
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
