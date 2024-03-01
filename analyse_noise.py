@@ -96,7 +96,7 @@ def read_phot_file(filename):
         return None
 
 
-def calculate_mean_rms_binned(table, bin_size=60, num_stars=100):
+def calculate_mean_rms_binned(table, bin_size=60, num_stars=500):
     mean_flux_list = []
     RMS_list = []
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
@@ -154,7 +154,7 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     # Calculate mean flux and RMS for all stars with binning
-    mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=100)
+    mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=500)
 
     # Plot noise model
     plot_noise_model(mean_flux_list, RMS_list)
