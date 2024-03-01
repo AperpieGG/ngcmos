@@ -101,6 +101,9 @@ def read_phot_file(filename):
 def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
     mean_flux_list = []
     RMS_list = []
+    mean_unbinned = []
+    rms_unbinned = []
+
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
@@ -123,17 +126,21 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         mean_flux = np.mean(flux_2)
         RMS = np.std(dt_flux_binned)
 
+        mean_unbinned = np.mean(flux_2)
+        rms_unbinned = np.std(dt_flux)
+
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
 
-    return mean_flux_list, RMS_list
+    return mean_flux_list, RMS_list, mean_unbinned, rms_unbinned
 
 
-def plot_noise_model(mean_flux_list, RMS_list):
+def plot_noise_model(mean_flux_list, RMS_list, mean_unbinned, rms_unbinned):
     # Plot the noise model
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
     ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model')
+    ax.plot(mean_unbinned, rms_unbinned, 'o', color='red', label='Unbinned')
     ax.set_xlabel('Mean Flux [e-]')
     ax.set_ylabel('RMS [e-]')
     ax.set_title('Noise Model')
@@ -211,8 +218,8 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
-        plot_noise_model(mean_flux_list, RMS_list)
+        mean_flux_list, RMS_list, mean_unbinned, rms_unbinned = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
+        plot_noise_model(mean_flux_list, RMS_list, mean_unbinned, rms_unbinned)
 
 
 if __name__ == "__main__":
