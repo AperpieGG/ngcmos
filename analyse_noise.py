@@ -96,10 +96,10 @@ def read_phot_file(filename):
         return None
 
 
-def calculate_mean_rms_binned(table, bin_size=60):
+def calculate_mean_rms_binned(table, bin_size=60, num_stars=50):
     mean_flux_list = []
     RMS_list = []
-    for gaia_id in table['gaia_id']:
+    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_2 = gaia_id_data['flux_2']
@@ -110,8 +110,7 @@ def calculate_mean_rms_binned(table, bin_size=60):
         flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
 
         # Use wotan to detrend the light curve
-        detrended_flux, trend = flatten(jd_mid_binned, flux_2_binned, method='mean', window_length=0.05,
-                                        return_trend=True)
+        detrended_flux, trend = flatten(jd_mid_binned, flux_2_binned, method='mean', window_length=0.05, return_trend=True)
         dt_flux = flux_2_binned / trend
 
         # Calculate mean flux and RMS
@@ -153,7 +152,7 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     # Calculate mean flux and RMS for all stars with binning
-    mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60)
+    mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=100)
 
     # Plot noise model
     plot_noise_model(mean_flux_list, RMS_list)
