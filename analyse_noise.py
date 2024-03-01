@@ -151,12 +151,12 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
     # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid, flux_2, 2), jd_mid)
+    trend = np.polyval(np.polyfit(jd_mid, flux_2, 3), jd_mid)
 
     # Compute Detrended flux and errors
-    relative_flux = flux_2 / trend
+    norm_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
-    rms = np.std(relative_flux)
+    rms = np.std(norm_flux)
     print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
 
     # Create subplots
@@ -170,7 +170,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
 
-    ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
+    ax2.errorbar(jd_mid, norm_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
     ax2.set_xlabel('MJD [days]')
     ax2.legend()
