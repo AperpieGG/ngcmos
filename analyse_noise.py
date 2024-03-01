@@ -138,7 +138,49 @@ def plot_noise_model(mean_flux_list, RMS_list):
     plt.show()
 
 
+def plot_lc_with_detrend(table, gaia_id_to_plot):
+    # Select rows with the specified Gaia ID
+    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
+    # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
+    jd_mid = gaia_id_data['jd_mid']
+    flux_2 = gaia_id_data['flux_2']
+    fluxerr_2 = gaia_id_data['fluxerr_2']
+    tmag = gaia_id_data['Tmag'][0]
+
+    # Use wotan to detrend the light curve
+    detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
+    relative_flux = flux_2 / trend
+    relative_err = fluxerr_2 / trend
+
+    # Create subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+    # Plot raw flux with wotan model
+    ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
+    ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
+    ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
+    ax1.set_xlabel('MJD [days]')
+    ax1.set_ylabel('Flux [e-]')
+    ax1.legend()
+
+    ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
+    ax2.set_ylabel('Detrended Flux [e-]')
+    ax2.set_xlabel('MJD [days]')
+    ax2.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+
 def main():
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
+    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    args = parser.parse_args()
+    gaia_id_to_plot = args.gaia_id
+    bin_size = args.bin
+
     # Set plot parameters
     plot_images()
 
@@ -149,15 +191,17 @@ def main():
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Read the first photometry file
-    print(f"Reading the first photometry file {phot_files[0]}...")
+    # Plot the first photometry file
+    print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
 
-    # Calculate mean flux and RMS for all stars with binning
-    mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=1000)
-
-    # Plot noise model
-    plot_noise_model(mean_flux_list, RMS_list)
+    # Plot the light curve for the specified Gaia ID
+    if gaia_id_to_plot:
+        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
+    else:
+        # Calculate mean and RMS for the noise model
+        mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
+        plot_noise_model(mean_flux_list, RMS_list)
 
 
 if __name__ == "__main__":
