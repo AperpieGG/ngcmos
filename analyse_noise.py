@@ -109,6 +109,12 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
+
+    # do some maths
+    mean_flux = np.mean(flux_2)
+    RMS = np.std(relative_flux)
+    print(f"Mean flux: {mean_flux:.2f}, RMS: {RMS:.2f}")
+
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
     # Plot raw flux with wotan model
