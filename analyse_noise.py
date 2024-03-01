@@ -154,6 +154,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # Compute Detrended flux and errors
     relative_flux = flux_2 / trend
+    relative_err = fluxerr_2 / trend
     rms = np.std(relative_flux)
     print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
 
