@@ -110,7 +110,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     skyerrs = [np.sqrt(gaia_id_data[f'fluxerr_{i}'] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(2, 7)]
     x = gaia_id_data['x']
     y = gaia_id_data['y']
-    print(len(x), len(y))
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
@@ -118,7 +117,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     fluxerrs_binned = [[np.sqrt(np.sum(fluxerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(2, len(fluxerrs[i]), bin_size)] for i in range(5)]
     sky_binned = [[np.mean(sky[i][j:j + bin_size]) for j in range(2, len(sky[i]), bin_size)] for i in range(5)]
     skyerrs_binned = [[np.sqrt(np.sum(skyerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(2, len(skyerrs[i]), bin_size)] for i in range(5)]
-
+    print(len(jd_mid_binned), len(fluxes_binned), len(sky_binned, len(x), len(y)))
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
