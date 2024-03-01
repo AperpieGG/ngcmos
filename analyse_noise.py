@@ -145,24 +145,18 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
-    flux_2 = gaia_id_data['flux_3']
-    fluxerr_2 = gaia_id_data['fluxerr_3']
+    flux_2 = gaia_id_data['flux_2']
+    fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    p_init = models.Polynomial1D(degree=2)
-
-    # Choose a fitting algorithm and configure fitting options
-    fit_p = fitting.FittingWithOutlierRemoval(fitting.LevMarLSQFitter(), sigma_clip, niter=3, sigma=3.0)
-
-    # Fit the model to your data
-    p, _ = fit_p(p_init, jd_mid, flux_2)
-
-    # Detrend the light curve
-    trend = p(jd_mid)
+    coefficients = np.polyfit(jd_mid, flux_2, 2)
+    trend = np.polyval(coefficients, jd_mid)
 
     # Compute relative flux and errors
     relative_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
+    rms = np.std(relative_flux)
+    print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
 
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
