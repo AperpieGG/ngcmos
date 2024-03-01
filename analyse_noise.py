@@ -11,10 +11,12 @@ from matplotlib import pyplot as plt
 from utils import plot_images
 from wotan import flatten
 
+
 def load_config(filename):
     with open(filename, 'r') as file:
         config = json.load(file)
     return config
+
 
 # Load paths from the configuration file
 config = load_config('directories.json')
@@ -26,6 +28,7 @@ out_paths = config["out_paths"]
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
         break
+
 
 def find_current_night_directory(directory):
     """
@@ -46,6 +49,7 @@ def find_current_night_directory(directory):
     current_date_directory = os.path.join(directory, previous_date)
     return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
 
+
 def get_phot_files(directory):
     """
     Get photometry files with the pattern 'phot_*.fits' from the directory.
@@ -65,6 +69,7 @@ def get_phot_files(directory):
         if fnmatch.fnmatch(filename, 'phot_*.fits'):
             phot_files.append(filename)
     return phot_files
+
 
 def read_phot_file(filename):
     """
@@ -90,7 +95,8 @@ def read_phot_file(filename):
         print(f"Error reading photometry file {filename}: {e}")
         return None
 
-def calculate_mean_rms(table):
+
+def calculate_mean_rms_binned(table, bin_size=60):
     mean_flux_list = []
     RMS_list = []
     for gaia_id in table['gaia_id']:
@@ -99,12 +105,17 @@ def calculate_mean_rms(table):
         flux_2 = gaia_id_data['flux_2']
         fluxerr_2 = gaia_id_data['fluxerr_2']
 
+        # Bin the data
+        jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
+        flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
+
         # Use wotan to detrend the light curve
-        detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
-        dt_flux = flux_2 / trend
+        detrended_flux, trend = flatten(jd_mid_binned, flux_2_binned, method='mean', window_length=0.05,
+                                        return_trend=True)
+        dt_flux = flux_2_binned / trend
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_2)
+        mean_flux = np.mean(flux_2_binned)
         RMS = np.std(dt_flux)
 
         # Append to lists
@@ -112,6 +123,7 @@ def calculate_mean_rms(table):
         RMS_list.append(RMS)
 
     return mean_flux_list, RMS_list
+
 
 def plot_noise_model(mean_flux_list, RMS_list):
     # Plot the noise model
@@ -123,6 +135,7 @@ def plot_noise_model(mean_flux_list, RMS_list):
     ax.legend()
     plt.tight_layout()
     plt.show()
+
 
 def main():
     # Set plot parameters
@@ -139,11 +152,12 @@ def main():
     print(f"Reading the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
 
-    # Calculate mean flux and RMS for all stars
-    mean_flux_list, RMS_list = calculate_mean_rms(phot_table)
+    # Calculate mean flux and RMS for all stars with binning
+    mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60)
 
     # Plot noise model
     plot_noise_model(mean_flux_list, RMS_list)
+
 
 if __name__ == "__main__":
     main()
