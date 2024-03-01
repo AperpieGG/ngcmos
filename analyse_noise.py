@@ -160,6 +160,8 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=50):
         dt_fluxerr = fluxerr_2 / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+        print(len(time_binned), len(dt_flux_binned), len(dt_fluxerr_binned))
+        print(len(jd_mid), len(dt_flux), len(dt_fluxerr))
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2)
@@ -170,16 +172,17 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=50):
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         RMS_unbinned_list.append(rms_unbinned)
-    print(f"The length of the RMS list is {len(dt_flux_binned)}")
-    print(f"The length of the RMS unbinned list is {len(dt_flux)}")
+
+    print(f"The length of the RMS list is {len(RMS_list)}")
+    print(f"The length of the RMS unbinned list is {len(RMS_unbinned_list)}")
     return mean_flux_list, RMS_list, RMS_unbinned_list
 
 
-def plot_noise_model(mean_flux_list, RMS_list, rms_unbinned_list):
+def plot_noise_model(mean_flux_list, RMS_list, RMS_unbinned_list):
     # Plot the noise model
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-    ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model')
-    ax.plot(mean_flux_list, rms_unbinned_list, 'o', color='red', label='Unbinned')
+    ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model (Binned)')
+    ax.plot(mean_flux_list, RMS_unbinned_list, 'o', color='red', label='Unbinned')
     ax.set_xlabel('Mean Flux [e-]')
     ax.set_ylabel('RMS [e-]')
     ax.set_title('Noise Model')
@@ -257,8 +260,8 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, rms_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=bin_size)
-        plot_noise_model(mean_flux_list, RMS_list, rms_unbinned_list)
+        mean_flux_list, RMS_list, RMS_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=50)
+        plot_noise_model(mean_flux_list, RMS_list, RMS_unbinned_list)
 
 
 if __name__ == "__main__":
