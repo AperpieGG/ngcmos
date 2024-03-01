@@ -108,6 +108,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     fluxerrs = [gaia_id_data[f'fluxerr_{i}'] for i in range(2, 7)]
     sky = [gaia_id_data[f'flux_w_sky_{i}'] - gaia_id_data[f'flux_{i}'] for i in range(2, 7)]
     skyerrs = [np.sqrt(gaia_id_data[f'fluxerr_{i}'] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(2, 7)]
+    x = gaia_id_data['x']
+    y = gaia_id_data['y']
 
     # Bin the data
     jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(2, len(jd_mid), bin_size)]
@@ -130,6 +132,13 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
         axs[row, col].set_xlabel('MJD [days]')
         axs[row, col].set_ylabel(f'Flux [e-] {bin_label}')
         axs[row, col].legend()
+
+    # Plot x, y positions
+    axs[2, 1].plot(jd_mid_binned, x, 'o', color='red', label='X Position')
+    axs[2, 1].plot(jd_mid_binned, y, 'o', color='green', label='Y Position')
+    axs[2, 1].set_xlabel('MJD [days]')
+    axs[2, 1].set_ylabel('Position')
+    axs[2, 1].legend()
 
     fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
     plt.tight_layout()
