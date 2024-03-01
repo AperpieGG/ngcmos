@@ -151,7 +151,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
     # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid, flux_2, 3), jd_mid)
+    trend = np.polyval(np.polyfit(jd_mid-int(jd_mid[0]), flux_2, 2), jd_mid-int(jd_mid[0]))
 
     # Compute Detrended flux and errors
     norm_flux = flux_2 / trend
