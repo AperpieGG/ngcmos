@@ -136,6 +136,9 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         mean_unbinned_list.append(mean_unbinned)
         rms_unbinned_list.append(rms_unbinned)
 
+        print(f"Length of binned flux: {len(dt_flux_binned)}")
+        print(f"Length of unbinned flux: {len(dt_flux)}")
+
     return mean_flux_list, RMS_list, mean_unbinned_list, rms_unbinned_list
 
 
