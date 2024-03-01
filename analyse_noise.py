@@ -112,10 +112,10 @@ def calculate_mean_rms_binned(table, bin_size=60, num_stars=1000):
         flux_2_binned = [np.mean(flux_2[i:i + bin_size]) for i in range(0, len(flux_2), bin_size)]
 
         # Use astropy fitting
-        p_init = models.Polynomial1D(degree=2)
-        fit_p = fitting.LevMarLSQFitter()
+        p_init = models.Polynomial1D(degree=1)
+        fit_p = fitting.FittingWithOutlierRemoval(fitting.LinearLSQFitter(), sigma_clip, niter=3, sigma=3.0)
         trend = fit_p(p_init, jd_mid_binned, flux_2_binned)
-        dt_flux = flux_2_binned / trend
+        dt_flux = flux_2_binned - trend(jd_mid_binned)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2_binned)
