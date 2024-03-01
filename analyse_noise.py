@@ -107,12 +107,12 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # Use wotan to detrend the light curve
     detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
-    relative_flux = flux_2 / trend
+    dt_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
 
     # do some maths
     mean_flux = np.mean(flux_2)
-    RMS = np.std(relative_flux)
+    RMS = np.std(dt_flux)
     print(f"Mean flux: {mean_flux:.2f}, RMS: {RMS:.2f}")
 
     # Create subplots
@@ -125,12 +125,14 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
     # Plot detrended flux
-    ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
+    ax2.errorbar(jd_mid, dt_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
     ax2.legend()
 
     plt.tight_layout()
     plt.show()
+
+    return mean_flux, RMS
 
 
 def main():
