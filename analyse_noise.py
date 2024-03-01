@@ -150,7 +150,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     tmag = gaia_id_data['Tmag'][0]
 
     # use astropy to detrend the light curve
-    p_init = models.Polynomial1D(degree=1)
+    p_init = models.Polynomial1D(degree=2)
     fit_p = fitting.FittingWithOutlierRemoval(fitting.LinearLSQFitter(), sigma_clip, niter=3, sigma=3.0)
 
     # Fit the model to the data
