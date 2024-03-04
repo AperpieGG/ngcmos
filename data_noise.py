@@ -211,7 +211,12 @@ def calculate_sky(table, num_stars, mean_flux_list):
         photon_shot_noise_star = np.sqrt(mean_flux_array) / mean_flux_array
         photon_shot_noise_list.append(photon_shot_noise_star)
 
-    return sky_flux, sky_noise, dc_noise, read_noise_list, read_signal_list, photon_shot_noise_list
+    # Convert lists to NumPy arrays
+    sky_flux_array = np.array(sky_flux)
+    dc_noise_array = np.array(dc_noise)
+    read_signal_array = np.array(read_signal_list)
+
+    return sky_flux_array, sky_noise, dc_noise_array, read_noise_list, read_signal_array, photon_shot_noise_list
 
 
 def plot_noise_model(mean_flux_list, RMS_list, sky_flux, sky_noise, dc_noise, read_noise, read_signal, photon_shot_noise):
