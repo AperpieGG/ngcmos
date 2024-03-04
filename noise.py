@@ -114,7 +114,7 @@ def noise_sources():
     dc_noise = np.sqrt(dark_current) / flux
 
     # set read noise from cmos characterisation
-    read_noise_pix = 1.74
+    read_noise_pix = 1.56
     read_noise = (read_noise_pix * npix) / flux
     read_signal = (read_noise_pix * npix) ** 2
 
