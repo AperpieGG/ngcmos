@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 import numpy as np
 import os
+
+from matplotlib import pyplot as plt
+
 from noise import plot_images, noise_model
 from analyse_noise import load_config, find_current_night_directory, get_phot_files, read_phot_file
 
@@ -103,6 +106,28 @@ def scintilation_noise():
     return N
 
 
+def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise, N):
+    N_sc = (N * flux) ** 2
+
+    total_noise = np.sqrt(flux + sky_flux + dark_current + read_signal + N_sc)
+    RNS = total_noise / flux
+    fig, ax = plt.subplots(figsize=(6, 8))
+    ax.plot(flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
+    ax.plot(flux, read_noise, color='red', label='read noise', linestyle='--')
+    ax.plot(flux, dc_noise, color='purple', label='dark noise', linestyle='--')
+    ax.plot(flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
+    ax.plot(flux, N, color='orange', label='scintilation noise', linestyle='--')
+    ax.plot(flux, RNS, color='black', label='total noise')
+    ax.set_xlabel('Flux')
+    ax.set_ylabel('RMS (mag)')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    plt.tight_layout()
+
+    plt.legend(loc='best')
+    plt.show()
+
+
 def main():
     # Set plot parameters
     plot_images()
@@ -168,14 +193,13 @@ def main():
             read_noise = (read_noise_pix * npix) / flux
             read_signal = (read_noise_pix * npix) ** 2
 
-            # Call the noise model function with real data
-            noise_model(flux, photon_shot_noise, sky, sky_noise, read_noise, read_signal, dark_current, dc_noise)
+            # Calculate scintillation noise
+            N = scintilation_noise()
 
-            # Plot or save the noise model plot here if needed
+            # Call the noise model function with real data
+            noise_model(flux, photon_shot_noise, sky, sky_noise, read_noise, read_signal, dark_current, dc_noise, N)
 
 
 if __name__ == "__main__":
     main()
-
-
 
