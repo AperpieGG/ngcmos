@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 import numpy as np
 import os
 from noise import plot_images, noise_model
