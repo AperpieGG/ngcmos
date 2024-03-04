@@ -142,6 +142,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
     mean_sky_list = []
+    sky_noise = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -158,71 +159,21 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2)
+        mean_sky = np.mean(sky_2)
         RMS = np.std(dt_flux_binned)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
+        mean_sky_list.append(mean_sky)
+        sky_noise.append(sky_noise_star)
 
-    return mean_flux_list, RMS_list
-
-
-def calculate_sky(table, num_stars, mean_flux_list):
-    aperture_radius = 2
-    npix = np.pi * aperture_radius ** 2
-    dark_current_rate = 0.66
-    exposure_time = 10
-    dark_current = dark_current_rate * exposure_time * npix
-
-    sky_flux = []
-    sky_noise = []
-    dc_noise = []
-    read_noise_list = []
-    read_signal_list = []
-    photon_shot_noise_list = []
-
-    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        sky_2 = gaia_id_data['flux_w_sky_2'] - gaia_id_data['flux_2']
-
-        # Calculate mean sky
-        mean_sky = np.mean(sky_2)
-        sky_flux.append(mean_sky)
-
-        # Calculate sky noise normalized with respect to the flux for each star
         sky_noise_star = np.sqrt(mean_sky) / mean_flux_list
-        sky_noise.append(sky_noise_star)
 
-        # Calculate sky noise normalized with respect to the flux for each star
-        mean_flux_array = np.array(mean_flux_list)  # Convert to NumPy array
-        sky_noise_star = np.sqrt(mean_sky) / mean_flux_array
-        sky_noise.append(sky_noise_star)
-
-        # Calculate dark current noise normalized with respect to the flux for each star
-        dark_current_noise = np.sqrt(dark_current) / mean_flux_array
-        dc_noise.append(dark_current_noise)
-
-        # Set read noise from CMOS characterization
-        read_noise_pix = 1.56
-        read_noise_star = (read_noise_pix * npix) / mean_flux_array
-        read_noise_list.append(read_noise_star)
-
-        # Calculate photon shot noise normalized with respect to the flux for each star
-        photon_shot_noise_star = np.sqrt(mean_flux_array) / mean_flux_array
-        photon_shot_noise_list.append(photon_shot_noise_star)
-
-    # Convert lists to NumPy arrays
-    sky_flux_array = np.array(sky_flux)
-    dc_noise_array = np.array(dc_noise)
-    read_signal_array = np.array(read_signal_list)
-
-    return sky_flux_array, sky_noise, dc_noise_array, read_noise_list, read_signal_array, photon_shot_noise_list
+    return mean_flux_list, RMS_list, mean_sky_list, sky_noise
 
 
-def plot_noise_model(mean_flux_list, RMS_list, sky_flux, sky_noise, dc_noise, read_noise, read_signal, photon_shot_noise):
-    # Calculate total noise and normalize with respect to flux
-    total_noise = np.sqrt(sky_flux + dc_noise + read_signal)
-    RNS = total_noise / mean_flux_list
+def plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise):
 
     # Plot the noise model
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
@@ -232,13 +183,6 @@ def plot_noise_model(mean_flux_list, RMS_list, sky_flux, sky_noise, dc_noise, re
 
     # Plot noise components as lines
     ax.plot(mean_flux_list, sky_noise, color='red', label='Sky Noise')
-    ax.plot(mean_flux_list, dc_noise, color='blue', label='Dark Current Noise')
-    ax.plot(mean_flux_list, read_noise, color='green', label='Read Noise')
-    ax.plot(mean_flux_list, read_signal, color='purple', label='Read Signal')
-    ax.plot(mean_flux_list, photon_shot_noise, color='yellow', label='Photon Shot Noise')
-
-    # Plot total noise
-    ax.plot(mean_flux_list, RNS, color='black', label='Total Noise')
 
     ax.set_xlabel('Mean Flux [e-]')
     ax.set_ylabel('RMS [e-]')
@@ -318,15 +262,10 @@ def main():
     else:
         # Calculate mean and RMS for the noise model
         num_stars = 100
-        mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size, num_stars)
-
-        # Calculate sky noise, dark current noise, read noise, and photon shot noise
-        sky_flux, sky_noise, dc_noise, read_noise, read_signal, photon_shot_noise = calculate_sky(phot_table, num_stars,
-                                                                                                  mean_flux_list)
+        mean_flux_list, RMS_list, mean_sky_list, sky_noise = calculate_mean_rms_binned(phot_table, bin_size, num_stars)
 
         # Plot the noise model
-        plot_noise_model(mean_flux_list, RMS_list, sky_flux, sky_noise, dc_noise, read_noise, read_signal,
-                         photon_shot_noise)
+        plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise)
 
 
 if __name__ == "__main__":
