@@ -141,7 +141,6 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 def calculate_mean_rms_binned(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
-    RMS_unbinned_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -165,18 +164,14 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
-        RMS_unbinned_list.append(rms_unbinned)
 
-    print(f"The length of the RMS list is {len(RMS_list)}")
-    print(f"The length of the RMS unbinned list is {len(RMS_unbinned_list)}")
-    return mean_flux_list, RMS_list, RMS_unbinned_list
+    return mean_flux_list, RMS_list
 
 
-def plot_noise_model(mean_flux_list, RMS_list, RMS_unbinned_list):
+def plot_noise_model(mean_flux_list, RMS_list):
     # Plot the noise model
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
     ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model (Binned)')
-    ax.plot(mean_flux_list, RMS_unbinned_list, 'o', color='red', label='Unbinned')
     ax.set_xlabel('Mean Flux [e-]')
     ax.set_ylabel('RMS [e-]')
     ax.set_title('Noise Model')
@@ -254,9 +249,9 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, RMS_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=60,
+        mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60,
                                                                                 num_stars=100)
-        plot_noise_model(mean_flux_list, RMS_list, RMS_unbinned_list)
+        plot_noise_model(mean_flux_list, RMS_list)
 
 
 if __name__ == "__main__":
