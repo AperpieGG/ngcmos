@@ -269,6 +269,7 @@ def noise_sources(mean_flux_list):
     # set exposure time and and random flux
     exposure_time = 10
     synthetic_flux = np.array(mean_flux_list)
+    print(np.min(mean_flux_list), np.max(mean_flux_list))
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 0.66
