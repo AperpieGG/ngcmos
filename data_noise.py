@@ -168,7 +168,11 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         RMS_list.append(RMS)
         mean_sky_list.append(mean_sky)
         sky_noise_list.append(sky_noise_star)
-    print(mean_sky_list, sky_noise_list)
+
+    mean_sky_average = np.mean(mean_sky_list)
+    sky_noise_average = np.sqrt(mean_sky_average) / mean_flux_list
+    print('Sky Noise:', sky_noise_average)
+    print('Mean Sky:', mean_sky_average)
 
     return mean_flux_list, RMS_list, mean_sky_list, sky_noise_list
 
