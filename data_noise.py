@@ -2,7 +2,16 @@
 import numpy as np
 import os
 from matplotlib import pyplot as plt
-from analyse_noise import load_config, find_current_night_directory, get_phot_files, read_phot_file
+import json
+from astropy.io import fits
+from datetime import datetime, timedelta
+import fnmatch
+
+def load_config(filename):
+    with open(filename, 'r') as file:
+        config = json.load(file)
+    return config
+
 
 # Load paths from the configuration file
 config = load_config('directories.json')
@@ -14,6 +23,72 @@ out_paths = config["out_paths"]
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
         break
+
+
+def find_current_night_directory(directory):
+    """
+    Find the directory for the current night based on the current date.
+    If not found, use the current working directory.
+
+    Parameters
+    ----------
+    directory : str
+        Base path for the directory.
+
+    Returns
+    -------
+    str
+        Path to the current night directory.
+    """
+    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+    current_date_directory = os.path.join(directory, previous_date)
+    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
+
+
+def get_phot_files(directory):
+    """
+    Get photometry files with the pattern 'phot_*.fits' from the directory.
+
+    Parameters
+    ----------
+    directory : str
+        Directory containing the files.
+
+    Returns
+    -------
+    list of str
+        List of photometry files matching the pattern.
+    """
+    phot_files = []
+    for filename in os.listdir(directory):
+        if fnmatch.fnmatch(filename, 'phot_*.fits'):
+            phot_files.append(filename)
+    return phot_files
+
+
+def read_phot_file(filename):
+    """
+    Read the photometry file.
+
+    Parameters
+    ----------
+    filename : str
+        Photometry file to read.
+
+    Returns
+    -------
+    astropy.table.table.Table
+        Table containing the photometry data.
+    """
+    # Read the photometry file here using fits or any other appropriate method
+    try:
+        with fits.open(filename) as ff:
+            # Access the data in the photometry file as needed
+            tab = ff[1].data
+            return tab
+    except Exception as e:
+        print(f"Error reading photometry file {filename}: {e}")
+        return None
 
 
 def plot_images():
@@ -200,7 +275,7 @@ def main():
     # Iterate through each photometry file
     for phot_file in phot_files:
         print(f"Processing photometry file {phot_file}...")
-        phot_table = read_phot_file(phot_file[0])
+        phot_table = read_phot_file(phot_file)
 
         # Calculate mean and RMS for the noise model for each star
         for gaia_id in phot_table['gaia_id'][:num_stars]:
