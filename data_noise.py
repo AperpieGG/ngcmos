@@ -200,7 +200,7 @@ def main():
     # Iterate through each photometry file
     for phot_file in phot_files:
         print(f"Processing photometry file {phot_file}...")
-        phot_table = read_phot_file(phot_file)
+        phot_table = read_phot_file(phot_file[0])
 
         # Calculate mean and RMS for the noise model for each star
         for gaia_id in phot_table['gaia_id'][:num_stars]:
