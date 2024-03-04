@@ -293,7 +293,7 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     # Assuming you already have `table` from somewhere
-    flux, RMS_list, mean_sky_list, sky_noise_list = calculate_mean_rms_binned(phot_table, bin_size=90, num_stars=10000)
+    flux, RMS_list, mean_sky_list, sky_noise_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=100)
     mean_flux_list = flux  # Use flux as mean flux
 
     # Calculate the average sky background
