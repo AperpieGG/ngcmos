@@ -268,7 +268,7 @@ def noise_sources():
 
     # set exposure time and and random flux
     exposure_time = 10
-    synthetic_flux = np.arange(10, 1e4, 10)
+    synthetic_flux = np.arange(10, 1e5, 10)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 0.66
@@ -348,7 +348,7 @@ def main():
         # Calculate mean and RMS for the noise model
         mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=args.num_stars)
 
-        plot_noise_model(mean_flux_list, RMS_list)
+        # plot_noise_model(mean_flux_list, RMS_list)
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
          dark_current, dc_noise) = noise_sources()
