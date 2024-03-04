@@ -193,21 +193,22 @@ def calculate_sky(table, num_stars, mean_flux_list):
         sky_noise_star = np.sqrt(mean_sky) / mean_flux_list
         sky_noise.append(sky_noise_star)
 
+        # Calculate sky noise normalized with respect to the flux for each star
+        mean_flux_array = np.array(mean_flux_list)  # Convert to NumPy array
+        sky_noise_star = np.sqrt(mean_sky) / mean_flux_array
+        sky_noise.append(sky_noise_star)
+
         # Calculate dark current noise normalized with respect to the flux for each star
-        dark_current_noise = np.sqrt(dark_current) / mean_flux_list
+        dark_current_noise = np.sqrt(dark_current) / mean_flux_array
         dc_noise.append(dark_current_noise)
 
         # Set read noise from CMOS characterization
         read_noise_pix = 1.56
-        read_noise_star = (read_noise_pix * npix) / mean_flux_list
+        read_noise_star = (read_noise_pix * npix) / mean_flux_array
         read_noise_list.append(read_noise_star)
 
-        # Set read signal from CMOS characterization
-        read_signal_star = (read_noise_pix * npix) ** 2
-        read_signal_list.append(read_signal_star)
-
         # Calculate photon shot noise normalized with respect to the flux for each star
-        photon_shot_noise_star = np.sqrt(mean_flux_list) / mean_flux_list
+        photon_shot_noise_star = np.sqrt(mean_flux_array) / mean_flux_array
         photon_shot_noise_list.append(photon_shot_noise_star)
 
     return sky_flux, sky_noise, dc_noise, read_noise_list, read_signal_list, photon_shot_noise_list
