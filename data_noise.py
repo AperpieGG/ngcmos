@@ -169,12 +169,31 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         mean_sky_list.append(mean_sky)
         sky_noise_list.append(sky_noise_star)
 
-    mean_sky_average = np.mean(mean_sky_list)
-    sky_noise_average = np.sqrt(mean_sky_average) / mean_sky_average
-    print('Sky Noise:', sky_noise_average)
-    print('Mean Sky:', mean_sky_average)
-
     return mean_flux_list, RMS_list, mean_sky_list, sky_noise_list
+
+
+def noise_sources(flux, sky_flux):
+    aperture_radius = 2
+    npix = np.pi * aperture_radius ** 2
+
+    exposure_time = 10
+
+    # Set dark current rate and read noise based on your calibration
+    dark_current_rate = 0.66
+    read_noise_pix = 1.56
+
+    dark_current = dark_current_rate * exposure_time * npix
+    dc_noise = np.sqrt(dark_current) / flux
+    read_noise = (read_noise_pix * npix) / flux
+    read_signal = (read_noise_pix * npix) ** 2
+
+    # Set sky noise
+    sky_noise = np.sqrt(sky_flux) / flux
+
+    # Set photon shot noise
+    photon_shot_noise = np.sqrt(flux) / flux
+
+    return flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise
 
 
 def plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise):
@@ -237,16 +256,29 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.show()
 
 
-def main():
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
-    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    args = parser.parse_args()
-    gaia_id_to_plot = args.gaia_id
-    bin_size = args.bin
+def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise):
+    N = scintilation_noise()
+    N_sc = (N * flux) ** 2
 
-    # Set plot parameters
+    total_noise = np.sqrt(flux + sky_flux + dark_current + read_signal + N_sc)
+    RNS = total_noise / flux
+    fig, ax = plt.subplots(figsize=(6, 8))
+    ax.plot(flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
+    ax.plot(flux, read_noise, color='red', label='read noise', linestyle='--')
+    ax.plot(flux, dc_noise, color='purple', label='dark noise', linestyle='--')
+    ax.plot(flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
+    ax.plot(flux, np.ones(len(flux)) * N, color='orange', label='scintilation noise', linestyle='--')
+    ax.plot(flux, RNS, color='black', label='total noise')
+    ax.set_xlabel('Flux')
+    ax.set_ylabel('RMS')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    plt.tight_layout()
+    plt.legend(loc='best')
+    plt.show()
+
+
+def main():
     plot_images()
 
     # Get the current night directory
@@ -260,16 +292,22 @@ def main():
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
 
-    # Plot the light curve for the specified Gaia ID
-    if gaia_id_to_plot:
-        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
-    else:
-        # Calculate mean and RMS for the noise model
-        num_stars = 100
-        mean_flux_list, RMS_list, mean_sky_list, sky_noise_list = calculate_mean_rms_binned(phot_table, bin_size, num_stars)
+    # Assuming you already have `table` from somewhere
+    flux, RMS_list, mean_sky_list, sky_noise_list = calculate_mean_rms_binned(phot_table, bin_size=90, num_stars=10000)
+    mean_flux_list = flux  # Use flux as mean flux
 
-        # Plot the noise model
-        # plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise)
+    # Calculate the average sky background
+    aperture_radius = 2
+    mean_sky_average = np.mean(mean_sky_list)
+    exposure_time = 10
+    npix = np.pi * aperture_radius ** 2
+    sky_flux_average = mean_sky_average * exposure_time * npix
+
+    # Calculate noise sources using real data
+    flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise = noise_sources(flux, sky_flux_average)
+
+    # Plot noise model with real data
+    noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise)
 
 
 if __name__ == "__main__":
