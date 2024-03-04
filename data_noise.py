@@ -142,9 +142,18 @@ def main():
     # Set the bin size
     bin_size = 60
 
+    # Initialize lists to store aggregated data
+    all_flux = []
+    all_sky = []
+    all_photon_shot_noise = []
+    all_sky_noise = []
+    all_dc_noise = []
+    all_read_noise = []
+    all_N = []
+
     # Iterate through each photometry file
     for phot_file in phot_files:
-        print(f"Plotting photometry file {phot_file}...")
+        print(f"Processing photometry file {phot_file}...")
         phot_table = read_phot_file(phot_file)
 
         # Calculate mean and RMS for the noise model for each star
@@ -166,7 +175,6 @@ def main():
 
             # Calculate mean flux, sky, and RMS
             mean_flux = np.mean(flux_2)
-            RMS = np.std(dt_flux_binned)
             mean_sky = np.mean(sky_2)
 
             # Pass real data to the noise model
@@ -189,15 +197,33 @@ def main():
             # Set read noise from CMOS characterization
             read_noise_pix = 1.56
             read_noise = (read_noise_pix * npix) / flux
-            read_signal = (read_noise_pix * npix) ** 2
 
             # Calculate scintillation noise
             N = scintilation_noise()
 
-            # Call the noise model function with real data
-            noise_model(flux, photon_shot_noise, sky, sky_noise, read_noise, read_signal, dark_current, dc_noise, N)
+            # Append data to aggregated lists
+            all_flux.append(flux)
+            all_sky.append(sky)
+            all_photon_shot_noise.append(photon_shot_noise)
+            all_sky_noise.append(sky_noise)
+            all_dc_noise.append(dc_noise)
+            all_read_noise.append(read_noise)
+            all_N.append(N)
+
+    # Convert lists to numpy arrays
+    all_flux = np.array(all_flux)
+    all_sky = np.array(all_sky)
+    all_photon_shot_noise = np.array(all_photon_shot_noise)
+    all_sky_noise = np.array(all_sky_noise)
+    all_dc_noise = np.array(all_dc_noise)
+    all_read_noise = np.array(all_read_noise)
+    all_N = np.array(all_N)
+
+    # Call the noise model function with aggregated data
+    noise_model(all_flux, all_photon_shot_noise, all_sky, all_sky_noise, all_read_noise, all_dc_noise, all_N)
 
 
 if __name__ == "__main__":
     main()
+
 
