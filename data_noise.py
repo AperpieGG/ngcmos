@@ -258,6 +258,10 @@ def main():
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
+    # Plot the first photometry file
+    print(f"Plotting the first photometry file {phot_files[0]}...")
+    phot_table = read_phot_file(phot_files[0])
+
     # Set the number of stars to process
     num_stars = 50
     # Set the bin size
@@ -272,11 +276,7 @@ def main():
     all_read_noise = []
     all_N = []
 
-    # Iterate through each photometry file
-    for phot_file in phot_files:
-        print(f"Processing photometry file {phot_file}...")
-        phot_table = read_phot_file(phot_file)
-
+    if phot_table is not None:
         # Calculate mean and RMS for the noise model for each star
         for gaia_id in phot_table['gaia_id'][:num_stars]:
             gaia_id_data = phot_table[phot_table['gaia_id'] == gaia_id]
