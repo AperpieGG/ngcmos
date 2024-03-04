@@ -146,17 +146,17 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
-        flux_2 = gaia_id_data['flux_2']
+        flux_3 = gaia_id_data['flux_3']
         fluxerr_2 = gaia_id_data['fluxerr_2']
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_2 / trend
+        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
+        dt_flux = flux_3 / trend
         dt_fluxerr = fluxerr_2 / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_2)
+        mean_flux = np.mean(flux_3)
         RMS = np.std(dt_flux_binned)
         rms_unbinned = np.std(dt_flux)
 
@@ -263,7 +263,7 @@ def noise_sources(mean_flux_list):
 
     """
 
-    aperture_radius = 2
+    aperture_radius = 3
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
