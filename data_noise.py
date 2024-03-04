@@ -141,72 +141,42 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 def calculate_mean_rms_binned(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
-    mean_sky_list = []
-    sky_noise_list = []
+    RMS_unbinned_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_2 = gaia_id_data['flux_2']
         fluxerr_2 = gaia_id_data['fluxerr_2']
-        sky_2 = gaia_id_data['flux_w_sky_2'] - gaia_id_data['flux_2']
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_2 / trend
         dt_fluxerr = fluxerr_2 / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+        print(len(time_binned), len(dt_flux_binned), len(dt_fluxerr_binned))
+        print(len(jd_mid), len(dt_flux), len(dt_fluxerr))
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_2)
-        mean_sky = np.mean(sky_2)
         RMS = np.std(dt_flux_binned)
-        sky_noise_star = np.sqrt(mean_sky) / mean_flux_list
+        rms_unbinned = np.std(dt_flux)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
-        mean_sky_list.append(mean_sky)
-        sky_noise_list.append(sky_noise_star)
+        RMS_unbinned_list.append(rms_unbinned)
 
-    return mean_flux_list, RMS_list, mean_sky_list, sky_noise_list
-
-
-def noise_sources(flux, sky_flux):
-    aperture_radius = 2
-    npix = np.pi * aperture_radius ** 2
-
-    exposure_time = 10
-
-    # Set dark current rate and read noise based on your calibration
-    dark_current_rate = 0.66
-    read_noise_pix = 1.56
-
-    dark_current = dark_current_rate * exposure_time * npix
-    dc_noise = np.sqrt(dark_current) / flux
-    read_noise = (read_noise_pix * npix) / flux
-    read_signal = (read_noise_pix * npix) ** 2
-
-    # Set sky noise
-    sky_noise = np.sqrt(sky_flux) / flux
-
-    # Set photon shot noise
-    photon_shot_noise = np.sqrt(flux) / flux
-
-    return flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise
+    print(f"The length of the RMS list is {len(RMS_list)}")
+    print(f"The length of the RMS unbinned list is {len(RMS_unbinned_list)}")
+    return mean_flux_list, RMS_list, RMS_unbinned_list
 
 
-def plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise):
-
+def plot_noise_model(mean_flux_list, RMS_list, RMS_unbinned_list):
     # Plot the noise model
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-
-    # Plot RMS as data points
-    ax.scatter(mean_flux_list, RMS_list, color='black', label='RMS')
-
-    # Plot noise components as lines
-    ax.plot(mean_flux_list, sky_noise, color='red', label='Sky Noise')
-
+    ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model (Binned)')
+    ax.plot(mean_flux_list, RMS_unbinned_list, 'o', color='red', label='Unbinned')
     ax.set_xlabel('Mean Flux [e-]')
     ax.set_ylabel('RMS [e-]')
     ax.set_title('Noise Model')
@@ -256,29 +226,26 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.show()
 
 
-def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise):
-    N = scintilation_noise()
-    N_sc = (N * flux) ** 2
-
-    total_noise = np.sqrt(flux + sky_flux + dark_current + read_signal + N_sc)
-    RNS = total_noise / flux
-    fig, ax = plt.subplots(figsize=(6, 8))
-    ax.plot(flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
-    ax.plot(flux, read_noise, color='red', label='read noise', linestyle='--')
-    ax.plot(flux, dc_noise, color='purple', label='dark noise', linestyle='--')
-    ax.plot(flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
-    ax.plot(flux, np.ones(len(flux)) * N, color='orange', label='scintilation noise', linestyle='--')
-    ax.plot(flux, RNS, color='black', label='total noise')
-    ax.set_xlabel('Flux')
-    ax.set_ylabel('RMS')
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    plt.tight_layout()
-    plt.legend(loc='best')
-    plt.show()
-
+def scintilation_noise():
+    t = 10  # exposure time
+    D = 20  # telescope diameter
+    secZ = 1.2  # airmass
+    h = 2433  # height of Paranal
+    ho = 8000  # height of atmospheric scale
+    W = 1.75  # wind speed
+    N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
+    return N
 
 def main():
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
+    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    args = parser.parse_args()
+    gaia_id_to_plot = args.gaia_id
+    bin_size = args.bin
+
+    # Set plot parameters
     plot_images()
 
     # Get the current night directory
@@ -292,22 +259,12 @@ def main():
     print(f"Plotting the first photometry file {phot_files[0]}...")
     phot_table = read_phot_file(phot_files[0])
 
-    # Assuming you already have `table` from somewhere
-    flux, RMS_list, mean_sky_list, sky_noise_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=100)
-    mean_flux_list = flux  # Use flux as mean flux
-
-    # Calculate the average sky background
-    aperture_radius = 2
-    mean_sky_average = np.mean(mean_sky_list)
-    exposure_time = 10
-    npix = np.pi * aperture_radius ** 2
-    sky_flux_average = mean_sky_average * exposure_time * npix
-
-    # Calculate noise sources using real data
-    flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise = noise_sources(flux, sky_flux_average)
-
-    # Plot noise model with real data
-    noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise)
+    # Plot the light curve for the specified Gaia ID
+    if gaia_id_to_plot:
+        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
+    else:
+        # Calculate mean and RMS for the noise model
+        mean_flux_list, RMS_list, RMS_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=100)
 
 
 if __name__ == "__main__":
