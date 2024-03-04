@@ -142,7 +142,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
     mean_sky_list = []
-    sky_noise = []
+    sky_noise_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -167,9 +167,12 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         mean_sky_list.append(mean_sky)
-        sky_noise.append(sky_noise_star)
+        sky_noise_list.append(sky_noise_star)
+        print(len(mean_sky_list), len(sky_noise_list))
+        print('The mean flux and RMS are:', mean_flux_list, RMS_list)
+        print('The sky mean and sky noise are:', mean_sky_list, sky_noise_list)
 
-    return mean_flux_list, RMS_list, mean_sky_list, sky_noise
+    return mean_flux_list, RMS_list, mean_sky_list, sky_noise_list
 
 
 def plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise):
@@ -261,10 +264,10 @@ def main():
     else:
         # Calculate mean and RMS for the noise model
         num_stars = 100
-        mean_flux_list, RMS_list, mean_sky_list, sky_noise = calculate_mean_rms_binned(phot_table, bin_size, num_stars)
+        mean_flux_list, RMS_list, mean_sky_list, sky_noise_list = calculate_mean_rms_binned(phot_table, bin_size, num_stars)
 
         # Plot the noise model
-        plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise)
+        # plot_noise_model(mean_flux_list, RMS_list, mean_sky_list, sky_noise)
 
 
 if __name__ == "__main__":
