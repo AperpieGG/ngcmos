@@ -8,10 +8,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
-from sklearn.base import TransformerMixin
-import sklearn
 from utils import plot_images
-from wotan import flatten
 
 
 def load_config(filename):
@@ -107,12 +104,9 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
     Parameters
     ----------
-    times : array
-        Array of times to bin
-    flux : array
-        Array of flux values to bin
-    error : array
-        Array of error values to bin
+    time : array         of times to bin
+    flux : array         of flux values to bin
+    error : array         of error values to bin
     bin_fact : int
         Number of measurements to combine
 
@@ -129,18 +123,18 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     ------
     None
     """
-    n_binned = int(len(time)/bin_fact)
-    clip = n_binned*bin_fact
+    n_binned = int(len(time) / bin_fact)
+    clip = n_binned * bin_fact
     time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
     # determine if 1 or 2d flux/err inputs
     if len(flux.shape) == 1:
         flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
-        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact)**2, axis=1))/bin_fact
+        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
     else:
         # assumed 2d with 1 row per star
         n_stars = len(flux)
         flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
-        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact))**2, axis=2))/bin_fact
+        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
     return time_b, flux_b, error_b
 
 
@@ -204,7 +198,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
     # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
     # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid-int(jd_mid[0]), flux_2, 2), jd_mid-int(jd_mid[0]))
+    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
 
     # Compute Detrended flux and errors
     norm_flux = flux_2 / trend
@@ -260,7 +254,8 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, RMS_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=90, num_stars=10000)
+        mean_flux_list, RMS_list, RMS_unbinned_list = calculate_mean_rms_binned(phot_table, bin_size=90,
+                                                                                num_stars=10000)
         plot_noise_model(mean_flux_list, RMS_list, RMS_unbinned_list)
 
 
