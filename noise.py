@@ -164,11 +164,17 @@ def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_s
     plt.show()
 
 
-plot_images()
-flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise = noise_sources()
-noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise)
+def main():
 
-calculate_camera_spec()
+    plot_images()
 
-# TODO add noise model for the Ikon-L
+    flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise = noise_sources()
+    
+    noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise)
+
+    calculate_camera_spec()
+
+
+if __name__ == "__main__":
+    main()
 
