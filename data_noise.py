@@ -231,14 +231,17 @@ def scintilation_noise():
     N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
     return N
 
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
     args = parser.parse_args()
     gaia_id_to_plot = args.gaia_id
     bin_size = args.bin
+    num_stars = args.num_stars
 
     # Set plot parameters
     plot_images()
@@ -259,7 +262,7 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=100)
+        mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=args.num_stars)
 
         plot_noise_model(mean_flux_list, RMS_list)
 
