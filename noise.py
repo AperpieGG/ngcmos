@@ -30,12 +30,12 @@ def plot_images():
     plt.rcParams['ytick.minor.right'] = True
     plt.rcParams['ytick.minor.left'] = True
 
-    ## Font and fontsize
+    # Font and fontsize
 
     plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['font.size'] = 14
 
-    ## Legend
+    # Legend
 
     plt.rcParams['legend.frameon'] = True
     plt.rcParams['legend.framealpha'] = 0.8
@@ -74,22 +74,31 @@ def noise_sources():
     """
     Returns the noise sources for a given flux
 
-    returns arrays of noise ans signal for a given flux
+    returns arrays of noise and signal for a given flux
 
-    Paramaters
+    Parameters
     ----------
-    flux : float
-        The flux of the star in photons per second
-    exposure_time : float
-        The exposure time in seconds
-    dark_current_rate : float
-        The dark current rate in electrons per second
-    read_noise_pix : float
-        The read noise in electrons per pixel
-    aperture_radius : float
-        The aperture radius in pixels
-    sky_flux : float
-        The sky flux in photons per second per pixel
+    None
+
+    Returns
+    -------
+    flux : array
+        The flux of the star in electrons per second
+    photon_shot_noise : array
+        The photon shot noise
+    sky_flux : array
+        The sky flux
+    sky_noise : array
+        The sky noise
+    read_noise : array
+        The read noise
+    read_signal : array
+        The read signal
+    dark_current : array
+        The dark current
+    dc_noise : array
+        The dark current noise
+
     """
 
     aperture_radius = 3
