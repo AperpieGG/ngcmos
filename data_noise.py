@@ -2,7 +2,6 @@
 import numpy as np
 import os
 from matplotlib import pyplot as plt
-from noise import plot_images
 from analyse_noise import load_config, find_current_night_directory, get_phot_files, read_phot_file
 
 # Load paths from the configuration file
@@ -15,6 +14,42 @@ out_paths = config["out_paths"]
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
         break
+
+
+def plot_images():
+    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['xtick.top'] = True
+    plt.rcParams['xtick.labeltop'] = False
+    plt.rcParams['xtick.labelbottom'] = True
+    plt.rcParams['xtick.bottom'] = True
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+    plt.rcParams['xtick.minor.visible'] = True
+    plt.rcParams['xtick.major.top'] = True
+    plt.rcParams['xtick.minor.top'] = True
+    plt.rcParams['xtick.minor.bottom'] = True
+    plt.rcParams['xtick.alignment'] = 'center'
+
+    plt.rcParams['ytick.left'] = True
+    plt.rcParams['ytick.labelleft'] = True
+    plt.rcParams['ytick.right'] = True
+    plt.rcParams['ytick.minor.visible'] = True
+    plt.rcParams['ytick.major.right'] = True
+    plt.rcParams['ytick.major.left'] = True
+    plt.rcParams['ytick.minor.right'] = True
+    plt.rcParams['ytick.minor.left'] = True
+
+    # Font and fontsize
+
+    plt.rcParams['font.size'] = 14
+
+    # Legend
+
+    plt.rcParams['legend.frameon'] = True
+    plt.rcParams['legend.framealpha'] = 0.8
+    plt.rcParams['legend.loc'] = 'best'
+    plt.rcParams['legend.fancybox'] = True
+    plt.rcParams['legend.fontsize'] = 14
 
 
 def bin_time_flux_error(time, flux, error, bin_fact):
