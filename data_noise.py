@@ -232,7 +232,7 @@ def scintilation_noise():
     return N
 
 
-def noise_sources():
+def noise_sources(mean_flux_list):
     """
     Returns the noise sources for a given flux
 
@@ -268,7 +268,7 @@ def noise_sources():
 
     # set exposure time and and random flux
     exposure_time = 10
-    synthetic_flux = np.linspace(10, 1e5, 5000)
+    synthetic_flux = np.array(mean_flux_list)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 0.66
@@ -351,7 +351,7 @@ def main():
         # plot_noise_model(mean_flux_list, RMS_list)
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources()
+         dark_current, dc_noise) = noise_sources(mean_flux_list)
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list)
