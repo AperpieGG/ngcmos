@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 import numpy as np
 import os
 from matplotlib import pyplot as plt
@@ -6,6 +5,7 @@ import json
 from astropy.io import fits
 from datetime import datetime, timedelta
 import fnmatch
+
 
 def load_config(filename):
     with open(filename, 'r') as file:
@@ -29,16 +29,6 @@ def find_current_night_directory(directory):
     """
     Find the directory for the current night based on the current date.
     If not found, use the current working directory.
-
-    Parameters
-    ----------
-    directory : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str
-        Path to the current night directory.
     """
     previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
     current_date_directory = os.path.join(directory, previous_date)
@@ -48,16 +38,6 @@ def find_current_night_directory(directory):
 def get_phot_files(directory):
     """
     Get photometry files with the pattern 'phot_*.fits' from the directory.
-
-    Parameters
-    ----------
-    directory : str
-        Directory containing the files.
-
-    Returns
-    -------
-    list of str
-        List of photometry files matching the pattern.
     """
     phot_files = []
     for filename in os.listdir(directory):
@@ -69,21 +49,9 @@ def get_phot_files(directory):
 def read_phot_file(filename):
     """
     Read the photometry file.
-
-    Parameters
-    ----------
-    filename : str
-        Photometry file to read.
-
-    Returns
-    -------
-    astropy.table.table.Table
-        Table containing the photometry data.
     """
-    # Read the photometry file here using fits or any other appropriate method
     try:
         with fits.open(filename) as ff:
-            # Access the data in the photometry file as needed
             tab = ff[1].data
             return tab
     except Exception as e:
@@ -104,7 +72,6 @@ def plot_images():
     plt.rcParams['xtick.minor.top'] = True
     plt.rcParams['xtick.minor.bottom'] = True
     plt.rcParams['xtick.alignment'] = 'center'
-
     plt.rcParams['ytick.left'] = True
     plt.rcParams['ytick.labelleft'] = True
     plt.rcParams['ytick.right'] = True
@@ -113,13 +80,7 @@ def plot_images():
     plt.rcParams['ytick.major.left'] = True
     plt.rcParams['ytick.minor.right'] = True
     plt.rcParams['ytick.minor.left'] = True
-
-    # Font and fontsize
-
     plt.rcParams['font.size'] = 14
-
-    # Legend
-
     plt.rcParams['legend.frameon'] = True
     plt.rcParams['legend.framealpha'] = 0.8
     plt.rcParams['legend.loc'] = 'best'
@@ -128,82 +89,20 @@ def plot_images():
 
 
 def bin_time_flux_error(time, flux, error, bin_fact):
-    """
-    Use reshape to bin light curve data, clip under filled bins
-    Works with 2D arrays of flux and errors
-
-    Note: under filled bins are clipped off the end of the series
-
-    Parameters
-    ----------
-    time : array         of times to bin
-    flux : array         of flux values to bin
-    error : array         of error values to bin
-    bin_fact : int
-        Number of measurements to combine
-
-    Returns
-    -------
-    times_b : array
-        Binned times
-    flux_b : array
-        Binned fluxes
-    error_b : array
-        Binned errors
-
-    Raises
-    ------
-    None
-    """
     n_binned = int(len(time) / bin_fact)
     clip = n_binned * bin_fact
     time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
-    # determine if 1 or 2d flux/err inputs
     if len(flux.shape) == 1:
         flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
         error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
     else:
-        # assumed 2d with 1 row per star
         n_stars = len(flux)
         flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
         error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_binned(table, bin_size, num_stars):
-    mean_flux_list = []
-    RMS_list = []
-    mean_sky_list = []
-
-    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid']
-        flux_2 = gaia_id_data['flux_2']
-        fluxerr_2 = gaia_id_data['fluxerr_2']
-        flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
-        sky_2 = flux_w_sky_2 - flux_2
-
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_2 / trend
-        dt_fluxerr = fluxerr_2 / trend
-
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
-
-        # Calculate mean flux, sky and RMS
-        mean_flux = np.mean(flux_2)
-        RMS = np.std(dt_flux_binned)
-        mean_sky = np.mean(sky_2)
-
-        # Append to lists
-        mean_flux_list.append(mean_flux)
-        RMS_list.append(RMS)
-        mean_sky_list.append(mean_sky)
-
-    print(f"The length of the RMS list is {len(RMS_list)}")
-    return mean_flux_list, RMS_list, mean_sky_list
-
-
-def scintilation_noise():
+def scintillation_noise():
     t = 10  # exposure time
     D = 20  # telescope diameter
     secZ = 1.2  # airmass
@@ -214,21 +113,14 @@ def scintilation_noise():
     return N
 
 
-def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, dc_noise, N):
-    # Calculate scintillation noise contribution
+def noise_model(flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N):
     N_sc = (N * flux) ** 2
-
-    # Calculate total noise
     total_noise = np.sqrt(photon_shot_noise + read_noise + dc_noise + N_sc + sky_noise ** 2)
-
-    # Normalize all noise components with respect to flux
     photon_shot_noise /= flux
     sky_noise /= flux
     read_noise /= flux
     dc_noise /= flux
     N_sc /= flux
-
-    # Plot the noise model
     fig, ax = plt.subplots(figsize=(6, 8))
     ax.plot(flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(flux, read_noise, color='red', label='read noise', linestyle='--')
@@ -246,26 +138,12 @@ def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, dc_noi
 
 
 def main():
-    # Set plot parameters
     plot_images()
-
-    # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
-
-    # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
-
-    # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[0]}...")
-    phot_table = read_phot_file(phot_files[0])
-
-    # Set the number of stars to process
     num_stars = 50
-    # Set the bin size
     bin_size = 60
 
-    # Initialize lists to store aggregated data
     all_flux = []
     all_sky = []
     all_photon_shot_noise = []
@@ -274,62 +152,54 @@ def main():
     all_read_noise = []
     all_N = []
 
-    if phot_table is not None:
-        # Calculate mean and RMS for the noise model for each star
-        for gaia_id in phot_table['gaia_id'][:num_stars]:
-            gaia_id_data = phot_table[phot_table['gaia_id'] == gaia_id]
-            jd_mid = gaia_id_data['jd_mid']
-            flux_2 = gaia_id_data['flux_2']
-            fluxerr_2 = gaia_id_data['fluxerr_2']
-            flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
-            sky_2 = flux_w_sky_2 - flux_2
+    if phot_files:
+        for phot_file in phot_files:
+            phot_table = read_phot_file(phot_file)
+            if phot_table is not None:
+                for gaia_id in phot_table['gaia_id'][:num_stars]:
+                    gaia_id_data = phot_table[phot_table['gaia_id'] == gaia_id]
+                    jd_mid = gaia_id_data['jd_mid']
+                    flux_2 = gaia_id_data['flux_2']
+                    fluxerr_2 = gaia_id_data['fluxerr_2']
+                    flux_w_sky_2 = gaia_id_data['flux_w_sky_2']
+                    sky_2 = flux_w_sky_2 - flux_2
 
-            # Detrend the flux
-            trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
-            dt_flux = flux_2 / trend
-            dt_fluxerr = fluxerr_2 / trend
+                    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
+                    dt_flux = flux_2 / trend
+                    dt_fluxerr = fluxerr_2 / trend
 
-            # Bin the data if needed
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+                    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr,
+                                                                                         bin_size)
 
-            # Calculate mean flux, sky, and RMS
-            mean_flux = np.mean(flux_2)
-            mean_sky = np.mean(sky_2)
+                    mean_flux = np.mean(flux_2)
+                    mean_sky = np.mean(sky_2)
 
-            # Pass real data to the noise model
-            flux = mean_flux
-            sky = mean_sky
-            photon_shot_noise = np.sqrt(flux) / flux
-            sky_noise = np.sqrt(sky) / flux
+                    flux = mean_flux
+                    sky = mean_sky
+                    photon_shot_noise = np.sqrt(flux) / flux
+                    sky_noise = np.sqrt(sky) / flux
 
-            aperture_radius = 3
-            npix = np.pi * aperture_radius ** 2
+                    aperture_radius = 3
+                    npix = np.pi * aperture_radius ** 2
 
-            # Set exposure time
-            exposure_time = 10
+                    exposure_time = 10
+                    dark_current_rate = 0.66
+                    dark_current = dark_current_rate * exposure_time * npix
+                    dc_noise = np.sqrt(dark_current) / flux
 
-            # Set dark current rate from CMOS characterization
-            dark_current_rate = 0.66
-            dark_current = dark_current_rate * exposure_time * npix
-            dc_noise = np.sqrt(dark_current) / flux
+                    read_noise_pix = 1.56
+                    read_noise = (read_noise_pix * npix) / flux
 
-            # Set read noise from CMOS characterization
-            read_noise_pix = 1.56
-            read_noise = (read_noise_pix * npix) / flux
+                    N = scintillation_noise()
 
-            # Calculate scintillation noise
-            N = scintilation_noise()
+                    all_flux.append(flux)
+                    all_sky.append(sky)
+                    all_photon_shot_noise.append(photon_shot_noise)
+                    all_sky_noise.append(sky_noise)
+                    all_dc_noise.append(dc_noise)
+                    all_read_noise.append(read_noise)
+                    all_N.append(N)
 
-            # Append data to aggregated lists
-            all_flux.append(flux)
-            all_sky.append(sky)
-            all_photon_shot_noise.append(photon_shot_noise)
-            all_sky_noise.append(sky_noise)
-            all_dc_noise.append(dc_noise)
-            all_read_noise.append(read_noise)
-            all_N.append(N)
-
-    # Convert lists to numpy arrays
     all_flux = np.array(all_flux)
     all_sky = np.array(all_sky)
     all_photon_shot_noise = np.array(all_photon_shot_noise)
@@ -338,11 +208,8 @@ def main():
     all_read_noise = np.array(all_read_noise)
     all_N = np.array(all_N)
 
-    # Call the noise model function with aggregated data
-    noise_model(all_flux, all_photon_shot_noise, all_sky, all_sky_noise, all_read_noise, all_dc_noise, all_N)
+    noise_model(all_flux, all_photon_shot_noise, all_sky_noise, all_read_noise, all_dc_noise, all_N)
 
 
 if __name__ == "__main__":
     main()
-
-
