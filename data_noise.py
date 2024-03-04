@@ -299,7 +299,7 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     fig, ax = plt.subplots(figsize=(6, 8))
 
     ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model')
-    
+
     ax.plot(synthetic_flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_flux, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_flux, dc_noise, color='purple', label='dark noise', linestyle='--')
@@ -349,6 +349,12 @@ def main():
         mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=60, num_stars=args.num_stars)
 
         plot_noise_model(mean_flux_list, RMS_list)
+
+        (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
+         dark_current, dc_noise) = noise_sources()
+
+        noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
+                    dark_current, dc_noise, mean_flux_list, RMS_list)
 
 
 if __name__ == "__main__":
