@@ -104,24 +104,35 @@ def scintilation_noise():
     return N
 
 
-def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise, N):
+def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, dc_noise, N):
+    # Calculate scintillation noise contribution
     N_sc = (N * flux) ** 2
 
-    total_noise = np.sqrt(flux + sky_flux + dark_current + read_signal + N_sc)
-    RNS = total_noise / flux
+    # Calculate total noise
+    total_noise = np.sqrt(photon_shot_noise + read_noise + dc_noise + N_sc + sky_noise ** 2)
+
+    # Normalize all noise components with respect to flux
+    photon_shot_noise /= flux
+    sky_noise /= flux
+    read_noise /= flux
+    dc_noise /= flux
+    N_sc /= flux
+
+    # Plot the noise model
     fig, ax = plt.subplots(figsize=(6, 8))
     ax.plot(flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(flux, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(flux, dc_noise, color='purple', label='dark noise', linestyle='--')
     ax.plot(flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
-    ax.plot(flux, N, color='orange', label='scintilation noise', linestyle='--')
-    ax.plot(flux, RNS, color='black', label='total noise')
+    ax.plot(flux, N, color='orange', label='scintillation noise', linestyle='--')
+    ax.plot(flux, total_noise, color='black', label='total noise')
     ax.set_xlabel('Flux')
     ax.set_ylabel('RMS (mag)')
     ax.set_xscale('log')
     ax.set_yscale('log')
+    ax.set_ylim(0.001, 0.1)
+    ax.set_xlim(1000, 1e6)
     plt.tight_layout()
-
     plt.legend(loc='best')
     plt.show()
 
