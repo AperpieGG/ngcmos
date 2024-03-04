@@ -1,10 +1,8 @@
 #! /usr/bin/env python
 import numpy as np
 import os
-
 from matplotlib import pyplot as plt
-
-from noise import plot_images, noise_model
+from noise import plot_images
 from analyse_noise import load_config, find_current_night_directory, get_phot_files, read_phot_file
 
 # Load paths from the configuration file
