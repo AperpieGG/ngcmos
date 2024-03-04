@@ -161,14 +161,13 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         mean_flux = np.mean(flux_2)
         mean_sky = np.mean(sky_2)
         RMS = np.std(dt_flux_binned)
+        sky_noise_star = np.sqrt(mean_sky) / mean_flux_list
 
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         mean_sky_list.append(mean_sky)
         sky_noise.append(sky_noise_star)
-
-        sky_noise_star = np.sqrt(mean_sky) / mean_flux_list
 
     return mean_flux_list, RMS_list, mean_sky_list, sky_noise
 
