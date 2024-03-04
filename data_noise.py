@@ -232,6 +232,90 @@ def scintilation_noise():
     return N
 
 
+def noise_sources():
+    """
+    Returns the noise sources for a given flux
+
+    returns arrays of noise and signal for a given flux
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    flux : array
+        The flux of the star in electrons per second
+    photon_shot_noise : array
+        The photon shot noise
+    sky_flux : array
+        The sky flux
+    sky_noise : array
+        The sky noise
+    read_noise : array
+        The read noise
+    read_signal : array
+        The read signal
+    dark_current : array
+        The dark current
+    dc_noise : array
+        The dark current noise
+
+    """
+
+    aperture_radius = 3
+    npix = np.pi * aperture_radius ** 2
+
+    # set exposure time and and random flux
+    exposure_time = 10
+    synthetic_flux = np.arange(100, 1e6, 10)
+
+    # set dark current rate from cmos characterisation
+    dark_current_rate = 0.66
+    dark_current = dark_current_rate * exposure_time * npix
+    dc_noise = np.sqrt(dark_current) / synthetic_flux
+
+    # set read noise from cmos characterisation
+    read_noise_pix = 1.56
+    read_noise = (read_noise_pix * npix) / synthetic_flux
+    read_signal = (read_noise_pix * npix) ** 2
+
+    # set random sky background
+    sky_flux = 22.6 * exposure_time * npix
+    sky_noise = np.sqrt(sky_flux) / synthetic_flux
+
+    # set random photon shot noise from the flux
+    photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
+
+    return synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise
+
+
+def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise, mean_flux_list, RMS_list):
+    N = scintilation_noise()
+    N_sc = (N * synthetic_flux) ** 2
+
+    total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
+    RNS = total_noise / synthetic_flux
+    fig, ax = plt.subplots(figsize=(6, 8))
+
+    ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model')
+    
+    ax.plot(synthetic_flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
+    ax.plot(synthetic_flux, read_noise, color='red', label='read noise', linestyle='--')
+    ax.plot(synthetic_flux, dc_noise, color='purple', label='dark noise', linestyle='--')
+    ax.plot(synthetic_flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
+    ax.plot(synthetic_flux, np.ones(len(synthetic_flux)) * N, color='orange', label='scintilation noise', linestyle='--')
+    ax.plot(synthetic_flux, RNS, color='black', label='total noise')
+    ax.set_xlabel('Flux')
+    ax.set_ylabel('RMS (mag)')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    plt.tight_layout()
+
+    plt.legend(loc='best')
+    plt.show()
+
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
