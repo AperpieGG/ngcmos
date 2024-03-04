@@ -170,7 +170,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         sky_noise_list.append(sky_noise_star)
 
     mean_sky_average = np.mean(mean_sky_list)
-    sky_noise_average = np.sqrt(mean_sky_average) / mean_flux_list
+    sky_noise_average = np.sqrt(mean_sky_average) / mean_sky_average
     print('Sky Noise:', sky_noise_average)
     print('Mean Sky:', mean_sky_average)
 
