@@ -187,7 +187,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size, exposure_time=10):
     plt.show()
 
 
-def plot_lc_for_all_stars(table, bin_size=1):
+def plot_lc_for_all_stars(table, bin_size):
     # Get unique Gaia IDs from the table
     unique_gaia_ids = np.unique(table['gaia_id'])
 
