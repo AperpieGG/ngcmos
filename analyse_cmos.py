@@ -232,9 +232,12 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         circle = Circle((x, y), radius=3, edgecolor='green', facecolor='none')
         axs[2, 1].add_patch(circle)
 
-        # Add color bar
+        # Add color bar with actual intensity values
         cbar = fig.colorbar(im, ax=axs[2, 1])
-        cbar.set_label('Normalized Intensity')
+        cbar.set_label('Intensity')
+        cbar.set_ticks([0, 0.5, 1])  # Adjust tick locations as needed
+        cbar.set_ticklabels([vmin, (vmin + vmax) / 2, vmax])  # Use actual intensity values as tick labels
+        cbar.set_clim(vmin, vmax)  # Set color bar limits to match intensity range
 
     # Plot jd_mid vs flux_2
     for i in range(5):
