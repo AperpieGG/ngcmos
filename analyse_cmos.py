@@ -97,7 +97,50 @@ def read_phot_file(filename):
         return None
 
 
-def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
+def bin_time_flux_error(time, flux, error, bin_fact):
+    """
+    Use reshape to bin light curve data, clip under filled bins
+    Works with 2D arrays of flux and errors
+
+    Note: under filled bins are clipped off the end of the series
+
+    Parameters
+    ----------
+    time : array         of times to bin
+    flux : array         of flux values to bin
+    error : array         of error values to bin
+    bin_fact : int
+        Number of measurements to combine
+
+    Returns
+    -------
+    times_b : array
+        Binned times
+    flux_b : array
+        Binned fluxes
+    error_b : array
+        Binned errors
+
+    Raises
+    ------
+    None
+    """
+    n_binned = int(len(time) / bin_fact)
+    clip = n_binned * bin_fact
+    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
+    # determine if 1 or 2d flux/err inputs
+    if len(flux.shape) == 1:
+        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
+        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
+    else:
+        # assumed 2d with 1 row per star
+        n_stars = len(flux)
+        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
+        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
+    return time_b, flux_b, error_b
+
+
+def plot_lc(table, gaia_id_to_plot, bin_size, exposure_time=10):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
@@ -112,11 +155,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     y = gaia_id_data['y']
 
     # Bin the data
-    jd_mid_binned = [np.mean(jd_mid[i:i + bin_size]) for i in range(0, len(jd_mid), bin_size)]
-    fluxes_binned = [[np.mean(fluxes[i][j:j + bin_size]) for j in range(0, len(fluxes[i]), bin_size)] for i in range(5)]
-    fluxerrs_binned = [[np.sqrt(np.sum(fluxerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(0, len(fluxerrs[i]), bin_size)] for i in range(5)]
-    sky_binned = [[np.mean(sky[i][j:j + bin_size]) for j in range(0, len(sky[i]), bin_size)] for i in range(5)]
-    skyerrs_binned = [[np.sqrt(np.sum(skyerrs[i][j:j + bin_size] ** 2)) / bin_size for j in range(0, len(skyerrs[i]), bin_size)] for i in range(5)]
+    for i in range(5):
+        jd_mid, fluxes[i], fluxerrs[i] = bin_time_flux_error(jd_mid, fluxes[i], fluxerrs[i], bin_size)
+        sky[i], skyerrs[i] = bin_time_flux_error(jd_mid, sky[i], skyerrs[i], bin_size)
 
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
@@ -127,8 +168,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     for i in range(5):
         row = i // 2
         col = i % 2
-        axs[row, col].errorbar(jd_mid_binned, fluxes_binned[i], yerr=fluxerrs_binned[i], fmt='o', color='black', label=f'Flux {i+2}')
-        axs[row, col].errorbar(jd_mid_binned, sky_binned[i], yerr=skyerrs_binned[i], fmt='o', color='blue', label=f'Sky {i+2}')
+        axs[row, col].errorbar(jd_mid, fluxes[i], yerr=fluxerrs[i], fmt='o', color='black', label=f'Flux {i+2}')
+        axs[row, col].errorbar(jd_mid, sky[i], yerr=skyerrs[i], fmt='o', color='blue', label=f'Sky {i+2}')
         axs[row, col].set_xlabel('MJD [days]')
         axs[row, col].set_ylabel(f'Flux [e-] {bin_label}')
         axs[row, col].legend()
@@ -141,7 +182,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     axs[2, 1].set_ylabel('Position')
     axs[2, 1].legend()
 
-    fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag)')
+    fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag), on position {x:.2f}, {y:.2f}')
     plt.tight_layout()
     plt.show()
 
