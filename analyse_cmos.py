@@ -229,7 +229,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[2, 1].set_ylabel('Y')
 
         # Draw a circle around the target star
-        circle = Circle((x, y), radius=3, edgecolor='green', facecolor='none', lw=2)
+        circle = Circle((x, y), radius=3, edgecolor='lime', facecolor='none', lw=2)
         annulus = Circle((x, y), radius=15, edgecolor='green', facecolor='none', lw=2, linestyle='dashed')
         dannulus = Circle((x, y), radius=20, edgecolor='green', facecolor='none', lw=2, linestyle='dashed')
         axs[2, 1].add_patch(circle)
