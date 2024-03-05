@@ -236,8 +236,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         rso = 20  # Outer radius of the annulus
 
         # Calculate flux, fluxerr, and background using sep
-        flux, fluxerr, _ = sep.sum_circle(cropped_image_data, radius=r, err=skyerrs[0], mask=None,
-                                          subpix=0, bkgann=(rsi, rso), gain=1)
+        flux, fluxerr, _ = sep.sum_circle(cropped_image_data, x, y, r, subpix=0, bkgann=(rsi, rso))
         bkg = sep.Background(cropped_image_data, bw=5, bh=5, fw=3, fh=3)
         flux_bkg = bkg.globalback * np.pi * r ** 2
         fluxerr_bkg = bkg.globalrms * np.sqrt(np.pi * r ** 2)
