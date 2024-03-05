@@ -232,11 +232,12 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Get the aperture and annulus parameters using sep
         r = 3  # Aperture radius
-        rsi = 8  # Inner radius of the annulus
-        rso = 12  # Outer radius of the annulus
+        rsi = 15  # Inner radius of the annulus
+        rso = 20  # Outer radius of the annulus
 
         # Calculate flux, fluxerr, and background using sep
-        flux, fluxerr, _ = sep.sum_circle(cropped_image_data, radius=r, err=None, gain=1.0)
+        flux, fluxerr, _ = sep.sum_circle(cropped_image_data, radius=r, err=skyerrs[0], mask=None,
+                                          subpix=0, bkgann=(rsi, rso), gain=1)
         bkg = sep.Background(cropped_image_data, bw=5, bh=5, fw=3, fh=3)
         flux_bkg = bkg.globalback * np.pi * r ** 2
         fluxerr_bkg = bkg.globalrms * np.sqrt(np.pi * r ** 2)
@@ -256,7 +257,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         cbar.set_label('Intensity')
         cbar.set_ticks([0, 0.5, 1])  # Adjust tick locations as needed
         cbar.set_ticklabels([vmin, (vmin + vmax) / 2, vmax])  # Use actual intensity values as tick labels
-
 
     # Plot jd_mid vs flux_2
     for i in range(5):
