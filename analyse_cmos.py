@@ -205,7 +205,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
     if image_data is not None:
         # Define the size of the region around the star
-        radius = 20  # Adjust as needed
+        radius = 30  # Adjust as needed
 
         # Define the limits for the region around the star
         x_min = max(int(x - radius), 0)
