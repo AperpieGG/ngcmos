@@ -26,10 +26,12 @@ The script ran as cronjobs in the nuc computer which is in Chile currently. The 
 
 
 1) QC_Donuts.py
-2) QC_control.py
-3) Simple_wrapper.py
-4) process_cmos.py
-5) analyse_cmos.py
+   This is a script to run Donuts on a set of images, compute the shifts, and save the results to a JSON file.
+   It also created an mp4 animation of the images with shifts greater than 0.5 pixels.
+3) QC_control.py
+4) Simple_wrapper.py
+5) process_cmos.py
+6) analyse_cmos.py
 
 The process_cmos.py works:
 
