@@ -154,10 +154,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     x = gaia_id_data['x']
     y = gaia_id_data['y']
 
-    # Bin the data
     for i in range(5):
-        jd_mid, fluxes[i], fluxerrs[i] = bin_time_flux_error(jd_mid, fluxes[i], fluxerrs[i], bin_size)
-        sky[i], skyerrs[i] = bin_time_flux_error(jd_mid, sky[i], skyerrs[i], bin_size)
+        # Bin flux data
+        jd_mid_binned, fluxes[i], fluxerrs[i] = bin_time_flux_error(jd_mid, fluxes[i], fluxerrs[i], bin_size)
+        # Bin sky data using the same binned jd_mid as the flux data
+        _, sky[i], skyerrs[i] = bin_time_flux_error(jd_mid, sky[i], skyerrs[i], bin_size)
 
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
