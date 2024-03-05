@@ -13,8 +13,6 @@ from utils import plot_images
 from wotan import flatten
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
-from matplotlib.patches import Ellipse
-import sep
 
 
 def load_config(filename):
@@ -225,37 +223,18 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Plot the normalized cropped image
         extent = [x - radius, x + radius, y - radius, y + radius]
-        im = axs[2, 1].imshow(normalized_image_data, cmap='hot', origin='lower', extent=extent, vmin=vmin, vmax=vmax)
+        im = axs[2, 1].imshow(normalized_image_data, cmap='hot', origin='lower', extent=extent)
         axs[2, 1].set_title('Region around the star')
         axs[2, 1].set_xlabel('X')
         axs[2, 1].set_ylabel('Y')
 
-        # Get the aperture and annulus parameters using sep
-        r = 3  # Aperture radius
-        rsi = 15  # Inner radius of the annulus
-        rso = 20  # Outer radius of the annulus
-
-        # Calculate flux, fluxerr, and background using sep
-        flux, fluxerr, _ = sep.sum_circle(cropped_image_data, x, y, r, subpix=0, bkgann=(rsi, rso))
-        bkg = sep.Background(cropped_image_data, bw=5, bh=5, fw=3, fh=3)
-        flux_bkg = bkg.globalback * np.pi * r ** 2
-        fluxerr_bkg = bkg.globalrms * np.sqrt(np.pi * r ** 2)
-
-        # Plot the aperture
-        aperture = Ellipse((radius, radius), 2 * r, 2 * r, edgecolor='cyan', facecolor='none')
-        axs[2, 1].add_patch(aperture)
-
-        # Plot the annulus
-        annulus_inner = Ellipse((radius, radius), 2 * rsi, 2 * rsi, edgecolor='blue', facecolor='none', linestyle='--')
-        axs[2, 1].add_patch(annulus_inner)
-        annulus_outer = Ellipse((radius, radius), 2 * rso, 2 * rso, edgecolor='blue', facecolor='none', linestyle='--')
-        axs[2, 1].add_patch(annulus_outer)
-
-        # Add color bar with actual intensity values
-        cbar = fig.colorbar(im, ax=axs[2, 1])
-        cbar.set_label('Intensity')
-        cbar.set_ticks([0, 0.5, 1])  # Adjust tick locations as needed
-        cbar.set_ticklabels([vmin, (vmin + vmax) / 2, vmax])  # Use actual intensity values as tick labels
+        # Draw a circle around the target star
+        circle = Circle((x, y), radius=3, edgecolor='green', facecolor='none', lw=2)
+        annulus = Circle((x, y), radius=15, edgecolor='green', facecolor='none', lw=2, linestyle='dashed')
+        dannulus = Circle((x, y), radius=20, edgecolor='green', facecolor='none', lw=2, linestyle='dashed')
+        axs[2, 1].add_patch(circle)
+        axs[2, 1].add_patch(annulus)
+        axs[2, 1].add_patch(dannulus)
 
     # Plot jd_mid vs flux_2
     for i in range(5):
