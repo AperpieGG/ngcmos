@@ -139,6 +139,28 @@ def bin_time_flux_error(time, flux, error, bin_fact):
         error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
     return time_b, flux_b, error_b
 
+def get_image_data(filename):
+    """
+    Get the image data from the FITS file.
+
+    Parameters
+    ----------
+    filename : str
+        FITS file to read.
+
+    Returns
+    -------
+    numpy.ndarray
+        Image data from the FITS file.
+    """
+    try:
+        with fits.open(filename) as hdulist:
+            data = hdulist[0].data
+            return data
+    except Exception as e:
+        print(f"Error reading FITS file {filename}: {e}")
+        return None
+
 
 def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     # Select rows with the specified Gaia ID
@@ -164,6 +186,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     fig, axs = plt.subplots(3, 2, figsize=(16, 10))
+
+    image = get_image_data(gaia_id_data['filename'][0])
+    print(f"Image shape: {image.shape}")
 
     # Plot jd_mid vs flux_2
     for i in range(5):
