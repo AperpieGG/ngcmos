@@ -11,6 +11,8 @@ from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import plot_images
 from wotan import flatten
+from matplotlib.patches import Circle
+from astropy.visualization import ZScaleInterval
 
 
 def load_config(filename):
@@ -198,24 +200,37 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
     print(f"Image data shape: {image_data.shape}")
 
+    # Get image data based on frame_id
+    image_data = get_image_data(gaia_id_data['frame_id'].iloc[0], image_directory)
+
     if image_data is not None:
         # Define the size of the region around the star
         radius = 15  # Adjust as needed
 
         # Define the limits for the region around the star
-        x_min = int(x - radius)
-        x_max = int(x + radius)
-        y_min = int(y - radius)
-        y_max = int(y + radius)
+        x_min = max(int(x - radius), 0)
+        x_max = min(int(x + radius), image_data.shape[1])
+        y_min = max(int(y - radius), 0)
+        y_max = min(int(y + radius), image_data.shape[0])
 
         # Crop the image data to the defined region
         cropped_image_data = image_data[y_min:y_max, x_min:x_max]
 
-        # Plot the cropped image
-        axs[2, 1].imshow(cropped_image_data, cmap='gray', origin='lower')
-        axs[2, 1].set_title('Region around the star')
+        # Normalize the cropped image data using zscale
+        interval = ZScaleInterval()
+        vmin, vmax = interval.get_limits(cropped_image_data)
+        normalized_image_data = np.clip((cropped_image_data - vmin) / (vmax - vmin), 0, 1)
+
+        # Plot the normalized cropped image
+        extent = [x - radius, x + radius, y - radius, y + radius]
+        axs[2, 1].imshow(normalized_image_data, cmap='hot', origin='lower', extent=extent)
+        axs[2, 1].set_title('Region around the star (Normalized)')
         axs[2, 1].set_xlabel('X')
         axs[2, 1].set_ylabel('Y')
+
+        # Draw a circle around the target star
+        circle = Circle((x, y), radius=3, edgecolor='red', facecolor='none')
+        axs[2, 1].add_patch(circle)
 
     # Plot jd_mid vs flux_2
     for i in range(5):
