@@ -194,7 +194,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 2, figsize=(18, 14))
+    fig, axs = plt.subplots(3, 2, figsize=(16, 12))
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
@@ -219,16 +219,17 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         # Normalize the cropped image data using zscale
         interval = ZScaleInterval()
         vmin, vmax = interval.get_limits(cropped_image_data)
+        normalized_image_data = np.clip((cropped_image_data - vmin) / (vmax - vmin), 0, 1)
 
-        # Plot the image
+        # Plot the normalized cropped image
         extent = [x - radius, x + radius, y - radius, y + radius]
-        im = axs[2, 1].imshow(cropped_image_data, cmap='hot', aspect='auto', vmin=vmin, vmax=vmax)
+        im = axs[2, 1].imshow(normalized_image_data, cmap='hot', origin='lower', extent=extent)
         axs[2, 1].set_title('Region around the star')
         axs[2, 1].set_xlabel('X')
         axs[2, 1].set_ylabel('Y')
 
         # Draw a circle around the target star
-        circle = Circle((x, y), radius=3, edgecolor='green', facecolor='none', lw=2)
+        circle = Circle((x, y), radius=3, edgecolor='green', facecolor='none')
         axs[2, 1].add_patch(circle)
 
         # Add color bar
