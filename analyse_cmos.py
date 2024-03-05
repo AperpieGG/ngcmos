@@ -167,6 +167,7 @@ def get_image_data(frame_id, image_directory):
         print(f"Image file {image_path} not found.")
         return None
 
+
 def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_directory=""):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
@@ -190,7 +191,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
-    fig, axs = plt.subplots(3, 2, figsize=(16, 10))
+    # Define the size of the figure
+    fig, axs = plt.subplots(3, 2, figsize=(16, 12))  # Increase the height to accommodate the additional subplot
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
@@ -209,10 +211,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         cropped_image_data = image_data[y_min:y_max, x_min:x_max]
 
         # Plot the cropped image
-        axs[2, 0].imshow(cropped_image_data, cmap='gray', origin='lower')
-        axs[2, 0].set_title('Region around the star')
-        axs[2, 0].set_xlabel('X')
-        axs[2, 0].set_ylabel('Y')
+        axs[2, 1].imshow(cropped_image_data, cmap='gray', origin='lower')
+        axs[2, 1].set_title('Region around the star')
+        axs[2, 1].set_xlabel('X')
+        axs[2, 1].set_ylabel('Y')
 
     # Plot jd_mid vs flux_2
     for i in range(5):
@@ -227,15 +229,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag), on position X, Y: [{x:.0f}, {y:.0f}]')
     plt.tight_layout()
     plt.show()
-
-def plot_lc_for_all_stars(table, bin_size):
-    # Get unique Gaia IDs from the table
-    unique_gaia_ids = np.unique(table['gaia_id'])
-
-    # Iterate over each unique Gaia ID
-    for gaia_id_to_plot in unique_gaia_ids:
-        # Plot the light curve for the current Gaia ID
-        plot_lc(table, gaia_id_to_plot, bin_size)
 
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
