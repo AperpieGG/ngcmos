@@ -200,7 +200,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
     if image_data is not None:
         # Define the size of the region around the star
-        radius = 30  # Adjust as needed
+        radius = 15  # Adjust as needed
 
         # Define the limits for the region around the star
         x_min = int(x - radius)
@@ -230,6 +230,16 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag), on position X, Y: [{x:.0f}, {y:.0f}]')
     plt.tight_layout()
     plt.show()
+
+
+def plot_lc_for_all_stars(table, bin_size):
+    # Get unique Gaia IDs from the table
+    unique_gaia_ids = np.unique(table['gaia_id'])
+
+    # Iterate over each unique Gaia ID
+    for gaia_id_to_plot in unique_gaia_ids:
+        # Plot the light curve for the current Gaia ID
+        plot_lc(table, gaia_id_to_plot, bin_size)
 
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
