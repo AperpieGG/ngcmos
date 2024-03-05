@@ -169,19 +169,14 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     for i in range(5):
         row = i // 2
         col = i % 2
-        axs[row, col].errorbar(jd_mid, fluxes[i], yerr=fluxerrs[i], fmt='o', color='black', label=f'Flux {i+2}')
-        axs[row, col].errorbar(jd_mid, sky[i], yerr=skyerrs[i], fmt='o', color='blue', label=f'Sky {i+2}')
+        axs[row, col].errorbar(jd_mid_binned, fluxes[i], yerr=fluxerrs[i], fmt='o', color='black', label=f'Flux {i+2}')
+        axs[row, col].errorbar(jd_mid_binned, sky[i], yerr=skyerrs[i], fmt='o', color='blue', label=f'Sky {i+2}')
         axs[row, col].set_xlabel('MJD [days]')
         axs[row, col].set_ylabel(f'Flux [e-] {bin_label}')
         axs[row, col].legend()
 
     # Plot x, y positions
     print(len(jd_mid), len(x), len(y))
-    axs[2, 1].plot(jd_mid, x, 'o', color='red', label='X Position')
-    axs[2, 1].plot(jd_mid, y, 'o', color='green', label='Y Position')
-    axs[2, 1].set_xlabel('MJD [days]')
-    axs[2, 1].set_ylabel('Position')
-    axs[2, 1].legend()
 
     fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag), on position {x:.2f}, {y:.2f}')
     plt.tight_layout()
