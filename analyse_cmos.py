@@ -219,17 +219,16 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         # Normalize the cropped image data using zscale
         interval = ZScaleInterval()
         vmin, vmax = interval.get_limits(cropped_image_data)
-        normalized_image_data = np.clip((cropped_image_data - vmin) / (vmax - vmin), 0, 1)
 
-        # Plot the normalized cropped image
+        # Plot the image
         extent = [x - radius, x + radius, y - radius, y + radius]
-        im = axs[2, 1].imshow(normalized_image_data, cmap='hot', origin='lower', extent=extent)
+        im = axs[2, 1].imshow(cropped_image_data, cmap='gray', aspect='auto', extent=extent, vmin=vmin, vmax=vmax)
         axs[2, 1].set_title('Region around the star')
         axs[2, 1].set_xlabel('X')
         axs[2, 1].set_ylabel('Y')
 
         # Draw a circle around the target star
-        circle = Circle((x, y), radius=3, edgecolor='red', facecolor='none')
+        circle = Circle((x, y), radius=3, edgecolor='green', facecolor='none', lw=2)
         axs[2, 1].add_patch(circle)
 
         # Add color bar
