@@ -140,7 +140,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_lc(table, gaia_id_to_plot, bin_size, exposure_time=10):
+def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
