@@ -196,10 +196,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
+    print(f"Image data shape: {image_data.shape}")
 
     if image_data is not None:
         # Define the size of the region around the star
-        radius = 15  # Adjust as needed
+        radius = 30  # Adjust as needed
 
         # Define the limits for the region around the star
         x_min = int(x - radius)
