@@ -139,30 +139,35 @@ def bin_time_flux_error(time, flux, error, bin_fact):
         error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
     return time_b, flux_b, error_b
 
-def get_image_data(filename):
-    """
-    Get the image data from the FITS file.
 
-    Parameters
-    ----------
-    filename : str
-        FITS file to read.
-
-    Returns
-    -------
-    numpy.ndarray
-        Image data from the FITS file.
+def get_image_data(frame_id, image_directory):
     """
-    try:
-        with fits.open(filename) as hdulist:
-            data = hdulist[0].data
-            return data
-    except Exception as e:
-        print(f"Error reading FITS file {filename}: {e}")
+    Get the image data corresponding to the given frame_id.
+
+    Parameters:
+        frame_id (str): The frame_id of the image.
+        image_directory (str): The directory where the image files are stored.
+
+    Returns:
+        numpy.ndarray or None: The image data if the image exists, otherwise None.
+    """
+    # Construct the path to the image file using the frame_id
+    image_path = os.path.join(image_directory, frame_id)
+
+    # Check if the image file exists
+    if os.path.exists(image_path):
+        # Open the image file
+        try:
+            image_data = fits.getdata(image_path)
+            return image_data
+        except Exception as e:
+            print(f"Error opening image file {image_path}: {e}")
+            return None
+    else:
+        print(f"Image file {image_path} not found.")
         return None
 
-
-def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
+def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_directory=""):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
@@ -187,8 +192,27 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
 
     fig, axs = plt.subplots(3, 2, figsize=(16, 10))
 
-    image = get_image_data(gaia_id_data['filename'][0])
-    print(f"Image shape: {image.shape}")
+    # Get image data based on frame_id
+    image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
+
+    if image_data is not None:
+        # Define the size of the region around the star
+        radius = 15  # Adjust as needed
+
+        # Define the limits for the region around the star
+        x_min = int(x - radius)
+        x_max = int(x + radius)
+        y_min = int(y - radius)
+        y_max = int(y + radius)
+
+        # Crop the image data to the defined region
+        cropped_image_data = image_data[y_min:y_max, x_min:x_max]
+
+        # Plot the cropped image
+        axs[2, 0].imshow(cropped_image_data, cmap='gray', origin='lower')
+        axs[2, 0].set_title('Region around the star')
+        axs[2, 0].set_xlabel('X')
+        axs[2, 0].set_ylabel('Y')
 
     # Plot jd_mid vs flux_2
     for i in range(5):
@@ -203,7 +227,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
     fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag), on position X, Y: [{x:.0f}, {y:.0f}]')
     plt.tight_layout()
     plt.show()
-
 
 def plot_lc_for_all_stars(table, bin_size):
     # Get unique Gaia IDs from the table
