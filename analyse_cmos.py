@@ -223,7 +223,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Plot the normalized cropped image
         extent = [x - radius, x + radius, y - radius, y + radius]
-        im = axs[2, 1].imshow(normalized_image_data, cmap='hot', origin='lower', extent=extent)
+        im = axs[2, 1].imshow(normalized_image_data, cmap='hot', origin='lower', extent=extent, vmin=vmin, vmax=vmax)
         axs[2, 1].set_title('Region around the star')
         axs[2, 1].set_xlabel('X')
         axs[2, 1].set_ylabel('Y')
@@ -237,7 +237,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         cbar.set_label('Intensity')
         cbar.set_ticks([0, 0.5, 1])  # Adjust tick locations as needed
         cbar.set_ticklabels([vmin, (vmin + vmax) / 2, vmax])  # Use actual intensity values as tick labels
-        cbar.set_clim(vmin, vmax)  # Set color bar limits to match intensity range
 
     # Plot jd_mid vs flux_2
     for i in range(5):
