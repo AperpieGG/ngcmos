@@ -175,9 +175,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10):
         axs[row, col].set_ylabel(f'Flux [e-] {bin_label}')
         axs[row, col].legend()
 
-    # Plot x, y positions
-    print(len(jd_mid), len(x), len(y))
-
     fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag), on position {x:.2f}, {y:.2f}')
     plt.tight_layout()
     plt.show()
