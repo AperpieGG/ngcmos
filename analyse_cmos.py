@@ -276,7 +276,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         ax2 = axs[0].twiny()
 
         # Set the ticks and labels for the upper x-axis
-        air_tick_labels = [round(airmass, 2)]
+        air_tick_labels = [f'{airmass[i]}' for i in range(len(airmass))]
         ax2.set_xticks(jd_mid_binned)
         ax2.set_xticklabels(air_tick_labels)
         ax2.set_xlabel('Airmass')
