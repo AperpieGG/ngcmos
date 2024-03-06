@@ -258,10 +258,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[2].add_patch(dannulus)
 
         # Create legend labels
-        legend_labels = [f'Aperture (r={radius} pix)' for radius in circle_radii]
-        legend_labels.append('Annulus (r=15) pix')
-        legend_labels.append('Dannulus (r=20) pix')
-        axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(1.05, 1.0))
+        legend_labels = [f'Aperture, {radius} pix)' for radius in circle_radii]
+        legend_labels.append('Annulus, 15-20 pix')
+        axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(1.01, 1.0))
 
         # Plot jd_mid vs fluxes
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
