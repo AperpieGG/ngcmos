@@ -210,7 +210,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(2, 1, figsize=(12, 10))
+    fig, axs = plt.subplots(3, 1, figsize=(12, 10))
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
@@ -238,7 +238,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         # Plot the normalized cropped image
         extent = [x - radius, x + radius, y - radius, y + radius]
         axs[1].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
-        axs[1].set_title('Region around the star')
+        axs[1].set_title(f'Center X, Y: [{x:.0f}, {y:.0f}]')
         axs[1].set_xlabel('X')
         axs[1].set_ylabel('Y')
 
@@ -252,18 +252,32 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         for radius in circle_radii:
             circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
-            axs[1].add_patch(circle)
+            axs[2].add_patch(circle)
         annulus = Circle((x, y), radius=15, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
         dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
-        axs[1].add_patch(annulus)
-        axs[1].add_patch(dannulus)
+        axs[2].add_patch(annulus)
+        axs[2].add_patch(dannulus)
+
+        # Create legend labels
+        legend_labels = [f'Circle (radius={radius})' for radius in circle_radii]
+        legend_labels.append('Annulus (radius=15)')
+        legend_labels.append('Dannulus (radius=20)')
+
+        # Add legend
+        axs[0].legend(legend_labels)
 
         # Plot jd_mid vs fluxes
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
-        axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}) on position X, Y: [{x:.0f}, {y:.0f}]')
+        axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
         axs[0].set_ylabel('Flux [e-]')
         axs[0].set_xlabel('MJD [days]')
         axs[0].legend()
+
+        # Plot jd_mid vs sky
+        axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
+        axs[1].set_ylabel('Flux [e-]')
+        axs[1].set_xlabel('MJD [days]')
+        axs[1].legend()
         plt.tight_layout()
         plt.show()
 
