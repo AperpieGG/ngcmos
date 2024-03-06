@@ -16,6 +16,30 @@ import os
 import numpy as np
 
 
+def filter_filenames(directory):
+    """
+    Filter filenames based on specific criteria.
+
+    Parameters
+    ----------
+    directory : str
+        Directory containing the files.
+
+    Returns
+    -------
+    list of str
+        Filtered list of filenames.
+    """
+    filtered_filenames = []
+    for filename in os.listdir(directory):
+        if filename.endswith('.fits'):
+            exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog", "phot"]
+            if any(word in filename.lower() for word in exclude_words):
+                continue
+            filtered_filenames.append(filename)  # Append only the filename without the directory path
+    return sorted(filtered_filenames)
+
+
 def update_header(directory):
     """
     Update the header of FITS files in the specified directory.
@@ -26,10 +50,8 @@ def update_header(directory):
         Path to the directory containing FITS files.
     """
 
-    for filename in sorted(glob.glob(os.path.join(directory, '*_r.fits'))):
-        if 'FILTER' in fits.getheader(filename):
-            print(f"Header already present for {filename}")
-            continue
+    for filename in filter_filenames(directory):
+        filename = os.path.join(directory, filename)
         with fits.open(filename, mode='update') as hdul:
             if 'FILTER' not in hdul[0].header:
                 hdul[0].header['FILTER'] = 'NGTS'
