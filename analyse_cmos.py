@@ -210,7 +210,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 2, figsize=(16, 12))
+    fig, axs = plt.subplots(2, 1, figsize=(10, 12))
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
@@ -265,7 +265,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     axs[0].legend()
     plt.tight_layout()
     plt.show()
-
+    
 
 def plot_lc_for_all_stars(table, bin_size):
     # Get unique Gaia IDs from the table
