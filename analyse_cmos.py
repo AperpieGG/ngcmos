@@ -172,7 +172,6 @@ def get_image_data(frame_id, image_directory):
 
 def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_directory=""):
     # Select rows with the specified Gaia ID
-    # TODO: create a condition here that will take apertures considering the Tmag
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
     jd_mid = gaia_id_data['jd_mid']
@@ -182,6 +181,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     # extract fluxes and errors based on Tmag
     if tmag < 11:
         fluxes = [gaia_id_data['flux_5']]
+        print(f"Fluxes: {fluxes}")
         fluxerrs = [gaia_id_data['fluxerr_5']]
         sky = [gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']]
         skyerrs = [np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)]
