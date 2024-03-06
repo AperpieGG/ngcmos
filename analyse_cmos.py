@@ -197,9 +197,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         skyerrs = [np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)]
 
     # Bin flux data
-    jd_mid_binned, fluxes, fluxerrs = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
+    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
-    _, sky, skyerrs = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
+    _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
 
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
@@ -255,7 +255,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
                 axs[0].add_patch(annulus)
 
     # Plot jd_mid vs fluxes
-    axs[0].errorbar(jd_mid, fluxes[0], yerr=fluxerrs[0], fmt='o', color='black', label='Raw Flux 2')
+    axs[0].errorbar(jd_mid_binned, fluxes_binned[0], yerr=fluxerrs_binned[0], fmt='o', color='black', label='Raw Flux 2')
     axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}) on position X, Y: [{x:.0f}, {y:.0f}]')
     axs[0].set_ylabel('Flux [e-]')
     axs[0].set_xlabel('MJD [days]')
