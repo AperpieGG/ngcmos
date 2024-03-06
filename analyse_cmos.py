@@ -216,9 +216,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
     print(f"Image data shape: {image_data.shape}")
 
-    # Get image data based on frame_id
-    image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
-
+    # Plot the image data
     if image_data is not None:
         # Define the size of the region around the star
         radius = 30  # Adjust as needed
@@ -239,7 +237,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Plot the normalized cropped image
         extent = [x - radius, x + radius, y - radius, y + radius]
-        im = axs[1].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
+        axs[1].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
         axs[1].set_title('Region around the star')
         axs[1].set_xlabel('X')
         axs[1].set_ylabel('Y')
