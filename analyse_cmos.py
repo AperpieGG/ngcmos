@@ -161,7 +161,8 @@ def get_image_data(frame_id, image_directory):
         # Open the image file
         try:
             image_data = fits.getdata(image_path)
-            return image_data
+            image_header = fits.getheader(image_path)
+            return image_data, image_header
         except Exception as e:
             print(f"Error opening image file {image_path}: {e}")
             return None
@@ -214,6 +215,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
+    image_header = image_data[1]
+    airmass = image_header['AIRMASS']
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
@@ -267,6 +270,13 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
+        alt_tick_labels = plt.gca().get_yticks().tolist()
+        ax2 = plt.gca().twinx()
+        air_tick_labels = airmass
+        air_tick_labels[0] = ''
+        ax2.set_yticks(alt_tick_labels)
+        ax2.set_yticklabels(air_tick_labels)
+        ax2.set_ylabel('Airmass')
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
