@@ -172,23 +172,39 @@ def get_image_data(frame_id, image_directory):
 
 def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_directory=""):
     # Select rows with the specified Gaia ID
+    # TODO: create a condition here that will take apertures considering the Tmag
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
-
-    # Get jd_mid, flux_2, and sky_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
-    fluxes = [gaia_id_data[f'flux_{i}'] for i in range(2, 7)]
-    fluxerrs = [gaia_id_data[f'fluxerr_{i}'] for i in range(2, 7)]
-    sky = [gaia_id_data[f'flux_w_sky_{i}'] - gaia_id_data[f'flux_{i}'] for i in range(2, 7)]
-    skyerrs = [np.sqrt(gaia_id_data[f'fluxerr_{i}'] ** 2 + gaia_id_data[f'fluxerr_w_sky_{i}'] ** 2) for i in range(2, 7)]
     x = gaia_id_data['x'][0]
     y = gaia_id_data['y'][0]
 
-    for i in range(5):
-        # Bin flux data
-        jd_mid_binned, fluxes[i], fluxerrs[i] = bin_time_flux_error(jd_mid, fluxes[i], fluxerrs[i], bin_size)
-        # Bin sky data using the same binned jd_mid as the flux data
-        _, sky[i], skyerrs[i] = bin_time_flux_error(jd_mid, sky[i], skyerrs[i], bin_size)
+    # flux_2, and sky_2 for the selected rows
+    if tmag < 11:
+        fluxes = [gaia_id_data['flux_5']]
+        fluxerrs = [gaia_id_data['fluxerr_5']]
+        sky = [gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']]
+        skyerrs = [np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)]
+    elif 12 > tmag >= 11:
+        fluxes = [gaia_id_data['flux_4']]
+        fluxerrs = [gaia_id_data['fluxerr_4']]
+        sky = [gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']]
+        skyerrs = [np.sqrt(gaia_id_data['fluxerr_4'] ** 2 + gaia_id_data['fluxerr_w_sky_4'] ** 2)]
+    elif 13 > tmag >= 12:
+        fluxes = [gaia_id_data['flux_3']]
+        fluxerrs = [gaia_id_data['fluxerr_3']]
+        sky = [gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']]
+        skyerrs = [np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)]
+    else:
+        fluxes = [gaia_id_data['flux_3']]
+        fluxerrs = [gaia_id_data['fluxerr_3']]
+        sky = [gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']]
+        skyerrs = [np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)]
+
+    # Bin flux data
+    jd_mid_binned, fluxes, fluxerrs = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
+    # Bin sky data using the same binned jd_mid as the flux data
+    _, sky, skyerrs = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
 
     # Determine the bin label for the y-axis
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
