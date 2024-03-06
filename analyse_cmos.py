@@ -257,15 +257,15 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
                 annulus = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
                 axs[0].add_patch(annulus)
 
-    # Plot jd_mid vs fluxes
-    axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
-    axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}) on position X, Y: [{x:.0f}, {y:.0f}]')
-    axs[0].set_ylabel('Flux [e-]')
-    axs[0].set_xlabel('MJD [days]')
-    axs[0].legend()
-    plt.tight_layout()
-    plt.show()
-    
+        # Plot jd_mid vs fluxes
+        axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
+        axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}) on position X, Y: [{x:.0f}, {y:.0f}]')
+        axs[0].set_ylabel('Flux [e-]')
+        axs[0].set_xlabel('MJD [days]')
+        axs[0].legend()
+        plt.tight_layout()
+        plt.show()
+
 
 def plot_lc_for_all_stars(table, bin_size):
     # Get unique Gaia IDs from the table
