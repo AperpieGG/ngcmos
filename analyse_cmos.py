@@ -261,8 +261,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         legend_labels = [f'Aperture (r={radius} pix)' for radius in circle_radii]
         legend_labels.append('Annulus (r=15) pix')
         legend_labels.append('Dannulus (r=20) pix')
-        axs[2].legend(legend_labels)
-
+        axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(-0.15, 1.0))
+        
         # Plot jd_mid vs fluxes
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
         axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
@@ -274,7 +274,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[1].set_ylabel('Flux [e-]')
         axs[1].set_xlabel('MJD [days]')
         axs[1].legend()
-        axs[1].get_shared_x_axes().join(axs[1], axs[0])
         plt.tight_layout()
         plt.show()
 
