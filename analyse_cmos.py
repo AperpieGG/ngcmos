@@ -210,11 +210,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(2, 1, figsize=(10, 12))
+    fig, axs = plt.subplots(1, 2, figsize=(10, 10))
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
-    print(f"Image data shape: {image_data.shape}")
+    print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
     if image_data is not None:
