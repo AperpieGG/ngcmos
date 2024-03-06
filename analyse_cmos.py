@@ -216,7 +216,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     # Get image data based on frame_id
     image_data, image_header = get_image_data(gaia_id_data['frame_id'][0], image_directory)
     airmass = image_header['AIRMASS']
-    print(airmass)
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
@@ -273,7 +272,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         alt_tick_labels = plt.gca().get_yticks().tolist()
         ax2 = plt.gca().twinx()
         air_tick_labels = airmass
-        air_tick_labels[0] = ''
+        air_tick_labels = [round(air_tick_labels, 2)]
         ax2.set_yticks(alt_tick_labels)
         ax2.set_yticklabels(air_tick_labels)
         ax2.set_ylabel('Airmass')
