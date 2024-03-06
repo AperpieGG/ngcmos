@@ -213,10 +213,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     # Define the size of the figure
     fig, axs = plt.subplots(3, 1, figsize=(8, 16))
 
-    # Get image data based on frame_id
-    image_data, image_header = get_image_data(gaia_id_data['frame_id'][0], image_directory)
-    airmass = round(image_header['AIRMASS'], 2)
-    print(airmass)
+    airmass_values = []
+    for frame_id in gaia_id_data['frame_id']:
+        image_data, image_header = get_image_data(frame_id, image_directory)
+        airmass_values.append(round(image_header['AIRMASS'], 2))
+        print(f"Frame ID: {frame_id}, Airmass: {image_header['AIRMASS']}")
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
