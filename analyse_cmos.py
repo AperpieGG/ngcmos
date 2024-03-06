@@ -190,11 +190,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         fluxerrs = [gaia_id_data['fluxerr_4']]
         sky = [gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']]
         skyerrs = [np.sqrt(gaia_id_data['fluxerr_4'] ** 2 + gaia_id_data['fluxerr_w_sky_4'] ** 2)]
-    elif 13 > tmag >= 12:
-        fluxes = [gaia_id_data['flux_3']]
-        fluxerrs = [gaia_id_data['fluxerr_3']]
-        sky = [gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']]
-        skyerrs = [np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)]
     else:
         fluxes = [gaia_id_data['flux_3']]
         fluxerrs = [gaia_id_data['fluxerr_3']]
@@ -239,30 +234,32 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Plot the normalized cropped image
         extent = [x - radius, x + radius, y - radius, y + radius]
-        im = axs[2, 1].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
-        axs[2, 1].set_title('Region around the star')
-        axs[2, 1].set_xlabel('X')
-        axs[2, 1].set_ylabel('Y')
+        im = axs[1].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
+        axs[1].set_title('Region around the star')
+        axs[1].set_xlabel('X')
+        axs[1].set_ylabel('Y')
 
         # Draw a circle around the target star
-        circle = Circle((x, y), radius=3, edgecolor='lime', facecolor='none', lw=1)
-        annulus = Circle((x, y), radius=15, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
-        dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
-        axs[2, 1].add_patch(circle)
-        axs[2, 1].add_patch(annulus)
-        axs[2, 1].add_patch(dannulus)
+        if tmag < 11:
+            circle_radii = [3, 15, 20]
+        elif 12 > tmag >= 11:
+            circle_radii = [3, 12, 15]
+        else:
+            circle_radii = [3, 10, 12]
 
-    # Plot jd_mid vs flux_2
-    for i in range(5):
-        row = i // 2
-        col = i % 2
-        axs[row, col].errorbar(jd_mid_binned, fluxes[i], yerr=fluxerrs[i], fmt='o', color='black', label=f'Flux {i+2}')
-        axs[row, col].errorbar(jd_mid_binned, sky[i], yerr=skyerrs[i], fmt='o', color='blue', label=f'Sky {i+2}')
-        axs[row, col].set_xlabel('MJD [days]')
-        axs[row, col].set_ylabel(f'Flux [e-] {bin_label}')
-        axs[row, col].legend()
+        for radius in circle_radii:
+            circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
+            axs[0].add_patch(circle)
+            if radius > 3:
+                annulus = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
+                axs[0].add_patch(annulus)
 
-    fig.suptitle(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f} mag), on position X, Y: [{x:.0f}, {y:.0f}]')
+    # Plot jd_mid vs fluxes
+    axs[0].errorbar(jd_mid, fluxes[0], yerr=fluxerrs[0], fmt='o', color='black', label='Raw Flux 2')
+    axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}) on position X, Y: [{x:.0f}, {y:.0f}]')
+    axs[0].set_ylabel('Flux [e-]')
+    axs[0].set_xlabel('MJD [days]')
+    axs[0].legend()
     plt.tight_layout()
     plt.show()
 
