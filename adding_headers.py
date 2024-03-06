@@ -13,35 +13,7 @@ import glob
 from datetime import datetime, timedelta
 from astropy.io import fits
 import os
-
-
-def find_current_night_directory(file_path):
-    """
-    Find the directory for the current night based on the current date.
-
-    Parameters
-    ----------
-    file_path : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str or None
-        Path to the current night directory if found, otherwise None.
-    """
-
-    # Get the current date in the format YYYYMMDD
-    current_date = datetime.now().strftime("%Y%m%d") + '/'
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d") + '/'
-
-    # Construct the path for the previous_date directory
-    current_date_directory = os.path.join(file_path, previous_date)
-
-    # Check if the directory exists
-    if os.path.isdir(current_date_directory):
-        return current_date_directory
-    else:
-        return None
+import numpy as np
 
 
 def update_header(directory):
@@ -61,6 +33,16 @@ def update_header(directory):
         with fits.open(filename, mode='update') as hdul:
             if 'FILTER' not in hdul[0].header:
                 hdul[0].header['FILTER'] = 'NGTS'
+            else:
+                print(f"FILTER already present for {filename}")
+            if 'AIRMASS' not in hdul[0].header:
+                airmass = 1 / np.cos(np.radians(90 - hdul[0].header['ALTITUDE']))
+                hdul[0].header['AIRMASS'] = airmass
+            else:
+                print(f"AIRMASS already present for {filename}")
+            hdul.flush()
+            print(f"Updated header for {filename}")
+    print("All headers updated")
 
 
 def main():
@@ -84,5 +66,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO: Add a function to check if the header is already present and skip the file if it is
 # TODO: add parse arguments to the main function for the directory path
