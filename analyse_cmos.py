@@ -178,23 +178,27 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     jd_mid = gaia_id_data['jd_mid']
     x = gaia_id_data['x'][0]
     y = gaia_id_data['y'][0]
+    fluxes = [gaia_id_data['flux_5']]
+    fluxerrs = [gaia_id_data['fluxerr_5']]
+    sky = [gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']]
+    skyerrs = [np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)]
 
-    # flux_2, and sky_2 for the selected rows
-    if tmag < 11:
-        fluxes = [gaia_id_data['flux_5']]
-        fluxerrs = [gaia_id_data['fluxerr_5']]
-        sky = [gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']]
-        skyerrs = [np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)]
-    elif 12 > tmag >= 11:
-        fluxes = [gaia_id_data['flux_4']]
-        fluxerrs = [gaia_id_data['fluxerr_4']]
-        sky = [gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']]
-        skyerrs = [np.sqrt(gaia_id_data['fluxerr_4'] ** 2 + gaia_id_data['fluxerr_w_sky_4'] ** 2)]
-    else:
-        fluxes = [gaia_id_data['flux_3']]
-        fluxerrs = [gaia_id_data['fluxerr_3']]
-        sky = [gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']]
-        skyerrs = [np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)]
+    # # flux_2, and sky_2 for the selected rows
+    # if tmag < 11:
+    #     fluxes = [gaia_id_data['flux_5']]
+    #     fluxerrs = [gaia_id_data['fluxerr_5']]
+    #     sky = [gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']]
+    #     skyerrs = [np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)]
+    # elif 12 > tmag >= 11:
+    #     fluxes = [gaia_id_data['flux_4']]
+    #     fluxerrs = [gaia_id_data['fluxerr_4']]
+    #     sky = [gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']]
+    #     skyerrs = [np.sqrt(gaia_id_data['fluxerr_4'] ** 2 + gaia_id_data['fluxerr_w_sky_4'] ** 2)]
+    # else:
+    #     fluxes = [gaia_id_data['flux_3']]
+    #     fluxerrs = [gaia_id_data['fluxerr_3']]
+    #     sky = [gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']]
+    #     skyerrs = [np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)]
 
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
@@ -255,7 +259,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
                 axs[0].add_patch(annulus)
 
     # Plot jd_mid vs fluxes
-    axs[0].errorbar(jd_mid_binned, fluxes_binned[0], yerr=fluxerrs_binned[0], fmt='o', color='black', label='Raw Flux 2')
+    axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
     axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f}) on position X, Y: [{x:.0f}, {y:.0f}]')
     axs[0].set_ylabel('Flux [e-]')
     axs[0].set_xlabel('MJD [days]')
