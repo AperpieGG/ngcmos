@@ -161,7 +161,8 @@ def get_image_data(frame_id, image_directory):
         # Open the image file
         try:
             image_data = fits.getdata(image_path)
-            return image_data
+            image_header = fits.getheader(image_path)
+            return image_data, image_header
         except Exception as e:
             print(f"Error opening image file {image_path}: {e}")
             return None
@@ -215,9 +216,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
     print(image_data)
-    image_header = fits.getheader(os.path.join(image_directory, gaia_id_data['frame_id'][0]))
+    image_header = get_image_data(gaia_id_data['frame_id'][0], image_directory)
     print(image_header)
-    airmass = image_header['AIRMASS']
+    airmass = np.round(image_header['AIRMASS'], 2)
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
