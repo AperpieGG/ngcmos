@@ -210,7 +210,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(1, 2, figsize=(10, 10))
+    fig, axs = plt.subplots(2, 1, figsize=(12, 10))
 
     # Get image data based on frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
@@ -244,18 +244,19 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Draw a circle around the target star
         if tmag < 11:
-            circle_radii = [3, 15, 20]
+            circle_radii = [5]
         elif 12 > tmag >= 11:
-            circle_radii = [3, 12, 15]
+            circle_radii = [4]
         else:
-            circle_radii = [3, 10, 12]
+            circle_radii = [3]
 
         for radius in circle_radii:
             circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
-            axs[0].add_patch(circle)
-            if radius > 3:
-                annulus = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
-                axs[0].add_patch(annulus)
+            axs[1].add_patch(circle)
+        annulus = Circle((x, y), radius=15, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
+        dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
+        axs[1].add_patch(annulus)
+        axs[1].add_patch(dannulus)
 
         # Plot jd_mid vs fluxes
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
