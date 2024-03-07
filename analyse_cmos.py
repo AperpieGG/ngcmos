@@ -272,12 +272,16 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         ax2.set_xlim(min(airmass), max(airmass))  # Set the limits based on airmass values
         ax2.set_xlabel('Airmass')
 
+        # Downsample the ticks from the original x-axis
         xticks = axs[0].get_xticks()
         xticklabels = axs[0].get_xticklabels()
+        downsampled_xticks = xticks[::len(xticks) // 10]  # Adjust the denominator for desired downsampling rate
+        downsampled_xticklabels = xticklabels[
+                                  ::len(xticklabels) // 10]  # Adjust the denominator for desired downsampling rate
 
-        # Set the ticks and tick labels for the twin axis
-        ax2.set_xticks(xticks)
-        ax2.set_xticklabels(xticklabels)
+        # Set the downsampled ticks and tick labels for the twin axis
+        ax2.set_xticks(downsampled_xticks)
+        ax2.set_xticklabels(downsampled_xticklabels)
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
