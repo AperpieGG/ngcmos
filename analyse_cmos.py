@@ -270,10 +270,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Create twin axis for airmass on top of the plot
         ax2 = axs[0].twiny()
-
-        # Set the ticks for the twin axis to match the JD Mid ticks
-        ax2.set_xticks(jd_mid_binned)
-
+        ax2.plot(jd_mid_binned, airmass, 'o', color='red', label='Airmass')
+        ax2.set_ylabel('Airmass')
         # Set the label for the twin axis
         ax2.set_xlabel('Airmass')
 
