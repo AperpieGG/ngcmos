@@ -211,7 +211,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 1, figsize=(12, 16))
+    fig, axs = plt.subplots(3, 1, figsize=(12, 18))
 
     airmass = []
     for frame_id in gaia_id_data['frame_id']:
@@ -225,10 +225,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         radius = 30  # pixels
 
         # Define the limits for the region around the star
-        x_min = max(int(x - radius), 0)
-        x_max = min(int(x + radius), image_data.shape[1])
-        y_min = max(int(y - radius), 0)
-        y_max = min(int(y + radius), image_data.shape[0])
+        x_min = max(int(x - radius), 1)
+        x_max = min(int(x + radius), image_data.shape[1] - 1)
+        y_min = max(int(y - radius), 1)
+        y_max = min(int(y + radius), image_data.shape[0] - 1)
 
         # Crop the image data to the defined region
         cropped_image_data = image_data[y_min:y_max, x_min:x_max]
