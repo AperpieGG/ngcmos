@@ -204,9 +204,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 1, figsize=(12, 12))
+    fig, axs = plt.subplots(3, 1, figsize=(12, 14))
 
     airmass = []
+    altitude = []
     # take data for the first frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
 
@@ -214,6 +215,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     for frame_id in gaia_id_data['frame_id']:
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass.append(round(image_header['AIRMASS'], 2))
+        altitude.append(round(image_header['ALTITUDE'], 2))
     print(f"The star has GAIA id: {gaia_id_to_plot}")
     print(len(airmass))
     print(len(jd_mid_binned))
@@ -274,14 +276,19 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         ax2.xaxis.set_major_locator(plt.MaxNLocator(nbins=len(axs[0].get_xticks()), prune='both'))
 
+        # Create twin axis for altitude on the y-axis
+        ax3 = axs[0].twinx()
+        ax3.set_ylim(min(altitude), max(altitude))  # Set the limits based on altitude values
+        ax3.set_ylabel('Altitude')
+
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
         axs[1].set_ylabel('Flux [e-]')
         axs[1].set_xlabel('MJD [days]')
         axs[1].legend()
-        plt.tight_layout()
-        plt.show()
 
+    plt.tight_layout()
+    plt.show()
 
 def plot_lc_for_all_stars(table, bin_size):
     # Get unique Gaia IDs from the table
