@@ -214,23 +214,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     for frame_id in gaia_id_data['frame_id']:
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass.append(round(image_header['AIRMASS'], 2))
-
-    # Extract frame IDs and corresponding airmass values
-    frame_ids = gaia_id_data['frame_id']
-    unique_frame_ids = np.unique(frame_ids)
-    airmass_values = []
-
-    # Collect airmass values corresponding to each unique frame ID
-    for frame_id in unique_frame_ids:
-        image_header = fits.getheader(os.path.join(image_directory, frame_id))
-        airmass_values.append(round(image_header['AIRMASS'], 2))
-
-    # Create a dictionary to map frame IDs to airmass values
-    frame_id_to_airmass = dict(zip(unique_frame_ids, airmass_values))
-
-    # Create a list of airmass values corresponding to jd_mid
-    airmass_for_jd_mid = [frame_id_to_airmass[frame_id] for frame_id in frame_ids]
-
+    print(f"The star has GAIA id: {gaia_id_to_plot}")
+    print(len(airmass))
+    print(len(jd_mid_binned))
 
     # Plot the image data
     if image_data is not None:
@@ -282,16 +268,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
-        # Create twin axis for airmass on top of the plot
         ax2 = axs[0].twiny()
+        ax2.set_xlim(min(airmass), max(airmass))  # Set the limits based on airmass values
         ax2.set_xlabel('Airmass')
 
-        # Set the limits based on airmass values
-        ax2.set_xlim(min(airmass_for_jd_mid), max(airmass_for_jd_mid))
-
-        # Set the ticks and labels for the twin axis
-        ax2.set_xticks(jd_mid_binned)
-        ax2.set_xticklabels(airmass_for_jd_mid)
+        ax2.xaxis.set_major_locator(plt.MaxNLocator(nbins=len(axs[0].get_xticks()), prune='both'))
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
