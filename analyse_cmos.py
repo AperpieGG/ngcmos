@@ -222,24 +222,23 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     # Plot the image data
     if image_data is not None:
         # Define the size of the region around the star
-        radius = 30 # pixels
+        radius = 30  # pixels
 
-        x_min = max((x - radius), 0)
-        x_max = min((x + radius), image_data.shape[1] - 1)  # Subtract 1 to account for zero-indexing
-        y_min = max((y - radius), 0)
-        y_max = min((y + radius), image_data.shape[0] - 1)
+        # Define the limits for the region around the star
+        x_min = max(int(x - radius), 0)
+        x_max = min(int(x + radius), image_data.shape[1])
+        y_min = max(int(y - radius), 0)
+        y_max = min(int(y + radius), image_data.shape[0])
 
         # Crop the image data to the defined region
         cropped_image_data = image_data[y_min:y_max, x_min:x_max]
-
         # Normalize the cropped image data using zscale
         interval = ZScaleInterval()
         vmin, vmax = interval.get_limits(cropped_image_data)
         normalized_image_data = np.clip((cropped_image_data - vmin) / (vmax - vmin), 0, 1)
-
         # Plot the normalized cropped image
         extent = [x - radius, x + radius, y - radius, y + radius]
-        axs[2].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
+        im = axs[2].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
         axs[2].set_xlabel('X')
         axs[2].set_ylabel('Y')
 
