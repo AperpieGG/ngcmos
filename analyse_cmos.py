@@ -275,7 +275,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         ax2.set_ylabel('Airmass')
 
         # ax2.xaxis.set_major_locator(plt.MaxNLocator(nbins=len(axs[0].get_yticks()), prune='both'))
-
+        ax2.plot(jd_mid_binned, airmass, 'o', color='red', label='Airmass')
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
         axs[1].set_ylabel('Flux [e-]')
