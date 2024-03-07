@@ -215,6 +215,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass.append(round(image_header['AIRMASS'], 2))
     print(f"The star has GAIA id: {gaia_id_to_plot}")
+    print(len(airmass))
+    print(len(jd_mid_binned))
 
     # Plot the image data
     if image_data is not None:
