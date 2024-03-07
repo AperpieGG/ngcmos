@@ -252,7 +252,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
             circle_radii = [3]
 
         for radius in circle_radii:
-            circle = Circle((x - x_min, y - y_min), radius=radius, edgecolor='lime', facecolor='none', lw=1)
+            circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
             axs[2].add_patch(circle)
         annulus = Circle((x, y), radius=15, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
         dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
