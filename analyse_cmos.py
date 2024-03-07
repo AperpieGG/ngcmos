@@ -268,16 +268,12 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
-        alt_tick_labels = plt.gca().get_yticks().tolist()
-        ax2 = plt.gca().twinx()
-        air_tick_labels = [airmass for airmass in airmass]
-        air_tick_labels[0] = ''
-        ax2.set_yticks(alt_tick_labels)
-        ax2.set_yticklabels(air_tick_labels)
-        ax2.set_ylabel('Airmass')
-
-
-
+        ax2 = axs[0].twiny()
+        ax2.set_xlim(axs[0].get_xlim())
+        ax2.set_xticks(jd_mid_binned)
+        ax2.set_xticklabels(airmass)
+        ax2.set_xlabel('Airmass')
+    
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
         axs[1].set_ylabel('Flux [e-]')
