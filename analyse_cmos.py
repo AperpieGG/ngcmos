@@ -176,8 +176,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
     jd_mid = gaia_id_data['jd_mid']
-    x = gaia_id_data['x'][0]
-    y = gaia_id_data['y'][0]
 
     # Define empty variables to store fluxes, errors, etc.
     fluxes = []
@@ -217,7 +215,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     for frame_id in gaia_id_data['frame_id']:
         image_data, image_header = get_image_data(frame_id, image_directory)
         airmass.append(round(image_header['AIRMASS'], 2))
-    print(f"The frame id is: {frame_id}")
+        x = gaia_id_data['x'][0]
+        y = gaia_id_data['y'][0]
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
