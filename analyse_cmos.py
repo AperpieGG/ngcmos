@@ -204,7 +204,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 1, figsize=(12, 12))
+    fig, axs = plt.subplots(3, 1, figsize=(10, 10))
 
     airmass = []
     # take data for the first frame_id
