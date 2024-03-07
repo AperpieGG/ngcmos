@@ -178,12 +178,6 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     x = gaia_id_data['x'][0]
     y = gaia_id_data['y'][0]
 
-    # Define empty variables to store fluxes, errors, etc.
-    fluxes = []
-    fluxerrs = []
-    sky = []
-    skyerrs = []
-
     # Extract fluxes and errors based on Tmag
     if tmag < 11:
         fluxes = gaia_id_data['flux_5']
@@ -213,8 +207,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     fig, axs = plt.subplots(3, 1, figsize=(12, 14))
 
     airmass = []
+    # take data for the first frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
 
+    # Get airmass for each frame_id
     for frame_id in gaia_id_data['frame_id']:
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass.append(round(image_header['AIRMASS'], 2))
@@ -273,11 +269,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         # Create a twin axes for the upper x-axis
         ax2 = axs[0].twiny()
 
-        # # Set the ticks and labels for the upper x-axis
-        # air_tick_labels = [f'{airmass[i]}' for i in range(len(airmass))]
-        # ax2.set_xticks(jd_mid_binned)
-        # ax2.set_xticklabels(air_tick_labels)
-        # ax2.set_xlabel('Airmass')
+        # Set the ticks and labels for the upper x-axis
+        air_tick_labels = [f'{airmass[i]}' for i in range(len(airmass))]
+        ax2.set_xticks(jd_mid_binned)
+        ax2.set_xticklabels(air_tick_labels)
+        ax2.set_xlabel('Airmass')
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
