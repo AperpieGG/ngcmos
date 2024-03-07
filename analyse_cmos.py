@@ -285,6 +285,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Set labels for the lower x-axis
         axs[0].set_xlabel('JD Mid')
+        axs[0].set_xticks(jd_mid_binned[sample_indices])
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
