@@ -207,6 +207,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     fig, axs = plt.subplots(3, 1, figsize=(12, 12))
 
     airmass = []
+    altitude = []
     # take data for the first frame_id
     image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
 
@@ -214,6 +215,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     for frame_id in gaia_id_data['frame_id']:
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass.append(round(image_header['AIRMASS'], 2))
+        altitude.append(round(image_header['ALT'], 2))
     print(f"The star has GAIA id: {gaia_id_to_plot}")
     print(len(airmass))
     print(len(jd_mid_binned))
@@ -349,8 +351,8 @@ def main():
     print(f"Photometry files: {phot_files}")
 
     # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[1]}...")
-    phot_table = read_phot_file(phot_files[1])
+    print(f"Plotting the first photometry file {phot_files[2]}...")
+    phot_table = read_phot_file(phot_files[2])
 
     if gaia_id_to_plot is None:
         plot_lc_for_all_stars(phot_table, bin_size)
