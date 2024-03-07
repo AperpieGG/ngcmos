@@ -268,27 +268,20 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
-        # Plot airmass vs flux on the same subplot
-        axs[0].plot(jd_mid_binned, fluxes_binned, marker='o', color='red', label='Airmass')
+        # Create twin axis for airmass
+        ax2 = axs[0].twiny()  # Use sharey=axs[0] to share the same y-axis
+
+        # Set the tick positions for the twin axis to match the JD Mid ticks
+        ax2.set_xticks(jd_mid_binned)
+        # Set the tick labels for the twin axis to match the airmass values
+        ax2.set_xticklabels([f'{airmass[i]:.2f}' for i in range(len(jd_mid_binned))],
+                            rotation=45)  # Adjust rotation if needed
 
         # Set the label for the twin axis
+        ax2.set_xlabel('Airmass')
+
+        # Set labels for the lower x-axis
         axs[0].set_xlabel('JD Mid')
-
-        # Set ticks and labels for both jd_mid and airmass on the x-axis
-        axs[0].set_xticks(jd_mid_binned)
-        axs[0].set_xticklabels([f'{value:.2f}' for value in jd_mid_binned], rotation=45)  # Adjust rotation if needed
-
-        # Create airmass vs flux subplot
-        ax_airmass_flux = axs[0].twinx()
-
-        # Plot airmass vs flux on the same subplot
-        ax_airmass_flux.plot(jd_mid_binned, fluxes_binned, marker='o', color='red', label='Airmass')
-        ax_airmass_flux.set_ylabel('Flux [e-]')
-        ax_airmass_flux.legend(loc='upper left')
-
-        # Set the label for the twin axis
-        ax_airmass_flux.set_xlabel('JD Mid')
-
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
         axs[1].set_ylabel('Flux [e-]')
