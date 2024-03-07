@@ -272,8 +272,14 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         ax2.set_xlim(min(airmass), max(airmass))  # Set the limits based on airmass values
         ax2.set_xlabel('Airmass')
 
-        desired_ticks = 20
-        ax2.xaxis.set_major_locator(plt.MaxNLocator(desired_ticks))
+        # desired_ticks = 20
+        # ax2.xaxis.set_major_locator(plt.MaxNLocator(desired_ticks))
+
+        # Get the ticks from the original x-axis
+        xticks = axs[0].get_xticks()
+
+        # Set the ticks for the twin axis
+        ax2.set_xticks(xticks)
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
