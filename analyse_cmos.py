@@ -262,32 +262,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         legend_labels.append('Annulus, 15-20 pix')
         axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(1.01, 1.0))
 
-        # Sample a subset of airmass values to create tick positions and labels
-        num_ticks = 10  # Choose the number of ticks you want to display
-        sample_indices = np.round(np.linspace(0, len(jd_mid_binned) - 1, num_ticks)).astype(int)
-        sample_jd_mid = [jd_mid_binned[i] for i in sample_indices]
-        sample_airmass = [airmass[i] for i in sample_indices]
-
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
         axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
-
-        # Create twin axis for airmass
-        ax2 = axs[0].twiny()  # Use sharey=axs[0] to share the same y-axis
-
-        # Set the tick positions for the twin axis to match the JD Mid ticks
-        ax2.set_xticks(sample_jd_mid)
-        # Set the tick labels for the twin axis using the sampled airmass values
-        ax2.set_xticklabels([f'{airmass:.2f}' for airmass in sample_airmass], rotation=45)  # Adjust rotation if needed
-
-        # Set the label for the twin axis
-        ax2.set_xlabel('Airmass')
-
-        # Set labels for the lower x-axis
-        axs[0].set_xlabel('JD Mid')
-
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
