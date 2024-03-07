@@ -176,6 +176,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
     jd_mid = gaia_id_data['jd_mid']
+    x_1 = gaia_id_data['x'][0]
+    y_1 = gaia_id_data['y'][0]
+    print(f"X and Y coordinates for the star: {x_1}, {y_1}")
 
     # Define empty variables to store fluxes, errors, etc.
     fluxes = []
@@ -209,7 +212,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 1)
+    fig, axs = plt.subplots(3, 1, figsize=(12, 14))
 
     airmass = []
     for frame_id in gaia_id_data['frame_id']:
@@ -217,6 +220,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         airmass.append(round(image_header['AIRMASS'], 2))
         x = gaia_id_data['x'][0]
         y = gaia_id_data['y'][0]
+    print(f"X and Y coordinates for the star: {x}, {y}")
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
