@@ -269,10 +269,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].legend()
 
         ax2 = axs[0].twiny()
-        # ax2.set_xlim(min(airmass), max(airmass))  # Set the limits based on airmass values
         ax2.set_xlabel('Airmass')
 
-        ax2.xaxis.set_major_locator(plt.MaxNLocator(nbins=len(axs[0].get_xticks()), prune='both'))
+        ax2.xaxis.set_major_locator(plt.MaxNLocator(axs[0].get_xticks().size))
         ax2.set_xticklabels(airmass)
 
         # Plot jd_mid vs sky
