@@ -211,25 +211,23 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 1, figsize=(8, 16))
+    fig, axs = plt.subplots(3, 1, figsize=(12, 16))
 
     airmass = []
     for frame_id in gaia_id_data['frame_id']:
         image_data, image_header = get_image_data(frame_id, image_directory)
         airmass.append(round(image_header['AIRMASS'], 2))
-        print(f"Frame ID: {frame_id}, Airmass: {image_header['AIRMASS']}")
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
     if image_data is not None:
         # Define the size of the region around the star
-        radius = 30  # Adjust as needed
+        radius = 30 # pixels
 
-        # Define the limits for the region around the star
         x_min = max(int(x - radius), 0)
-        x_max = min(int(x + radius), image_data.shape[1])
+        x_max = min(int(x + radius), image_data.shape[1] - 1)  # Subtract 1 to account for zero-indexing
         y_min = max(int(y - radius), 0)
-        y_max = min(int(y + radius), image_data.shape[0])
+        y_max = min(int(y + radius), image_data.shape[0] - 1)
 
         # Crop the image data to the defined region
         cropped_image_data = image_data[y_min:y_max, x_min:x_max]
@@ -254,7 +252,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
             circle_radii = [3]
 
         for radius in circle_radii:
-            circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
+            circle = Circle((x - x_min, y - y_min), radius=radius, edgecolor='lime', facecolor='none', lw=1)
             axs[2].add_patch(circle)
         annulus = Circle((x, y), radius=15, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
         dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
