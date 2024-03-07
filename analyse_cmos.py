@@ -268,12 +268,23 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
-        ax2 = axs[0].twiny()
-        ax2.set_xlim(axs[0].get_xlim())
+        # Create airmass vs flux subplot
+        ax_airmass_flux = axs[0].twinx()
+
+        # Plot airmass vs flux
+        ax_airmass_flux.plot(airmass, fluxes_binned, marker='o', color='red', label='Airmass')
+        ax_airmass_flux.set_ylabel('Flux [e-]')
+        ax_airmass_flux.legend(loc='upper left')
+
+        # Create twin axis for JD Mid on the airmass vs flux subplot
+        ax2 = ax_airmass_flux.twiny()
+
+        # Set the tick positions for the twin axis to match the JD Mid ticks
         ax2.set_xticks(jd_mid_binned)
-        ax2.set_xticklabels(airmass)
-        ax2.set_xlabel('Airmass')
-    
+        # Set the tick labels for the twin axis to match the JD Mid values
+        ax2.set_xticklabels([f'{jd:.2f}' for jd in jd_mid_binned], rotation=45)  # Adjust rotation if needed
+
+
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
         axs[1].set_ylabel('Flux [e-]')
