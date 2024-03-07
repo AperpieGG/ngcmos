@@ -270,7 +270,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Create twin axis for airmass on top of the plot
         ax2 = axs[0].twiny()
-        ax2.plot(airmass, fluxes_binned, 'o', color='red', label='Airmass')
+        ax2.plot(airmass, fluxes_binned, 'o', color='white', label='Airmass')
         ax2.set_ylabel('Airmass')
         # Set the label for the twin axis
         ax2.set_xlabel('Airmass')
