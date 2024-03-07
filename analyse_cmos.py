@@ -264,10 +264,20 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
-        axs[0].plot(jd_mid_binned, airmass, 'o', color='red', label='Airmass')
         axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
+
+        # Create twin axis for airmass on top of the plot
+        ax2 = axs[0].twiny()
+
+        # Set the ticks for the twin axis to match the JD Mid ticks
+        ax2.set_xticks(jd_mid_binned)
+        # Set the tick labels for the twin axis using airmass values
+        ax2.set_xticklabels([f'{airmass:.2f}' for airmass in airmass], rotation=45)
+
+        # Set the label for the twin axis
+        ax2.set_xlabel('Airmass')
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
