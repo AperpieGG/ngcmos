@@ -268,6 +268,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
+        # Get the number of ticks for jd_mid
+        num_ticks_jd_mid = len(axs[0].get_xticks())
+        print("Number of ticks for jd_mid:", num_ticks_jd_mid)
+
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
         axs[1].set_ylabel('Flux [e-]')
