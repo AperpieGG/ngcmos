@@ -224,10 +224,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         # Define the size of the region around the star
         radius = 30 # pixels
 
-        x_min = max(int(x - radius), 0)
-        x_max = min(int(x + radius), image_data.shape[1] - 1)  # Subtract 1 to account for zero-indexing
-        y_min = max(int(y - radius), 0)
-        y_max = min(int(y + radius), image_data.shape[0] - 1)
+        x_min = max((x - radius), 0)
+        x_max = min((x + radius), image_data.shape[1] - 1)  # Subtract 1 to account for zero-indexing
+        y_min = max((y - radius), 0)
+        y_max = min((y + radius), image_data.shape[0] - 1)
 
         # Crop the image data to the defined region
         cropped_image_data = image_data[y_min:y_max, x_min:x_max]
