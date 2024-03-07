@@ -268,8 +268,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
-        ax2 = axs[0].twinx()
-        ax2.set_axis(airmass, jd_mid_binned)
+        ax2 = axs[0].twinx(airmass)
+        # ax2.set_ylim(min(airmass), max(airmass))  # Set the limits based on airmass values
         # ax2.invert_yaxis()
         # ax2.set_xscale('log')
         ax2.set_ylabel('Airmass')
