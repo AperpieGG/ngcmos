@@ -267,7 +267,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         ax2.set_xlabel('Airmass')
 
         # Set the locator for the upper x-axis to match the number of ticks on the bottom x-axis
-        ax2.xaxis.set_major_locator(plt.MaxNLocator(len(axs[0].get_xticks())))
+        ax2.xaxis.set_major_locator(plt.MaxNLocator(min_n_ticks=5, integer=True))
 
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
