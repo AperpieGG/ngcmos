@@ -161,8 +161,7 @@ def get_image_data(frame_id, image_directory):
         # Open the image file
         try:
             image_data = fits.getdata(image_path)
-            image_header = fits.getheader(image_path)
-            return image_data, image_header
+            return image_data
         except Exception as e:
             print(f"Error opening image file {image_path}: {e}")
             return None
@@ -176,9 +175,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
     jd_mid = gaia_id_data['jd_mid']
-    x_1 = gaia_id_data['x'][0]
-    y_1 = gaia_id_data['y'][0]
-    print(f"X_1 and Y_1 coordinates for the star: {x_1}, {y_1}")
+    x = gaia_id_data['x'][0]
+    y = gaia_id_data['y'][0]
 
     # Define empty variables to store fluxes, errors, etc.
     fluxes = []
@@ -215,12 +213,11 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     fig, axs = plt.subplots(3, 1, figsize=(12, 14))
 
     airmass = []
+    image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
+
     for frame_id in gaia_id_data['frame_id']:
-        image_data, image_header = get_image_data(frame_id, image_directory)
+        image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass.append(round(image_header['AIRMASS'], 2))
-        x = gaia_id_data['x'][0]
-        y = gaia_id_data['y'][0]
-    print(f"X and Y coordinates for the star: {x}, {y}")
     print(f"The star has GAIA id: {gaia_id_to_plot}")
 
     # Plot the image data
