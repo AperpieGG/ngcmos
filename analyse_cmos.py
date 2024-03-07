@@ -268,12 +268,15 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
+        # Create twin axis for airmass
         ax2 = axs[0].twiny()
 
-        # Set ticks for the twin axis based on the number of data points in jd_mid_binned
-        tick_positions = np.arange(len(jd_mid_binned))
-        ax2.set_xticks(tick_positions)
-        ax2.set_xticklabels([f'{airmass[i]}' for i in range(len(jd_mid_binned))])
+        # Set number of ticks on the twin axis
+        num_ticks = len(jd_mid_binned)
+        ax2.set_xticks(np.linspace(0, num_ticks - 1, num=num_ticks))
+
+        # Set tick labels for the twin axis
+        ax2.set_xticklabels([f'{airmass[i]:.2f}' for i in range(num_ticks)])
         ax2.set_xlabel('Airmass')
 
         # Plot jd_mid vs sky
