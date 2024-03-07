@@ -178,7 +178,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     jd_mid = gaia_id_data['jd_mid']
     x_1 = gaia_id_data['x'][0]
     y_1 = gaia_id_data['y'][0]
-    print(f"X and Y coordinates for the star: {x_1}, {y_1}")
+    print(f"X_1 and Y_1 coordinates for the star: {x_1}, {y_1}")
 
     # Define empty variables to store fluxes, errors, etc.
     fluxes = []
