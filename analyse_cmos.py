@@ -272,7 +272,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         ax2.set_xlim(axs[0].get_xlim())
         ax2.set_xlabel('Airmass')
 
-        ax2.xaxis.set_major_locator(plt.MaxNLocator(nbins=len(axs[0].get_xticks())))
+        ax2.xaxis.set_major_locator(plt.MaxNLocator(axs[0].get_xticks().size))
         ax2.set_xticklabels(airmass)
 
         # Plot jd_mid vs sky
