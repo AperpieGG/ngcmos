@@ -204,7 +204,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
     bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
-    fig, axs = plt.subplots(3, 1, figsize=(12, 14))
+    fig, axs = plt.subplots(3, 1, figsize=(12, 12))
 
     airmass = []
     # take data for the first frame_id
@@ -349,8 +349,8 @@ def main():
     print(f"Photometry files: {phot_files}")
 
     # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[0]}...")
-    phot_table = read_phot_file(phot_files[0])
+    print(f"Plotting the first photometry file {phot_files[1]}...")
+    phot_table = read_phot_file(phot_files[1])
 
     if gaia_id_to_plot is None:
         plot_lc_for_all_stars(phot_table, bin_size)
