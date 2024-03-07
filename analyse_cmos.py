@@ -268,12 +268,12 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
         # Create a twin axes for the upper x-axis
         ax2 = axs[0].twiny()
-        
-        # Set the ticks and labels for the upper x-axis
+
         air_tick_labels = [f'{airmass[i]}' for i in range(len(airmass))]
-        air_tick_positions = [jd for jd in jd_mid if jd in jd_mid_binned]  # Match airmass values to jd_mid_binned
+        tick_spacing = max(1, len(jd_mid_binned) // 10)  # Adjust the spacing as needed
+        air_tick_positions = jd_mid_binned[::tick_spacing]  # Use a subset of jd_mid_binned
         ax2.set_xticks(air_tick_positions)
-        ax2.set_xticklabels(air_tick_labels)
+        ax2.set_xticklabels(air_tick_labels[::tick_spacing])  # Ensure labels match tick positions
         ax2.set_xlabel('Airmass')
 
         # Plot jd_mid vs sky
