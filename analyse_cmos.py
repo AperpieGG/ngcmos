@@ -262,29 +262,24 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         legend_labels.append('Annulus, 15-20 pix')
         axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(1.01, 1.0))
 
-        # Create twin axis for airmass on top of the plot
-        ax2 = axs[0].twiny()
-        ax2.set_xlabel('Airmass')
-
-        # Set the locator for the upper x-axis to match the number of ticks on the bottom x-axis
-        ax2.xaxis.set_major_locator(plt.MaxNLocator(min_n_ticks=5, integer=True))
-
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
         axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
+        ax2 = axs[0].twiny()
+        ax2.set_xlim(axs[0].get_xlim())
+        ax2.set_xlabel('Airmass')
+
+        ax2.xaxis.set_major_locator(plt.MaxNLocator(nbins=len(axs[0].get_xticks()), prune='both'))
+        ax2.set_xticklabels(airmass)
+
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
         axs[1].set_ylabel('Flux [e-]')
         axs[1].set_xlabel('MJD [days]')
         axs[1].legend()
-
-        # Set the ticks and labels for the twin axis
-        ax2.set_xticks(jd_mid_binned)
-        ax2.set_xticklabels(airmass)
-
         plt.tight_layout()
         plt.show()
 
