@@ -181,7 +181,7 @@ def main():
 
             # Load the photometry catalog
             phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-            print(f"Found catalog with name {prefix}_catalog.fits\n")
+            print(f"Found catalog with name {prefix}_catalog_input.fits\n")
             # Convert RA and DEC to pixel coordinates using the WCS information from the header
             phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
