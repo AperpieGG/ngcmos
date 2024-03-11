@@ -138,6 +138,8 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
+# TODO: Set condition for the aperture to be used for the noise model
+# TODO: Estimate the avg sky background for the noise model in line 287
 def calculate_mean_rms_binned(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
@@ -291,7 +293,8 @@ def noise_sources(mean_flux_list):
     return synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise
 
 
-def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise, mean_flux_list, RMS_list):
+def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise,
+                mean_flux_list, RMS_list):
     N = scintilation_noise()
     N_sc = (N * synthetic_flux) ** 2
 
@@ -305,7 +308,8 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     ax.plot(synthetic_flux, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_flux, dc_noise, color='purple', label='dark noise', linestyle='--')
     ax.plot(synthetic_flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
-    ax.plot(synthetic_flux, np.ones(len(synthetic_flux)) * N, color='orange', label='scintilation noise', linestyle='--')
+    ax.plot(synthetic_flux, np.ones(len(synthetic_flux)) * N, color='orange', label='scintilation noise',
+            linestyle='--')
     ax.plot(synthetic_flux, RNS, color='black', label='total noise')
     ax.set_xlabel('Flux [e-]')
     ax.set_ylabel('RMS [e-]')
