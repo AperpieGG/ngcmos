@@ -144,14 +144,12 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
     RMS_unbinned_list = []
-    sky_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_3']
         fluxerr_3 = gaia_id_data['fluxerr_3']
-        sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
@@ -162,16 +160,14 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_3)
         RMS = np.std(dt_flux_binned)
-        mean_sky = np.mean(sky_3)
         # rms_unbinned = np.std(dt_flux)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
-        sky_list.append(mean_sky)
         # RMS_unbinned_list.append(rms_unbinned)
 
-    return mean_flux_list, RMS_list, sky_list
+    return mean_flux_list, RMS_list
 
 
 def plot_noise_model(mean_flux_list, RMS_list):
@@ -238,7 +234,7 @@ def scintilation_noise():
     return N
 
 
-def noise_sources(mean_flux_list, sky_list):
+def noise_sources(mean_flux_list):
     """
     Returns the noise sources for a given flux
 
@@ -288,9 +284,8 @@ def noise_sources(mean_flux_list, sky_list):
     read_signal = (read_noise_pix * npix) ** 2
 
     # set random sky background
-    sky_flux = np.mean(sky_list)
-    # sky_flux_pix = 22.6  # replace with average sky background?)
-    # sky_flux = sky_flux_pix * exposure_time * npix
+    sky_flux_pix = 22.6
+    sky_flux = sky_flux_pix * exposure_time * npix
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
     print(sky_flux, sky_noise)
 
@@ -363,7 +358,7 @@ def main():
         # plot_noise_model(mean_flux_list, RMS_list)
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
+         dark_current, dc_noise) = noise_sources(mean_flux_list)
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list)
