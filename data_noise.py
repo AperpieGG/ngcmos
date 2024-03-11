@@ -292,6 +292,7 @@ def noise_sources(mean_flux_list, sky_list):
     # sky_flux_pix = 22.6  # replace with average sky background?)
     # sky_flux = sky_flux_pix * exposure_time * npix
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
+    print(sky_flux, sky_noise)
 
     # set random photon shot noise from the flux
     photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
@@ -337,8 +338,6 @@ def main():
     parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
     args = parser.parse_args()
     gaia_id_to_plot = args.gaia_id
-    bin_size = args.bin
-    num_stars = args.num_stars
 
     # Set plot parameters
     plot_images()
