@@ -1,4 +1,13 @@
 #! /usr/bin/env python
+
+"""
+This script checks the headers of the FITS files in the specified directory
+and moves the files without CTYPE1 and/or CTYPE2 to a separate directory.
+
+Usage:
+python check_headers.py
+"""
+
 from datetime import datetime, timedelta
 from donuts import Donuts
 from astropy.io import fits
