@@ -147,6 +147,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
+        print('The star has id: ', gaia_id)
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_3']
         fluxerr_3 = gaia_id_data['fluxerr_3']
