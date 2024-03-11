@@ -353,7 +353,7 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, sky_list = calculate_mean_rms_binned(phot_table, bin_size=1, num_stars=args.num_stars)
+        mean_flux_list, RMS_list = calculate_mean_rms_binned(phot_table, bin_size=1, num_stars=args.num_stars)
 
         # plot_noise_model(mean_flux_list, RMS_list)
 
