@@ -147,11 +147,11 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_3']
-        fluxerr_2 = gaia_id_data['fluxerr_2']
+        fluxerr_3 = gaia_id_data['fluxerr_3']
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
-        dt_fluxerr = fluxerr_2 / trend
+        dt_fluxerr = fluxerr_3 / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
