@@ -284,7 +284,7 @@ def noise_sources(mean_flux_list):
     read_signal = (read_noise_pix * npix) ** 2
 
     # set random sky background
-    sky_flux = 20 * exposure_time * npix
+    sky_flux = 18 * exposure_time * npix
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
 
     # set random photon shot noise from the flux
