@@ -28,26 +28,25 @@ The script ran as cronjobs in the nuc computer which is in Chile currently. The 
 1) ```QC_Donuts.py ```
    This is a script to run Donuts on a specified observing night, compute and plots the x-y pixels shifts, and save the results to a JSON file.
    It also created an mp4 animation of the images with shifts greater than 0.5 pixels.
+   
 3) ```QC_control.py ```
    This is script that will create an mp4 video animation for each fifth image of each object of each particular observing night.
-5) ```Simple_wrapper.py ```
-   This script is made of two individual scripts that will solve the images astrometrically from the tic8 catalog and also tweak the solution for the distortion effect. Finally, a master catalog and an input catalog for the stars on the field are created. The input catalog has specific filters that will cut the candidates which will be used for photometry later.
-7) ```check_cmos.py```
-8) ```adding_headers.py```
-9) process_cmos.py
-10) analyse_cmos.py
+   
+5) ```calibration_images.py```
+   Will search for master bias and darks on the calibration directory. We dont have shutter so bias and darks kept fixed assuming their performance is stable through months of observations. A function will make a new flat using the evening-flats.fits file based on each night of observations. It will create a master flat for each given night. If there is not any particular night, it will use a master_flat image which is backup. Finally, it will peform reduction without saving the images. 
 
-The process_cmos.py works:
+6) ```Simple_wrapper.py ```
+   This script is made of two individual scripts that will solve the images astrometrically from the tic8 catalog and also tweak the solution for the distortion effect. Finally, a master catalog and an input catalog for the stars on the field are created. The input catalog has specific filters that will cut the candidates down and will be used for photometry later.
+   
+8) ```check_cmos.py```
+   After the wcs is updated on the headers, this script will check which images will be used for photometry. First uses donuts to measure the shifts and then it will check if the wcs is on the headers. If not, the data will be moved to the no_wcs/ subdirectory.
+   
+9) ```adding_headers.py```
+   This code is generating the Airmass (calculation simple by the unity over the sine of altitude) and Filter keyword in the headers of the data.
+   
+11) ```process_cmos.py```
+   This script rujns from the data directory. It uses the config file to identify the base and out paths. It has a function to find the current night directory based on the previous night of observation. If it doesnt exist it will use the directory the script is running. It will also filter the filenames keeping only the .fits for TOI, excluding flats, bias, darks, caralogs and photometry. To do that it will use the prefix to identify the NGTS fields. The main function uses the catalog file for each image after reduction and extracts the photometry for all stars on the field. It saves them a fits file.
+12) analyse_cmos.py
 
-1) Run it from the data directory
-2) It uses config files to identify base_path and out_paths
-3) Function to find the current night directory based on the previous night of observation. If it doesnt exist it will use the directory the script is running.
-4) Function to filter the filenames. It will exclude files such flats, bias, darks, caralogs and photometry.
-5) Function to get prefix. This basically finds the NGTS field that were observed on the night.
-6) Main function that uses the catalog file for each image after reduction and extracts the photometry for all stars on the field. It saves them a fits file.
 
-
-The analyse_cmos.py works:
-
-1) 
 
