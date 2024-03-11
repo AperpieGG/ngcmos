@@ -30,8 +30,9 @@ The script ran as cronjobs in the nuc computer which is in Chile currently. The 
    It also created an mp4 animation of the images with shifts greater than 0.5 pixels.
 3) QC_control.py
 4) Simple_wrapper.py
-5) process_cmos.py
-6) analyse_cmos.py
+5) check_cmos.py
+6) process_cmos.py
+7) analyse_cmos.py
 
 The process_cmos.py works:
 
