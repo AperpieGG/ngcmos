@@ -31,11 +31,13 @@ The script ran as cronjobs in the nuc computer which is in Chile currently. The 
 3) ```QC_control.py ```
    This is script that will create an mp4 video animation for each fifth image of each object of each particular observing night.
 5) ```Simple_wrapper.py ```
-   This script is made of two individual scripts that will solve the images astrometrically from the tic8 catalog and also tweak the solution for the distortion effect. Finally, a master catalog and an input catalog for the stars on the field are created. The input catalog has specific filters that will cut the candidates which will be used for photometry later.
+   This script is made of two individual scripts that will solve the images astrometrically from the tic8 catalog and also tweak the solution for the distortion effect. Finally, a master catalog and an input catalog for the stars on the field are created. The input catalog has specific filters that will cut the candidates down and will be used for photometry later.
 7) ```check_cmos.py```
-8) ```adding_headers.py```
-9) process_cmos.py
-10) analyse_cmos.py
+   After the wcs is updated on the headers, this script will check which images will be used for photometry. First uses donuts to measure the shifts and then it will check if the wcs is on the headers. If not, the data will be moved to the no_wcs/ subdirectory
+9) ```adding_headers.py```
+   This code is generating the Airmass and Filter keyword in the headers of the data
+11) process_cmos.py
+12) analyse_cmos.py
 
 The process_cmos.py works:
 
