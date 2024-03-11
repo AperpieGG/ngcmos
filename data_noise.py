@@ -147,7 +147,6 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
-        print('The star has id: ', gaia_id)
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_3']
         fluxerr_3 = gaia_id_data['fluxerr_3']
@@ -285,10 +284,10 @@ def noise_sources(mean_flux_list):
     read_signal = (read_noise_pix * npix) ** 2
 
     # set random sky background
-    sky_flux_pix = 15
+    sky_flux_pix = 18
     sky_flux = sky_flux_pix * exposure_time * npix
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
-    print(sky_flux, sky_noise)
+    print(sky_flux)
 
     # set random photon shot noise from the flux
     photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
