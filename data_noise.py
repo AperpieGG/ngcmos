@@ -240,8 +240,7 @@ def scintilation_noise(airmass_list):
     D = 20  # telescope diameter
     h = 2433  # height of Paranal
     ho = 8000  # height of atmospheric scale
-    airmass = np.mean(airmass_list) # airmass
-    print(airmass)
+    # airmass = np.mean(airmass_list) # airmass
     C_y = 1.56
     secZ = 1.2  # airmass
     W = 1.75  # wind speed
