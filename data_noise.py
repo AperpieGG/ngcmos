@@ -139,7 +139,6 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 # TODO: Set condition for the aperture to be used for the noise model
-# TODO: Estimate the avg sky background for the noise model in line 287
 def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
 
     mean_flux_list = []
@@ -148,25 +147,8 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
     sky_list = []
     airmass_list = []
 
-    # Get the number of frames
-    num_frames = len(table) // num_stars
-
-    # Iterate over the frames
-    for frame_idx in range(num_frames):
-        # Calculate the start and end index for the current frame
-        start_idx = frame_idx * num_stars
-        end_idx = start_idx + num_stars
-
-        # Get the frame IDs for the current frame
-        frame_ids = table['frame_id'][start_idx:end_idx]
-
-        # Iterate over the frame IDs and collect airmass
-        for frame_id in frame_ids:
-            # Retrieve the airmass for the current frame ID
-            image_header = fits.getheader(os.path.join(image_directory, frame_id))
-            airmass_list.append(round(image_header['AIRMASS'], 2))
-            print(f"Frame ID: {frame_id}, Airmass: {airmass_list[-1]}")
-            
+    # TODO: Get the airmass for each image
+    
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
