@@ -151,6 +151,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
     for frame_id in table['frame_id'][:num_stars]:
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass_list.append(round(image_header['AIRMASS'], 2))
+        print(len(frame_id), len(airmass_list))
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
