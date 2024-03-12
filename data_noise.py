@@ -342,7 +342,7 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     plt.show()
 
 
-def main():
+def main(phot_file):
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
@@ -357,13 +357,9 @@ def main():
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
-    # Get photometry files with the pattern 'phot_*.fits'
-    phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
-
-    # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files}...")
-    phot_table = read_phot_file(phot_files)
+    # Plot the current photometry file
+    print(f"Plotting the photometry file {phot_file}...")
+    phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Plot the light curve for the specified Gaia ID
     if gaia_id_to_plot:
@@ -383,5 +379,18 @@ def main():
                     dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
 
 
+def main_loop(phot_files):
+    for phot_file in phot_files:
+        main(phot_file)
+
+
 if __name__ == "__main__":
-    main()
+    # Get the current night directory
+    current_night_directory = find_current_night_directory(base_path)
+
+    # Get photometry files with the pattern 'phot_*.fits'
+    phot_files = get_phot_files(current_night_directory)
+    print(f"Photometry files: {phot_files}")
+
+    # Run the main function for each photometry file
+    main_loop(phot_files)
