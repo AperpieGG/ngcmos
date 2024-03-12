@@ -148,7 +148,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
     airmass_list = []
 
     # TODO: Get the airmass for each image
-    
+
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
@@ -362,8 +362,8 @@ def main():
     print(f"Photometry files: {phot_files}")
 
     # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[0]}...")
-    phot_table = read_phot_file(phot_files[0])
+    print(f"Plotting the first photometry file {phot_files}...")
+    phot_table = read_phot_file(phot_files)
 
     # Plot the light curve for the specified Gaia ID
     if gaia_id_to_plot:
