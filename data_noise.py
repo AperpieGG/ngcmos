@@ -410,7 +410,7 @@ def main():
         # plot_noise_model(mean_flux_list, RMS_list)
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, airmass_list)
+         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list)
