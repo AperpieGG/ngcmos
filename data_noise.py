@@ -153,6 +153,10 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         fluxerr_3 = gaia_id_data['fluxerr_3']
         sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
 
+        # exclude stars with flux > 200000
+        if np.max(flux_3) < 200000:
+            continue
+
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
         dt_fluxerr = fluxerr_3 / trend
