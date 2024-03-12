@@ -239,34 +239,6 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.show()
 
 
-def get_image_data(frame_id, image_directory):
-    """
-    Get the image data corresponding to the given frame_id.
-
-    Parameters:
-        frame_id (str): The frame_id of the image.
-        image_directory (str): The directory where the image files are stored.
-
-    Returns:
-        numpy.ndarray or None: The image data if the image exists, otherwise None.
-    """
-    # Construct the path to the image file using the frame_id
-    image_path = os.path.join(image_directory, frame_id)
-
-    # Check if the image file exists
-    if os.path.exists(image_path):
-        # Open the image file
-        try:
-            image_data = fits.getdata(image_path)
-            return image_data
-        except Exception as e:
-            print(f"Error opening image file {image_path}: {e}")
-            return None
-    else:
-        print(f"Image file {image_path} not found.")
-        return None
-
-
 def scintilation_noise(airmass_list):
 
     t = 10  # exposure time
@@ -413,7 +385,7 @@ def main():
          dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-                    dark_current, dc_noise, mean_flux_list, RMS_list)
+                    dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
 
 
 if __name__ == "__main__":
