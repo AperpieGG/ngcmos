@@ -140,11 +140,13 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 # TODO: Set condition for the aperture to be used for the noise model
 # TODO: Estimate the avg sky background for the noise model in line 287
-def calculate_mean_rms_binned(table, bin_size, num_stars):
+def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
+
     mean_flux_list = []
     RMS_list = []
     RMS_unbinned_list = []
     sky_list = []
+    airmass_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -152,6 +154,11 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         flux_3 = gaia_id_data['flux_3']
         fluxerr_3 = gaia_id_data['fluxerr_3']
         sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
+
+        # Get airmass for each frame_id
+        for frame_id in gaia_id_data['frame_id']:
+            image_header = fits.getheader(os.path.join(image_directory, frame_id))
+            airmass_list.append(round(image_header['AIRMASS'], 2))
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
@@ -176,7 +183,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
         # RMS_unbinned_list.append(rms_unbinned)
 
-    return mean_flux_list, RMS_list, sky_list
+    return mean_flux_list, RMS_list, sky_list, airmass_list
 
 
 def plot_noise_model(mean_flux_list, RMS_list):
@@ -232,12 +239,42 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.show()
 
 
-def scintilation_noise():
+def get_image_data(frame_id, image_directory):
+    """
+    Get the image data corresponding to the given frame_id.
+
+    Parameters:
+        frame_id (str): The frame_id of the image.
+        image_directory (str): The directory where the image files are stored.
+
+    Returns:
+        numpy.ndarray or None: The image data if the image exists, otherwise None.
+    """
+    # Construct the path to the image file using the frame_id
+    image_path = os.path.join(image_directory, frame_id)
+
+    # Check if the image file exists
+    if os.path.exists(image_path):
+        # Open the image file
+        try:
+            image_data = fits.getdata(image_path)
+            return image_data
+        except Exception as e:
+            print(f"Error opening image file {image_path}: {e}")
+            return None
+    else:
+        print(f"Image file {image_path} not found.")
+        return None
+
+
+def scintilation_noise(airmass_list):
+
     t = 10  # exposure time
     D = 20  # telescope diameter
     h = 2433  # height of Paranal
     ho = 8000  # height of atmospheric scale
-    airmass = 1.1  # airmass
+    airmass = np.mean(airmass_list) # airmass
+    print(airmass)
     C_y = 1.56
     secZ = 1.2  # airmass
     W = 1.75  # wind speed
@@ -309,8 +346,8 @@ def noise_sources(mean_flux_list, sky_list):
 
 
 def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise,
-                mean_flux_list, RMS_list):
-    N = scintilation_noise()
+                mean_flux_list, RMS_list, airmass_list):
+    N = scintilation_noise(airmass_list)
     N_sc = (N * synthetic_flux) ** 2
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
@@ -366,12 +403,13 @@ def main():
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, sky_list = calculate_mean_rms_binned(phot_table, bin_size=1, num_stars=args.num_stars)
+        mean_flux_list, RMS_list, sky_list, airmass_list = calculate_mean_rms_binned(phot_table, bin_size=1,
+                                                                                     num_stars=args.num_stars)
 
         # plot_noise_model(mean_flux_list, RMS_list)
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
+         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, airmass_list)
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list)
