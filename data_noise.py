@@ -404,7 +404,8 @@ def main():
     else:
         # Calculate mean and RMS for the noise model
         mean_flux_list, RMS_list, sky_list, airmass_list = calculate_mean_rms_binned(phot_table, bin_size=1,
-                                                                                     num_stars=args.num_stars)
+                                                                                     num_stars=args.num_stars,
+                                                                                     image_directory=current_night_directory)
 
         # plot_noise_model(mean_flux_list, RMS_list)
 
