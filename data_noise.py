@@ -147,11 +147,15 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
     RMS_unbinned_list = []
     sky_list = []
     airmass_list = []
-    # Get airmass for each frame_id
-    for frame_id in table['frame_id'][:num_stars]:
+    
+    # Get unique frame IDs associated with the selected Gaia IDs
+    unique_frame_ids = np.unique(table['frame_id'][:num_stars])
+
+    # Iterate over unique frame IDs
+    for frame_id in unique_frame_ids:
+        # Retrieve the airmass for the current frame ID
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass_list.append(round(image_header['AIRMASS'], 2))
-        print(frame_id, image_header['AIRMASS'])
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
