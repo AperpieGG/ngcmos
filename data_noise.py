@@ -189,10 +189,10 @@ def extract_airmass_from_table(table, image_directory):
         # Read FITS file header to extract airmass
         with fits.open(fits_file_path) as hdul:
             image_header = hdul[0].header
-            airmass = round(image_header['AIRMASS'], 2)
+            airmass = round(image_header['AIRMASS'], 3)
 
         # Append airmass value and frame ID to the list
-        airmass_list.append((frame_id, airmass))
+        airmass_list.append(airmass)
         print(f"Frame ID: {frame_id}, Airmass: {airmass}")
 
     return airmass_list
