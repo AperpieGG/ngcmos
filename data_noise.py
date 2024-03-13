@@ -147,14 +147,29 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
     sky_list = []
     airmass_list = []
 
-    # TODO: Get the airmass for each image
-
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_3']
         fluxerr_3 = gaia_id_data['fluxerr_3']
         sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
+
+        # Get unique frame IDs associated with the Gaia ID
+        unique_frame_ids = gaia_id_data['frame_id'].unique()
+
+        # Iterate over frame IDs to extract airmass
+        for frame_id in unique_frame_ids:
+            # Get the path to the FITS file
+            fits_file_path = os.path.join(image_directory, frame_id)
+
+            # Read FITS file header to extract airmass
+            with fits.open(fits_file_path) as hdul:
+                image_header = hdul[0].header
+                airmass = round(image_header['AIRMASS'], 2)
+
+                # Append airmass value and frame ID to the lists
+                airmass_list.append((frame_id, airmass))
+                print(f"Frame ID: {frame_id}, Airmass: {airmass}")
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
@@ -237,15 +252,15 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 def scintilation_noise(airmass_list):
 
     t = 10  # exposure time
-    D = 20  # telescope diameter
+    D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
     ho = 8000  # height of atmospheric scale
-    # airmass = np.mean(airmass_list) # airmass
+    airmass = np.mean(airmass_list)  # airmass
     C_y = 1.56
     secZ = 1.2  # airmass
     W = 1.75  # wind speed
-    N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
-    # N = 10*10e-6 * (C_y**2) * (D ** (-4. / 3.)) * (1. / t) * (airmass ** 3) * np.exp((-2. * h) / ho)
+    # N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
+    N = 10*10e-6 * (C_y**2) * (D ** (-4. / 3.)) * (1. / t) * (airmass ** 3) * np.exp((-2. * h) / ho)
     return N
 
 
