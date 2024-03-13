@@ -168,9 +168,9 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
                 image_header = hdul[0].header
                 airmass = round(image_header['AIRMASS'], 2)
 
-            # Append airmass value and frame ID to the lists
-            airmass_list.append((frame_id, airmass))
-            print(f"Frame ID: {frame_id}, Airmass: {airmass}")
+        # Append airmass value and frame ID to the lists
+        airmass_list.append((frame_id, airmass))
+        print(f"Frame ID: {frame_id}, Airmass: {airmass}")
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
