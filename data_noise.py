@@ -175,7 +175,8 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         # RMS_unbinned_list.append(rms_unbinned)
 
     # plot histogram of sky_list to check for outliers
-    plt.hist(sky_list, bins=50)
+    print('The length of sky_3 is ', len(sky_3))
+    print('The length of the sky_list is ', len(sky_list))
     plt.hist(sky_3, bins=50)
     plt.show()
 
