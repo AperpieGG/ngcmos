@@ -158,8 +158,14 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
         unique_frame_ids = np.unique(frame_ids)
         print(len(unique_frame_ids))
 
-        # Iterate over frame IDs to extract airmass
+        # Iterate over unique frame IDs to extract airmass
+        processed_frame_ids = set()  # To store processed frame IDs
         for frame_id in unique_frame_ids:
+            if frame_id in processed_frame_ids:
+                continue  # Skip if frame ID is already processed
+            else:
+                processed_frame_ids.add(frame_id)  # Mark frame ID as processed
+
             # Get the path to the FITS file
             fits_file_path = os.path.join(image_directory, frame_id)
 
@@ -171,11 +177,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
             # Append airmass value and frame ID to the lists
             airmass_list.append((frame_id, airmass))
             print(f"Frame ID: {frame_id}, Airmass: {airmass}")
-
-            # Check if the length of airmass_list matches the length of frame_ids
-            if len(airmass_list) == len(frame_ids):
-                break
-
+            
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
             continue
