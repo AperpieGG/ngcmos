@@ -178,13 +178,15 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     print('The length of sky_3 is ', len(sky_3))
     print('The length of the sky_list is ', len(sky_list))
     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-    ax[0].hist(sky_3, bins=100, color='blue', alpha=0.5)
+    ax[0].hist(sky_3, bins=100, color='blue')
     ax[0].set_title('Sky_3')
-    ax[0].set_xlabel('Flux [e-]')
+    ax[0].set_scale('log')
+    ax[0].legend()
 
-    ax[1].hist(sky_list, bins=100, color='red', alpha=0.5)
+    ax[1].hist(sky_list, bins=100, color='red')
     ax[1].set_title('Sky_list')
     ax[1].set_yscale('log')
+    ax[1].legend()
     plt.tight_layout()
 
     plt.show()
