@@ -138,29 +138,6 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_max_unique_frame_ids(table):
-    """
-    Calculate the maximum number of unique frame IDs allowed per Gaia ID based on the dataset.
-
-    Parameters
-    ----------
-    table : astropy.table.Table
-        Table containing the photometry data.
-
-    Returns
-    -------
-    int
-        Maximum number of unique frame IDs allowed per Gaia ID.
-    """
-    # Count the number of unique frame IDs for each Gaia ID
-    unique_frame_ids_per_gaia_id = table.group_by('gaia_id')['frame_id'].groups.aggregate(np.unique)
-
-    # Calculate the maximum number of unique frame IDs
-    max_unique_frame_ids = np.max([len(ids) for ids in unique_frame_ids_per_gaia_id])
-
-    return max_unique_frame_ids
-
-
 def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
 
     mean_flux_list = []
@@ -168,6 +145,10 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
     RMS_unbinned_list = []
     sky_list = []
     airmass_list = []
+
+    # Calculate the maximum number of unique frame IDs dynamically
+    max_unique_frame_ids = calculate_max_unique_frame_ids(table)
+    print(f"Maximum number of unique frame IDs: {max_unique_frame_ids}")
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -195,7 +176,8 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
             print(f"Frame ID: {frame_id}, Airmass: {airmass}")
 
         # Check if the number of unique frame IDs exceeds a limit
-        max_unique_frame_ids = calculate_max_unique_frame_ids(table)
+        max_unique_frame_ids = []
+
         if len(unique_frame_ids) > max_unique_frame_ids:
             print(f"Exceeded maximum number of unique frame IDs for Gaia ID {gaia_id}. Terminating loop.")
             break
@@ -224,6 +206,11 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
 
     return mean_flux_list, RMS_list, sky_list, airmass_list
 
+
+def calculate_max_unique_frame_ids(table):
+    unique_frame_ids_per_gaia_id = table.group_by('gaia_id')['frame_id'].groups.aggregate(np.unique)
+    max_unique_frame_ids = np.max([len(ids) for ids in unique_frame_ids_per_gaia_id])
+    return max_unique_frame_ids
 
 def plot_noise_model(mean_flux_list, RMS_list):
     # Plot the noise model
