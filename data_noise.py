@@ -180,7 +180,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
     ax[0].hist(sky_3, bins=100, color='blue')
     ax[0].set_title('Sky_3')
-    ax[0].set_scale('log')
+    ax[0].set_yscale('log')
     ax[0].legend()
 
     ax[1].hist(sky_list, bins=100, color='red')
