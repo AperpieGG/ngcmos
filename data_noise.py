@@ -138,7 +138,29 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-# TODO: Set condition for the aperture to be used for the noise model
+def calculate_max_unique_frame_ids(table):
+    """
+    Calculate the maximum number of unique frame IDs allowed per Gaia ID based on the dataset.
+
+    Parameters
+    ----------
+    table : astropy.table.Table
+        Table containing the photometry data.
+
+    Returns
+    -------
+    int
+        Maximum number of unique frame IDs allowed per Gaia ID.
+    """
+    # Count the number of unique frame IDs for each Gaia ID
+    unique_frame_ids_per_gaia_id = table.group_by('gaia_id')['frame_id'].groups.aggregate(np.unique)
+
+    # Calculate the maximum number of unique frame IDs
+    max_unique_frame_ids = np.max([len(ids) for ids in unique_frame_ids_per_gaia_id])
+
+    return max_unique_frame_ids
+
+
 def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
 
     mean_flux_list = []
@@ -168,9 +190,15 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
                 image_header = hdul[0].header
                 airmass = round(image_header['AIRMASS'], 2)
 
-        # Append airmass value and frame ID to the lists
-        airmass_list.append((frame_id, airmass))
-        print(f"Frame ID: {frame_id}, Airmass: {airmass}")
+            # Append airmass value and frame ID to the lists
+            airmass_list.append((frame_id, airmass))
+            print(f"Frame ID: {frame_id}, Airmass: {airmass}")
+
+        # Check if the number of unique frame IDs exceeds a limit
+        max_unique_frame_ids = calculate_max_unique_frame_ids(table)
+        if len(unique_frame_ids) > max_unique_frame_ids:
+            print(f"Exceeded maximum number of unique frame IDs for Gaia ID {gaia_id}. Terminating loop.")
+            break
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
