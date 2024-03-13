@@ -193,7 +193,6 @@ def extract_airmass_from_table(table, image_directory):
 
         # Append airmass value and frame ID to the list
         airmass_list.append(airmass)
-        print(f"Frame ID: {frame_id}, Airmass: {airmass}")
 
     return airmass_list
 
@@ -242,13 +241,13 @@ def scintilation_noise(airmass_list):
     t = 10  # exposure time
     D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
-    ho = 8000  # height of atmospheric scale
+    H = 8000  # height of atmospheric scale
     airmass = np.mean(airmass_list)  # airmass
     C_y = 1.56
     secZ = 1.2  # airmass
     W = 1.75  # wind speed
     # N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
-    N = 10*10e-6 * (C_y**2) * (D ** (-4. / 3.)) * (1. / t) * (airmass ** 3) * np.exp((-2. * h) / ho)
+    N = np.sqrt(10*10e-6 * (C_y**2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
     return N
 
 
@@ -372,6 +371,7 @@ def main(phot_file):
 
         # Extract airmass from the photometry table
         airmass_list = extract_airmass_from_table(phot_table, current_night_directory)
+        print(f"Average airmass: {np.mean(airmass_list)}")
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
          dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
