@@ -147,6 +147,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
     # Get unique frame IDs
     unique_frame_ids = np.unique(table['frame_id'][:700])  # Take only the first 700 frame IDs
+    print('The length of the unique frame IDs is: ', len(unique_frame_ids))
 
     for frame_id in unique_frame_ids:
         frame_data = table[table['frame_id'] == frame_id]  # Filter data for the current frame ID
