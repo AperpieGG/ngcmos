@@ -184,7 +184,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
 def plot_noise_model(mean_flux_list, RMS_list):
     # Plot the noise model
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-    ax.plot(mean_flux_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
+    ax.plot(mean_flux_list, RMS_list, 'o', color='blue', label='Noise Model', alpha=0.5)
     ax.set_xlabel('Mean Flux [e-]')
     ax.set_ylabel('RMS [e-]')
     ax.set_title('Noise Model')
