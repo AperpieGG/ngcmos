@@ -145,35 +145,40 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     RMS_unbinned_list = []
     sky_list = []
 
-    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid']
-        flux_3 = gaia_id_data['flux_3']
-        fluxerr_3 = gaia_id_data['fluxerr_3']
-        sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
+    # Get unique frame IDs
+    unique_frame_ids = np.unique(table['frame_id'][:700])  # Take only the first 700 frame IDs
 
-        # exclude stars with flux > 200000
-        if np.max(flux_3) > 250000:
-            print('The stars excluded are: ', gaia_id)
-            continue
+    for frame_id in unique_frame_ids:
+        frame_data = table[table['frame_id'] == frame_id]  # Filter data for the current frame ID
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_3 / trend
-        dt_fluxerr = fluxerr_3 / trend
+        for gaia_id in frame_data['gaia_id'][:num_stars]:  # Selecting the first num_stars stars for each frame
+            gaia_id_data = frame_data[frame_data['gaia_id'] == gaia_id]
+            jd_mid = gaia_id_data['jd_mid']
+            flux_3 = gaia_id_data['flux_3']
+            fluxerr_3 = gaia_id_data['fluxerr_3']
+            sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+            # exclude stars with flux > 200000
+            if np.max(flux_3) > 250000:
+                print('The stars excluded are: ', gaia_id)
+                continue
 
-        # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_3)
-        RMS = np.std(dt_flux_binned)
-        mean_sky = np.median(sky_3)
-        # rms_unbinned = np.std(dt_flux)
+            trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
+            dt_flux = flux_3 / trend
+            dt_fluxerr = fluxerr_3 / trend
 
-        # Append to lists
-        mean_flux_list.append(mean_flux)
-        RMS_list.append(RMS)
-        sky_list.append(mean_sky)
-        # RMS_unbinned_list.append(rms_unbinned)
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr,
+                                                                                  bin_size)
+
+            # Calculate mean flux and RMS
+            mean_flux = np.mean(flux_3)
+            RMS = np.std(dt_flux_binned)
+            mean_sky = np.median(sky_3)
+
+            # Append to lists
+            mean_flux_list.append(mean_flux)
+            RMS_list.append(RMS)
+            sky_list.append(mean_sky)
 
     # plot two plots of the histogram of sky_list to check for outliers
     print('The length of sky_3 is ', len(sky_3))
