@@ -213,7 +213,6 @@ def extract_airmass_from_table(table, image_directory):
 
         # Append airmass value and frame ID to the list
         airmass_list.append(airmass)
-        print(f"Frame ID: {frame_id}, Airmass: {airmass}")
 
     return airmass_list
 
