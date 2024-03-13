@@ -145,7 +145,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     RMS_unbinned_list = []
     sky_list = []
 
-    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
+    for gaia_id in table['gaia_id'][:num_stars - 1]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_3']
@@ -154,6 +154,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
+            print('The stars excluded are: ', gaia_id)
             continue
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
@@ -181,11 +182,13 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     ax[0].hist(sky_3, bins=100, color='blue')
     ax[0].set_title('Sky_3')
     ax[0].set_yscale('log')
+    ax[0].set_xlabel('Sky flux [e-]')
     ax[0].legend()
 
     ax[1].hist(sky_list, bins=100, color='red')
     ax[1].set_title('Sky_list')
     ax[1].set_yscale('log')
+    ax[1].set_xlabel('Sky flux [e-]')
     ax[1].legend()
     plt.tight_layout()
 
