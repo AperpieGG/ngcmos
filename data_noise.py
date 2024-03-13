@@ -138,13 +138,12 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
+def calculate_mean_rms_binned(table, bin_size, num_stars):
 
     mean_flux_list = []
     RMS_list = []
     RMS_unbinned_list = []
     sky_list = []
-    airmass_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -153,31 +152,6 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
         fluxerr_3 = gaia_id_data['fluxerr_3']
         sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
 
-        # Get unique frame IDs associated with the Gaia ID
-        frame_ids = np.array(gaia_id_data['frame_id'])
-        unique_frame_ids = np.unique(frame_ids)
-        print(len(unique_frame_ids))
-
-        # Iterate over unique frame IDs to extract airmass
-        processed_frame_ids = set()  # To store processed frame IDs
-        for frame_id in unique_frame_ids:
-            if frame_id in processed_frame_ids:
-                continue  # Skip if frame ID is already processed
-            else:
-                processed_frame_ids.add(frame_id)  # Mark frame ID as processed
-
-            # Get the path to the FITS file
-            fits_file_path = os.path.join(image_directory, frame_id)
-
-            # Read FITS file header to extract airmass
-            with fits.open(fits_file_path) as hdul:
-                image_header = hdul[0].header
-                airmass = round(image_header['AIRMASS'], 2)
-
-            # Append airmass value and frame ID to the lists
-            airmass_list.append((frame_id, airmass))
-            print(f"Frame ID: {frame_id}, Airmass: {airmass}")
-            
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
             continue
@@ -200,26 +174,28 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
         sky_list.append(mean_sky)
         # RMS_unbinned_list.append(rms_unbinned)
 
-    return mean_flux_list, RMS_list, sky_list, airmass_list
+    return mean_flux_list, RMS_list, sky_list
 
 
-def calculate_max_unique_frame_ids(table):
-    unique_frame_ids_per_gaia_id = table.group_by('gaia_id')['frame_id'].groups.aggregate(np.unique)
-    max_unique_frame_ids = np.max([len(ids) for ids in unique_frame_ids_per_gaia_id])
-    return max_unique_frame_ids
+def extract_airmass_from_table(table, image_directory):
+    unique_frame_ids = np.unique(table['frame_id'])
 
-def plot_noise_model(mean_flux_list, RMS_list):
-    # Plot the noise model
-    fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-    ax.plot(mean_flux_list, RMS_list, 'o', color='blue', label='Noise Model', alpha=0.5)
-    ax.set_xlabel('Mean Flux [e-]')
-    ax.set_ylabel('RMS [e-]')
-    ax.set_title('Noise Model')
-    ax.set_yscale('log')
-    ax.set_xscale('log')
-    ax.legend()
-    plt.tight_layout()
-    plt.show()
+    airmass_list = []
+
+    for frame_id in unique_frame_ids:
+        # Get the path to the FITS file
+        fits_file_path = os.path.join(image_directory, frame_id)
+
+        # Read FITS file header to extract airmass
+        with fits.open(fits_file_path) as hdul:
+            image_header = hdul[0].header
+            airmass = round(image_header['AIRMASS'], 2)
+
+        # Append airmass value and frame ID to the list
+        airmass_list.append((frame_id, airmass))
+        print(f"Frame ID: {frame_id}, Airmass: {airmass}")
+
+    return airmass_list
 
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
@@ -392,14 +368,13 @@ def main(phot_file):
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, sky_list, airmass_list = calculate_mean_rms_binned(phot_table, bin_size=1,
-                                                                                     num_stars=args.num_stars,
-                                                                                     image_directory=current_night_directory)
+        mean_flux_list, RMS_list, sky_list = calculate_mean_rms_binned(phot_table, bin_size=1, num_stars=args.num_stars)
 
-        # plot_noise_model(mean_flux_list, RMS_list)
+        # Extract airmass from the photometry table
+        airmass_list = extract_airmass_from_table(phot_table, current_night_directory)
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, airmass_list)
+         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
