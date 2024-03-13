@@ -180,11 +180,11 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
     ax[0].hist(sky_3, bins=100, color='blue', alpha=0.5)
     ax[0].set_title('Sky_3')
-    ax[0].y_scale('log')
+    ax[0].set_xlabel('Flux [e-]')
 
     ax[1].hist(sky_list, bins=100, color='red', alpha=0.5)
     ax[1].set_title('Sky_list')
-    ax[1].y_scale('log')
+    ax[1].set_yscale('log')
     plt.tight_layout()
 
     plt.show()
