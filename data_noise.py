@@ -247,7 +247,7 @@ def scintilation_noise(airmass_list):
     secZ = 1.2  # airmass
     W = 1.75  # wind speed
     # N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
-    N = np.sqrt(10*10e-6 * (C_y**2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
+    N = 10*10e-6 * (C_y**2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H)
     return N
 
 
