@@ -147,13 +147,13 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid'][:500]
-        flux_3 = gaia_id_data['flux_3'][:500]
-        fluxerr_3 = gaia_id_data['fluxerr_3'][:500]
-        sky_3 = gaia_id_data['flux_w_sky_3'][:500] - gaia_id_data['flux_3'][:500]
+        jd_mid = gaia_id_data['jd_mid'][0:500]
+        flux_3 = gaia_id_data['flux_3'][0:500]
+        fluxerr_3 = gaia_id_data['fluxerr_3'][0:500]
+        sky_3 = gaia_id_data['flux_w_sky_3'][0:500] - gaia_id_data['flux_3'][0:500]
 
         # exclude stars with flux > 200000
-        if np.max(flux_3) > 250000:
+        if np.max(flux_3) > 230000:
             print('The stars excluded are: ', gaia_id)
             continue
 
@@ -179,13 +179,13 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
     print('The length of sky_3 is ', len(sky_3))
     print('The length of the sky_list is ', len(sky_list))
     fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-    ax[0].hist(sky_3, bins=100, color='blue', label='Sky_3')
+    ax[0].hist(sky_3, bins=100, color='blue', label='Sky_3 = {}'.format(np.median(sky_3)))
     ax[0].set_title('Sky_3')
     ax[0].set_yscale('log')
     ax[0].set_xlabel('Sky flux [e-]')
     ax[0].legend()
 
-    ax[1].hist(sky_list, bins=100, color='red', label='mean sky flux')
+    ax[1].hist(sky_list, bins=100, color='red', label='mean sky flux = {}'.format(mean_sky))
     ax[1].set_title('Sky_list')
     ax[1].set_yscale('log')
     ax[1].set_xlabel('Sky flux [e-]')
