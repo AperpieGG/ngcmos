@@ -174,6 +174,11 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         # RMS_unbinned_list.append(rms_unbinned)
 
+    # plot histogram of sky_list to check for outliers
+    plt.hist(sky_list, bins=50)
+    plt.hist(sky_3, bins=50)
+    plt.show()
+
     return mean_flux_list, RMS_list, sky_list
 
 
