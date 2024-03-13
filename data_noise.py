@@ -155,7 +155,8 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
         sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
 
         # Get unique frame IDs associated with the Gaia ID
-        unique_frame_ids = gaia_id_data['frame_id'].unique()
+        frame_ids = np.array(gaia_id_data['frame_id'])
+        unique_frame_ids = np.unique(frame_ids)
 
         # Iterate over frame IDs to extract airmass
         for frame_id in unique_frame_ids:
