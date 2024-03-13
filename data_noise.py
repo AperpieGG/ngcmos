@@ -146,10 +146,6 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
     sky_list = []
     airmass_list = []
 
-    # Calculate the maximum number of unique frame IDs dynamically
-    max_unique_frame_ids = calculate_max_unique_frame_ids(table)
-    print(f"Maximum number of unique frame IDs: {max_unique_frame_ids}")
-
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
@@ -160,6 +156,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
         # Get unique frame IDs associated with the Gaia ID
         frame_ids = np.array(gaia_id_data['frame_id'])
         unique_frame_ids = np.unique(frame_ids)
+        print(len(unique_frame_ids))
 
         # Iterate over frame IDs to extract airmass
         for frame_id in unique_frame_ids:
@@ -175,12 +172,9 @@ def calculate_mean_rms_binned(table, bin_size, num_stars, image_directory):
             airmass_list.append((frame_id, airmass))
             print(f"Frame ID: {frame_id}, Airmass: {airmass}")
 
-        # Check if the number of unique frame IDs exceeds a limit
-        max_unique_frame_ids = []
-
-        if len(unique_frame_ids) > max_unique_frame_ids:
-            print(f"Exceeded maximum number of unique frame IDs for Gaia ID {gaia_id}. Terminating loop.")
-            break
+            # Check if the length of airmass_list matches the length of frame_ids
+            if len(airmass_list) == len(frame_ids):
+                break
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 200000:
