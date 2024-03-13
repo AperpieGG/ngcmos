@@ -174,10 +174,19 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         # RMS_unbinned_list.append(rms_unbinned)
 
-    # plot histogram of sky_list to check for outliers
+    # plot two plots of the histogram of sky_list to check for outliers
     print('The length of sky_3 is ', len(sky_3))
     print('The length of the sky_list is ', len(sky_list))
-    plt.hist(sky_3, bins=50)
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    ax[0].hist(sky_3, bins=100, color='blue', alpha=0.5)
+    ax[0].set_title('Sky_3')
+    ax[0].y_scale('log')
+
+    ax[1].hist(sky_list, bins=100, color='red', alpha=0.5)
+    ax[1].set_title('Sky_list')
+    ax[1].y_scale('log')
+    plt.tight_layout()
+
     plt.show()
 
     return mean_flux_list, RMS_list, sky_list
