@@ -150,7 +150,7 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         jd_mid = gaia_id_data['jd_mid'][:700]
         flux_3 = gaia_id_data['flux_3'][:700]
         fluxerr_3 = gaia_id_data['fluxerr_3'][:700]
-        sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3'][:700]
+        sky_3 = gaia_id_data['flux_w_sky_3'][:700] - gaia_id_data['flux_3'][:700]
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 250000:
