@@ -175,6 +175,25 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         # RMS_unbinned_list.append(rms_unbinned)
 
+    binning_times = []
+    RMS_values = []
+    max_binning = 200
+
+    for bin_size in range(1, max_binning + 1):
+        mean_RMS = np.mean(RMS_list)
+        binning_times.append(bin_size * 10)  # Assuming each bin corresponds to 10 seconds
+        RMS_values.append(mean_RMS)
+
+    # Plot RMS as a function of binning time
+    plt.figure(figsize=(10, 6))
+    plt.plot(binning_times, RMS_values, marker='o', linestyle='-')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Binning Time (seconds)')
+    plt.ylabel('RMS')
+    plt.title('RMS as a function of Binning Time')
+    plt.show()
+
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
     # print('The length of the sky_list is ', len(sky_list))
@@ -364,28 +383,6 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     plt.show()
 
 
-def bin_noise_model(phot_table, max_binning=200, num_stars=100):
-    binning_times = []
-    RMS_values = []
-
-    for bin_size in range(1, max_binning + 1):
-        mean_flux_list, RMS_list, _ = calculate_mean_rms_binned(phot_table, bin_size, num_stars)
-        mean_RMS = np.mean(RMS_list)
-        binning_times.append(bin_size * 10)  # Assuming each bin corresponds to 10 seconds
-        RMS_values.append(mean_RMS)
-
-    # Plot RMS as a function of binning time
-    plt.figure(figsize=(10, 6))
-    plt.plot(binning_times, RMS_values, marker='o', linestyle='-')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel('Binning Time (seconds)')
-    plt.ylabel('RMS')
-    plt.title('RMS as a function of Binning Time')
-    plt.grid(True)
-    plt.show()
-
-
 def main(phot_file):
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -404,9 +401,6 @@ def main(phot_file):
     # Plot the current photometry file
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-    # Plot the light curve for the specified Gaia ID
-    bin_noise_model(phot_table, max_binning=200, num_stars=args.num_stars)
 
     if gaia_id_to_plot:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
