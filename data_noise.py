@@ -370,7 +370,7 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_ylim(0.001, 0.1)
-    ax.set_xlim(100, 1e6)
+    ax.set_xlim(1000, 1e6)
     plt.tight_layout()
 
     plt.legend(loc='best')
