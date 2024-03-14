@@ -181,15 +181,20 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         RMS = np.std(dt_flux_binned)
         RMS_values.append(RMS)
         binning_times.append(i)
-        
-    # Plot RMS as a function of binning time
+
+    # Calculate the expected decrease in RMS
+    expected_RMS = [RMS_list[0] / np.sqrt(n) for n in range(1, max_binning)]
+
+    # Plot RMS as a function of binning time along with the expected decrease in RMS
     plt.figure(figsize=(10, 6))
-    plt.plot(binning_times, RMS_values, marker='o')
+    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel('Binning Time (seconds)')
+    plt.xlabel('Exposure time (s)')
     plt.ylabel('RMS')
-    plt.title('RMS as a function of Binning Time')
+    plt.title('RMS vs Binning time')
+    plt.legend()
     plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
