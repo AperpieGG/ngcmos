@@ -150,25 +150,29 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
-        flux_3 = gaia_id_data['flux_4']
-        fluxerr_3 = gaia_id_data['fluxerr_4']
-        sky_3 = gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']
+        flux_4 = gaia_id_data['flux_4']
+        fluxerr_4 = gaia_id_data['fluxerr_4']
+        sky_4 = gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']
+
+        if np.max(sky_4) > np.max(flux_4):
+            print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
+            continue
 
         # exclude stars with flux > 200000
-        if np.max(flux_3) > 200000:
+        if np.max(flux_4) > 200000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
             continue
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_3 / trend
-        dt_fluxerr = fluxerr_3 / trend
+        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
+        dt_flux = flux_4 / trend
+        dt_fluxerr = fluxerr_4 / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_3)
+        mean_flux = np.mean(flux_4)
         RMS = np.std(dt_flux_binned)
-        mean_sky = np.median(sky_3)
+        mean_sky = np.median(sky_4)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
