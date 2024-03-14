@@ -363,7 +363,7 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux
-    fig, ax = plt.subplots(figsize=(6, 8))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model', alpha=0.5)
 
