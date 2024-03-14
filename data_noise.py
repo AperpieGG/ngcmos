@@ -147,10 +147,10 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid'][0:500]
-        flux_3 = gaia_id_data['flux_3'][0:500]
-        fluxerr_3 = gaia_id_data['fluxerr_3'][0:500]
-        sky_3 = gaia_id_data['flux_w_sky_3'][0:500] - gaia_id_data['flux_3'][0:500]
+        jd_mid = gaia_id_data['jd_mid']
+        flux_3 = gaia_id_data['flux_3']
+        fluxerr_3 = gaia_id_data['fluxerr_3']
+        sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
 
         # exclude stars with flux > 200000
         if np.max(flux_3) > 230000:
