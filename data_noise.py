@@ -207,7 +207,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
 
 def plot_rms_time(table, num_of_stars):
-    filtered_table = table[(table['Tmag'] >= 7) & (table['Tmag'] <= 9.5)]
+    filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 9.5)]
     binning_times = []
     average_rms_values = []
     max_binning = 150
@@ -222,7 +222,7 @@ def plot_rms_time(table, num_of_stars):
         Tmag = gaia_id_data['Tmag'][0]
 
         # exclude stars with flux > 200000
-        if np.max(flux_5) > 230000:
+        if np.max(flux_5) > 250000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
         else:
             print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
