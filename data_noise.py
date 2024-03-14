@@ -312,7 +312,7 @@ def noise_sources(mean_flux_list, sky_list):
 
     """
 
-    aperture_radius = 3
+    aperture_radius = 2
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
