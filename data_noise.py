@@ -206,11 +206,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     return mean_flux_list, RMS_list, sky_list
 
 
-def plot_rms_time(table):
+def plot_rms_time(table, num_of_stars):
 
     filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 9.5)]
 
-    for gaia_id in filtered_table['gaia_id'][:1]:  # Selecting the first star
+    for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Selecting the first star
         print('The star with gaia_id {} and Tmag = {:.2f}'.format(gaia_id, filtered_table['Tmag'][0]))
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
@@ -229,7 +229,7 @@ def plot_rms_time(table):
 
         binning_times = []
         RMS_values = []
-        max_binning = 250
+        max_binning = 150
 
     for i in range(1, max_binning):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
@@ -237,13 +237,14 @@ def plot_rms_time(table):
         RMS_values.append(RMS)
         exposure_time = i * 10  # Multiply number of bins by exposure time per bin (10 seconds)
         binning_times.append(exposure_time)
+    Average_rms = np.mean(RMS_values)
 
     # Calculate the expected decrease in RMS
     RMS_model = RMS_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 6))
-    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(binning_times, Average_rms, 'o', color='black', label='Actual RMS', alpha=0.5)
     plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
@@ -444,7 +445,7 @@ def main(phot_file):
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        plot_rms_time(phot_table)
+        plot_rms_time(phot_table, num_of_stars=args.num_stars)
 
         mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
 
