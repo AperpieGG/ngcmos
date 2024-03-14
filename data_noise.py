@@ -244,14 +244,10 @@ def plot_rms_time(table, num_of_stars):
     # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
-    # Scale the model RMS to match the first data point
-    scaling_factor = average_rms_values[0] / RMS_model[0]
-    RMS_model_scaled = RMS_model * scaling_factor
-
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 6))
     plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(binning_times, RMS_model_scaled, '--', color='red', label='Model RMS')
+    plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
