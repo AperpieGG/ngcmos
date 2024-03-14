@@ -209,10 +209,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
 def plot_rms_time(table):
 
-    binning_times = []
-    RMS_values = []
-    max_binning = 200
-
     filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10)]
 
     for gaia_id in filtered_table['gaia_id'][:1]:  # Selecting the first star
@@ -221,6 +217,10 @@ def plot_rms_time(table):
         jd_mid = gaia_id_data['jd_mid']
         flux_5 = gaia_id_data['flux_5']
         fluxerr_5 = gaia_id_data['fluxerr_5']
+
+        binning_times = []
+        RMS_values = []
+        max_binning = 200
 
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
