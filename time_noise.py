@@ -143,10 +143,10 @@ def plot_rms_time(table, num_of_stars):
     filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
 
     # Sort the filtered table by brightness
-    filtered_table_sorted = filtered_table.sort_values(by='Tmag', ascending=False)
+    filtered_table.sort('Tmag')  # Sort by the 'Tmag' column
 
     # Select the 8 most bright stars
-    brightest_stars = filtered_table_sorted[:8]
+    brightest_stars = filtered_table[-num_of_stars:]  # Select the last 8 rows
 
     binning_times = []
     average_rms_values = []
@@ -154,7 +154,7 @@ def plot_rms_time(table, num_of_stars):
 
     num_stars_used = 0
 
-    for gaia_id in brightest_stars['gaia_id']:  # Loop over the 8 most bright stars
+    for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_6']
