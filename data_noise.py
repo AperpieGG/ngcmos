@@ -147,12 +147,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
-        if 8 < Tmag < 10:
+        if 9 < Tmag < 10:
             jd_mid = gaia_id_data['jd_mid']
             flux_3 = gaia_id_data['flux_3']
             fluxerr_3 = gaia_id_data['fluxerr_3']
             sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
-    
+
             # exclude stars with flux > 200000
             if np.max(flux_3) > 230000:
                 print('Stars with gaia_id = {} and Tmag = {} have been excluded'.format(gaia_id, round(gaia_id_data['Tmag'][0], 2)))
