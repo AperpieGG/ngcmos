@@ -156,7 +156,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         # exclude stars with flux > 200000
         if np.max(flux_3) > 230000:
             print('Stars with gaia_id = {} and Tmag = {} have been excluded'.format(gaia_id,
-                                                                                    round(gaia_id_data['Tmag'], 2)))
+                                                                                    np.round(gaia_id_data['Tmag'][0], 2)))
             continue
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
