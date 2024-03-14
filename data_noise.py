@@ -142,7 +142,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
     mean_flux_list = []
     RMS_list = []
-    RMS_unbinned_list = []
     sky_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
@@ -167,33 +166,37 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         mean_flux = np.mean(flux_3)
         RMS = np.std(dt_flux_binned)
         mean_sky = np.median(sky_3)
-        # rms_unbinned = np.std(dt_flux)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
-        # RMS_unbinned_list.append(rms_unbinned)
 
     binning_times = []
     RMS_values = []
     max_binning = 200
 
-    for bin_size in range(1, max_binning + 1):
-        mean_RMS = np.mean(RMS_list)
-        binning_times.append(bin_size * 10)  # Assuming each bin corresponds to 10 seconds
+    for b_size in range(1, max_binning + 1):
+        rms_sum = 0
+        counter = 0
+        for i in range(0, len(RMS_list), b_size):
+            if i + b_size <= len(RMS_list):
+                rms_sum += np.mean(RMS_list[i:i + b_size])
+                counter += 1
+        mean_RMS = rms_sum / counter if counter != 0 else 0
+        binning_times.append(b_size * 10)  # Assuming each bin corresponds to 10 seconds
         RMS_values.append(mean_RMS)
 
     # Plot RMS as a function of binning time
     plt.figure(figsize=(10, 6))
-    plt.plot(binning_times, RMS_values, marker='o', linestyle='-')
+    plt.plot(binning_times, RMS_values, marker='o')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Binning Time (seconds)')
     plt.ylabel('RMS')
     plt.title('RMS as a function of Binning Time')
     plt.show()
-
+    
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
     # print('The length of the sky_list is ', len(sky_list))
