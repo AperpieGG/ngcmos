@@ -322,7 +322,6 @@ def noise_sources(mean_flux_list, sky_list):
     # set exposure time and and random flux
     exposure_time = 10
     synthetic_flux = np.linspace(15, 1e6, 500)
-    print(np.min(mean_flux_list), np.max(mean_flux_list))
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
@@ -358,6 +357,7 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
 
     ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model', alpha=0.5)
 
+    ax.plot(synthetic_flux, RMS_list, color='black', label= 'total noise', linestyle='--')
     ax.plot(synthetic_flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_flux, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_flux, dc_noise, color='purple', label='dark noise', linestyle='--')
