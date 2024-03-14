@@ -148,7 +148,7 @@ def plot_rms_time(table, num_of_stars):
     num_stars_used = 0
 
     # sort the Tmag column from smaller to larger
-    filtered_table.sort('Tmag')
+    filtered_table.sort('Tmag'[0])
     print(filtered_table['Tmag'])
 
     for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
