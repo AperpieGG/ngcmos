@@ -175,24 +175,24 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         # RMS_unbinned_list.append(rms_unbinned)
 
-    # plot two plots of the histogram of sky_list to check for outliers
-    print('The length of sky_3 is ', len(sky_3))
-    print('The length of the sky_list is ', len(sky_list))
-    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-    ax[0].hist(sky_3, bins=100, color='blue', label='Sky_3 = {}'.format(np.median(sky_3)))
-    ax[0].set_title('Sky_3')
-    ax[0].set_yscale('log')
-    ax[0].set_xlabel('Sky flux [e-]')
-    ax[0].legend()
-
-    ax[1].hist(sky_list, bins=100, color='red', label='mean sky flux = {}'.format(mean_sky))
-    ax[1].set_title('Sky_list')
-    ax[1].set_yscale('log')
-    ax[1].set_xlabel('Sky flux [e-]')
-    ax[1].legend()
-    plt.tight_layout()
-
-    plt.show()
+    # # plot two plots of the histogram of sky_list to check for outliers
+    # print('The length of sky_3 is ', len(sky_3))
+    # print('The length of the sky_list is ', len(sky_list))
+    # fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    # ax[0].hist(sky_3, bins=100, color='blue', label='Sky_3 = {}'.format(np.median(sky_3)))
+    # ax[0].set_title('Sky_3')
+    # ax[0].set_yscale('log')
+    # ax[0].set_xlabel('Sky flux [e-]')
+    # ax[0].legend()
+    #
+    # ax[1].hist(sky_list, bins=100, color='red', label='mean sky flux = {}'.format(mean_sky))
+    # ax[1].set_title('Sky_list')
+    # ax[1].set_yscale('log')
+    # ax[1].set_xlabel('Sky flux [e-]')
+    # ax[1].legend()
+    # plt.tight_layout()
+    #
+    # plt.show()
 
     return mean_flux_list, RMS_list, sky_list
 
