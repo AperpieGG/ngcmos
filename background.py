@@ -78,7 +78,7 @@ def find_current_night_directory(directory):
     return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
 
 
-def find_background_level(table, gaia_id_to_plot, exposure_time=10, image_directory=""):
+def find_background_level(table, gaia_id_to_plot, image_directory=""):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
 
@@ -140,7 +140,9 @@ def read_phot_file(filename):
 def main():
     # Parse the command-line arguments
     parser = argparse.ArgumentParser(description='Find the background level for a specified Gaia ID.')
+    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     args = parser.parse_args()
+    gaia_id_to_plot = args.gaia_id
 
     # Find the directory for the current night
     current_night_directory = find_current_night_directory(base_path)
@@ -154,7 +156,7 @@ def main():
         phot_data.append(read_phot_file(phot_file))
 
     # Find the background level for the specified Gaia ID
-    background_level = find_background_level(phot_data, current_night_directory)
+    background_level = find_background_level(phot_data, gaia_id_to_plot, current_night_directory)
     print('Final background level is:', background_level)
 
 
