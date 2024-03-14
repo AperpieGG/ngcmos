@@ -183,7 +183,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         binning_times.append(i)
 
     # Calculate the expected decrease in RMS
-    expected_RMS = [RMS_list[0] / np.sqrt(n) for n in range(1, max_binning)]
+    expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of binning time along with the expected decrease in RMS
     plt.figure(figsize=(10, 6))
