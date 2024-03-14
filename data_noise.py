@@ -207,7 +207,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
 
 def plot_rms_time(table, num_of_stars):
-    filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 9.5)]
+    filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
     binning_times = []
     average_rms_values = []
     max_binning = 150
