@@ -208,7 +208,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
 def plot_rms_time(table):
 
-    filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10)]
+    filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 9.5)]
 
     for gaia_id in filtered_table['gaia_id'][:1]:  # Selecting the first star
         print('The star with gaia_id {} and Tmag = {:.2f}'.format(gaia_id, filtered_table['Tmag'][0]))
@@ -235,7 +235,8 @@ def plot_rms_time(table):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
         RMS = np.std(dt_flux_binned)
         RMS_values.append(RMS)
-        binning_times.append(i)
+        exposure_time = i * 10  # Multiply number of bins by exposure time per bin (10 seconds)
+        binning_times.append(exposure_time)
 
     # Calculate the expected decrease in RMS
     expected_RMS = RMS_values[0] / np.sqrt(binning_times)
