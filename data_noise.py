@@ -176,10 +176,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         tmag_list.append(Tmag)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(mean_flux_list, tmag_list, 'o', color='black', label='Tmag vs Mean Flux')
+    plt.plot(tmag_list, mean_flux_list, 'o', color='black', label='Tmag vs Mean Flux')
     plt.xlabel('Mean Flux')
     plt.ylabel('Tmag')
     plt.title('Tmag vs Mean Flux')
+    plt.xlim(0, 25000)
     plt.legend()
     plt.show()
 
