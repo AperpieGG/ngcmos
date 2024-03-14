@@ -81,13 +81,14 @@ def find_current_night_directory(directory):
 def find_background_level(table, gaia_id_to_plot, image_directory=""):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
-
+    sky_list = []
     # Get the image data for the specified frame_id
     for frame_id in gaia_id_data['frame_id']:
         image_data = get_image_data(frame_id, image_directory)
         sky_level = np.median(image_data)
+        sky_list.append(sky_level)
 
-    Total_sky = np.median(sky_level)
+    Total_sky = np.median(sky_list)
     return Total_sky
 
 
