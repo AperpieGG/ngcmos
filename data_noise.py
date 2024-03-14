@@ -175,14 +175,14 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(tmag_list, mean_flux_list, 'o', color='black', label='Tmag vs Mean Flux')
-    plt.xlabel('Mean Flux')
-    plt.ylabel('Tmag')
-    plt.title('Tmag vs Mean Flux')
-    plt.xlim(0, 25000)
-    plt.legend()
-    plt.show()
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(tmag_list, mean_flux_list, 'o', color='black', label='Tmag vs Mean Flux')
+    # plt.xlabel('Mean Flux')
+    # plt.ylabel('Tmag')
+    # plt.title('Tmag vs Mean Flux')
+    # plt.xlim(0, 25000)
+    # plt.legend()
+    # plt.show()
 
     binning_times = []
     RMS_values = []
@@ -197,17 +197,17 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     # Calculate the expected decrease in RMS
     expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
-    # # Plot RMS as a function of binning time along with the expected decrease in RMS
-    # plt.figure(figsize=(10, 6))
-    # plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    # plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
-    # plt.xscale('log')
-    # plt.yscale('log')
-    # plt.xlabel('Exposure time (s)')
-    # plt.ylabel('RMS')
-    # plt.title('RMS vs Binning time')
-    # plt.legend()
-    # plt.show()
+    # Plot RMS as a function of binning time along with the expected decrease in RMS
+    plt.figure(figsize=(10, 6))
+    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('RMS')
+    plt.title('RMS vs Binning time')
+    plt.legend()
+    plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
