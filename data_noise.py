@@ -364,6 +364,28 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     plt.show()
 
 
+def bin_noise_model(phot_table, max_binning=200, num_stars=100):
+    binning_times = []
+    RMS_values = []
+
+    for bin_size in range(1, max_binning + 1):
+        mean_flux_list, RMS_list, _ = calculate_mean_rms_binned(phot_table, bin_size, num_stars)
+        mean_RMS = np.mean(RMS_list)
+        binning_times.append(bin_size * 10)  # Assuming each bin corresponds to 10 seconds
+        RMS_values.append(mean_RMS)
+
+    # Plot RMS as a function of binning time
+    plt.figure(figsize=(10, 6))
+    plt.plot(binning_times, RMS_values, marker='o', linestyle='-')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Binning Time (seconds)')
+    plt.ylabel('RMS')
+    plt.title('RMS as a function of Binning Time')
+    plt.grid(True)
+    plt.show()
+
+
 def main(phot_file):
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
@@ -399,6 +421,8 @@ def main(phot_file):
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
+
+        bin_noise_model(phot_table, max_binning=200, num_stars=args.num_stars)
 
 
 def main_loop(phot_files):
