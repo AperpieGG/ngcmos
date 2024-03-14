@@ -229,19 +229,19 @@ def plot_rms_time(table):
             binning_times.append(i * 10)  # Convert bins to exposure time in seconds
 
     # Calculate the expected decrease in RMS
-        expected_RMS = RMS_values[0] / np.sqrt(binning_times)
+    expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
-        # Plot RMS as a function of exposure time along with the expected decrease in RMS
-        plt.figure(figsize=(10, 6))
-        plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-        plt.plot(binning_times, expected_RMS, '--', color='black', label='Expected RMS')
-        plt.xscale('log')
-        plt.yscale('log')
-        plt.xlabel('Exposure time (s)')
-        plt.ylabel('RMS')
-        plt.title('RMS vs Exposure time')
-        plt.legend()
-        plt.show()
+    # Plot RMS as a function of exposure time along with the expected decrease in RMS
+    plt.figure(figsize=(10, 6))
+    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(binning_times, expected_RMS, '--', color='black', label='Expected RMS')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('RMS')
+    plt.title('RMS vs Exposure time')
+    plt.legend()
+    plt.show()
 
 
 def extract_airmass_from_table(table, image_directory):
