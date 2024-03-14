@@ -3,12 +3,10 @@ import argparse
 import datetime
 import json
 import os
-import fnmatch
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
-from matplotlib import pyplot as plt
-from utils import plot_images
+from calibration_images import reduce_images
 
 
 def load_config(filename):
@@ -23,26 +21,25 @@ calibration_paths = config["calibration_paths"]
 base_paths = config["base_paths"]
 out_paths = config["out_paths"]
 
-
 # Select directory based on existence
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
         break
 
 
-def get_image_data(frame_id, image_directory):
+def get_image_data(filename, image_directory):
     """
     Get the image data corresponding to the given frame_id.
 
     Parameters:
-        frame_id (str): The frame_id of the image.
+        filename (str): The name of the image.
         image_directory (str): The directory where the image files are stored.
 
     Returns:
         numpy.ndarray or None: The image data if the image exists, otherwise None.
     """
     # Construct the path to the image file using the frame_id
-    image_path = os.path.join(image_directory, frame_id)
+    image_path = os.path.join(image_directory, filename)
 
     # Check if the image file exists
     if os.path.exists(image_path):
@@ -78,23 +75,30 @@ def find_current_night_directory(directory):
     return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
 
 
-def find_background_level(table, gaia_id_to_plot, image_directory=""):
-    # Select rows with the specified Gaia ID
-    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
-    sky_list = []
-    # Get the image data for the specified frame_id
-    for frame_id in gaia_id_data['frame_id']:
-        image_data = get_image_data(frame_id, image_directory)
-        sky_level = np.median(image_data)
-        sky_list.append(sky_level)
-
-    Total_sky = np.median(sky_list)
-    return Total_sky
-
-
-def get_phot_files(directory):
+def get_prefix(filenames):
     """
-    Get photometry files with the pattern 'phot_*.fits' from the directory.
+    Extract unique prefixes from a list of filenames.
+
+    Parameters
+    ----------
+    filenames : list of str
+        List of filenames.
+
+    Returns
+    -------
+    set of str
+        Set of unique prefixes extracted from the filenames.
+    """
+    prefixes = set()
+    for filename in filenames:
+        prefix = filename[:11]
+        prefixes.add(prefix)
+    return prefixes
+
+
+def filter_filenames(directory):
+    """
+    Filter filenames based on specific criteria.
 
     Parameters
     ----------
@@ -104,66 +108,47 @@ def get_phot_files(directory):
     Returns
     -------
     list of str
-        List of photometry files matching the pattern.
+        Filtered list of filenames.
     """
-    phot_files = []
+    filtered_filenames = []
     for filename in os.listdir(directory):
-        if fnmatch.fnmatch(filename, 'phot_*.fits'):
-            phot_files.append(os.path.join(directory, filename))
-    return phot_files
-
-
-def read_phot_file(filename):
-    """
-    Read the photometry file.
-
-    Parameters
-    ----------
-    filename : str
-        Photometry file to read.
-
-    Returns
-    -------
-    astropy.table.table.Table
-        Table containing the photometry data.
-    """
-    # Read the photometry file here using fits or any other appropriate method
-    try:
-        with fits.open(filename) as ff:
-            # Access the data in the photometry file as needed
-            tab = ff[1].data
-            return tab
-    except Exception as e:
-        print(f"Error reading photometry file {filename}: {e}")
-        return None
+        if filename.endswith('.fits'):
+            exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog", "phot", "catalog_input"]
+            if any(word in filename.lower() for word in exclude_words):
+                continue
+            filtered_filenames.append(filename)  # Append only the filename without the directory path
+    return sorted(filtered_filenames)
 
 
 def main():
-    # Parse the command-line arguments
-    parser = argparse.ArgumentParser(description='Find the background level for a specified Gaia ID.')
-    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
-    args = parser.parse_args()
-    gaia_id_to_plot = args.gaia_id
+    # set directory for the current night or use the current working directory
+    directory = find_current_night_directory(base_path)
+    print(f"Directory: {directory}")
 
-    # Find the directory for the current night
-    current_night_directory = find_current_night_directory(base_path)
+    # filter filenames only for .fits data files
+    filenames = filter_filenames(directory)
+    print(f"Number of files: {len(filenames)}")
 
-    # Get photometry files with the pattern 'phot_*.fits'
-    phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
+    # Get prefixes for each set of images
+    prefixes = get_prefix(filenames)
+    print(f"The prefixes are: {prefixes}")
 
-    # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[0]}...")
-    phot_table = read_phot_file(phot_files[0])
+    for prefix in prefixes:
+        sky_list = []
+        # Iterate over filenames with the current prefix
+        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
+        for filename in prefix_filenames:
+            print(f"Processing filename {filename}......")
+            # Calibrate image and get FITS file
+            reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
+            sky_data = np.median(reduced_data)
+            sky_list.append(sky_data)
+            print(f"Sky data: {sky_data}")
 
-    # Find the background level for the specified Gaia ID
-    background_level = find_background_level(phot_table, gaia_id_to_plot, current_night_directory)
-    print('Final background level is:', background_level)
+        # Calculate the median sky value
+        median_sky = np.median(sky_list)
+        print(f"Median sky value for prefix {prefix} is: {median_sky}")
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
