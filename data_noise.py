@@ -191,21 +191,20 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
         RMS = np.std(dt_flux_binned)
         RMS_values.append(RMS)
-        binning_times.append(i)
+        binning_times.append(i * 10)  # Convert bins to exposure time in seconds
 
     # Calculate the expected decrease in RMS
-    print(RMS_values)
     expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
-    # Plot RMS as a function of binning time along with the expected decrease in RMS
+    # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 6))
     plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
+    plt.plot(binning_times, expected_RMS, '--', color='black', label='Expected RMS')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
     plt.ylabel('RMS')
-    plt.title('RMS vs Binning time')
+    plt.title('RMS vs Exposure time')
     plt.legend()
     plt.show()
 
