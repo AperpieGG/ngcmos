@@ -138,7 +138,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_binned(table, bin_size, num_stars):
+def calculate_mean_rms_flux(table, bin_size, num_stars):
 
     mean_flux_list = []
     RMS_list = []
@@ -406,7 +406,7 @@ def main(phot_file):
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, sky_list = calculate_mean_rms_binned(phot_table, bin_size=1, num_stars=args.num_stars)
+        mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
 
         # Extract airmass from the photometry table
         airmass_list = extract_airmass_from_table(phot_table, current_night_directory)
