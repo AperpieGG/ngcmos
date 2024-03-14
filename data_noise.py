@@ -214,7 +214,7 @@ def plot_rms_time(table, num_of_stars):
 
     num_stars_used = 0
 
-    for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Loop over selected stars
+    for gaia_id in filtered_table['gaia_id'][:1]:  # Loop over selected stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_5 = gaia_id_data['flux_6']
