@@ -341,7 +341,7 @@ def noise_sources(mean_flux_list, sky_list):
     print(sky_flux)
 
     # set random photon shot noise from the flux
-    photon_shot_noise = np.sqrt(mean_flux_list) / synthetic_flux
+    photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
 
     return synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise
 
