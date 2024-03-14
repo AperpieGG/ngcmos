@@ -406,6 +406,8 @@ def main(phot_file):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Plot the light curve for the specified Gaia ID
+    bin_noise_model(phot_table, max_binning=200, num_stars=args.num_stars)
+
     if gaia_id_to_plot:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
@@ -421,8 +423,6 @@ def main(phot_file):
 
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
-
-    # bin_noise_model(phot_table, max_binning=200, num_stars=args.num_stars)
 
 
 def main_loop(phot_files):
