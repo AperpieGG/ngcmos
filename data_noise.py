@@ -217,12 +217,12 @@ def plot_rms_time(table, num_of_stars):
     for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Loop over selected stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
-        flux_5 = gaia_id_data['flux_5']
-        fluxerr_5 = gaia_id_data['fluxerr_5']
+        flux_5 = gaia_id_data['flux_6']
+        fluxerr_5 = gaia_id_data['fluxerr_6']
         Tmag = gaia_id_data['Tmag'][0]
 
         # exclude stars with flux > 200000
-        if np.max(flux_5) > 300000:
+        if np.max(flux_5) > 320000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
         else:
             print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
