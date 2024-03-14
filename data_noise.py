@@ -176,7 +176,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         tmag_list.append(Tmag)
 
     plt.figure(figsize=(10, 6))
-    plt.semilogy(tmag_list, mean_flux_list, 'o', color='red', label='RMS vs Mean Flux')
+    plt.semilogy(tmag_list, mean_flux_list, 'o', color='black', alpha=0.5)
+    plt.gca().invert_xaxis()
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
     plt.title('Tmag vs Mean Flux')
