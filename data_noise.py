@@ -175,6 +175,14 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         tmag_list = np.append(Tmag)
 
+        plt.figure(figsize=(10, 6))
+        plt.plot(mean_flux_list, tmag_list, 'o', color='black', label='Tmag vs Mean Flux')
+        plt.xlabel('Mean Flux')
+        plt.ylabel('Tmag')
+        plt.title('Tmag vs Mean Flux')
+        plt.legend()
+        plt.show()
+
     binning_times = []
     RMS_values = []
     max_binning = 200
@@ -199,14 +207,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     # plt.title('RMS vs Binning time')
     # plt.legend()
     # plt.show()
-
-    plt.figure(figsize=(10, 6))
-    plt.plot(mean_flux_list, tmag_list, 'o', color='black', label='Tmag vs Mean Flux')
-    plt.xlabel('Mean Flux')
-    plt.ylabel('Tmag')
-    plt.title('Tmag vs Mean Flux')
-    plt.legend()
-    plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
