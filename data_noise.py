@@ -220,11 +220,11 @@ def plot_rms_time(table):
         flux_5 = gaia_id_data['flux_5']
         fluxerr_5 = gaia_id_data['fluxerr_5']
 
-        for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
-            RMS = np.std(dt_flux_binned)
-            RMS_values.append(RMS)
-            binning_times.append(i * 10)  # Convert bins to exposure time in seconds
+    for i in range(1, max_binning):
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
+        RMS = np.std(dt_flux_binned)
+        RMS_values.append(RMS)
+        binning_times.append(i * 10)  # Convert bins to exposure time in seconds
 
     # Calculate the expected decrease in RMS
     expected_RMS = RMS_values[0] / np.sqrt(binning_times)
@@ -433,7 +433,7 @@ def main(phot_file):
     else:
         # Calculate mean and RMS for the noise model
         plot_rms_time(phot_table)
-        
+
         mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
 
         # Extract airmass from the photometry table
