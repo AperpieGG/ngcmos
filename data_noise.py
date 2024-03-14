@@ -183,31 +183,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     plt.title('Tmag vs Mean Flux')
     plt.show()
 
-    binning_times = []
-    RMS_values = []
-    max_binning = 200
-
-    for i in range(1, max_binning):
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
-        RMS = np.std(dt_flux_binned)
-        RMS_values.append(RMS)
-        binning_times.append(i * 10)  # Convert bins to exposure time in seconds
-
-    # Calculate the expected decrease in RMS
-    expected_RMS = RMS_values[0] / np.sqrt(binning_times)
-
-    # Plot RMS as a function of exposure time along with the expected decrease in RMS
-    plt.figure(figsize=(10, 6))
-    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(binning_times, expected_RMS, '--', color='black', label='Expected RMS')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel('Exposure time (s)')
-    plt.ylabel('RMS')
-    plt.title('RMS vs Exposure time')
-    plt.legend()
-    plt.show()
-
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
     # print('The length of the sky_list is ', len(sky_list))
@@ -228,6 +203,43 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     # plt.show()
 
     return mean_flux_list, RMS_list, sky_list
+
+
+def plot_rms_time(table):
+
+    binning_times = []
+    RMS_values = []
+    max_binning = 200
+
+    filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10)]
+
+    for gaia_id in filtered_table['gaia_id'][:1]:  # Selecting the first star
+        print('The star with gaia_id {} and Tmag = {:.2f}'.format(gaia_id, filtered_table['Tmag'][0]))
+        gaia_id_data = table[table['gaia_id'] == gaia_id]
+        jd_mid = gaia_id_data['jd_mid']
+        flux_5 = gaia_id_data['flux_5']
+        fluxerr_5 = gaia_id_data['fluxerr_5']
+
+        for i in range(1, max_binning):
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
+            RMS = np.std(dt_flux_binned)
+            RMS_values.append(RMS)
+            binning_times.append(i * 10)  # Convert bins to exposure time in seconds
+
+    # Calculate the expected decrease in RMS
+    expected_RMS = RMS_values[0] / np.sqrt(binning_times)
+
+    # Plot RMS as a function of exposure time along with the expected decrease in RMS
+    plt.figure(figsize=(10, 6))
+    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(binning_times, expected_RMS, '--', color='black', label='Expected RMS')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('RMS')
+    plt.title('RMS vs Exposure time')
+    plt.legend()
+    plt.show()
 
 
 def extract_airmass_from_table(table, image_directory):
@@ -420,6 +432,8 @@ def main(phot_file):
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
+        plot_rms_time(phot_table)
+        
         mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
 
         # Extract airmass from the photometry table
