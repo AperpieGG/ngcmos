@@ -175,14 +175,13 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
 
-    # plt.figure(figsize=(10, 6))
-    # plt.plot(tmag_list, mean_flux_list, 'o', color='black', label='Tmag vs Mean Flux')
-    # plt.xlabel('Mean Flux')
-    # plt.ylabel('Tmag')
-    # plt.title('Tmag vs Mean Flux')
-    # plt.xlim(0, 25000)
-    # plt.legend()
-    # plt.show()
+    plt.figure(figsize=(10, 6))
+    plt.semilogy(tmag_list, mean_flux_list, 'o', color='black', label='Tmag vs Mean Flux')
+    plt.xlabel('Tmag')
+    plt.ylabel('Mean Flux (log scale)')
+    plt.title('Tmag vs Mean Flux')
+    plt.legend()
+    plt.show()
 
     binning_times = []
     RMS_values = []
