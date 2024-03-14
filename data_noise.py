@@ -182,7 +182,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     # plt.xlabel('Tmag')
     # plt.ylabel('Mean Flux (log scale)')
     # plt.title('Tmag vs Mean Flux')
-    # plt.legend()
     # plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
@@ -217,13 +216,23 @@ def plot_rms_time(table):
         jd_mid = gaia_id_data['jd_mid']
         flux_5 = gaia_id_data['flux_5']
         fluxerr_5 = gaia_id_data['fluxerr_5']
+        Tmag = gaia_id_data['Tmag'][0]
+
+        # exclude stars with flux > 200000
+        if np.max(flux_5) > 230000:
+            print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
+            continue
+
+        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
+        dt_flux = flux_5 / trend
+        dt_fluxerr = fluxerr_5 / trend
 
         binning_times = []
         RMS_values = []
         max_binning = 200
 
     for i in range(1, max_binning):
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
         RMS = np.std(dt_flux_binned)
         RMS_values.append(RMS)
         binning_times.append(i*10)
