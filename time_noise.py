@@ -150,8 +150,8 @@ def plot_rms_time(table, num_of_stars):
     for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Loop over selected stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
-        flux_3 = gaia_id_data['flux_4']
-        fluxerr_5 = gaia_id_data['fluxerr_4']
+        flux_3 = gaia_id_data['flux_5']
+        fluxerr_5 = gaia_id_data['fluxerr_5']
         Tmag = gaia_id_data['Tmag'][0]
 
         # exclude stars with flux > 200000
