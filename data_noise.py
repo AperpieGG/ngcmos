@@ -173,7 +173,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
-        tmag_list = np.append(Tmag)
+        tmag_list = np.append(tmag_list, Tmag)
 
         plt.figure(figsize=(10, 6))
         plt.plot(mean_flux_list, tmag_list, 'o', color='black', label='Tmag vs Mean Flux')
