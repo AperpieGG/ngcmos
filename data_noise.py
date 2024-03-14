@@ -154,9 +154,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         fluxerr_4 = gaia_id_data['fluxerr_4']
         sky_4 = gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']
 
-        # if np.max(sky_4) > np.max(flux_4):
-        #     print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
-        #     continue
+        if np.max(sky_4) > np.max(flux_4):
+            print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
+            continue
 
         # exclude stars with flux > 200000
         if np.max(flux_4) > 200000:
@@ -353,7 +353,7 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 8))
 
     ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model', alpha=0.5)
 
