@@ -143,6 +143,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
     sky_list = []
+    tmag_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -172,6 +173,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
+        tmag_list = np.append(Tmag)
 
     binning_times = []
     RMS_values = []
@@ -186,15 +188,23 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     # Calculate the expected decrease in RMS
     expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
-    # Plot RMS as a function of binning time along with the expected decrease in RMS
+    # # Plot RMS as a function of binning time along with the expected decrease in RMS
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    # plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
+    # plt.xscale('log')
+    # plt.yscale('log')
+    # plt.xlabel('Exposure time (s)')
+    # plt.ylabel('RMS')
+    # plt.title('RMS vs Binning time')
+    # plt.legend()
+    # plt.show()
+
     plt.figure(figsize=(10, 6))
-    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel('Exposure time (s)')
-    plt.ylabel('RMS')
-    plt.title('RMS vs Binning time')
+    plt.plot(mean_flux_list, tmag_list, 'o', color='black', label='Tmag vs Mean Flux')
+    plt.xlabel('Mean Flux')
+    plt.ylabel('Tmag')
+    plt.title('Tmag vs Mean Flux')
     plt.legend()
     plt.show()
 
@@ -345,9 +355,9 @@ def noise_sources(mean_flux_list, sky_list):
     read_signal = (read_noise_pix * npix) ** 2
 
     # set random sky background
-    sky_flux_pix = 10
-    sky_flux = sky_flux_pix * exposure_time * npix
-    # sky_flux = np.median(sky_list)
+    # sky_flux_pix = 10
+    # sky_flux = sky_flux_pix * exposure_time * npix
+    sky_flux = np.median(sky_list)
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
     print(sky_flux)
 
