@@ -181,7 +181,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
     plt.title('Tmag vs Mean Flux')
-    plt.legend()
     plt.show()
 
     binning_times = []
@@ -195,7 +194,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         binning_times.append(i)
 
     # Calculate the expected decrease in RMS
-    expected_RMS = 1 / np.sqrt(binning_times)
+    print(RMS_values)
+    expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of binning time along with the expected decrease in RMS
     plt.figure(figsize=(10, 6))
