@@ -141,24 +141,15 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 def plot_rms_time(table, num_of_stars):
     filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
-
-    # Ensure 'Tmag' column is numeric
-    filtered_table['Tmag'] = filtered_table['Tmag'].astype(float)
-
-    # Handle missing or invalid values in 'Tmag' column
-    filtered_table = filtered_table[~np.isnan(filtered_table['Tmag'])]
-
-    # Sort the filtered table by brightness
-    filtered_table.sort('Tmag')  # Sort by the 'Tmag' column
-
-    # Select the 8 most bright stars
-    brightest_stars = filtered_table[-num_of_stars:]  # Select the last 8 rows
-
     binning_times = []
     average_rms_values = []
     max_binning = 150
 
     num_stars_used = 0
+
+    # sort the Tmag column from smaller to larger
+    filtered_table.sort('Tmag')
+    print(filtered_table['Tmag'])
 
     for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
