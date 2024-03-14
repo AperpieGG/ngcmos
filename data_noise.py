@@ -321,7 +321,7 @@ def noise_sources(mean_flux_list, sky_list):
 
     # set exposure time and and random flux
     exposure_time = 10
-    synthetic_flux = np.arange(100, 1e6, 10)
+    synthetic_flux = np.arange(1000, 1e6, 10)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
@@ -341,7 +341,7 @@ def noise_sources(mean_flux_list, sky_list):
     print(sky_flux)
 
     # set random photon shot noise from the flux
-    photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
+    photon_shot_noise = np.sqrt(mean_flux_list) / synthetic_flux
 
     return synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise
 
