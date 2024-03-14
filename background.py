@@ -147,16 +147,16 @@ def main():
     # Find the directory for the current night
     current_night_directory = find_current_night_directory(base_path)
 
-    # Get the photometry files for the current night
+    # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
+    print(f"Photometry files: {phot_files}")
 
-    # Read the photometry data from the table
-    phot_data = []
-    for phot_file in phot_files:
-        phot_data.append(read_phot_file(phot_file))
+    # Plot the first photometry file
+    print(f"Plotting the first photometry file {phot_files[0]}...")
+    phot_table = read_phot_file(phot_files[0])
 
     # Find the background level for the specified Gaia ID
-    background_level = find_background_level(phot_data, gaia_id_to_plot, current_night_directory)
+    background_level = find_background_level(phot_table, gaia_id_to_plot, current_night_directory)
     print('Final background level is:', background_level)
 
 
