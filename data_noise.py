@@ -212,16 +212,24 @@ def plot_rms_time(table, num_of_stars):
     average_rms_values = []
     max_binning = 150
 
+    num_stars_used = 0
+
     for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Loop over selected stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_5 = gaia_id_data['flux_5']
         fluxerr_5 = gaia_id_data['fluxerr_5']
+        Tmag = gaia_id_data['Tmag'][0]
 
         # exclude stars with flux > 200000
         if np.max(flux_5) > 230000:
-            print('Stars with gaia_id = {} have been excluded'.format(gaia_id))
+            print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
+        else:
+            print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
+            num_stars_used += 1
             continue
+
+        print('Total number of stars used: ', num_stars_used)
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_5 / trend
