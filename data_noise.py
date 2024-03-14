@@ -211,7 +211,6 @@ def plot_rms_time(table, num_of_stars):
     filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 9.5)]
 
     for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Selecting the first star
-        print('The star with gaia_id {} and Tmag = {:.2f}'.format(gaia_id, filtered_table['Tmag']))
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_5 = gaia_id_data['flux_5']
@@ -221,6 +220,8 @@ def plot_rms_time(table, num_of_stars):
         # exclude stars with flux > 200000
         if np.max(flux_5) > 230000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
+        else:
+            print('Stars with gaia_id = {} and Tmag = {:.2f} used'.format(gaia_id, Tmag))
             continue
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
