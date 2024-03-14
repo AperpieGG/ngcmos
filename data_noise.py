@@ -177,21 +177,13 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         tmag_list.append(Tmag)
 
     plt.figure(figsize=(10, 6))
-    plt.semilogy(tmag_list, mean_flux_list, 'o', color='black', alpha=0.5)
+    plt.plot(tmag_list,  np.log(mean_flux_list), 'o', color='black', alpha=0.5)
     plt.gca().invert_xaxis()
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
     plt.title('Tmag vs Mean Flux')
     plt.show()
 
-    # Calculate linear regression
-    slope, intercept, r_value, p_value, std_err = linregress(tmag_list, np.log(mean_flux_list))
-    regression_line = np.exp(intercept + slope * np.array(tmag_list))
-    plt.plot(tmag_list, regression_line, color='red',
-             label=f'Slope={slope:.2f}, Intercept={intercept:.2f}')
-
-    plt.legend()
-    plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
