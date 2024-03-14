@@ -422,7 +422,7 @@ def main(phot_file):
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
 
-        bin_noise_model(phot_table, max_binning=200, num_stars=args.num_stars)
+    bin_noise_model(phot_table, max_binning=200, num_stars=args.num_stars)
 
 
 def main_loop(phot_files):
