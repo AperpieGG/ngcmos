@@ -176,14 +176,14 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
-    plt.gca().invert_xaxis()
-    plt.xlabel('Tmag')
-    plt.ylabel('Mean Flux (log scale)')
-    plt.title('Tmag vs Mean Flux')
-    plt.legend()
-    plt.show()
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
+    # plt.gca().invert_xaxis()
+    # plt.xlabel('Tmag')
+    # plt.ylabel('Mean Flux (log scale)')
+    # plt.title('Tmag vs Mean Flux')
+    # plt.legend()
+    # plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
