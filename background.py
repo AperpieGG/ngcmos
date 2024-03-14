@@ -140,7 +140,6 @@ def read_phot_file(filename):
 def main():
     # Parse the command-line arguments
     parser = argparse.ArgumentParser(description='Find the background level for a specified Gaia ID.')
-    parser.add_argument('gaia_id', type=int, help='The Gaia ID to plot.')
     args = parser.parse_args()
 
     # Find the directory for the current night
@@ -155,7 +154,7 @@ def main():
         phot_data.append(read_phot_file(phot_file))
 
     # Find the background level for the specified Gaia ID
-    background_level = find_background_level(phot_data, args.gaia_id, current_night_directory)
+    background_level = find_background_level(phot_data, current_night_directory)
     print('Final background level is:', background_level)
 
 
