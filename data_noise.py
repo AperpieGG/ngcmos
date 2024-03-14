@@ -152,54 +152,51 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         fluxerr_3 = gaia_id_data['fluxerr_3']
         sky_3 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
 
-        Tmag = gaia_id_data['Tmag'][0]
-        if 9 < Tmag < 10:
+        # exclude stars with flux > 200000
+        if np.max(flux_3) > 230000:
+            print('Stars with gaia_id = {} and Tmag = {} have been excluded'.format(gaia_id, round(gaia_id_data['Tmag'][0], 2)))
+            continue
 
-            # exclude stars with flux > 200000
-            if np.max(flux_3) > 230000:
-                print('Stars with gaia_id = {} and Tmag = {} have been excluded'.format(gaia_id, round(gaia_id_data['Tmag'][0], 2)))
-                continue
+        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
+        dt_flux = flux_3 / trend
+        dt_fluxerr = fluxerr_3 / trend
 
-            trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
-            dt_flux = flux_3 / trend
-            dt_fluxerr = fluxerr_3 / trend
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+        # Calculate mean flux and RMS
+        mean_flux = np.mean(flux_3)
+        RMS = np.std(dt_flux_binned)
+        mean_sky = np.median(sky_3)
 
-            # Calculate mean flux and RMS
-            mean_flux = np.mean(flux_3)
-            RMS = np.std(dt_flux_binned)
-            mean_sky = np.median(sky_3)
+        # Append to lists
+        mean_flux_list.append(mean_flux)
+        RMS_list.append(RMS)
+        sky_list.append(mean_sky)
 
-            # Append to lists
-            mean_flux_list.append(mean_flux)
-            RMS_list.append(RMS)
-            sky_list.append(mean_sky)
+    binning_times = []
+    RMS_values = []
+    max_binning = 200
 
-        binning_times = []
-        RMS_values = []
-        max_binning = 200
+    for i in range(1, max_binning):
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
+        RMS = np.std(dt_flux_binned)
+        RMS_values.append(RMS)
+        binning_times.append(i)
 
-        for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
-            RMS = np.std(dt_flux_binned)
-            RMS_values.append(RMS)
-            binning_times.append(i)
+    # Calculate the expected decrease in RMS
+    expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
-        # Calculate the expected decrease in RMS
-        expected_RMS = RMS_values[0] / np.sqrt(binning_times)
-
-        # Plot RMS as a function of binning time along with the expected decrease in RMS
-        plt.figure(figsize=(10, 6))
-        plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-        plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
-        plt.xscale('log')
-        plt.yscale('log')
-        plt.xlabel('Exposure time (s)')
-        plt.ylabel('RMS')
-        plt.title('RMS vs Binning time')
-        plt.legend()
-        plt.show()
+    # Plot RMS as a function of binning time along with the expected decrease in RMS
+    plt.figure(figsize=(10, 6))
+    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(range(1, max_binning), expected_RMS, '--', color='black', label='Expected RMS')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('RMS')
+    plt.title('RMS vs Binning time')
+    plt.legend()
+    plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
     # print('The length of sky_3 is ', len(sky_3))
