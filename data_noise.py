@@ -325,7 +325,7 @@ def noise_sources(mean_flux_list, sky_list):
     print(np.min(mean_flux_list), np.max(mean_flux_list))
 
     # set dark current rate from cmos characterisation
-    dark_current_rate = 0.66
+    dark_current_rate = 1.6
     dark_current = dark_current_rate * exposure_time * npix
     dc_noise = np.sqrt(dark_current) / synthetic_flux
 
