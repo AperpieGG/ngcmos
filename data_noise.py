@@ -178,10 +178,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
     plt.figure(figsize=(10, 6))
     plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
-
-    coeffs = np.polyfit(tmag_list, np.log(mean_flux_list), 1)
-    plt.plot(tmag_list, np.polyval(coeffs, tmag_list), color='red',
-             label=f'Linear Fit: slope={coeffs[0]:.2f}, intercept={coeffs[1]:.2f}')
     plt.gca().invert_xaxis()
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
@@ -226,26 +222,26 @@ def plot_rms_time(table):
         flux_5 = gaia_id_data['flux_5']
         fluxerr_5 = gaia_id_data['fluxerr_5']
 
-    for i in range(1, max_binning):
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
-        RMS = np.std(dt_flux_binned)
-        RMS_values.append(RMS)
-        binning_times.append(i * 10)  # Convert bins to exposure time in seconds
+        for i in range(1, max_binning):
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
+            RMS = np.std(dt_flux_binned)
+            RMS_values.append(RMS)
+            binning_times.append(i * 10)  # Convert bins to exposure time in seconds
 
     # Calculate the expected decrease in RMS
-    expected_RMS = RMS_values[0] / np.sqrt(binning_times)
+        expected_RMS = RMS_values[0] / np.sqrt(binning_times)
 
-    # Plot RMS as a function of exposure time along with the expected decrease in RMS
-    plt.figure(figsize=(10, 6))
-    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(binning_times, expected_RMS, '--', color='black', label='Expected RMS')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel('Exposure time (s)')
-    plt.ylabel('RMS')
-    plt.title('RMS vs Exposure time')
-    plt.legend()
-    plt.show()
+        # Plot RMS as a function of exposure time along with the expected decrease in RMS
+        plt.figure(figsize=(10, 6))
+        plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+        plt.plot(binning_times, expected_RMS, '--', color='black', label='Expected RMS')
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.xlabel('Exposure time (s)')
+        plt.ylabel('RMS')
+        plt.title('RMS vs Exposure time')
+        plt.legend()
+        plt.show()
 
 
 def extract_airmass_from_table(table, image_directory):
