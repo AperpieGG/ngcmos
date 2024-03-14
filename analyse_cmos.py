@@ -285,7 +285,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         plt.show()
 
 
-def plot_lc_for_all_stars(table, bin_size):
+def plot_lc_for_all_stars(table, bin_size, gaia_id_to_plot):
     # Get unique Gaia IDs from the table
     unique_gaia_ids = np.unique(table['gaia_id'])
 
@@ -355,7 +355,7 @@ def main():
     phot_table = read_phot_file(phot_files[0])
 
     if gaia_id_to_plot is None:
-        plot_lc_for_all_stars(phot_table, bin_size)
+        plot_lc_for_all_stars(phot_table, bin_size, gaia_id_to_plot)
     else:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
 
