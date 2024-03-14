@@ -159,5 +159,9 @@ def main():
     print('Final background level is:', background_level)
 
 
+if __name__ == "__main__":
+    main()
+
+
 
 
