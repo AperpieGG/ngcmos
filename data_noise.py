@@ -9,6 +9,7 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import plot_images
+from scipy.stats import linregress
 
 
 def load_config(filename):
@@ -181,6 +182,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
     plt.title('Tmag vs Mean Flux')
+    plt.show()
+
+    # Calculate linear regression
+    slope, intercept, r_value, p_value, std_err = linregress(tmag_list, np.log(mean_flux_list))
+    regression_line = np.exp(intercept + slope * np.array(tmag_list))
+    plt.plot(tmag_list, regression_line, color='red',
+             label=f'Slope={slope:.2f}, Intercept={intercept:.2f}')
+
+    plt.legend()
     plt.show()
 
     # # plot two plots of the histogram of sky_list to check for outliers
