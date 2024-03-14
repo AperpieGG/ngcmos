@@ -147,7 +147,7 @@ def plot_rms_time(table, num_of_stars):
 
     num_stars_used = 0
 
-    for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Loop over selected stars
+    for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_6']
@@ -176,6 +176,10 @@ def plot_rms_time(table, num_of_stars):
 
         average_rms_values.append(RMS_values)
 
+        # Stop if the number of stars used reaches the specified number
+        if num_stars_used >= num_of_stars:
+            break
+
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
 
@@ -203,7 +207,7 @@ def main(phot_file):
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
+    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
     args = parser.parse_args()
     gaia_id_to_plot = args.gaia_id
 
