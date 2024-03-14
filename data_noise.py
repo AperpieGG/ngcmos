@@ -179,12 +179,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     plt.figure(figsize=(10, 6))
     plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
 
-    # Fit a linear model to the data
-    slope, intercept, r_value, p_value, std_err = linregress(tmag_list, np.log(mean_flux_list))
-    x = np.linspace(9, 10, 100)
-    y = slope * x + intercept
-    plt.plot(x, y, color='red', label='Linear fit')
-    
+    trend = np.polyval(np.polyfit(tmag_list, np.log(mean_flux_list), 1), tmag_list)
+    plt.plot(tmag_list, trend, color='red', label='Slope = {:.2f}'.format(linregress(tmag_list, np.log(mean_flux_list)).slope))
     plt.gca().invert_xaxis()
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
