@@ -226,7 +226,7 @@ def plot_rms_time(table):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_5, fluxerr_5, i)
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
-            binning_times.append(i * 10)  # Convert bins to exposure time in seconds
+            binning_times.append(i)
 
     # Calculate the expected decrease in RMS
     expected_RMS = RMS_values[0] / np.sqrt(binning_times)
