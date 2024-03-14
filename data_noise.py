@@ -211,7 +211,7 @@ def plot_rms_time(table, num_of_stars):
     filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 9.5)]
 
     for gaia_id in filtered_table['gaia_id'][:num_of_stars]:  # Selecting the first star
-        print('The star with gaia_id {} and Tmag = {:.2f}'.format(gaia_id, filtered_table['Tmag'][0]))
+        print('The star with gaia_id {} and Tmag = {:.2f}'.format(gaia_id, filtered_table['Tmag']))
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_5 = gaia_id_data['flux_5']
