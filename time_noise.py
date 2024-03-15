@@ -196,16 +196,16 @@ def plot_rms_time(table, num_stars):
     print(time_seconds)
 
     # Generate binning times
-    binning_times = [i for i in range(1, max_binning)]
+    binning_times = [i for i in range(1, time_seconds[-1] + 1, 10)]
     # binning_times = [i for i in range(1, max_binning)]
 
     # Calculate the expected decrease in RMS
-    RMS_model = average_rms_values[0] / np.sqrt(time_seconds)
+    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
-    plt.plot(time_seconds, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(time_seconds, RMS_model, '--', color='red', label='Model RMS')
+    plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
