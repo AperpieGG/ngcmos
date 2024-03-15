@@ -184,7 +184,7 @@ def plot_rms_time(table, num_stars):
 
         average_rms_values.append(RMS_values)
         print(len(time))
-        print(len(time_binned))
+        print(len(average_rms_values))
 
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
