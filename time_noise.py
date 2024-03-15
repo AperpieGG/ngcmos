@@ -138,8 +138,14 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, num_of_stars):
+def plot_rms_time(table, num_stars):
+    # Filter table for stars within desired Tmag range
     filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
+    # Sort the table by Tmag (brightness)
+    filtered_table = filtered_table.sort_values(by='Tmag')
+    # Take only the first 10 brightest stars
+    filtered_table = filtered_table.head(num_stars)
+
     binning_times = []
     average_rms_values = []
     max_binning = 150
@@ -152,15 +158,15 @@ def plot_rms_time(table, num_of_stars):
         flux_3 = gaia_id_data['flux_6']
         fluxerr_5 = gaia_id_data['fluxerr_6']
         Tmag = gaia_id_data['Tmag'][0]
-        # exclude stars with flux > 200000
+
+        # Exclude stars with flux > 230000 counts
         if np.max(flux_3) > 230000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
             continue
-        if np.max(flux_3) < 230000:
-            print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
-            num_stars_used += 1
-            continue
-            
+
+        print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
+        num_stars_used += 1
+
         print('Total number of stars used: ', num_stars_used)
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
@@ -174,7 +180,7 @@ def plot_rms_time(table, num_of_stars):
         average_rms_values.append(RMS_values)
 
         # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_of_stars:
+        if num_stars_used >= num_stars:
             break
 
     # Calculate the average RMS across all stars for each bin
@@ -197,6 +203,7 @@ def plot_rms_time(table, num_of_stars):
     plt.title('Average RMS vs Exposure time')
     plt.legend()
     plt.show()
+
 
 def main(phot_file):
     # Parse command-line arguments
