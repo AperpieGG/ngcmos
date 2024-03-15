@@ -149,8 +149,8 @@ def plot_rms_time(table, num_stars):
     # Take the ones which are on the argument
     filtered_table = filtered_table[:num_stars]
 
-    binning_times = []
     average_rms_values = []
+    times_binned = []
     max_binning = 150
 
     num_stars_used = 0
@@ -184,6 +184,7 @@ def plot_rms_time(table, num_stars):
             time_seconds.append(exposure_time_seconds)
 
         average_rms_values.append(RMS_values)
+        times_binned.append(time_seconds)
 
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
@@ -191,6 +192,7 @@ def plot_rms_time(table, num_stars):
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
+    time_seconds = times_binned[0]
 
     print(len(average_rms_values))
     print(len(time_seconds))
