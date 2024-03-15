@@ -176,6 +176,7 @@ def plot_rms_time(table, num_stars):
         dt_fluxerr = fluxerr_5 / trend
         RMS_values = []
         time_seconds = []  # Initialize a list to store time in seconds
+        times = []
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
             # Convert time from Julian dates to seconds
