@@ -141,9 +141,6 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 def plot_rms_time(table, num_of_stars):
     filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
-    binning_times = []
-    average_rms_values = []
-    max_binning = 150
 
     num_stars_used = 0
 
@@ -168,32 +165,20 @@ def plot_rms_time(table, num_of_stars):
         dt_flux = flux_3 / trend
         dt_fluxerr = fluxerr_5 / trend
 
+        binning_times = []
         RMS_values = []
+        max_binning = 200
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             binning_times.append(i)
-
-        average_rms_values.append(RMS_values)
-
-        # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_of_stars:
-            break
-
-    # Calculate the average RMS across all stars for each bin
-    average_rms_values = np.mean(average_rms_values, axis=0)
-
-    # Generate binning times
-    exposure_time = 10
-    # binning_times = [i * exposure_time for i in range(1, max_binning)]
-
-    # Calculate the expected decrease in RMS
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+        # Calculate the expected decrease in RMS
+        RMS_model = RMS_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
-    plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(binning_times, RMS_values, 'o', color='black', label='Actual RMS', alpha=0.5)
     plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
