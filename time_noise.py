@@ -197,8 +197,8 @@ def plot_rms_time(table, num_stars):
     # average_rms_values = 10e6 * average_rms_values # Convert to ppm
 
     # Generate binning times
-    # binning_times = [i for i in range(1, max_binning)]
-    binning_times = 201
+    binning_times = [i for i in range(1, max_binning)]
+
     # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
