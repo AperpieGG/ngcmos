@@ -158,7 +158,6 @@ def plot_rms_time(table, num_stars):
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
         else:
             print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
-            num_stars_used += 1
             continue
 
         print('Total number of stars used: ', num_stars_used)
@@ -200,6 +199,9 @@ def plot_rms_time(table, num_stars):
     plt.title('Average RMS vs Exposure time')
     plt.legend()
     plt.show()
+
+    plt.close()
+
 
 
 def main(phot_file):
