@@ -142,11 +142,11 @@ def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
     filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 10)]
     # Sort the table by Tmag (brightness)
-    unique_tmags = np.sort(np.unique(filtered_table['Tmag']))
+    unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
-
+    print('The number of bright stars in the filtered table is: ', len(filtered_table))
     # Take the ones which are on the argument
-    filtered_table = filtered_table[:num_stars]
+    filtered_table = np.sort(filtered_table[:num_stars])
 
     binning_times = []
     average_rms_values = []
