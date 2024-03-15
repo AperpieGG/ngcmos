@@ -146,7 +146,6 @@ def plot_rms_time(table, num_of_stars):
 
     num_stars_used = 0
 
-
     for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
@@ -169,14 +168,19 @@ def plot_rms_time(table, num_of_stars):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
+
         average_rms_values.append(RMS_values)
+
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_of_stars:
             break
+
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
+
     # Generate binning times
     binning_times = [i * 10 for i in range(1, max_binning)]
+
     # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
