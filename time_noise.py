@@ -144,9 +144,10 @@ def plot_rms_time(table, num_stars):
     # Sort the table by Tmag (brightness)
     sorted_indices = np.argsort(filtered_table['Tmag'])
     filtered_table = filtered_table[sorted_indices]
+    print(filtered_table['Tmag'])
 
     # Take only the first 10 brightest stars
-    filtered_table = filtered_table.head(num_stars)
+    filtered_table = filtered_table[:num_stars]
 
     binning_times = []
     average_rms_values = []
