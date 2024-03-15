@@ -298,19 +298,26 @@ def plot_lc_for_all_stars(table, bin_size):
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
-    # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
-    flux_2 = gaia_id_data['flux_2']
-    fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
+    # Extract fluxes and errors based on Tmag
+    if tmag < 11:
+        fluxes = gaia_id_data['flux_5']
+        fluxerrs = gaia_id_data['fluxerr_5']
+    elif 12 > tmag >= 11:
+        fluxes = gaia_id_data['flux_4']
+        fluxerrs = gaia_id_data['fluxerr_4']
+    else:
+        fluxes = gaia_id_data['flux_3']
+        fluxerrs = gaia_id_data['fluxerr_3']
+
     # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
+    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, 2), jd_mid - int(jd_mid[0]))
 
     # Compute Detrended flux and errors
-    norm_flux = flux_2 / trend
-    relative_err = fluxerr_2 / trend
+    norm_flux = fluxes / trend
+    relative_err = fluxerrs / trend
     rms = np.std(norm_flux)
     print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
 
@@ -318,7 +325,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     # Plot raw flux with wotan model
-    ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux')
+    ax1.plot(jd_mid, fluxes, 'o', color='black', label='Raw Flux')
     ax1.plot(jd_mid, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
