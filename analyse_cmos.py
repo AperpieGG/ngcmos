@@ -302,7 +302,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    tmag = gaia_id_data['Tmag']
+    tmag = gaia_id_data['Tmag'][0]
 
     # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
     # use polyfit to detrend the light curve
@@ -334,8 +334,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.show()
 
 
-def main():
-    # Parse command-line arguments
+def main(phot_file):    # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
@@ -346,16 +345,8 @@ def main():
     # Set plot parameters
     plot_images()
 
-    # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
-
-    # Get photometry files with the pattern 'phot_*.fits'
-    phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
-
-    # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[2]}...")
-    phot_table = read_phot_file(phot_files[2])
+    print(f"Plotting the photometry file {phot_file}...")
+    phot_table = read_phot_file(phot_file)
 
     if gaia_id_to_plot is None:
         plot_lc_for_all_stars(phot_table, bin_size)
@@ -365,5 +356,18 @@ def main():
     plt.show()
 
 
+def main_loop(phot_files):
+    for phot_file in phot_files:
+        main(phot_file)
+
+
 if __name__ == "__main__":
-    main()
+    # Get the current night directory
+    current_night_directory = find_current_night_directory(base_path)
+
+    # Get photometry files with the pattern 'phot_*.fits'
+    phot_files = get_phot_files(current_night_directory)
+    print(f"Photometry files: {phot_files}")
+
+    # Run the main function for each photometry file
+    main_loop(phot_files)
