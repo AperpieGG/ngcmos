@@ -141,7 +141,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
     # filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
-    filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 12)]
+    filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
 
     # Sort the table by Tmag (brightness)
     unique_tmags = np.unique(filtered_table['Tmag'])
@@ -164,7 +164,7 @@ def plot_rms_time(table, num_stars):
         Tmag = gaia_id_data['Tmag'][0]
 
         # Exclude stars with flux > 230000 counts
-        if np.max(flux_3) > 230000:
+        if np.max(flux_3) > 250000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
             continue
 
@@ -184,15 +184,15 @@ def plot_rms_time(table, num_stars):
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
 
-        # average_rms_values.append(RMS_values)
-        # times_binned.append(time_seconds)
+        average_rms_values.append(RMS_values)
+        times_binned.append(time_seconds)
 
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
             break
 
     # Calculate the average RMS across all stars for each bin
-    average_rms_values = np.mean(RMS_values, axis=0)
+    average_rms_values = np.mean(average_rms_values, axis=0)
     print(average_rms_values)
 
     # average_rms_values = 10e6 * average_rms_values # Convert to ppm
