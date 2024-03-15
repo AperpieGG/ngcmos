@@ -175,10 +175,12 @@ def plot_rms_time(table, num_stars):
         dt_flux = flux_3 / trend
         dt_fluxerr = fluxerr_5 / trend
         RMS_values = []
+        time = []
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
+            time.append(time_binned)
 
         average_rms_values.append(RMS_values)
 
@@ -191,10 +193,10 @@ def plot_rms_time(table, num_stars):
 
     # Generate binning times
     # binning_times = [i * 10 for i in range(1, max_binning)]
-    binning_times = [i for i in range(1, max_binning)]
+    binning_times = [i for i in range(1, time)]
 
     # Calculate the expected decrease in RMS
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+    RMS_model = average_rms_values[0] / np.sqrt(time)
     
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
