@@ -330,8 +330,8 @@ def noise_sources(mean_flux_list, sky_list):
 
     # set read noise from cmos characterisation
     read_noise_pix = 1.56
-    read_noise = (read_noise_pix * npix) / synthetic_flux
-    read_signal = (read_noise_pix * npix) ** 2
+    read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux
+    read_signal = npix * (read_noise_pix ** 2)
 
     # set random sky background
     sky_flux = np.mean(sky_list)
