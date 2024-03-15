@@ -138,11 +138,16 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, num_stars):
+def plot_rms_time(table, num_of_stars):
     filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
     binning_times = []
     average_rms_values = []
     max_binning = 150
+
+    num_stars_used = 0
+
+    list_bright = table[(table['Tmag'].sort() >= 8.5) & (table['Tmag'].sort() <= 10)]
+    print(list_bright)
 
     for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -150,36 +155,33 @@ def plot_rms_time(table, num_stars):
         flux_3 = gaia_id_data['flux_6']
         fluxerr_5 = gaia_id_data['fluxerr_6']
         Tmag = gaia_id_data['Tmag'][0]
-
         # exclude stars with flux > 200000
         if np.max(flux_3) > 230000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
         else:
             print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
+            num_stars_used += 1
             continue
-
+        print('Total number of stars used: ', num_stars_used)
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
         dt_fluxerr = fluxerr_5 / trend
-
         RMS_values = []
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
-
         average_rms_values.append(RMS_values)
-
+        # Stop if the number of stars used reaches the specified number
+        if num_stars_used >= num_of_stars:
+            break
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
-
     # Generate binning times
-    exposure_time = 10
-    binning_times = [i * exposure_time for i in range(1, max_binning)]
-
+    binning_times = [i * 10 for i in range(1, max_binning)]
     # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
-
+    
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
     plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
