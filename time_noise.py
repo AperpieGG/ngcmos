@@ -146,7 +146,7 @@ def plot_rms_time(table, num_stars):
     print('The bright stars are: ', len(unique_tmags))
 
     # Take the ones which are on the argument
-    filtered_table = unique_tmags[:num_stars]
+    filtered_table = filtered_table[:num_stars]
 
     binning_times = []
     average_rms_values = []
