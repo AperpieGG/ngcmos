@@ -193,11 +193,11 @@ def plot_rms_time(table, num_stars):
     average_rms_values = np.mean(average_rms_values, axis=0)
     time_seconds = np.mean(time_seconds, axis=0)
 
-
     print(len(average_rms_values))
+    print(len(time_seconds))
 
     # Generate binning times
-    binning_times = [i for i in range(1, time_seconds)]
+    binning_times = [i for i in range(1, max_binning)]
     # binning_times = [i for i in range(1, max_binning)]
 
     # Calculate the expected decrease in RMS
