@@ -302,7 +302,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
-    tmag = gaia_id_data['Tmag'][0]
+    tmag = gaia_id_data['Tmag']
 
     # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
     # use polyfit to detrend the light curve
