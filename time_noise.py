@@ -140,15 +140,12 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
-    filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
+    filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 10)]
     # Sort the table by Tmag (brightness)
-    unique_tmags = np.unique(filtered_table['Tmag'])
-    print(len(unique_tmags))  # Print the number of unique Tmag values
+    unique_tmags = np.sort(np.unique(filtered_table['Tmag']))
+    print('The bright stars are: ', len(unique_tmags))
 
-    # Sort the unique Tmag values
-    sorted_unique_tmags = np.sort(unique_tmags)
-
-    # Take only the first 10 brightest stars
+    # Take the ones which are on the argument
     filtered_table = filtered_table[:num_stars]
 
     binning_times = []
