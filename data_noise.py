@@ -276,7 +276,7 @@ def scintilation_noise(airmass_list):
     h = 2433  # height of Paranal
     H = 8000  # height of atmospheric scale
     airmass = np.mean(airmass_list)  # airmass
-    C_y = 1.56
+    C_y = 1.54
     secZ = 1.2  # airmass
     W = 1.75  # wind speed
     # N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
@@ -334,9 +334,8 @@ def noise_sources(mean_flux_list, sky_list):
     read_signal = (read_noise_pix * npix) ** 2
 
     # set random sky background
-    # sky_flux_pix = 10
-    # sky_flux = sky_flux_pix * exposure_time * npix
-    sky_flux = np.median(sky_list)
+    # sky_flux = np.median(sky_list)
+    sky_flux = 194 * npix 
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
     print(sky_flux)
 
