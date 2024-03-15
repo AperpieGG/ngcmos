@@ -155,10 +155,12 @@ def plot_rms_time(table, num_of_stars):
         # exclude stars with flux > 200000
         if np.max(flux_3) > 230000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
-        else:
+            continue
+        if np.max(flux_3) < 230000:
             print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
             num_stars_used += 1
             continue
+            
         print('Total number of stars used: ', num_stars_used)
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
