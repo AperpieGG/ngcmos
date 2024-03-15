@@ -139,73 +139,97 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 def plot_rms_time(table, num_stars):
-    # Filter table for stars within desired Tmag range
-    filtered_table = table[np.argsort(table['Tmag'] >= 7.5) & (table['Tmag'] <= 10)]
-    # Sort the table by Tmag (brightness)
-    unique_tmags = np.unique(filtered_table['Tmag'])
-    print('The bright stars are: ', len(unique_tmags))
+    """
+    Plot the RMS as a function of exposure time for the brightest stars.
 
-    # Take the ones which are on the argument
-    filtered_table = filtered_table[:num_stars]
+    Parameters
+    ----------
+    table : astropy.table.table.Table
+        Table containing the photometry data.
+    num_stars : int
+        Number of stars to plot.
 
-    binning_times = []
-    average_rms_values = []
-    max_binning = 150
+    Returns
+    -------
+    None
+    """
+    # Extract unique Tmag values from the entire table
+    unique_tmags = np.unique(table['Tmag'])
 
-    num_stars_used = 0
+    # Sort unique Tmag values from brightest to faintest
+    sorted_unique_tmags = np.sort(unique_tmags)[::-1]
 
-    for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid']
-        flux_3 = gaia_id_data['flux_6']
-        fluxerr_5 = gaia_id_data['fluxerr_6']
-        Tmag = gaia_id_data['Tmag'][0]
+    # Take the brightest num_stars unique Tmag values
+    selected_tmags = sorted_unique_tmags[:num_stars]
 
-        # Exclude stars with flux > 230000 counts
-        if np.max(flux_3) > 230000:
-            print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
-            continue
+    # Initialize lists to store data
+    jd_mid_list = []
+    flux_3_list = []
+    fluxerr_5_list = []
+    gaia_id_list = []
 
-        print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
-        num_stars_used += 1
+    # Loop over selected Tmag values
+    for tmag in selected_tmags:
+        # Find rows corresponding to the selected Tmag
+        tmag_rows = table[table['Tmag'] == tmag]
 
-        print('Total number of stars used: ', num_stars_used)
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_3 / trend
-        dt_fluxerr = fluxerr_5 / trend
-        RMS_values = []
-        for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
-            RMS = np.std(dt_flux_binned)
-            RMS_values.append(RMS)
+        # Extract data from the rows
+        for _, row in tmag_rows.iterrows():
+            jd_mid_list.append(row['jd_mid'])
+            flux_3_list.append(row['flux_6'])
+            fluxerr_5_list.append(row['fluxerr_6'])
+            gaia_id_list.append(row['gaia_id'])
+            binning_times = []
+            average_rms_values = []
+            max_binning = 150
 
-        average_rms_values.append(RMS_values)
+            num_stars_used = 0
 
-        # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_stars:
-            break
+            for gaia_id, jd_mid, flux_3, fluxerr_5 in zip(gaia_id_list, jd_mid_list, flux_3_list, fluxerr_5_list):
+                # Exclude stars with flux > 230000 counts
+                if np.max(flux_3) > 230000:
+                    print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, tmag))
+                    continue
 
-    # Calculate the average RMS across all stars for each bin
-    average_rms_values = np.mean(average_rms_values, axis=0)
+                print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, tmag))
+                num_stars_used += 1
 
-    # Generate binning times
-    binning_times = [i * 10 for i in range(1, max_binning)]
+                print('Total number of stars used: ', num_stars_used)
+                trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
+                dt_flux = flux_3 / trend
+                dt_fluxerr = fluxerr_5 / trend
+                RMS_values = []
+                for i in range(1, max_binning):
+                    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
+                    RMS = np.std(dt_flux_binned)
+                    RMS_values.append(RMS)
 
-    # Calculate the expected decrease in RMS
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+                average_rms_values.append(RMS_values)
 
-    # Plot RMS as a function of exposure time along with the expected decrease in RMS
-    plt.figure(figsize=(10, 8))
-    plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel('Exposure time (s)')
-    plt.ylabel('RMS')
-    plt.title('Average RMS vs Exposure time')
-    plt.legend()
-    plt.show()
+                # Stop if the number of stars used reaches the specified number
+                if num_stars_used >= num_stars:
+                    break
 
+            # Calculate the average RMS across all stars for each bin
+            average_rms_values = np.mean(average_rms_values, axis=0)
+
+            # Generate binning times
+            binning_times = [i * 10 for i in range(1, max_binning)]
+
+            # Calculate the expected decrease in RMS
+            RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+
+            # Plot RMS as a function of exposure time along with the expected decrease in RMS
+            plt.figure(figsize=(10, 8))
+            plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+            plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
+            plt.xscale('log')
+            plt.yscale('log')
+            plt.xlabel('Exposure time (s)')
+            plt.ylabel('RMS')
+            plt.title('Average RMS vs Exposure time')
+            plt.legend()
+            plt.show()
 
 def main(phot_file):
     # Parse command-line arguments
