@@ -144,7 +144,6 @@ def plot_rms_time(table, num_stars):
     average_rms_values = []
     max_binning = 150
 
-
     for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
@@ -170,10 +169,6 @@ def plot_rms_time(table, num_stars):
             RMS_values.append(RMS)
 
         average_rms_values.append(RMS_values)
-
-        # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_stars:
-            break
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
