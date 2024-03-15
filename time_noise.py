@@ -144,7 +144,6 @@ def plot_rms_time(table, num_stars):
     average_rms_values = []
     max_binning = 150
 
-    num_stars_used = 0
 
     for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -159,8 +158,6 @@ def plot_rms_time(table, num_stars):
         else:
             print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
             continue
-
-        print('Total number of stars used: ', num_stars_used)
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
@@ -199,10 +196,6 @@ def plot_rms_time(table, num_stars):
     plt.title('Average RMS vs Exposure time')
     plt.legend()
     plt.show()
-
-    plt.close()
-
-
 
 def main(phot_file):
     # Parse command-line arguments
