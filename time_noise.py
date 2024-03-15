@@ -95,19 +95,47 @@ def read_phot_file(filename):
         return None
 
 
-def bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, binning_exposure):
-    n_binned = int((jd_mid[-1] - jd_mid[0]) / binning_exposure)
-    bin_fact = len(jd_mid) // n_binned
+def bin_time_flux_error(time, flux, error, bin_fact):
+    """
+    Use reshape to bin light curve data, clip under filled bins
+    Works with 2D arrays of flux and errors
 
-    # Compute the clip index ensuring it's an integer
-    clip = int(n_binned * bin_fact)
+    Note: under filled bins are clipped off the end of the series
 
-    # Perform binning
-    time_b = np.average(jd_mid[:clip].reshape(n_binned, bin_fact), axis=1)
-    dt_flux_b = np.average(dt_flux[:clip].reshape(n_binned, bin_fact), axis=1)
-    dt_fluxerr_b = np.sqrt(np.sum(dt_fluxerr[:clip].reshape(n_binned, bin_fact)**2, axis=1)) / bin_fact
+    Parameters
+    ----------
+    time : array         of times to bin
+    flux : array         of flux values to bin
+    error : array         of error values to bin
+    bin_fact : int
+        Number of measurements to combine
 
-    return time_b, dt_flux_b, dt_fluxerr_b
+    Returns
+    -------
+    times_b : array
+        Binned times
+    flux_b : array
+        Binned fluxes
+    error_b : array
+        Binned errors
+
+    Raises
+    ------
+    None
+    """
+    n_binned = int(len(time) / bin_fact)
+    clip = n_binned * bin_fact
+    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
+    # determine if 1 or 2d flux/err inputs
+    if len(flux.shape) == 1:
+        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
+        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
+    else:
+        # assumed 2d with 1 row per star
+        n_stars = len(flux)
+        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
+        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
+    return time_b, flux_b, error_b
 
 
 def plot_rms_time(table, num_stars):
@@ -148,14 +176,7 @@ def plot_rms_time(table, num_stars):
         dt_fluxerr = fluxerr_5 / trend
         RMS_values = []
         for i in range(1, max_binning):
-            # Calculate the binning exposure time based on the exposure time of the first image
-            binning_exposure = (jd_mid[-1] - jd_mid[0]) / max_binning * i
-
-            # Perform binning with respect to the exposure time
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr,
-                                                                                 binning_exposure)
-
-            # Calculate RMS
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
 
@@ -169,14 +190,14 @@ def plot_rms_time(table, num_stars):
     average_rms_values = np.mean(average_rms_values, axis=0)
 
     # Generate binning times
-    binning_times = [(jd_mid[-1] - jd_mid[0]) / max_binning * i for i in range(1, max_binning)]
-
+    # binning_times = [i * 10 for i in range(1, max_binning)]
+    binning_times = [i for i in range(1, max_binning)]
     # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
-    plt.plot(binning_times, average_rms_values, 'o', color='black', label='Average RMS')
+    plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
     plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
