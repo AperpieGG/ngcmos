@@ -334,7 +334,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     plt.show()
 
 
-def main(phot_file):    # Parse command-line arguments
+def main(phot_files, file_index, bin_size):  # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
@@ -345,6 +345,11 @@ def main(phot_file):    # Parse command-line arguments
     # Set plot parameters
     plot_images()
 
+    if file_index < 1 or file_index > len(phot_files):
+        print("Invalid file index!")
+        return
+
+    phot_file = phot_files[file_index - 1]  # Adjust index to match list indexing
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(phot_file)
 
@@ -369,5 +374,11 @@ if __name__ == "__main__":
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Run the main function for each photometry file
-    main_loop(phot_files)
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--file', type=int, help='Index of the photometry file to plot (starting from 1)')
+    args = parser.parse_args()
+    file_index = args.file
+
+    # Run the main function for the specified photometry file
+    main(phot_files, file_index)
