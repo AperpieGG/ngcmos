@@ -152,7 +152,7 @@ def plot_rms_time(table, num_stars):
 
     average_rms_values = []
     times_binned = []
-    max_binning = 120
+    max_binning = 200
 
     num_stars_used = 0
 
