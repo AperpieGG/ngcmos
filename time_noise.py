@@ -142,7 +142,9 @@ def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
     filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
     # Sort the table by Tmag (brightness)
-    filtered_table = filtered_table.sort_values(by='Tmag')
+    sorted_indices = np.argsort(filtered_table['Tmag'])
+    filtered_table = filtered_table[sorted_indices]
+
     # Take only the first 10 brightest stars
     filtered_table = filtered_table.head(num_stars)
 
