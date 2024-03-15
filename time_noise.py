@@ -193,6 +193,7 @@ def plot_rms_time(table, num_stars):
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
     time_seconds = times_binned[0]
+    print(time_seconds)
 
     print(len(average_rms_values))
     print(len(time_seconds))
