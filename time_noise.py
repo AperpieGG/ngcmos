@@ -196,7 +196,7 @@ def plot_rms_time(table, num_stars):
     print(time_seconds)
 
     # Generate binning times
-    binning_times = [i for i in range(1, time_seconds[-1] + 1, 10)]
+    binning_times = [i for i in range(1, time_seconds[0])]
     # binning_times = [i for i in range(1, max_binning)]
 
     # Calculate the expected decrease in RMS
