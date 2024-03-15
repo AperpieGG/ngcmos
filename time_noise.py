@@ -146,8 +146,6 @@ def plot_rms_time(table, num_of_stars):
 
     num_stars_used = 0
 
-    list_bright = table[(table['Tmag'].sort() >= 8.5) & (table['Tmag'].sort() <= 10)]
-    print(list_bright)
 
     for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -181,7 +179,7 @@ def plot_rms_time(table, num_of_stars):
     binning_times = [i * 10 for i in range(1, max_binning)]
     # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
-    
+
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
     plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
