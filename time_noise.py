@@ -204,7 +204,7 @@ def plot_rms_time(table, num_stars):
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
     plt.plot(exposure_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
+    plt.plot(exposure_times, RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
