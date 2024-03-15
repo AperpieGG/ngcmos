@@ -175,19 +175,14 @@ def plot_rms_time(table, num_stars):
         dt_flux = flux_3 / trend
         dt_fluxerr = fluxerr_5 / trend
         RMS_values = []
-        time_seconds = []  # Initialize a list to store time in seconds
-        times = []
+        time = []
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, i)
-            # Convert time from Julian dates to seconds
-            time_binned_seconds = (time_binned - time_binned[0]) * 86400  # 86400 seconds in a day
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
-            time_seconds.append(time_binned_seconds)
+            time.append(time_binned)
 
         average_rms_values.append(RMS_values)
-        times.append(time_seconds)
-        print(times)
 
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
@@ -196,16 +191,19 @@ def plot_rms_time(table, num_stars):
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
 
-    # Generate binning times in seconds
-    binning_times_seconds = [(i - 1) * 10 * max_binning for i in range(1, max_binning)]
+    print(len(average_rms_values))
+
+    # Generate binning times
+    # binning_times = [i * 10 for i in range(1, max_binning)]
+    binning_times = [i for i in range(1, max_binning)]
 
     # Calculate the expected decrease in RMS
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times_seconds)
+    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
-    plt.plot(binning_times_seconds, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
-    plt.plot(binning_times_seconds, RMS_model, '--', color='red', label='Model RMS')
+    plt.plot(binning_times, average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(binning_times, RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
