@@ -95,47 +95,19 @@ def read_phot_file(filename):
         return None
 
 
-def bin_time_flux_error(time, flux, error, bin_fact):
-    """
-    Use reshape to bin light curve data, clip under filled bins
-    Works with 2D arrays of flux and errors
+def bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, binning_exposure):
+    n_binned = int((jd_mid[-1] - jd_mid[0]) / binning_exposure)
+    bin_fact = len(jd_mid) // n_binned
 
-    Note: under filled bins are clipped off the end of the series
+    # Compute the clip index ensuring it's an integer
+    clip = int(n_binned * bin_fact)
 
-    Parameters
-    ----------
-    time : array         of times to bin
-    flux : array         of flux values to bin
-    error : array         of error values to bin
-    bin_fact : int
-        Number of measurements to combine
+    # Perform binning
+    time_b = np.average(jd_mid[:clip].reshape(n_binned, bin_fact), axis=1)
+    dt_flux_b = np.average(dt_flux[:clip].reshape(n_binned, bin_fact), axis=1)
+    dt_fluxerr_b = np.sqrt(np.sum(dt_fluxerr[:clip].reshape(n_binned, bin_fact)**2, axis=1)) / bin_fact
 
-    Returns
-    -------
-    times_b : array
-        Binned times
-    flux_b : array
-        Binned fluxes
-    error_b : array
-        Binned errors
-
-    Raises
-    ------
-    None
-    """
-    n_binned = int(len(time) / bin_fact)
-    clip = n_binned * bin_fact
-    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
-    # determine if 1 or 2d flux/err inputs
-    if len(flux.shape) == 1:
-        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
-        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
-    else:
-        # assumed 2d with 1 row per star
-        n_stars = len(flux)
-        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
-        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
-    return time_b, flux_b, error_b
+    return time_b, dt_flux_b, dt_fluxerr_b
 
 
 def plot_rms_time(table, num_stars):
