@@ -9,7 +9,6 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import plot_images
-from scipy.stats import linregress
 
 
 def load_config(filename):
@@ -139,7 +138,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, num_of_stars):
+def plot_rms_time(table, num_stars):
     filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
     binning_times = []
     average_rms_values = []
@@ -177,7 +176,7 @@ def plot_rms_time(table, num_of_stars):
         average_rms_values.append(RMS_values)
 
         # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_of_stars:
+        if num_stars_used >= num_stars:
             break
 
     # Calculate the average RMS across all stars for each bin
@@ -232,6 +231,7 @@ def main_loop(phot_files):
 
 
 if __name__ == "__main__":
+    plot_images()
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
