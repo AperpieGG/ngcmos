@@ -353,9 +353,9 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     RNS = total_noise / synthetic_flux
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    ax.plot(mean_flux_list, RMS_list, 'o', color='black', label='Noise Model', alpha=0.5)
+    ax.plot(mean_flux_list, RMS_list, 'o', color='red', label='Noise Model', alpha=0.5)
 
-    ax.plot(synthetic_flux, RNS, color='black', label= 'total noise', linestyle='--')
+    ax.plot(synthetic_flux, RNS, color='black', label='total noise', linestyle='--')
     ax.plot(synthetic_flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_flux, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_flux, dc_noise, color='purple', label='dark noise', linestyle='--')
