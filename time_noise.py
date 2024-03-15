@@ -140,8 +140,8 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
-    # filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
-    filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
+    filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
+    # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
 
     # Sort the table by Tmag (brightness)
     unique_tmags = np.unique(filtered_table['Tmag'])
@@ -205,7 +205,7 @@ def plot_rms_time(table, num_stars):
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
-    plt.plot(times_binned[0], average_rms_values, 'o', color='black', label='Actual RMS', alpha=0.5)
+    plt.plot(times_binned[0], average_rms_values, 'o', color='black', label='Actual RMS')
     plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
@@ -213,6 +213,7 @@ def plot_rms_time(table, num_stars):
     plt.ylabel('RMS')
     plt.title('Average RMS vs Exposure time')
     plt.legend()
+    plt.tight_layout()
     plt.show()
 
 
