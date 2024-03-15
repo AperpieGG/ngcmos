@@ -298,18 +298,21 @@ def plot_lc_for_all_stars(table, bin_size):
 def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
-
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
     flux_2 = gaia_id_data['flux_2']
     fluxerr_2 = gaia_id_data['fluxerr_2']
     tmag = gaia_id_data['Tmag'][0]
 
-    # Use wotan to detrend the light curve
-    detrended_flux, trend = flatten(jd_mid, flux_2, method='mean', window_length=0.05, return_trend=True)
+    # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
+    # use polyfit to detrend the light curve
+    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
 
-    relative_flux = flux_2 / trend
+    # Compute Detrended flux and errors
+    norm_flux = flux_2 / trend
     relative_err = fluxerr_2 / trend
+    rms = np.std(norm_flux)
+    print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
 
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
@@ -317,14 +320,14 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     # Plot raw flux with wotan model
     ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
     ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
+    ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
 
-    # Plot detrended flux
-    ax2.errorbar(jd_mid, relative_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
+    ax2.errorbar(jd_mid, norm_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
-    ax2.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
+    ax2.set_xlabel('MJD [days]')
     ax2.legend()
 
     plt.tight_layout()
