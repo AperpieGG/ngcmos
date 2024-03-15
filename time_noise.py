@@ -186,7 +186,6 @@ def plot_rms_time(table, num_stars):
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
-        print(average_rms_values)
 
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
@@ -194,6 +193,7 @@ def plot_rms_time(table, num_stars):
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
+    print(average_rms_values)
 
     # average_rms_values = 10e6 * average_rms_values # Convert to ppm
 
