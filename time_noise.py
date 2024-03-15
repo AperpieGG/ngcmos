@@ -183,7 +183,6 @@ def plot_rms_time(table, num_stars):
             time.append(time_binned)
 
         average_rms_values.append(RMS_values)
-        print(len(time))
 
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
@@ -198,7 +197,7 @@ def plot_rms_time(table, num_stars):
     binning_times = [i for i in range(1, max_binning)]
 
     # Calculate the expected decrease in RMS
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+    RMS_model = average_rms_values[0] / np.sqrt(time)
     
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
