@@ -164,7 +164,8 @@ def plot_rms_time(table, num_stars):
 
     num_stars_used = 0
 
-    for gaia_id in selected_stars['gaia_id']:  # Loop over all stars in the filtered table
+    for star_row in selected_stars:  # Loop over all stars in the selected table
+        gaia_id = star_row['gaia_id']
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_6']
