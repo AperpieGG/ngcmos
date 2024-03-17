@@ -150,9 +150,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
-        flux_4 = gaia_id_data['flux_3']
-        fluxerr_4 = gaia_id_data['fluxerr_3']
-        sky_4 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
+        flux_4 = gaia_id_data['flux_6']
+        fluxerr_4 = gaia_id_data['fluxerr_6']
+        sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
 
         # if np.max(sky_4) > np.max(flux_4):
         #     print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
@@ -316,7 +316,7 @@ def noise_sources(mean_flux_list, sky_list):
 
     """
 
-    aperture_radius = 3
+    aperture_radius = 6
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
@@ -353,16 +353,15 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noi
     RNS = total_noise / synthetic_flux
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    ax.plot(mean_flux_list, RMS_list, 'o', color='red', label='Noise Model', alpha=0.5)
+    ax.plot(mean_flux_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
 
-    ax.plot(synthetic_flux, RNS, color='black', label='total noise', linestyle='--')
+    ax.plot(synthetic_flux, RNS, color='black', label='total noise')
     ax.plot(synthetic_flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_flux, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_flux, dc_noise, color='purple', label='dark noise', linestyle='--')
     ax.plot(synthetic_flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
     ax.plot(synthetic_flux, np.ones(len(synthetic_flux)) * N, color='orange', label='scintilation noise',
             linestyle='--')
-    ax.plot(synthetic_flux, RNS, color='black', label='total noise')
     ax.set_xlabel('Flux [e-]')
     ax.set_ylabel('RMS')
     ax.set_xscale('log')
