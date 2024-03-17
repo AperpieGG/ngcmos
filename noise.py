@@ -101,25 +101,26 @@ def noise_sources():
 
     """
 
-    aperture_radius = 3
+    aperture_radius = 4
+
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
     exposure_time = 10
-    flux = np.arange(100, 1e6, 10)
+    flux = np.arange(1000, 1e6, 10)
 
     # set dark current rate from cmos characterisation
-    dark_current_rate = 0.66
+    dark_current_rate = 1.60
     dark_current = dark_current_rate * exposure_time * npix
     dc_noise = np.sqrt(dark_current) / flux
 
     # set read noise from cmos characterisation
     read_noise_pix = 1.56
-    read_noise = (read_noise_pix * npix) / flux
-    read_signal = (read_noise_pix * npix) ** 2
+    read_noise = (read_noise_pix * np.sqrt(npix)) / flux
+    read_signal = npix * (read_noise_pix ** 2)
 
     # set random sky background
-    sky_flux = 22.6 * exposure_time * npix
+    sky_flux = 194 * npix
     sky_noise = np.sqrt(sky_flux) / flux
 
     # set random photon shot noise from the flux
@@ -145,7 +146,7 @@ def noise_model(flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_s
 
     total_noise = np.sqrt(flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / flux
-    fig, ax = plt.subplots(figsize=(6, 8))
+    fig, ax = plt.subplots(figsize=(10, 8))
     ax.plot(flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(flux, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(flux, dc_noise, color='purple', label='dark noise', linestyle='--')
