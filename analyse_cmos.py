@@ -319,7 +319,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     norm_flux = fluxes / trend
     relative_err = fluxerrs / trend
     rms = np.std(norm_flux)
-    print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
+    print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.4f}")
 
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
