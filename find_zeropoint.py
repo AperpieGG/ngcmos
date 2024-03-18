@@ -152,11 +152,10 @@ def calculate_mean_rms_flux(table, num_stars):
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
-        flux_6 = gaia_id_data['flux_4']
+        flux_6 = gaia_id_data['flux_3']
 
         mean_flux = np.mean(flux_6)
         if mean_flux > 0:  # Filter out zero or negative flux values
-            print('The number of negative fluxes is: ', len(flux_6[flux_6 <= 0]))
             mean_flux_list.append(mean_flux)
             tmag_list.append(Tmag)
 
