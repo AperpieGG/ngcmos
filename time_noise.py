@@ -155,8 +155,8 @@ def plot_rms_time(table, num_stars):
         # Sort the table by Tmag (brightness)
         unique_tmags = np.unique(filtered_table['Tmag'])
         print('The bright stars are: ', len(unique_tmags))
-        
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
+
+        gaia_id_data = filtered_table[filtered_table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_6']
         fluxerr_5 = gaia_id_data['fluxerr_6']
