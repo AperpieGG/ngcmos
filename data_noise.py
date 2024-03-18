@@ -186,7 +186,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     plt.ylabel('Frequency')
     plt.title('Histogram of RMS Distribution')
     plt.legend()
-    plt.xlim(0, 2)
+    plt.xlim(-0.5, 2)
     plt.show()
 
     # plt.figure(figsize=(10, 6))
