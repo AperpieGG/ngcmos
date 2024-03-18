@@ -156,7 +156,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     num_stars_used = 0
     num_stars_excluded = 0
 
-    Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])
+    Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])[::-1]
     filtered_table_sorted = filtered_table[Tmag_sorted_indices]
     print(filtered_table_sorted['Tmag'])
 
