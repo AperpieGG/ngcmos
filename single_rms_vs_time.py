@@ -235,7 +235,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     plt.show()
 
 
-def main(phot_file, gaia_id=None):
+def run_for_one(phot_file, gaia_id=None):
     # Set plot parameters
     plot_images()
 
@@ -248,6 +248,21 @@ def main(phot_file, gaia_id=None):
 
     # Calculate mean and RMS for the noise model
     plot_rms_time(phot_table, 5, gaia_id)  # Always plot for 5 stars
+
+
+def run_for_more(phot_file, num_stars):
+    # Set plot parameters
+    plot_images()
+
+    # Get the current night directory
+    current_night_directory = find_current_night_directory(base_path)
+
+    # Plot the current photometry file
+    print(f"Plotting the photometry file {phot_file}...")
+    phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+
+    # Calculate mean and RMS for the noise model
+    plot_rms_time(phot_table, num_stars)
 
 
 if __name__ == "__main__":
@@ -268,7 +283,9 @@ if __name__ == "__main__":
     # Run the main function for each photometry file
     if args.gaia_id is not None:
         for phot_file in phot_files:
-            main(phot_file, args.gaia_id)
+            # main(phot_file, args.gaia_id)
+            run_for_one(phot_file, args.gaia_id)
     else:
         for phot_file in phot_files:
-            main(phot_file)
+            # main(phot_file, args.num_stars)
+            run_for_more(phot_file, args.num_stars)
