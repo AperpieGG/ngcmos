@@ -140,7 +140,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
-    filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 10)]
+    filtered_table = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 9.5)]
     # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
 
     # Sort the table by Tmag (brightness)
@@ -169,7 +169,7 @@ def plot_rms_time(table, num_stars):
         fluxerr_5 = Tmag_data['fluxerr_5']
         gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
-        print('Found star with gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
+        # print('Found star with gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_5 / trend
@@ -187,6 +187,10 @@ def plot_rms_time(table, num_stars):
         if RMS_values[0] > 0.005:
             print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(gaia_id, Tmag))
             num_stars_excluded += 1
+
+        else:
+            print('Using star with gaia_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
+                  format(gaia_id, Tmag, RMS_values[0]))
             continue
 
         num_stars_used += 1
