@@ -154,10 +154,10 @@ def calculate_mean_rms_flux(table, num_stars):
         Tmag = gaia_id_data['Tmag'][0]
         flux_6 = gaia_id_data['flux_6']
 
-        # Append to lists
         mean_flux = np.mean(flux_6)
-        mean_flux_list.append(mean_flux)
-        tmag_list.append(Tmag)
+        if mean_flux > 0:  # Filter out zero or negative flux values
+            mean_flux_list.append(mean_flux)
+            tmag_list.append(Tmag)
 
     mean_flux = np.array(mean_flux_list)
     tmag = np.array(tmag_list)
