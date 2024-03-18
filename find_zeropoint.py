@@ -142,10 +142,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 def calculate_mean_rms_flux(table, bin_size, num_stars):
 
     mean_flux_list = []
-    RMS_list = []
-    sky_list = []
     tmag_list = []
-    low_rms_gaia_ids = []  # Array to store gaia_id values for stars with RMS < 0.005
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -165,10 +162,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     plt.title('Tmag vs Mean Flux')
     plt.yscale('log')
 
-    plt.legend()
+    # Perform linear regression
+    slope, intercept, r_value, p_value, std_err = linregress(tmag_list, np.log(mean_flux_list))
+
+    # Plot the linear fit
+    plt.plot(tmag_list, slope * np.array(tmag_list) + intercept, '--', color='red', label='Linear fit')
+
     plt.show()
 
-    return mean_flux_list, RMS_list, sky_list
+    print(f"Slope: {slope}, Intercept: {intercept}, R-value: {r_value}, P-value: {p_value}, Std. Error: {std_err}")
 
 
 def main(phot_file):
