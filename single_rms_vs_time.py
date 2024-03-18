@@ -155,8 +155,8 @@ def plot_rms_time(table, num_stars, gaia_id=None):
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
-        flux_5 = Tmag_data['flux_4']
-        fluxerr_5 = Tmag_data['fluxerr_4']
+        flux_5 = Tmag_data['flux_6']
+        fluxerr_5 = Tmag_data['fluxerr_6']
         current_gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # Check if gaia_id is specified and matches current_gaia_id
@@ -180,7 +180,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
             print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 1100 ppm'.format(current_gaia_id, Tmag))
             num_stars_excluded += 1
             continue
-        if np.max(flux_5) > 200000:
+        if np.max(flux_5) > 230000:
             print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(current_gaia_id, Tmag))
             num_stars_excluded += 1
             continue
