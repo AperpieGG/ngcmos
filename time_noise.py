@@ -156,11 +156,11 @@ def plot_rms_time(table, num_stars):
 
     num_stars_used = 0
 
-    for Tmag in unique_tmags:
-        jd_mid = filtered_table['jd_mid'][filtered_table['Tmag'] == Tmag]
-        flux_3 = filtered_table['flux_6'][filtered_table['Tmag'] == Tmag]
-        fluxerr_5 = filtered_table['fluxerr_6'][filtered_table['Tmag'] == Tmag]
-        gaia_id = filtered_table['gaia_id'][filtered_table['Tmag'] == Tmag]
+    for unique_tmags in filtered_table['Tmag']:
+        jd_mid = filtered_table['jd_mid'][filtered_table['Tmag'] == unique_tmags]
+        flux_3 = filtered_table['flux_3'][filtered_table['Tmag'] == unique_tmags]
+        fluxerr_5 = filtered_table['fluxerr_5'][filtered_table['Tmag'] == unique_tmags]
+        gaia_id = filtered_table['gaia_id'][filtered_table['Tmag'] == unique_tmags]
 
         # Exclude stars with flux > 230000 counts
         if np.max(flux_3) > 250000:
