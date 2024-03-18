@@ -183,14 +183,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
     # Plot the data
     plt.figure(figsize=(10, 6))
-    plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
+    plt.plot(tmag_list, mean_flux_list, 'o', color='black', alpha=0.5)
     plt.gca().invert_xaxis()
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
     plt.title('Tmag vs Mean Flux')
+    plt.yscale('log')
 
     # Fit a linear model
-    coefficients = np.polyfit(tmag_list, np.log(mean_flux_list), 1)
+    coefficients = np.polyfit(tmag_list, mean_flux_list, 1)
     slope = coefficients[0]  # Slope (zeropoint)
 
     # Plot the linear fit
