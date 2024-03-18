@@ -208,7 +208,7 @@ def plot_rms_time(table, num_stars):
         len(unique_tmags), num_stars_used, num_stars_excluded))
 
     # Calculate the average RMS across all stars for each bin
-    average_rms_values = np.mean(average_rms_values, axis=0)
+    average_rms_values = np.mean(average_rms_values, axis=0) * 10e6  # Convert to ppm
     # average_rms_values = 10e6 * average_rms_values # Convert to ppm
 
     # Generate binning times
