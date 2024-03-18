@@ -157,7 +157,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     for Tmag in unique_tmags:
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
-        print(Tmag_data)
+        print(Tmag_data['Tmag'][0])
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
         flux_5 = Tmag_data['flux_6']
