@@ -139,7 +139,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 def plot_rms_time(table, num_stars, gaia_id=None):
-    filtered_table = table[(table['Tmag'] >= 10.5) & (table['Tmag'] <= 11.5)]
+    filtered_table = table[(table['Tmag'] >= 9.5) & (table['Tmag'] <= 10.5)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
@@ -201,7 +201,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0) * 1000000  # Convert to ppm
-    print(RMS_values[0])
+    print(RMS_values)
 
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
