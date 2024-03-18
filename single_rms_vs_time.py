@@ -247,7 +247,7 @@ def main(phot_file, gaia_id=None):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, gaia_id)  # Always plot for 5 stars
+    plot_rms_time(phot_table, 5, gaia_id)  # Always plot for 5 stars
 
 
 if __name__ == "__main__":
@@ -260,6 +260,7 @@ if __name__ == "__main__":
 
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
     parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a '
                                                     'particular star')
     args = parser.parse_args()
