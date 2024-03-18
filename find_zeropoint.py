@@ -197,7 +197,7 @@ def main(phot_file):
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-    calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
+    calculate_mean_rms_flux(phot_table, num_stars=args.num_stars)
 
 
 def main_loop(phot_files):
