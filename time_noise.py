@@ -175,9 +175,7 @@ def plot_rms_time(table, num_stars):
         #     continue
 
         print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
-        num_stars_used += 1
 
-        print('Total number of stars used: ', num_stars_used)
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_5 / trend
         dt_fluxerr = fluxerr_5 / trend
@@ -206,6 +204,9 @@ def plot_rms_time(table, num_stars):
     average_rms_values = np.mean(average_rms_values, axis=0)
     # average_rms_values = 10e6 * average_rms_values # Convert to ppm
 
+    num_stars_used += 1
+    print('Total number of stars used: ', num_stars_used)
+    
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
 
