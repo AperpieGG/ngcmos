@@ -165,12 +165,12 @@ def plot_rms_time(table, num_stars):
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
-        flux_3 = Tmag_data['flux_6']
-        fluxerr_5 = Tmag_data['fluxerr_6']
+        flux_5 = Tmag_data['flux_5']
+        fluxerr_5 = Tmag_data['fluxerr_5']
         gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # Exclude stars with flux > 230000 counts
-        if np.max(flux_3) > 250000:
+        if np.max(flux_5) > 250000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
             continue
 
@@ -178,8 +178,8 @@ def plot_rms_time(table, num_stars):
         num_stars_used += 1
 
         print('Total number of stars used: ', num_stars_used)
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_3 / trend
+        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
+        dt_flux = flux_5 / trend
         dt_fluxerr = fluxerr_5 / trend
         RMS_values = []
         time_seconds = []
