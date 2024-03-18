@@ -180,13 +180,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
 
-    # Plot the histogram of RMS values
-    plt.hist(RMS_list, bins=1000, label='RMS: %.2f' % np.mean(RMS_list))
-    plt.xlabel('RMS')
-    plt.ylabel('Frequency')
-    plt.title('Histogram of RMS Distribution')
-    plt.legend()
-    plt.show()
+    print('The mean RMS is: ', np.mean(RMS_list))
 
     # plt.figure(figsize=(10, 6))
     # plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
