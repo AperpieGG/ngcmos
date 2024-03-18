@@ -176,7 +176,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
             time_seconds.append(exposure_time_seconds)
 
         # Check if the first RMS value is greater than 0.0065
-        if RMS_values[0] > 0.007:
+        if RMS_values[8] > 0.0018:
             print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(current_gaia_id, Tmag))
             num_stars_excluded += 1
             continue
@@ -201,7 +201,6 @@ def plot_rms_time(table, num_stars, gaia_id=None):
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0) * 1000000  # Convert to ppm
-    print(average_rms_values)
 
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
