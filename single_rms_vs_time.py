@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import datetime
 import json
 import os
@@ -236,11 +235,6 @@ def plot_rms_time(table, num_stars, gaia_id=None):
 
 
 def main(phot_file, gaia_id=None):
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
-    args = parser.parse_args()
-
     # Set plot parameters
     plot_images()
 
@@ -255,11 +249,6 @@ def main(phot_file, gaia_id=None):
     plot_rms_time(phot_table, args.num_stars, gaia_id)
 
 
-def main_loop(phot_files, gaia_id=None):
-    for phot_file in phot_files:
-        main(phot_file, gaia_id)
-
-
 if __name__ == "__main__":
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
@@ -271,10 +260,11 @@ if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a particular star')
+    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
     args = parser.parse_args()
 
     # Run the main function for each photometry file
     if args.gaia_id is not None:
-        main_loop(phot_files, args.gaia_id)
+        main(phot_files, args.gaia_id)
     else:
-        main_loop(phot_files)
+        main(phot_files)
