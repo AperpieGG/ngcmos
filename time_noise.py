@@ -165,8 +165,8 @@ def plot_rms_time(table, num_stars):
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
-        flux_5 = Tmag_data['flux_6']
-        fluxerr_5 = Tmag_data['fluxerr_6']
+        flux_5 = Tmag_data['flux_4']
+        fluxerr_5 = Tmag_data['fluxerr_4']
         gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # print('Found star with gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
