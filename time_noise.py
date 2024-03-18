@@ -169,7 +169,7 @@ def plot_rms_time(table, num_stars):
         fluxerr_5 = Tmag_data['fluxerr_5']
         gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
-        print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
+        print('Found star with gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_5 / trend
