@@ -155,21 +155,29 @@ def plot_rms_time(table, num_stars):
     max_binning = 151
 
     num_stars_used = 0
+    jd_mid_by_Tmag = {}
 
-    for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
+    # Loop over all stars in the filtered table
+    for gaia_id in filtered_table['gaia_id']:
+        # Get data for the current gaia_id
         gaia_id_data = table[table['gaia_id'] == gaia_id]
+
+        # Extract relevant data
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_6']
         fluxerr_5 = gaia_id_data['fluxerr_6']
-        Tmag = gaia_id_data['Tmag'][0]
-        print(len(jd_mid))
+        Tmag = gaia_id_data['Tmag'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
-        # Sort Gaia_id by Tmag from brightest to faintest
+        # Sort jd_mid by Tmag from brightest to faintest
         gaia_id_sorted = np.argsort(Tmag)
-        jd_mid = jd_mid[gaia_id_sorted]
-        print(len(jd_mid))
-        flux_3 = flux_3[gaia_id_sorted]
-        fluxerr_5 = fluxerr_5[gaia_id_sorted]
+        jd_mid_sorted = jd_mid[gaia_id_sorted]
+
+        # Store jd_mid values grouped by Tmag
+        if Tmag not in jd_mid_by_Tmag:
+            jd_mid_by_Tmag[Tmag] = []
+        jd_mid_by_Tmag[Tmag].append(jd_mid_sorted)
+
+        print(len(jd_mid_by_Tmag[Tmag]))
 
         # Exclude stars with flux > 230000 counts
         if np.max(flux_3) > 250000:
