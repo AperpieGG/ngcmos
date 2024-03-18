@@ -147,7 +147,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     filtered_table_sorted = filtered_table[Tmag_sorted_indices]
 
     # Take the first num_stars from the sorted table
-    selected_stars = filtered_table_sorted[:num_stars]
+    selected_stars = np.unique(filtered_table_sorted[:num_stars]['Tmag'])
     print(selected_stars['Tmag'])  # Print the 'Tmag' values of selected stars
 
     average_rms_values = []
