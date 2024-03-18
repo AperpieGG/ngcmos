@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 import datetime
 import json
 import os
@@ -247,7 +246,7 @@ def main(phot_file, gaia_id=None):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, args.num_stars, gaia_id)
+    plot_rms_time(phot_table, 5, gaia_id)  # Always plot for 5 stars
 
 
 if __name__ == "__main__":
@@ -261,11 +260,12 @@ if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a particular star')
-    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
     args = parser.parse_args()
 
     # Run the main function for each photometry file
     if args.gaia_id is not None:
-        main(phot_files, args.gaia_id)
+        for phot_file in phot_files:
+            main(phot_file, args.gaia_id)
     else:
-        main(phot_files)
+        for phot_file in phot_files:
+            main(phot_file)
