@@ -165,12 +165,10 @@ def plot_rms_time(table, num_stars):
 
         # Sort Gaia_id by Tmag from brightest to faintest
         gaia_id_sorted = np.argsort(Tmag)
-        gaia_id = gaia_id[gaia_id_sorted]
-        Tmag = Tmag[gaia_id_sorted]
         jd_mid = jd_mid[gaia_id_sorted]
         flux_3 = flux_3[gaia_id_sorted]
         fluxerr_5 = fluxerr_5[gaia_id_sorted]
-        
+
         # Exclude stars with flux > 230000 counts
         if np.max(flux_3) > 250000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
