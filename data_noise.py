@@ -158,10 +158,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
         #     continue
 
-        # exclude stars with flux > 200000
-        if np.max(flux_4) > 200000:
-            print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
-            continue
+        # # exclude stars with flux > 200000
+        # if np.max(flux_4) > 200000:
+        #     print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
+        #     continue
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4 / trend
