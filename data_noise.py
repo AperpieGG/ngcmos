@@ -181,7 +181,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         tmag_list.append(Tmag)
 
     # Plot the histogram of RMS values
-    plt.hist(RMS_list, bins=100, color='navy')
+    plt.hist(RMS_list, bins=100, color='navy', label='RMS: {}'.format(np.median(RMS_list)))
     plt.xlabel('RMS')
     plt.ylabel('Frequency')
     plt.title('Histogram of RMS Distribution')
