@@ -138,12 +138,10 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, num_stars, gaia_id=None):
+def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
-    filtered_table = table[(table['Tmag'] >= 7) & (table['Tmag'] <= 12)]
-
-    if gaia_id is not None:
-        filtered_table = filtered_table[filtered_table['gaia_id'] == gaia_id]
+    filtered_table = table[(table['Tmag'] >= 7) & (table['Tmag'] <= 9.5)]
+    # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
 
     # Sort the table by Tmag (brightness)
     unique_tmags = np.unique(filtered_table['Tmag'])
@@ -167,8 +165,8 @@ def plot_rms_time(table, num_stars, gaia_id=None):
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
-        flux_5 = Tmag_data['flux_6']
-        fluxerr_5 = Tmag_data['fluxerr_6']
+        flux_5 = Tmag_data['flux_5']
+        fluxerr_5 = Tmag_data['fluxerr_5']
         gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # Exclude stars with flux > 230000 counts
@@ -228,8 +226,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
 def main(phot_file):
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--num_stars', type=int, default=1, help='Number of stars to plot')
-    parser.add_argument('--gaia_id', type=int, help='Specific Gaia ID to plot')
+    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
     args = parser.parse_args()
 
     # Set plot parameters
@@ -243,7 +240,7 @@ def main(phot_file):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, args.num_stars, args.gaia_id)
+    plot_rms_time(phot_table, args.num_stars)
 
 
 def main_loop(phot_files):
