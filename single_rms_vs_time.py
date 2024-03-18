@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 import datetime
 import json
 import os
@@ -9,6 +8,7 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt, ticker
 from utils import plot_images
+import argparse
 
 
 def load_config(filename):
@@ -138,17 +138,13 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, num_stars):
-    # Filter table for stars within desired Tmag range
-    filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.8)]
-    # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
+def plot_rms_time(table, gaia_id):
+    # Filter table for stars with the specified Gaia ID
+    filtered_table = table[table['gaia_id'] == gaia_id]
 
     # Sort the table by Tmag (brightness)
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
-
-    # Take the ones which are on the argument
-    filtered_table = filtered_table[:num_stars]
 
     average_rms_values = []
     times_binned = []
@@ -157,10 +153,7 @@ def plot_rms_time(table, num_stars):
     num_stars_used = 0
     num_stars_excluded = 0
 
-    Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])
-    filtered_table_sorted = filtered_table[Tmag_sorted_indices]
-
-    for Tmag in filtered_table_sorted['Tmag']:
+    for Tmag in filtered_table['Tmag']:
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
@@ -200,16 +193,11 @@ def plot_rms_time(table, num_stars):
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
 
-        # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_stars:
-            break
-
     print('The bright stars are: {}, Stars used: {}, Stars excluded: {}'.format(
         len(unique_tmags), num_stars_used, num_stars_excluded))
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0) * 1000000  # Convert to ppm
-    # average_rms_values = 10e6 * average_rms_values # Convert to ppm
 
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
@@ -225,7 +213,6 @@ def plot_rms_time(table, num_stars):
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
     plt.ylabel('RMS (ppm)')
-    # plt.title('Average RMS vs Exposure time')
 
     # Customize y-axis ticks to display numbers
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
@@ -237,32 +224,10 @@ def plot_rms_time(table, num_stars):
     plt.show()
 
 
-def main(phot_file):
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
-    args = parser.parse_args()
-
+def main(gaia_id):
     # Set plot parameters
     plot_images()
 
-    # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
-
-    # Plot the current photometry file
-    print(f"Plotting the photometry file {phot_file}...")
-    phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-    # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, args.num_stars)
-
-
-def main_loop(phot_files):
-    for phot_file in phot_files:
-        main(phot_file)
-
-
-if __name__ == "__main__":
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
@@ -270,5 +235,18 @@ if __name__ == "__main__":
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Run the main function for each photometry file
-    main_loop(phot_files)
+    # Plot the RMS plot for the specified Gaia ID
+    for phot_file in phot_files:
+        print(f"Plotting the RMS plot for Gaia ID {gaia_id} in photometry file {phot_file}...")
+        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+        plot_rms_time(phot_table, gaia_id)
+
+
+if __name__ == "__main__":
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot RMS plot for a specific Gaia ID')
+    parser.add_argument('--gaia_id', type=int, required=True, help='Specify the Gaia ID for plotting the RMS plot')
+    args = parser.parse_args()
+
+    # Run the main function for the specified Gaia ID
+    main(args.gaia_id)
