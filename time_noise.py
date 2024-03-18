@@ -145,7 +145,9 @@ def plot_rms_time(table, num_stars):
 
     # Sort the table by Tmag (brightness)
     unique_tmags = np.unique(filtered_table['Tmag'])
+    print('The bright stars are: ', unique_tmags)
     unique_tmags = np.sort(unique_tmags)
+    print('The bright stars are: ', unique_tmags)
     print('The bright stars are: ', len(unique_tmags))
 
     # Take the ones which are on the argument
