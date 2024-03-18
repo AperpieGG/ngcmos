@@ -143,10 +143,6 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
-    # Select the first num_stars stars after filtering by Tmag range
-    selected_stars = filtered_table[:num_stars]
-    print(selected_stars['Tmag'])
-
     average_rms_values = []
     times_binned = []
     max_binning = 151
@@ -184,8 +180,8 @@ def plot_rms_time(table, num_stars, gaia_id=None):
             time_seconds.append(exposure_time_seconds)
 
         # Check if the first RMS value is greater than 0.0065
-        if RMS_values[0] > 0.0046:
-            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.0065'.format(current_gaia_id, Tmag))
+        if RMS_values[0] > 0.005:
+            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(current_gaia_id, Tmag))
             num_stars_excluded += 1
             continue
         elif np.max(flux_5) > 250000:
