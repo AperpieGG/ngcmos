@@ -150,9 +150,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
-        flux_4 = gaia_id_data['flux_2']
-        fluxerr_4 = gaia_id_data['fluxerr_2']
-        sky_4 = gaia_id_data['flux_w_sky_2'] - gaia_id_data['flux_2']
+        flux_4 = gaia_id_data['flux_5']
+        fluxerr_4 = gaia_id_data['fluxerr_5']
+        sky_4 = gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']
 
         # if np.max(sky_4) > np.max(flux_4):
         #     print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
