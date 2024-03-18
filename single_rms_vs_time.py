@@ -142,15 +142,13 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     # Filter table for stars within desired Tmag range
     filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.8)]
 
-    # Sort the table by Tmag (brightness) in descending order
-    Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])[::-1]
+    # Sort the table by Tmag (brightness)
+    Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])
     filtered_table_sorted = filtered_table[Tmag_sorted_indices]
 
     # Take the first num_stars from the sorted table
     selected_stars = filtered_table_sorted[:num_stars]
-
-    # Print the Tmag values of the selected stars
-    print(selected_stars['Tmag'])
+    print(selected_stars['Tmag'])  # Print the 'Tmag' values of selected stars
 
     average_rms_values = []
     times_binned = []
@@ -158,7 +156,6 @@ def plot_rms_time(table, num_stars, gaia_id=None):
 
     num_stars_used = 0
     num_stars_excluded = 0
-
 
     for Tmag in selected_stars['Tmag']:
         # Get data for the current Tmag
@@ -207,7 +204,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
             break
 
     print('The bright stars are: {}, Stars used: {}, Stars excluded: {}'.format(
-        len(unique_tmags), num_stars_used, num_stars_excluded))
+        len(selected_stars), num_stars_used, num_stars_excluded))
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0) * 1000000  # Convert to ppm
