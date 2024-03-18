@@ -197,8 +197,8 @@ def plot_rms_time(table, num_stars):
         if num_stars_used >= num_stars:
             break
 
-    print('Total number of stars used: ', num_stars_used)
-    print('Total number of stars excluded: ', num_stars_excluded)
+    print('The bright stars are: {}, Stars used: {}, Stars excluded: {}'.format(
+        len(unique_tmags), num_stars_used, num_stars_excluded))
 
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
