@@ -140,7 +140,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
-    filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10)]
+    filtered_table = table[(table['Tmag'] >= 8.5) & (table['Tmag'] <= 10)]
     # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
 
     # Sort the table by Tmag (brightness)
@@ -165,8 +165,8 @@ def plot_rms_time(table, num_stars):
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
-        flux_5 = Tmag_data['flux_5']
-        fluxerr_5 = Tmag_data['fluxerr_5']
+        flux_5 = Tmag_data['flux_6']
+        fluxerr_5 = Tmag_data['fluxerr_6']
         gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # print('Found star with gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
@@ -184,7 +184,7 @@ def plot_rms_time(table, num_stars):
             time_seconds.append(exposure_time_seconds)
 
         # Check if the first RMS value is greater than 0.005
-        if RMS_values[0] > 0.006:
+        if RMS_values[0] > 0.005:
             print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(gaia_id, Tmag))
             num_stars_excluded += 1
             continue
