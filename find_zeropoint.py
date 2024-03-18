@@ -181,11 +181,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
 
-    # Filter out non-positive values from mean_flux_list
-    valid_indices = np.where(mean_flux_list > 0)
-    tmag_list = tmag_list[valid_indices]
-    mean_flux_list = mean_flux_list[valid_indices]
-
     # Plot the data
     plt.figure(figsize=(10, 6))
     plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
