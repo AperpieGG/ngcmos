@@ -140,7 +140,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 def plot_rms_time(table, num_stars, gaia_id=None):
     # Filter table for stars within desired Tmag range
-    filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
+    filtered_table = table[(table['Tmag'] >= 7) & (table['Tmag'] <= 12)]
 
     if gaia_id is not None:
         filtered_table = filtered_table[filtered_table['gaia_id'] == gaia_id]
