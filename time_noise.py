@@ -228,7 +228,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
 def main(phot_file):
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
+    parser.add_argument('--num_stars', type=int, default=1, help='Number of stars to plot')
     parser.add_argument('--gaia_id', type=int, help='Specific Gaia ID to plot')
     args = parser.parse_args()
 
