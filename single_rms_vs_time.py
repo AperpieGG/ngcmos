@@ -176,7 +176,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
             time_seconds.append(exposure_time_seconds)
 
         # Check if the first RMS value is greater than 0.0065
-        if RMS_values[0] > 0.01:
+        if RMS_values[0] > 0.007:
             print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(current_gaia_id, Tmag))
             num_stars_excluded += 1
             continue
