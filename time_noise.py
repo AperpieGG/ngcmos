@@ -195,6 +195,9 @@ def plot_rms_time(table, num_stars):
               format(gaia_id, Tmag, RMS_values[0]))
         times_binned.append(time_seconds)
 
+        if RMS_values[0] > 0.005:
+            continue
+
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
             break
