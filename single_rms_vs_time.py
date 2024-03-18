@@ -275,7 +275,7 @@ if __name__ == "__main__":
 
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--num_stars', type=int, default=1, help='Number of stars to plot')
+    parser.add_argument('--num_stars', type=int, default=0, help='Number of stars to plot')
     parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a '
                                                     'particular star')
     args = parser.parse_args()
