@@ -189,6 +189,7 @@ def plot_rms_time(table, num_stars):
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
+            print('The RMS value for the star with gaia_id = {} and Tmag = {:.2f} is {:.2f}'.format(gaia_id, Tmag, RMS))
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
