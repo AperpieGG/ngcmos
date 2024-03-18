@@ -138,7 +138,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, num_stars):
+def plot_rms_time(table, num_stars, gaia_id=None):
     # Filter table for stars within desired Tmag range
     filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.8)]
     # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
@@ -167,9 +167,12 @@ def plot_rms_time(table, num_stars):
         jd_mid = Tmag_data['jd_mid']
         flux_5 = Tmag_data['flux_6']
         fluxerr_5 = Tmag_data['fluxerr_6']
-        gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
+        current_gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # print('Found star with gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
+        # Check if gaia_id is specified and matches current_gaia_id
+        if gaia_id is not None and current_gaia_id != gaia_id:
+            continue
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_5 / trend
@@ -236,7 +239,7 @@ def plot_rms_time(table, num_stars):
     plt.show()
 
 
-def main(phot_file):
+def main(phot_file, gaia_id=None):
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
@@ -253,12 +256,12 @@ def main(phot_file):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, args.num_stars)
+    plot_rms_time(phot_table, args.num_stars, gaia_id)
 
 
-def main_loop(phot_files):
+def main_loop(phot_files, gaia_id=None):
     for phot_file in phot_files:
-        main(phot_file)
+        main(phot_file, gaia_id)
 
 
 if __name__ == "__main__":
@@ -269,5 +272,14 @@ if __name__ == "__main__":
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a '
+                                                    'particular star')
+    args = parser.parse_args()
+
     # Run the main function for each photometry file
-    main_loop(phot_files)
+    if args.gaia_id is not None:
+        main_loop(phot_files, args.gaia_id)
+    else:
+        main_loop(phot_files)
