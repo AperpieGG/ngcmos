@@ -157,10 +157,9 @@ def plot_rms_time(table, num_stars):
     num_stars_used = 0
 
     # Loop over all stars in the filtered table
-    for unique_tmags in filtered_table['Tmag']:
+    for Tmag in filtered_table['Tmag']:
         # Get data for the current gaia_id
-        Tmag_data = table[table['Tmag'] == unique_tmags]
-
+        Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
         flux_3 = Tmag_data['flux_6']
