@@ -250,7 +250,7 @@ def run_for_one(phot_file, gaia_id=None):
     plot_rms_time(phot_table, gaia_id)  # Always plot for 5 stars
 
 
-def run_for_more(phot_file, num_stars):
+def run_for_more(phot_file, num_stars=None):
     # Set plot parameters
     plot_images()
 
