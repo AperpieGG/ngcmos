@@ -138,13 +138,16 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, gaia_id):
+def plot_rms_time(table, num_stars, gaia_id=None):
     # Filter table for stars within desired Tmag range
     filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.8)]
 
     # Sort the table by Tmag (brightness)
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
+
+    # Take the ones which are on the argument
+    filtered_table = filtered_table[:num_stars]
 
     average_rms_values = []
     times_binned = []
@@ -153,16 +156,21 @@ def plot_rms_time(table, gaia_id):
     num_stars_used = 0
     num_stars_excluded = 0
 
-    for Tmag in filtered_table['Tmag']:
+    Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])
+    filtered_table_sorted = filtered_table[Tmag_sorted_indices]
+
+    for Tmag in filtered_table_sorted['Tmag']:
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
         flux_5 = Tmag_data['flux_6']
         fluxerr_5 = Tmag_data['fluxerr_6']
-        gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
+        current_gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
-        # print('Found star with gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
+        # Check if gaia_id is specified and matches current_gaia_id
+        if gaia_id is not None and current_gaia_id != gaia_id:
+            continue
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_5 / trend
@@ -176,14 +184,26 @@ def plot_rms_time(table, gaia_id):
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
 
-        if np.max(flux_5) > 250000:
-            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(gaia_id, Tmag))
+        # Check if the first RMS value is greater than 0.0065
+        if RMS_values[0] > 0.0065:
+            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.0065'.format(current_gaia_id, Tmag))
             num_stars_excluded += 1
             continue
+        elif np.max(flux_5) > 250000:
+            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(current_gaia_id, Tmag))
+            num_stars_excluded += 1
+            continue
+        else:
+            print('Using star with gaia_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
+                  format(current_gaia_id, Tmag, RMS_values[0]))
 
         num_stars_used += 1
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
+
+        # Stop if the number of stars used reaches the specified number
+        if num_stars_used >= num_stars:
+            break
 
     print('The bright stars are: {}, Stars used: {}, Stars excluded: {}'.format(
         len(unique_tmags), num_stars_used, num_stars_excluded))
@@ -206,7 +226,6 @@ def plot_rms_time(table, gaia_id):
     plt.xlabel('Exposure time (s)')
     plt.ylabel('RMS (ppm)')
 
-    # Customize y-axis ticks to display numbers
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
@@ -216,10 +235,32 @@ def plot_rms_time(table, gaia_id):
     plt.show()
 
 
-def main(gaia_id):
+def main(phot_file, gaia_id=None):
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
+    args = parser.parse_args()
+
     # Set plot parameters
     plot_images()
 
+    # Get the current night directory
+    current_night_directory = find_current_night_directory(base_path)
+
+    # Plot the current photometry file
+    print(f"Plotting the photometry file {phot_file}...")
+    phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+
+    # Calculate mean and RMS for the noise model
+    plot_rms_time(phot_table, args.num_stars, gaia_id)
+
+
+def main_loop(phot_files, gaia_id=None):
+    for phot_file in phot_files:
+        main(phot_file, gaia_id)
+
+
+if __name__ == "__main__":
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
@@ -227,18 +268,13 @@ def main(gaia_id):
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Plot the RMS plot for the specified Gaia ID
-    for phot_file in phot_files:
-        print(f"Plotting the RMS plot for Gaia ID {gaia_id} in photometry file {phot_file}...")
-        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-        plot_rms_time(phot_table, gaia_id)
-
-
-if __name__ == "__main__":
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot RMS plot for a specific Gaia ID')
-    parser.add_argument('--gaia_id', type=int, required=True, help='Specify the Gaia ID for plotting the RMS plot')
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a particular star')
     args = parser.parse_args()
 
-    # Run the main function for the specified Gaia ID
-    main(args.gaia_id)
+    # Run the main function for each photometry file
+    if args.gaia_id is not None:
+        main_loop(phot_files, args.gaia_id)
+    else:
+        main_loop(phot_files)
