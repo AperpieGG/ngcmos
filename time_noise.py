@@ -145,9 +145,6 @@ def plot_rms_time(table, num_stars):
 
     # Sort the table by Tmag (brightness)
     unique_tmags = np.unique(filtered_table['Tmag'])
-    print('The bright stars are: ', unique_tmags)
-    unique_tmags = np.sort(unique_tmags)
-    print('The bright stars are: ', unique_tmags)
     print('The bright stars are: ', len(unique_tmags))
 
     # Take the ones which are on the argument
@@ -159,12 +156,11 @@ def plot_rms_time(table, num_stars):
 
     num_stars_used = 0
 
-    for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid']
-        flux_3 = gaia_id_data['flux_6']
-        fluxerr_5 = gaia_id_data['fluxerr_6']
-        Tmag = gaia_id_data['Tmag'][0]
+    for Tmag in unique_tmags:
+        jd_mid = filtered_table['jd_mid'][filtered_table['Tmag'] == Tmag]
+        flux_3 = filtered_table['flux_6'][filtered_table['Tmag'] == Tmag]
+        fluxerr_5 = filtered_table['fluxerr_6'][filtered_table['Tmag'] == Tmag]
+        gaia_id = filtered_table['gaia_id'][filtered_table['Tmag'] == Tmag]
 
         # Exclude stars with flux > 230000 counts
         if np.max(flux_3) > 250000:
