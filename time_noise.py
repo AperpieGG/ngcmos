@@ -9,7 +9,6 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import plot_images
-import pandas as pd
 
 
 def load_config(filename):
@@ -140,22 +139,18 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 def plot_rms_time(table, num_stars):
-    # Convert structured array to pandas DataFrame
-    filtered_df = pd.DataFrame(table)
-
     # Filter table for stars within desired Tmag range
-    filtered_df = filtered_df[(filtered_df['Tmag'] >= 8) & (filtered_df['Tmag'] <= 9.5)]
+    filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
+    # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
 
-    # Sort the DataFrame by Tmag (brightness)
-    filtered_df = filtered_df.sort_values(by='Tmag')
+    # Sort the table by Tmag (brightness)
+    unique_tmags = np.unique(filtered_table['Tmag'])
+    unique_tmags = np.sort(unique_tmags)
+    print('The bright stars are: ', len(unique_tmags))
 
-    # Take the first 5 stars
-    selected_stars = filtered_df.head(5)
+    # Take the ones which are on the argument
+    filtered_table = filtered_table[:num_stars]
 
-    # Convert back to NumPy structured array
-    filtered_table = selected_stars.to_records(index=False)
-
-    # Proceed with the rest of the code as before
     average_rms_values = []
     times_binned = []
     max_binning = 151
