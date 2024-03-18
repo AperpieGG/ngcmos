@@ -152,10 +152,11 @@ def calculate_mean_rms_flux(table, num_stars):
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
-        flux_6 = gaia_id_data['flux_6']
+        flux_6 = gaia_id_data['flux_4']
 
         mean_flux = np.mean(flux_6)
         if mean_flux > 0:  # Filter out zero or negative flux values
+            print('The number of negative fluxes is: ', len(flux_6[flux_6 <= 0]))
             mean_flux_list.append(mean_flux)
             tmag_list.append(Tmag)
 
@@ -175,12 +176,13 @@ def calculate_mean_rms_flux(table, num_stars):
     plt.title('Tmag vs Mean Flux')
     plt.yscale('log')
     plt.legend()
-    plt.show()
 
     # Extract slope and intercept from optimized parameters
     slope, intercept = popt
 
-    print(f"Slope (zeropoint): {slope}")
+    print(f"Slope (zeropoint): {popt[0]}")
+
+    plt.show()
 
 
 def main(phot_file):
