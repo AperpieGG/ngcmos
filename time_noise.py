@@ -155,24 +155,19 @@ def plot_rms_time(table, num_stars):
     max_binning = 151
 
     num_stars_used = 0
+    num_stars_excluded = 0
 
     Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])
     filtered_table_sorted = filtered_table[Tmag_sorted_indices]
 
-    # Loop over all stars in the filtered table
     for Tmag in filtered_table_sorted['Tmag']:
-        # Get data for the current gaia_id
+        # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
         flux_5 = Tmag_data['flux_5']
         fluxerr_5 = Tmag_data['fluxerr_5']
         gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
-
-        # # Exclude stars with flux > 230000 counts
-        # if np.max(flux_5) > 250000:
-        #     print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
-        #     continue
 
         print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
 
@@ -190,9 +185,11 @@ def plot_rms_time(table, num_stars):
 
         # Check if the first RMS value is greater than 0.005
         if RMS_values[0] > 0.005:
-            print('Skipping star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(gaia_id, Tmag))
+            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(gaia_id, Tmag))
+            num_stars_excluded += 1
             continue
 
+        num_stars_used += 1
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
 
@@ -200,13 +197,16 @@ def plot_rms_time(table, num_stars):
         if num_stars_used >= num_stars:
             break
 
+    print('Total number of stars used: ', num_stars_used)
+    print('Total number of stars excluded: ', num_stars_excluded)
+
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
     # average_rms_values = 10e6 * average_rms_values # Convert to ppm
 
     num_stars_used += 1
     print('Total number of stars used: ', num_stars_used)
-    
+
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
 
