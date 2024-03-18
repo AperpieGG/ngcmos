@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
+from scipy.optimize import curve_fit
+
 from utils import plot_images
 from scipy.stats import linregress
 
@@ -139,8 +141,11 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_flux(table, bin_size, num_stars):
+def linear_model(x, m, b):
+    return m * x + b
 
+
+def calculate_mean_rms_flux(table, num_stars):
     mean_flux_list = []
     tmag_list = []
 
@@ -150,27 +155,30 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         flux_6 = gaia_id_data['flux_6']
 
         # Append to lists
-        mean_flux_list.append(np.mean(flux_6))
-        tmag_list.append(Tmag)
+        mean_flux = np.mean(flux_6)
+        if mean_flux > 0:  # Filter out zero or negative flux values
+            mean_flux_list.append(mean_flux)
+            tmag_list.append(Tmag)
+
+    # Perform curve fitting
+    popt, pcov = curve_fit(linear_model, tmag_list, np.log(mean_flux_list))
 
     # Plot the data
     plt.figure(figsize=(10, 6))
     plt.plot(tmag_list, mean_flux_list, 'o', color='black', alpha=0.5)
+    plt.plot(tmag_list, np.exp(linear_model(tmag_list, *popt)), '--', color='red', label='Linear fit')
     plt.gca().invert_xaxis()
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
     plt.title('Tmag vs Mean Flux')
     plt.yscale('log')
-
-    # Perform linear regression
-    slope, intercept, r_value, p_value, std_err = linregress(tmag_list, np.log(mean_flux_list))
-
-    # Plot the linear fit
-    plt.plot(tmag_list, slope * np.array(tmag_list) + intercept, '--', color='red', label='Linear fit')
-
+    plt.legend()
     plt.show()
 
-    print(f"Slope: {slope}, Intercept: {intercept}, R-value: {r_value}, P-value: {p_value}, Std. Error: {std_err}")
+    # Extract slope and intercept from optimized parameters
+    slope, intercept = popt
+
+    print(f"Slope (zeropoint): {slope}")
 
 
 def main(phot_file):
