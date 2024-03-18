@@ -163,7 +163,7 @@ def plot_rms_time(table, num_stars):
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_6']
         fluxerr_5 = gaia_id_data['fluxerr_6']
-        Tmag = gaia_id_data['Tmag'][0]
+        Tmag = gaia_id_data['Tmag']
         # Exclude stars with flux > 230000 counts
         if np.max(flux_3) > 250000:
             print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
