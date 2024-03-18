@@ -196,6 +196,11 @@ def plot_rms_time(table, num_stars):
     print(average_rms_values)
 
     # average_rms_values = 10e6 * average_rms_values # Convert to ppm
+    # Sort the stars based on their RMS values
+    sorted_stars = sorted(zip(filtered_table['gaia_id'], average_rms_values), key=lambda x: x[1])
+
+    # Select the first 5 stars with the lowest RMS values
+    selected_stars = sorted_stars[:5]
 
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
@@ -205,8 +210,9 @@ def plot_rms_time(table, num_stars):
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
-    plt.plot(times_binned[0], average_rms_values, 'o', color='black', label='Actual RMS')
-    plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
+    for gaia_id, _ in selected_stars:
+        index = filtered_table.index[filtered_table['gaia_id'] == gaia_id][0]
+        plt.plot(times_binned[index], average_rms_values, 'o', label=f'Star {gaia_id}')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time [s]')
