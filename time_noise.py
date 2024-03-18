@@ -141,37 +141,28 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 def plot_rms_time(table, num_stars):
     # Filter table for stars within desired Tmag range
     filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
-    # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
 
     # Sort the table by Tmag (brightness)
-    unique_tmags = np.unique(filtered_table['Tmag'])
-    print('The bright stars are: ', len(unique_tmags))
+    filtered_table = filtered_table.sort_values(by='Tmag')
 
-    # Take the ones which are on the argument
-    filtered_table = filtered_table[:num_stars]
+    # Exclude stars with flux > 250000 counts
+    filtered_table = filtered_table[filtered_table['flux_6'] <= 250000]
+
+    # Select the first 5 brightest stars
+    selected_stars = filtered_table.head(5)
 
     average_rms_values = []
     times_binned = []
     max_binning = 151
 
-    num_stars_used = 0
+    for _, row in selected_stars.iterrows():  # Loop over selected stars
+        gaia_id = row['gaia_id']
+        jd_mid = row['jd_mid']
+        flux_3 = row['flux_6']
+        fluxerr_5 = row['fluxerr_6']
 
-    for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid']
-        flux_3 = gaia_id_data['flux_6']
-        fluxerr_5 = gaia_id_data['fluxerr_6']
-        Tmag = gaia_id_data['Tmag'][0]
+        print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, row['Tmag']))
 
-        # Exclude stars with flux > 230000 counts
-        if np.max(flux_3) > 250000:
-            print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
-            continue
-
-        print('The star with gaia_id = {} and Tmag = {:.2f} is used'.format(gaia_id, Tmag))
-        num_stars_used += 1
-
-        print('Total number of stars used: ', num_stars_used)
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_3, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_3 / trend
         dt_fluxerr = fluxerr_5 / trend
@@ -187,15 +178,8 @@ def plot_rms_time(table, num_stars):
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
 
-        # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_stars:
-            break
-
     # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0)
-    print(average_rms_values)
-
-    # average_rms_values = 10e6 * average_rms_values # Convert to ppm
 
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
@@ -205,7 +189,8 @@ def plot_rms_time(table, num_stars):
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(10, 8))
-    plt.plot(times_binned[0], average_rms_values, 'o', color='black', label='Actual RMS')
+    for i in range(len(selected_stars)):
+        plt.plot(times_binned[i], average_rms_values, 'o', label=f'Star {selected_stars.iloc[i]["gaia_id"]}')
     plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
