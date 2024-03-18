@@ -162,10 +162,12 @@ def plot_rms_time(table, num_stars):
         flux_3 = gaia_id_data['flux_6']
         fluxerr_5 = gaia_id_data['fluxerr_6']
         Tmag = gaia_id_data['Tmag'][0]
+        print(len(jd_mid))
 
         # Sort Gaia_id by Tmag from brightest to faintest
         gaia_id_sorted = np.argsort(Tmag)
         jd_mid = jd_mid[gaia_id_sorted]
+        print(len(jd_mid))
         flux_3 = flux_3[gaia_id_sorted]
         fluxerr_5 = fluxerr_5[gaia_id_sorted]
 
