@@ -191,12 +191,14 @@ def plot_rms_time(table, num_stars):
             time_seconds.append(exposure_time_seconds)
 
         average_rms_values.append(RMS_values)
-        print('The RMS values for the star with gaia_id = {} and Tmag = {:.2f} are: {:.4f}'.
-              format(gaia_id, Tmag, RMS_values[0]))
+
         times_binned.append(time_seconds)
 
         if RMS_values[0] > 0.005:
             continue
+
+        print('The RMS values for the star with gaia_id = {} and Tmag = {:.2f} are: {:.4f}'.
+              format(gaia_id, Tmag, RMS_values[0]))
 
         # Stop if the number of stars used reaches the specified number
         if num_stars_used >= num_stars:
