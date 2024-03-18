@@ -156,17 +156,19 @@ def calculate_mean_rms_flux(table, num_stars):
 
         # Append to lists
         mean_flux = np.mean(flux_6)
-        if mean_flux > 0:  # Filter out zero or negative flux values
-            mean_flux_list.append(mean_flux)
-            tmag_list.append(Tmag)
+        mean_flux_list.append(mean_flux)
+        tmag_list.append(Tmag)
+
+    mean_flux = np.array(mean_flux_list)
+    tmag = np.array(tmag_list)
 
     # Perform curve fitting
-    popt, pcov = curve_fit(linear_model, tmag_list, np.log(mean_flux_list))
+    popt, pcov = curve_fit(linear_model, tmag, np.log(mean_flux))
 
     # Plot the data
     plt.figure(figsize=(10, 6))
-    plt.plot(tmag_list, mean_flux_list, 'o', color='black', alpha=0.5)
-    plt.plot(tmag_list, np.exp(linear_model(tmag_list, *popt)), '--', color='red', label='Linear fit')
+    plt.plot(tmag, mean_flux, 'o', color='black', alpha=0.5)
+    plt.plot(tmag, np.exp(linear_model(tmag, *popt)), '--', color='red', label='Linear fit')
     plt.gca().invert_xaxis()
     plt.xlabel('Tmag')
     plt.ylabel('Mean Flux (log scale)')
