@@ -179,7 +179,7 @@ def calculate_mean_rms_flux(table, num_stars):
     # Extract slope and intercept from optimized parameters
     slope, intercept = popt
 
-    print(f"Slope (zeropoint): {popt[0]}")
+    print(f"Slope (zeropoint) and intercept: {slope}, {intercept}")
 
     plt.show()
 
