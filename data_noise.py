@@ -150,9 +150,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
-        flux_4 = gaia_id_data['flux_6']
-        fluxerr_4 = gaia_id_data['fluxerr_6']
-        sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
+        flux_4 = gaia_id_data['flux_4']
+        fluxerr_4 = gaia_id_data['fluxerr_4']
+        sky_4 = gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']
 
         # if np.max(sky_4) > np.max(flux_4):
         #     print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
@@ -316,7 +316,7 @@ def noise_sources(mean_flux_list, sky_list):
 
     """
 
-    aperture_radius = 6
+    aperture_radius = 4
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
