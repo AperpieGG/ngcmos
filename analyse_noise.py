@@ -167,6 +167,13 @@ def calculate_mean_rms_binned(table, bin_size, num_stars):
         RMS_list.append(RMS)
         RMS_unbinned_list.append(rms_unbinned)
 
+    # Plot the histogram of RMS values
+    plt.hist(RMS_list, bins=20, color='navy', alpha=0.7)
+    plt.xlabel('RMS')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of RMS Distribution')
+    plt.show()
+
     print(f"The length of the RMS list is {len(RMS_list)}")
     print(f"The length of the RMS unbinned list is {len(RMS_unbinned_list)}")
     return mean_flux_list, RMS_list, RMS_unbinned_list
