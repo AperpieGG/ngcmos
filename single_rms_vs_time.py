@@ -235,7 +235,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     plt.show()
 
 
-def run_for_one(phot_file, gaia_id=None):
+def main(phot_file, gaia_id=None):
     # Set plot parameters
     plot_images()
 
@@ -247,22 +247,7 @@ def run_for_one(phot_file, gaia_id=None):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, gaia_id)  # Always plot for 5 stars
-
-
-def run_for_more(phot_file, num_stars=None):
-    # Set plot parameters
-    plot_images()
-
-    # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
-
-    # Plot the current photometry file
-    print(f"Plotting the photometry file {phot_file}...")
-    phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-    # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, num_stars)  # Always plot for 5 stars
+    plot_rms_time(phot_table, gaia_id)
 
 
 if __name__ == "__main__":
@@ -275,7 +260,6 @@ if __name__ == "__main__":
 
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
     parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a '
                                                     'particular star')
     args = parser.parse_args()
@@ -283,7 +267,7 @@ if __name__ == "__main__":
     # Run the main function for each photometry file
     if args.gaia_id is not None:
         for phot_file in phot_files:
-            run_for_one(phot_file, args.gaia_id)
+            main(phot_file, args.gaia_id)
     else:
         for phot_file in phot_files:
-            run_for_more(phot_file, args.num_stars)
+            main(phot_file)
