@@ -156,8 +156,11 @@ def plot_rms_time(table, num_stars):
 
     num_stars_used = 0
 
+    Tmag_sorted_indices = np.argsort(filtered_table['Tmag'])
+    filtered_table_sorted = filtered_table[Tmag_sorted_indices]
+
     # Loop over all stars in the filtered table
-    for Tmag in filtered_table['Tmag']:
+    for Tmag in filtered_table_sorted['Tmag']:
         # Get data for the current gaia_id
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
