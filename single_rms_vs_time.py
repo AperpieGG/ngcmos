@@ -247,7 +247,7 @@ def run_for_one(phot_file, gaia_id=None):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, 1, gaia_id)  # Always plot for 5 stars
+    plot_rms_time(phot_table, 5, gaia_id)  # Always plot for 5 stars
 
 
 def run_for_more(phot_file, num_stars):
