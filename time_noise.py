@@ -7,7 +7,7 @@ import fnmatch
 from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, ticker
 from utils import plot_images
 
 
@@ -223,9 +223,14 @@ def plot_rms_time(table, num_stars):
     plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel('Exposure time [s]')
-    plt.ylabel('RMS')
-    plt.title('Average RMS vs Exposure time')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('RMS (ppm)')
+    # plt.title('Average RMS vs Exposure time')
+
+    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().tick_params(axis='y', which='minor', length=4)
+
     plt.legend()
     plt.tight_layout()
     plt.show()
