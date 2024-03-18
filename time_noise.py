@@ -139,6 +139,16 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 def plot_rms_time(table, num_stars):
+    # Filter table for stars within desired Tmag range
+    filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
+    # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
+
+    # Sort the table by Tmag (brightness)
+    unique_tmags = np.unique(filtered_table['Tmag'])
+    print('The bright stars are: ', len(unique_tmags))
+
+    # Take the ones which are on the argument
+    filtered_table = filtered_table[:num_stars]
 
     average_rms_values = []
     times_binned = []
@@ -146,21 +156,12 @@ def plot_rms_time(table, num_stars):
 
     num_stars_used = 0
 
-    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
-
-        # Filter table for stars within desired Tmag range
-        filtered_table = table[(table['Tmag'] >= 8) & (table['Tmag'] <= 9.5)]
-        # filtered_table = table[(table['Tmag'] >= 7.5) & (table['Tmag'] <= 9.5)]
-
-        # Sort the table by Tmag (brightness)
-        unique_tmags = np.unique(filtered_table['Tmag'])
-        print('The bright stars are: ', len(unique_tmags))
-
-        gaia_id_data = filtered_table[filtered_table['gaia_id'] == gaia_id]
+    for gaia_id in filtered_table['gaia_id']:  # Loop over all stars in the filtered table
+        gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         flux_3 = gaia_id_data['flux_6']
         fluxerr_5 = gaia_id_data['fluxerr_6']
-        Tmag = gaia_id_data['Tmag']
+        Tmag = gaia_id_data['Tmag'][0]
 
         # Exclude stars with flux > 230000 counts
         if np.max(flux_3) > 250000:
