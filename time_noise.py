@@ -187,11 +187,11 @@ def plot_rms_time(table, num_stars):
         if RMS_values[0] > 0.006:
             print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 0.005'.format(gaia_id, Tmag))
             num_stars_excluded += 1
-
+            continue
         else:
             print('Using star with gaia_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
                   format(gaia_id, Tmag, RMS_values[0]))
-            continue
+
 
         num_stars_used += 1
         average_rms_values.append(RMS_values)
