@@ -326,7 +326,14 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b):
 
     # set exposure time and and random flux
     exposure_time = 10
-    synthetic_flux_unbinned = np.arange(100, 1e6, 10)
+
+    num_points = len(mean_flux_list)
+
+    # Determine the step size for the synthetic flux range
+    step_size = (1e6 - 100) / num_points
+
+    # Generate synthetic_flux_unbinned with the adjusted step size
+    synthetic_flux_unbinned = np.arange(100, 1e6, step_size)
     synthetic_flux_unbinned_error = np.sqrt(synthetic_flux_unbinned)
     synthetic_flux, _ = bin_time_flux_error(time_b, synthetic_flux_unbinned, synthetic_flux_unbinned_error, bin_size)
 
