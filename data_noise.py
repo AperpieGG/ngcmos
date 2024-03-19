@@ -335,7 +335,7 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux):
     # Generate synthetic_flux_unbinned with the adjusted step size
     synthetic_flux_unbinned = np.arange(100, 1e6, step_size)
     synthetic_flux_unbinned_error = np.sqrt(synthetic_flux_unbinned)
-    synthetic_flux, _ = bin_time_flux_error(time_b, synthetic_flux_unbinned, synthetic_flux_unbinned_error, bin_size)
+    synthetic_flux, _ = bin_time_flux_error(time_b, flux, synthetic_flux_unbinned_error, bin_size)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
