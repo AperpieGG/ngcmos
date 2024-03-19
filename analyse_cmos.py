@@ -10,9 +10,9 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import plot_images
-from wotan import flatten
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
+from astropy.stats import sigma_clip
 
 
 def load_config(filename):
@@ -195,13 +195,12 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         sky = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
         skyerrs = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
 
+    fluxes_clipped = sigma_clip(fluxes, sigma=5, maxiters=5)
+
     # Bin flux data
-    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
+    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes_clipped, fluxerrs, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
     _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
-
-    # Determine the bin label for the y-axis
-    bin_label = f'binned {bin_size * exposure_time / 60:.2f} min'
 
     # Define the size of the figure
     fig, axs = plt.subplots(3, 1, figsize=(10, 10))
