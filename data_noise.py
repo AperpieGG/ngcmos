@@ -140,7 +140,6 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 def calculate_mean_rms_flux(table, bin_size, num_stars):
-
     mean_flux_list = []
     RMS_list = []
     sky_list = []
@@ -254,7 +253,6 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
 
 
 def scintilation_noise(airmass_list):
-
     t = 10  # exposure time
     D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
@@ -264,7 +262,7 @@ def scintilation_noise(airmass_list):
     secZ = 1.2  # airmass
     W = 1.75  # wind speed
     # N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
-    N = np.sqrt(10e-6 * (C_y**2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
+    N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
     print('Scintilation noise: ', N)
     return N
 
@@ -335,8 +333,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux):
     # Generate synthetic_flux_unbinned with the adjusted step size
     synthetic_flux_unbinned = np.arange(100, 1e6, step_size)
     synthetic_flux_unbinned_error = np.sqrt(synthetic_flux_unbinned)
-    time_binned, synthetic_flux, synthetic_flux_binned = bin_time_flux_error(time_b, synthetic_flux_unbinned,
-                                                                             synthetic_flux_unbinned_error, bin_size)
+    time_binned, synthetic_flux, synthetic_flux_error = bin_time_flux_error(time_b, synthetic_flux_unbinned,
+                                                                            synthetic_flux_unbinned_error, bin_size)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
@@ -421,7 +419,8 @@ def main(phot_file):
 
         # Calculate noise sources
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'], phot_table['flux_6'])
+         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'],
+                                                 phot_table['flux_6'])
 
         # Plot the noise model
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
