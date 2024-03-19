@@ -179,9 +179,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-    num_clipped = len(flux_4) - len(flux_4_clipped)
-    print('Number of data points clipped:', num_clipped)
-    # print('Gaia IDs with RMS < 0.005:', low_rms_gaia_ids)  # Print the array of gaia_id values for low RMS stars
+    RMS_list = RMS_list * 1000000 # Convert to ppm
 
     return mean_flux_list, RMS_list, sky_list, tmag_list
 
