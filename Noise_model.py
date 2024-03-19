@@ -183,6 +183,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
+        mean_mags = np.mean(mags)
         RMS = np.std(dt_flux_binned) * 1000000
         mean_sky = np.median(sky_4)
 
@@ -191,7 +192,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
-        mags_list.append(mags)
+        mags_list.append(mean_mags)
 
         # # Store gaia_id for stars with RMS lower than 0.005
         # if RMS < 0.005:
