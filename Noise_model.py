@@ -139,23 +139,25 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_flux(table, bin_size, num_stars):
+def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     mean_flux_list = []
     RMS_list = []
     sky_list = []
     tmag_list = []
 
+    zp, airmass = extract_header(table, directory)
+
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
-        flux_4_clipped = gaia_id_data['flux_6']
+        flux_4 = gaia_id_data['flux_6']
         fluxerr_4 = gaia_id_data['fluxerr_6']
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
         # Sigma clipping
-        # flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
+        flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
@@ -255,9 +257,6 @@ def main(phot_file):
     # Plot the current photometry file
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-    # Extract airmass from the photometry table
-    airmass_list, zp = extract_header(phot_table, current_night_directory)
 
     # Calculate mean and RMS for the noise model
     mean_flux_list, RMS_list, sky_list, tmag_list = calculate_mean_rms_flux(phot_table, bin_size=bin_size,
