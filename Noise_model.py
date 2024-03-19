@@ -162,7 +162,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
-            print(f"ZP value for {frame_id}: {zp_value}")
 
         mags = []
         for flux, zp_value in zip(flux_4_clipped, zp):
