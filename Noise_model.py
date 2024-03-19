@@ -157,8 +157,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Sigma clipping
         flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
-        zp, airmass = extract_header(gaia_id_data['frame_id'][0], directory)
-        
+        zp = []
+        for frame_id in gaia_id_data['frame_id']:
+            image_header = fits.getheader(os.path.join(directory, frame_id))
+            zp.append(round(image_header['MAGZP_T'], 3))
+
         plt.plot(jd_mid, zp, 'o', color='darkgreen', label='data', alpha=0.5)
         plt.show()
 
