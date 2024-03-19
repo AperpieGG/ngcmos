@@ -155,7 +155,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
+        flux_4_clipped = sigma_clip(flux_4, sigma=5, maxiters=1)
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
