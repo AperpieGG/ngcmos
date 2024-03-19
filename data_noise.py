@@ -184,24 +184,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     print('The mean RMS is: ', np.mean(RMS_list))
     # print('Gaia IDs with RMS < 0.005:', low_rms_gaia_ids)  # Print the array of gaia_id values for low RMS stars
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
-    plt.gca().invert_xaxis()
-    plt.xlabel('Tmag')
-    plt.ylabel('Mean Flux (log scale)')
-    plt.title('Tmag vs Mean Flux')
-    plt.show()
-
-    # Fit a linear model
-    coefficients = np.polyfit(tmag_list, np.log(mean_flux_list), 1)
-    slope = coefficients[0]  # Slope (zeropoint)
-
-    # Plot the linear fit
-    plt.plot(tmag_list, coefficients[0] * tmag_list + coefficients[1], '--', color='red', label='Linear fit')
-    print(f"The slope of the linear fit is: {slope:.2f}")
-    plt.legend()
-    plt.show()
-
     return mean_flux_list, RMS_list, sky_list
 
 
