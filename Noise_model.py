@@ -179,18 +179,18 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     plt.legend()
     plt.show()
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
-
-        # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_4)
-        RMS = np.std(dt_flux_binned) * 1000000
-        mean_sky = np.median(sky_4)
-
-        # Append to lists
-        mean_flux_list.append(mean_flux)
-        RMS_list.append(RMS)
-        sky_list.append(mean_sky)
-        tmag_list.append(Tmag)
+        # time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
+        #
+        # # Calculate mean flux and RMS
+        # mean_flux = np.mean(flux_4)
+        # RMS = np.std(dt_flux_binned) * 1000000
+        # mean_sky = np.median(sky_4)
+        #
+        # # Append to lists
+        # mean_flux_list.append(mean_flux)
+        # RMS_list.append(RMS)
+        # sky_list.append(mean_sky)
+        # tmag_list.append(Tmag)
 
         # # Store gaia_id for stars with RMS lower than 0.005
         # if RMS < 0.005:
