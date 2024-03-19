@@ -154,11 +154,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        # # exclude stars with flux > 200000
-        # if np.max(flux_4) > 200000:
-        #     print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
-        #     continue
-
         # Sigma clipping
         flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
 
@@ -188,7 +183,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     print('Number of data points clipped:', num_clipped)
     # print('Gaia IDs with RMS < 0.005:', low_rms_gaia_ids)  # Print the array of gaia_id values for low RMS stars
 
-    return mean_flux_list, RMS_list, sky_list
+    return mean_flux_list, RMS_list, sky_list, tmag_list
 
 
 def extract_header(table, image_directory):
@@ -217,45 +212,6 @@ def extract_header(table, image_directory):
     return airmass_list, zp_list
 
 
-def plot_lc_with_detrend(table, gaia_id_to_plot):
-    # Select rows with the specified Gaia ID
-    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
-    # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
-    jd_mid = gaia_id_data['jd_mid']
-    flux_2 = gaia_id_data['flux_2']
-    fluxerr_2 = gaia_id_data['fluxerr_2']
-    tmag = gaia_id_data['Tmag'][0]
-
-    # flatten_lc, trend = flatten(jd_mid, flux_2, window_length=0.01, return_trend=True, method='biweight')
-    # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_2, 2), jd_mid - int(jd_mid[0]))
-
-    # Compute Detrended flux and errors
-    norm_flux = flux_2 / trend
-    relative_err = fluxerr_2 / trend
-    rms = np.std(norm_flux)
-    print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.2f}")
-
-    # Create subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-
-    # Plot raw flux with wotan model
-    ax1.plot(jd_mid, flux_2, 'o', color='black', label='Raw Flux 2')
-    ax1.plot(jd_mid, trend, color='red', label='Wotan Model')
-    ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
-    ax1.set_xlabel('MJD [days]')
-    ax1.set_ylabel('Flux [e-]')
-    ax1.legend()
-
-    ax2.errorbar(jd_mid, norm_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
-    ax2.set_ylabel('Detrended Flux [e-]')
-    ax2.set_xlabel('MJD [days]')
-    ax2.legend()
-
-    plt.tight_layout()
-    plt.show()
-
-
 def scintilation_noise(airmass_list):
     t = 10  # exposure time
     D = 0.2  # telescope diameter
@@ -271,66 +227,15 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
-    aperture_radius = 6
-    npix = np.pi * aperture_radius ** 2
-
-    # set exposure time and and random flux
-    exposure_time = 10
-
-    synthetic_flux = np.arange(100, 1e6, 10)
-
-    # set dark current rate from cmos characterisation
-    dark_current_rate = 1.6
-    dark_current = dark_current_rate * exposure_time * npix
-    dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size)
-
-    # set read noise from cmos characterisation
-    read_noise_pix = 1.56
-    read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size)
-    read_signal = npix * (read_noise_pix ** 2)
-
-    # set random sky background
-    sky_flux = np.mean(sky_list)
-    sky_noise = np.sqrt(sky_flux) / synthetic_flux / np.sqrt(bin_size)
-    print('Average sky flux: ', sky_flux)
-
-    # set random photon shot noise from the flux
-    photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux / np.sqrt(bin_size)
-
-    N = scintilation_noise(airmass_list)
-
-    N_sc = (N * synthetic_flux) ** 2
-    N = N / np.sqrt(bin_size)
-
-    total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
-    RNS = total_noise / synthetic_flux / np.sqrt(bin_size)
-
-    return synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
-
-
-def noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise,
-                mean_flux_list, RMS_list, N, RNS):
+def noise_model(mean_flux_list, RMS_list, tmag_list):
 
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    ax.plot(mean_flux_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
-
-    ax.plot(synthetic_flux, RNS, color='black', label='total noise')
-    ax.plot(synthetic_flux, photon_shot_noise, color='green', label='photon shot', linestyle='--')
-    ax.plot(synthetic_flux, read_noise, color='red', label='read noise', linestyle='--')
-    ax.plot(synthetic_flux, dc_noise, color='purple', label='dark noise', linestyle='--')
-    ax.plot(synthetic_flux, sky_noise, color='blue', label='sky bkg', linestyle='--')
-    ax.plot(synthetic_flux, np.ones(len(synthetic_flux)) * N, color='orange', label='scintilation noise',
-            linestyle='--')
+    ax.plot(tmag_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
     ax.set_xlabel('Flux [e-]')
     ax.set_ylabel('RMS')
-    ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_ylim(0.0001, 0.1)
-    ax.set_xlim(1000, 1e6)
     plt.tight_layout()
-
     plt.legend(loc='best')
     plt.show()
 
@@ -360,12 +265,8 @@ def main(phot_file):
     # Extract airmass from the photometry table
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
-    # Calculate noise sources
-    (synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS) \
-        = noise_sources(mean_flux_list, sky_list, bin_size, airmass_list)
-
     # Plot the noise model
-    noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, mean_flux_list, RMS_list, N, RNS)
+    noise_model(mean_flux_list, RMS_list, phot_table['Tmag'])
 
 
 def main_loop(phot_files):
