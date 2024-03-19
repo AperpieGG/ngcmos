@@ -288,7 +288,7 @@ def bin_flux(synthetic_flux, bin_size):
     return binned_flux
 
 
-def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux):
+def noise_sources(mean_flux_list, sky_list, bin_size, flux):
     """
     Returns the noise sources for a given flux
 
@@ -333,10 +333,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux):
     # Generate synthetic_flux_unbinned with the adjusted step size
     synthetic_flux_unbinned = np.arange(100, 1e6, step_size)
     print(synthetic_flux_unbinned)
-    synthetic_flux_unbinned_error = np.sqrt(synthetic_flux_unbinned)
-    time_binned, synthetic_flux, synthetic_flux_error = bin_time_flux_error(time_b, synthetic_flux_unbinned,
-                                                                            synthetic_flux_unbinned_error, bin_size)
 
+    synthetic_flux = bin_flux(synthetic_flux_unbinned, bin_size)
     print(synthetic_flux)
 
     # set dark current rate from cmos characterisation
@@ -350,7 +348,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux):
     read_signal = npix * (read_noise_pix ** 2)
 
     # set random sky background
-    sky_flux = np.mean(sky_list)
+    sky_flux_unbinned = bin_flux(sky_list, bin_size)
+    sky_flux = np.mean(sky_flux_unbinned)
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
     print('Average sky:', sky_flux)
 
@@ -422,8 +421,7 @@ def main(phot_file):
 
         # Calculate noise sources
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'],
-                                                 phot_table['flux_6'])
+         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['flux_6'])
 
         # Plot the noise model
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
