@@ -288,7 +288,7 @@ def bin_flux(synthetic_flux, bin_size):
     return binned_flux
 
 
-def noise_sources(mean_flux_list, sky_list, bin_size):
+def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
     """
     Returns the noise sources for a given flux
 
@@ -326,11 +326,7 @@ def noise_sources(mean_flux_list, sky_list, bin_size):
     exposure_time = 10
 
     # Generate synthetic_flux_unbinned with the adjusted step size
-    synthetic_flux_unbinned = np.arange(100, 1e6, 10)
-    print(synthetic_flux_unbinned)
-
-    synthetic_flux = bin_flux(synthetic_flux_unbinned, bin_size)
-    print(synthetic_flux)
+    synthetic_flux = np.arange(100, 1e6, 10)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
@@ -351,16 +347,18 @@ def noise_sources(mean_flux_list, sky_list, bin_size):
     # set random photon shot noise from the flux
     photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
 
-    return synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise
-
-
-def noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal, dark_current, dc_noise,
-                mean_flux_list, RMS_list, airmass_list):
     N = scintilation_noise(airmass_list)
     N_sc = (N * synthetic_flux) ** 2
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux
+
+    return synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
+
+
+def noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise,
+                mean_flux_list, RMS_list, N, RNS):
+
     fig, ax = plt.subplots(figsize=(10, 8))
 
     ax.plot(mean_flux_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
@@ -415,12 +413,11 @@ def main(phot_file):
         airmass_list, zp = extract_header(phot_table, current_night_directory)
 
         # Calculate noise sources
-        (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size)
+        (synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS) \
+            = noise_sources(mean_flux_list, sky_list, bin_size, airmass_list)
 
         # Plot the noise model
-        noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-                    dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
+        noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, mean_flux_list, RMS_list, N, RNS)
 
 
 def main_loop(phot_files):
