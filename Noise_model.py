@@ -228,7 +228,7 @@ def scintilation_noise(airmass_list):
 def noise_model(mean_flux_list, RMS_list, tmag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    ax.plot(tmag_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
+    ax.plot(tmag_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
