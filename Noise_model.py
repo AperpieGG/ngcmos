@@ -154,22 +154,32 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        # Sigma clipping
         flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
         zp = []
+        detrended_mags = []  # List to store detrended magnitudes
+
         for frame_id in gaia_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
-            zp.append(round(image_header['MAGZP_T'], 3))
+            zp_value = round(image_header['MAGZP_T'], 3)
+            zp.append(zp_value)
 
-        plt.plot(jd_mid, zp, 'o', color='darkgreen', label='data', alpha=0.5)
+            # Calculate detrended flux using zero point
+            trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
+            detrended_flux = flux_4_clipped / trend
+
+            # Convert detrended flux to magnitudes using zero point
+            detrended_mag = -2.5 * np.log10(detrended_flux) + zp_value
+            detrended_mags.append(detrended_mag)
+
+        # Plot the detrended magnitudes for this star
+        plt.plot(jd_mid, detrended_mags, 'o', color='darkgreen', label='Detrended Magnitudes', alpha=0.5)
+        plt.xlabel('JD Mid')
+        plt.ylabel('Detrended Magnitudes')
+        plt.title(f'Detrended Magnitudes for Star {gaia_id}')
         plt.show()
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4 / trend
-
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4_clipped, fluxerr_4, bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4_clipped)
