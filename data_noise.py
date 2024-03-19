@@ -169,7 +169,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
         RMS = np.std(dt_flux_binned)
-        mean_sky = np.mean(sky_4)
+        mean_sky = np.median(sky_4)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
