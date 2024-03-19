@@ -391,7 +391,7 @@ def main(phot_file):
     else:
         # Calculate mean and RMS for the noise model
         mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=bin_size,
-                                                                     num_stars=args.num_stars)
+                                                                     num_stars=args.num_stars, sigma=5)
 
         # Extract airmass from the photometry table
         airmass_list, zp = extract_header(phot_table, current_night_directory)
