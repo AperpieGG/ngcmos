@@ -169,6 +169,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mag_error = 1.0857 * fluxerr_4 / flux_4
 
         # Plot the magnitudes for this star
+        plt.figure(figsize=(10, 4))
         plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
         plt.xlabel('JD Mid')
         plt.ylabel('Magnitudes')
