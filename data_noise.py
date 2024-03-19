@@ -284,8 +284,9 @@ def bin_flux(synthetic_flux, bin_size):
     binned_flux : array
         Binned synthetic flux values.
     """
-    n_binned = len(synthetic_flux) // bin_size
-    binned_flux = np.mean(synthetic_flux[:n_binned*bin_size].reshape(-1, bin_size), axis=1)
+    n_binned = int(len(synthetic_flux) / bin_size)
+    clip = n_binned * bin_size
+    binned_flux = np.average(synthetic_flux[:clip].reshape(n_binned, bin_size), axis=1)
     return binned_flux
 
 
