@@ -267,7 +267,7 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def bin_flux(synthetic_flux, bin_size):
+def bin_synthetic_flux(synthetic_flux, bin_size):
     """
     Bin synthetic flux values.
 
@@ -292,7 +292,7 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
     """
     Returns the noise sources for a given flux
 
-    Returns arrays of noise and signal for a given flux
+    returns arrays of noise and signal for a given flux
 
     Parameters
     ----------
@@ -300,8 +300,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
 
     Returns
     -------
-    synthetic_flux : array
-        The synthetic flux of the star in electrons per second
+    flux : array
+        The flux of the star in electrons per second
     photon_shot_noise : array
         The photon shot noise
     sky_flux : array
@@ -316,8 +316,6 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
         The dark current
     dc_noise : array
         The dark current noise
-    RNS : array
-        The relative noise level
 
     """
 
@@ -332,15 +330,15 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
     # Determine the step size for the synthetic flux range
     step_size = (1e6 - 100) / num_points
 
-    synthetic_flux = np.arange(100, 1e6, step_size)
+    synthetic_flux = np.arange(100, 1e6, 10)
     print('Synthetic flux:', synthetic_flux)
 
-    # set dark current rate from CMOS characterisation
+    # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
     dark_current = dark_current_rate * exposure_time * npix
     dc_noise = np.sqrt(dark_current) / synthetic_flux
 
-    # set read noise from CMOS characterisation
+    # set read noise from cmos characterisation
     read_noise_pix = 1.56
     read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux
     read_signal = npix * (read_noise_pix ** 2)
@@ -359,11 +357,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux
 
-    # Bin synthetic flux and RNS
-    binned_synthetic_flux = bin_flux(synthetic_flux, bin_size)
-    binned_RNS = bin_flux(RNS, bin_size)
+    return synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
-    return binned_synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, binned_RNS
 
 def noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise,
                 mean_flux_list, RMS_list, N, RNS):
@@ -425,7 +420,7 @@ def main(phot_file):
         (synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS) \
             = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'], phot_table['flux_2'], airmass_list)
 
-        binned_synthetic_flux = bin_flux(synthetic_flux, bin_size)
+        binned_synthetic_flux = bin_synthetic_flux(synthetic_flux, bin_size)
 
         # Plot the noise model
         noise_model(binned_synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, mean_flux_list, RMS_list, N, RNS)
