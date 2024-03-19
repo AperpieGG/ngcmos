@@ -139,7 +139,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_flux(table, bin_size, num_stars, sigma=5):
+def calculate_mean_rms_flux(table, bin_size, num_stars):
     mean_flux_list = []
     RMS_list = []
     sky_list = []
@@ -160,7 +160,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, sigma=5):
         #     continue
 
         # Sigma clipping
-        flux_4_clipped = sigmaclip(flux_4, sigma=sigma, maxiters=5)
+        flux_4_clipped = sigmaclip(flux_4, sigma=5, maxiters=5)
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
@@ -391,7 +391,7 @@ def main(phot_file):
     else:
         # Calculate mean and RMS for the noise model
         mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=bin_size,
-                                                                     num_stars=args.num_stars, sigma=5)
+                                                                     num_stars=args.num_stars)
 
         # Extract airmass from the photometry table
         airmass_list, zp = extract_header(phot_table, current_night_directory)
