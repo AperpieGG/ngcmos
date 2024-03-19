@@ -166,12 +166,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
-        time_binned_sky, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky_4, skyerrs_4, bin_size)
-
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
         RMS = np.std(dt_flux_binned)
-        mean_sky = np.median(sky_binned)
+        mean_sky = np.median(sky_4)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
@@ -186,7 +184,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     print('The mean RMS is: ', np.mean(RMS_list))
     # print('Gaia IDs with RMS < 0.005:', low_rms_gaia_ids)  # Print the array of gaia_id values for low RMS stars
 
-    print('Average sky binned: ', np.mean(sky_binned))
+    print('Average sky binned: ', np.mean(sky_list))
     print('Average sky: ', np.mean(sky_4))
 
     return mean_flux_list, RMS_list, sky_list
