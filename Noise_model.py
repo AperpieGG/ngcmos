@@ -157,7 +157,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         # Sigma clipping
         flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
+        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4 / trend
 
@@ -179,7 +179,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-    # RMS_list = RMS_list * 1000000 # Convert to ppm
+    RMS_list = RMS_list * 1000000 # Convert to ppm
 
     return mean_flux_list, RMS_list, sky_list, tmag_list
 
@@ -229,8 +229,8 @@ def noise_model(mean_flux_list, RMS_list, tmag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
 
     ax.plot(tmag_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
-    ax.set_xlabel('Flux [e-]')
-    ax.set_ylabel('RMS')
+    ax.set_xlabel('TESS Magnitude')
+    ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     plt.tight_layout()
     ax.invert_xaxis()
