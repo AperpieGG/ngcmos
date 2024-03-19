@@ -207,6 +207,9 @@ def extract_header(table, image_directory):
         airmass_list.append(airmass)
         zp_list.append(zp)
 
+    print(f"Average airmass: {np.mean(airmass_list)}")
+    print(f"Average ZP: {np.mean(zp)}")
+
     return airmass_list, zp_list
 
 
@@ -316,7 +319,7 @@ def noise_sources(mean_flux_list, sky_list):
     # set random sky background
     sky_flux = np.mean(sky_list)
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
-    print(sky_flux)
+    print('Average sky:', sky_flux)
 
     # set random photon shot noise from the flux
     photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
@@ -376,16 +379,17 @@ def main(phot_file):
     if gaia_id_to_plot:
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
+        # Calculate mean and RMS for the noise model
         mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
 
         # Extract airmass from the photometry table
         airmass_list, zp = extract_header(phot_table, current_night_directory)
-        print(f"Average airmass: {np.mean(airmass_list)}")
-        print(f"Average ZP: {np.mean(zp)}")
 
+        # Calculate noise sources
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
          dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
 
+        # Plot the noise model
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
                     dark_current, dc_noise, mean_flux_list, RMS_list, airmass_list)
 
