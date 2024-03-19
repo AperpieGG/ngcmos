@@ -267,6 +267,24 @@ def scintilation_noise(airmass_list):
     return N
 
 
+def bin_flux(synthetic_flux, bin_size):
+    """
+    Bin synthetic flux values.
+    Parameters
+    ----------
+    synthetic_flux : array containing synthetic flux values.
+    bin_size : int
+        Number of flux values to combine into one bin.
+    Returns
+    -------
+    binned_flux : array
+        Binned synthetic flux values.
+    """
+    n_binned = len(synthetic_flux) // bin_size
+    binned_flux = np.mean(synthetic_flux[:n_binned*bin_size].reshape(-1, bin_size), axis=1)
+    return binned_flux
+
+
 def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list):
     """
     Returns the noise sources for a given flux
@@ -309,12 +327,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
     # Determine the step size for the synthetic flux range
     step_size = (1e6 - 100) / num_points
 
-    # Generate synthetic_flux_unbinned with the adjusted step size
-    synthetic_flux_unbinned = np.arange(100, 1e6, step_size)
-    synthetic_flux_unbinned_error = np.sqrt(synthetic_flux_unbinned)
-    time_binned, synthetic_flux, synthetic_flux_error = bin_time_flux_error(time_b, synthetic_flux_unbinned,
-                                                                            synthetic_flux_unbinned_error, bin_size)
-
+    synthetic_flux_unbinned = np.arange(100, 1e6, 10)
+    synthetic_flux = bin_flux(synthetic_flux_unbinned, bin_size)
     print('Synthetic flux:', synthetic_flux)
 
     # set dark current rate from cmos characterisation
