@@ -172,11 +172,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             detrended_mags.append(-2.5 * np.log10(detrended_flux) + zp_value)
 
         # Plot the detrended magnitudes for this star
-        plt.plot(jd_mid, detrended_flux, 'o', color='darkgreen', label='Detrended Magnitudes', alpha=0.5)
+        plt.plot(jd_mid, detrended_mags, 'o', color='darkgreen', label='Detrended Magnitudes', alpha=0.5)
         plt.xlabel('JD Mid')
         plt.ylabel('Detrended Magnitudes')
         plt.title(f'Detrended Magnitudes for Star {gaia_id}')
-        plt.ylim(np.mean(detrended_flux) - 1, np.mean(detrended_flux) + 1)
+        plt.ylim(np.mean(detrended_mags) - 1, np.mean(detrended_mags) + 1)
         plt.show()
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
