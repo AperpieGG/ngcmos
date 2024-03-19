@@ -165,7 +165,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4_clipped)
-        RMS = np.std(dt_flux_binned)
+        RMS = np.std(dt_flux_binned) * 1000000
         mean_sky = np.median(sky_4)
 
         # Append to lists
@@ -179,8 +179,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-    RMS_list *= 1000000
-
     return mean_flux_list, RMS_list, sky_list, tmag_list
 
 
