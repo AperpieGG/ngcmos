@@ -327,10 +327,10 @@ def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
     photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux
     photon_shot_noise = photon_shot_noise / np.sqrt(bin_size)
 
-    N = scintilation_noise(airmass_list) / np.sqrt(bin_size)
+    N = scintilation_noise(airmass_list)
 
     N_sc = (N * synthetic_flux) ** 2
-    # N = N / np.sqrt(bin_size)
+    N = N / np.sqrt(bin_size)
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux / np.sqrt(bin_size)
