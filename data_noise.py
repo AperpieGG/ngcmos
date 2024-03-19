@@ -154,6 +154,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         flux_4 = gaia_id_data['flux_6']
         fluxerr_4 = gaia_id_data['fluxerr_6']
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
+        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
         # # exclude stars with flux > 200000
         # if np.max(flux_4) > 200000:
@@ -166,10 +167,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
+        _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky_4, skyerrs_4, bin_size)
+
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_4)
+        mean_flux = np.mean(dt_flux_binned)
         RMS = np.std(dt_flux_binned)
-        mean_sky = np.median(sky_4)
+        mean_sky = np.median(sky_binned)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
@@ -305,7 +308,6 @@ def noise_sources(mean_flux_list, sky_list, bin_size):
     # set exposure time and and random flux
     exposure_time = 10
     synthetic_flux = np.arange(1000, 1e6, 10)
-    synthetic_flux = bin_time_flux_error(mean_flux_list, bin_size)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
@@ -318,7 +320,6 @@ def noise_sources(mean_flux_list, sky_list, bin_size):
     read_signal = npix * (read_noise_pix ** 2)
 
     # set random sky background
-    sky_flux = bin_time_flux_error(sky_list, bin_size)
     sky_flux = np.mean(sky_list)
     sky_noise = np.sqrt(sky_flux) / synthetic_flux
     print('Average sky:', sky_flux)
