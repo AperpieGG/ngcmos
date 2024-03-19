@@ -159,6 +159,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Sigma clipping
         flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
+        zp, airmass = extract_header(gaia_id_data['frame_id'], directory)
+
+        plt.plot(jd_mid, zp, 'o', color='darkgreen', label='data', alpha=0.5)
+        plt.show()
+
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4 / trend
