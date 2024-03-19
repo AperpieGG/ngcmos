@@ -259,8 +259,8 @@ def main(phot_file):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, tmag_list = calculate_mean_rms_flux(phot_table, bin_size=bin_size,
-                                                                            num_stars=args.num_stars)
+    mean_flux_list, RMS_list, sky_list, tmag_list = calculate_mean_rms_flux(
+        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Plot the noise model
     noise_model(mean_flux_list, RMS_list, tmag_list)
