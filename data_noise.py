@@ -177,12 +177,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
 
-        # Store gaia_id for stars with RMS lower than 0.005
-        if RMS < 0.005:
-            low_rms_gaia_ids.append(gaia_id)
+        # # Store gaia_id for stars with RMS lower than 0.005
+        # if RMS < 0.005:
+        #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-    print('Gaia IDs with RMS < 0.005:', low_rms_gaia_ids)  # Print the array of gaia_id values for low RMS stars
+    # print('Gaia IDs with RMS < 0.005:', low_rms_gaia_ids)  # Print the array of gaia_id values for low RMS stars
 
     plt.figure(figsize=(10, 6))
     plt.plot(tmag_list, np.log(mean_flux_list), 'o', color='black', alpha=0.5)
