@@ -179,7 +179,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-    RMS_list = np.array(RMS_list) * 1000000
+    RMS_list *= 1000000
 
     return mean_flux_list, RMS_list, sky_list, tmag_list
 
