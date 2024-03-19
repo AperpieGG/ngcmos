@@ -170,7 +170,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         # _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky_4, skyerrs_4, bin_size)
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(dt_flux_binned)
+        mean_flux = np.mean(flux_4)
         RMS = np.std(dt_flux_binned)
         mean_sky = np.median(sky_4)
 
