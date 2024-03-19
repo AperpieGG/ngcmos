@@ -315,6 +315,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
     time_binned, synthetic_flux, synthetic_flux_error = bin_time_flux_error(time_b, synthetic_flux_unbinned,
                                                                             synthetic_flux_unbinned_error, bin_size)
 
+    print('Synthetic flux:', synthetic_flux)
+
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
     dark_current = dark_current_rate * exposure_time * npix
