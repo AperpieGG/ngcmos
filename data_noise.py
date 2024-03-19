@@ -160,7 +160,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, sigma=5):
         #     continue
 
         # Sigma clipping
-        flux_4_clipped, _, _ = sigmaclip(flux_4, sigma=sigma)
+        flux_4_clipped = sigmaclip(flux_4, sigma=sigma, maxiters=5)
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
