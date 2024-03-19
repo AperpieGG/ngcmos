@@ -157,7 +157,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
 
         zp = []
-        mags = []  # List to store magnitudes for this star
+        mags_list = []  # List to store magnitudes for this star
 
         for frame_id in gaia_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
@@ -168,11 +168,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4, zp)]
         mag_error = 1.0857 * fluxerr_4 / flux_4
 
-        norm_mags = [mag - np.mean(mags) for mag in mags]
-
         # Plot the magnitudes for this star
         plt.figure(figsize=(10, 4))
-        plt.errorbar(jd_mid, norm_mags, yerr=mag_error, fmt='o', color='black')
+        plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
         plt.xlabel('JD Mid')
         plt.ylabel('Magnitudes')
         plt.title(f'Magnitudes for Star {gaia_id}')
@@ -194,13 +192,14 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
+        mags_list.append(mags)
 
         # # Store gaia_id for stars with RMS lower than 0.005
         # if RMS < 0.005:
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-    return mean_flux_list, RMS_list, sky_list, tmag_list
+    return mean_flux_list, RMS_list, sky_list, tmag_list, mags_list
 
 
 def extract_header(table, image_directory):
@@ -244,10 +243,10 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def noise_model(mean_flux_list, RMS_list, tmag_list):
+def noise_model(mean_flux_list, RMS_list, tmag_list, mag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    ax.plot(tmag_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
+    ax.plot(mag_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
@@ -278,11 +277,11 @@ def main(phot_file):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, tmag_list = calculate_mean_rms_flux(
+    mean_flux_list, RMS_list, sky_list, tmag_list, mags_list = calculate_mean_rms_flux(
         phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Plot the noise model
-    noise_model(mean_flux_list, RMS_list, tmag_list)
+    noise_model(mean_flux_list, RMS_list, tmag_list, mags_list)
 
 
 def main_loop(phot_files):
