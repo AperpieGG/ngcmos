@@ -179,7 +179,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-    RMS_list = RMS_list * 1000000 # Convert to ppm
+    # RMS_list = RMS_list * 1000000 # Convert to ppm
 
     return mean_flux_list, RMS_list, sky_list, tmag_list
 
@@ -234,6 +234,7 @@ def noise_model(mean_flux_list, RMS_list, tmag_list):
     ax.set_yscale('log')
     plt.tight_layout()
     ax.invert_xaxis()
+    ax.set_ylim(0.0001, 0.1)
     plt.legend(loc='best')
     plt.show()
 
