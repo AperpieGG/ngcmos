@@ -419,8 +419,8 @@ def main(phot_file):
 
         # Calculate noise sources
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'],
-                                                 phot_table['flux_6'])
+         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size=bin_size, time_b=phot_table['jd_mid'],
+                                                flux=phot_table['flux_2'])
 
         # Plot the noise model
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
