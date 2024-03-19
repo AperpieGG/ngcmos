@@ -171,16 +171,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         detrended_mags_all.append(detrended_mags)
 
-    # Plot the detrended magnitudes for all stars
-    for i, detrended_mags_star in enumerate(detrended_mags_all):
-        plt.plot(jd_mid, detrended_mags_star, 'o', label=f'Star {i + 1}', alpha=0.5)
-
-    plt.xlabel('JD Mid')
-    plt.ylabel('Detrended Magnitudes')
-    plt.title('Detrended Magnitudes for All Stars')
-    plt.legend()
-    plt.show()
-
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
 
         # Calculate mean flux and RMS
@@ -199,6 +189,17 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
+
+    # Plot the detrended magnitudes for all stars
+    for i, detrended_mags_star in enumerate(detrended_mags_all):
+        plt.plot(jd_mid, detrended_mags_star, 'o', label=f'Star {i + 1}', alpha=0.5)
+
+    plt.xlabel('JD Mid')
+    plt.ylabel('Detrended Magnitudes')
+    plt.title('Detrended Magnitudes for All Stars')
+    plt.legend()
+    plt.show()
+    
     return mean_flux_list, RMS_list, sky_list, tmag_list
 
 
