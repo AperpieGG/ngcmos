@@ -228,7 +228,6 @@ def scintilation_noise(airmass_list):
 
 
 def noise_model(mean_flux_list, RMS_list, tmag_list):
-
     fig, ax = plt.subplots(figsize=(10, 8))
 
     ax.plot(tmag_list, RMS_list, 'o', color='darkgreen', label='Noise Model', alpha=0.5)
@@ -236,6 +235,7 @@ def noise_model(mean_flux_list, RMS_list, tmag_list):
     ax.set_ylabel('RMS')
     ax.set_yscale('log')
     plt.tight_layout()
+    ax.invert_xaxis()
     plt.legend(loc='best')
     plt.show()
 
@@ -260,7 +260,7 @@ def main(phot_file):
 
     # Calculate mean and RMS for the noise model
     mean_flux_list, RMS_list, sky_list, tmag_list = calculate_mean_rms_flux(phot_table, bin_size=bin_size,
-                                                                 num_stars=args.num_stars)
+                                                                            num_stars=args.num_stars)
 
     # Extract airmass from the photometry table
     airmass_list, zp = extract_header(phot_table, current_night_directory)
