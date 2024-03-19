@@ -254,14 +254,14 @@ def scintilation_noise(airmass_list):
 
 def noise_model(mean_flux_list, RMS_list, tmag_list, mag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
-    print(len(mean_flux_list), len(RMS_list), len(tmag_list), len(mag_list))
+    print('RMS list: ', RMS_list)
+    print('mag list: ', mag_list)
     ax.plot(mag_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     plt.tight_layout()
     ax.invert_xaxis()
-
 
     plt.legend(loc='best')
     plt.show()
