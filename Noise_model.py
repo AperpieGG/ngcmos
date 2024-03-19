@@ -176,7 +176,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         plt.xlabel('JD Mid')
         plt.ylabel('Detrended Magnitudes')
         plt.title(f'Detrended Magnitudes for Star {gaia_id}')
-        plt.ylim(np.mean(detrended_mags) - 1, np.mean(detrended_mags) + 1)
+        plt.ylim(np.mean(detrended_mags) - 0.5, np.mean(detrended_mags) + 0.5)
         plt.show()
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
