@@ -164,9 +164,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
 
-            # Convert detrended flux to magnitudes using zero point
-            detrended_mag = -2.5 * np.log10(flux_4) + zp_value
-            detrended_mags.append(detrended_mag)
+        # Detrend the flux using zero points
+        detrended_flux = flux_4 / np.mean(zp)
+
+        # Convert detrended flux to magnitudes using zero points
+        detrended_mags = -2.5 * np.log10(detrended_flux) + np.mean(zp)
 
         # Plot the detrended magnitudes for this star
         plt.plot(jd_mid, detrended_mags, 'o', color='darkgreen', label='Detrended Magnitudes', alpha=0.5)
@@ -174,7 +176,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         plt.ylabel('Detrended Magnitudes')
         plt.title(f'Detrended Magnitudes for Star {gaia_id}')
         plt.show()
-
+        
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
 
         # Calculate mean flux and RMS
