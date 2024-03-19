@@ -145,8 +145,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     sky_list = []
     tmag_list = []
 
-    zp, airmass = extract_header(table, directory)
-
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
@@ -159,8 +157,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Sigma clipping
         flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
-        zp, airmass = extract_header(gaia_id_data['frame_id'], directory)
-
+        zp, airmass = extract_header(gaia_id_data['frame_id'][0], directory)
+        
         plt.plot(jd_mid, zp, 'o', color='darkgreen', label='data', alpha=0.5)
         plt.show()
 
