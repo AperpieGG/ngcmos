@@ -267,7 +267,7 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
+def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list):
     """
     Returns the noise sources for a given flux
 
@@ -304,8 +304,16 @@ def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
     # set exposure time and and random flux
     exposure_time = 10
 
+    num_points = len(flux)
+
+    # Determine the step size for the synthetic flux range
+    step_size = (1e6 - 100) / num_points
+
     # Generate synthetic_flux_unbinned with the adjusted step size
-    synthetic_flux = np.arange(100, 1e6, 10)
+    synthetic_flux_unbinned = np.arange(100, 1e6, step_size)
+    synthetic_flux_unbinned_error = np.sqrt(synthetic_flux_unbinned)
+    time_binned, synthetic_flux, synthetic_flux_error = bin_time_flux_error(time_b, synthetic_flux_unbinned,
+                                                                            synthetic_flux_unbinned_error, bin_size)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
@@ -392,7 +400,7 @@ def main(phot_file):
 
         # Calculate noise sources
         (synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS) \
-            = noise_sources(mean_flux_list, sky_list, bin_size, airmass_list)
+            = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'], phot_table['flux_2'], airmass_list)
 
         # Plot the noise model
         noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, mean_flux_list, RMS_list, N, RNS)
