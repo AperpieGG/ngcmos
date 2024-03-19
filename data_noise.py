@@ -167,8 +167,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
-        # _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky_4, skyerrs_4, bin_size)
-
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
         RMS = np.std(dt_flux_binned)
@@ -271,6 +269,26 @@ def scintilation_noise(airmass_list):
     return N
 
 
+def bin_flux(synthetic_flux, bin_size):
+    """
+    Bin synthetic flux values.
+
+    Parameters
+    ----------
+    synthetic_flux : array containing synthetic flux values.
+    bin_size : int
+        Number of flux values to combine into one bin.
+
+    Returns
+    -------
+    binned_flux : array
+        Binned synthetic flux values.
+    """
+    n_binned = len(synthetic_flux) // bin_size
+    binned_flux = np.mean(synthetic_flux[:n_binned*bin_size].reshape(-1, bin_size), axis=1)
+    return binned_flux
+
+
 def noise_sources(mean_flux_list, sky_list, bin_size):
     """
     Returns the noise sources for a given flux
@@ -307,7 +325,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size):
 
     # set exposure time and and random flux
     exposure_time = 10
-    synthetic_flux = np.arange(1000, 1e6, 10)
+    synthetic_flux = np.arange(100, 1e6, 10)
+    synthetic_flux = bin_flux(synthetic_flux, bin_size)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
