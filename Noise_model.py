@@ -232,7 +232,7 @@ def noise_model(mean_flux_list, RMS_list, tmag_list):
     ax.set_yscale('log')
     plt.tight_layout()
     ax.invert_xaxis()
-    ax.set_ylim(0.0001, 0.1)
+    ax.set_ylim(100, 100000)
     plt.legend(loc='best')
     plt.show()
 
