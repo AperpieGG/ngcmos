@@ -261,8 +261,8 @@ def noise_model(mean_flux_list, RMS_list, tmag_list, mag_list):
     ax.set_yscale('log')
     plt.tight_layout()
     ax.invert_xaxis()
-    ax.set_ylim(1000, 100000)
-    ax.set_xlim(16, 8)
+
+
     plt.legend(loc='best')
     plt.show()
 
