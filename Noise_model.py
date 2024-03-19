@@ -144,7 +144,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     RMS_list = []
     sky_list = []
     tmag_list = []
-    detrended_mags_all = []  # List to store detrended magnitudes for all stars
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -157,29 +156,27 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
-        detrended_mags = []  # List to store detrended magnitudes for this star
+        zp = []
+        detrended_mags = []  # List to store detrended magnitudes
+
         for frame_id in gaia_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
+            zp.append(zp_value)
 
-            # Detrend the flux with the corresponding zero point
-            detrended_flux = flux_4 / 10 ** (0.4 * zp_value)  # Convert to flux units
+        # Detrend the flux using zero points
+        print('First flux and zp: ', flux_4_clipped[0], zp[0])
+        detrended_flux = flux_4_clipped / np.mean(zp)
 
-            # Check for zero or negative flux values
-            valid_flux_indices = detrended_flux > 0
-            detrended_flux_valid = detrended_flux[valid_flux_indices]
+        # Convert detrended flux to magnitudes using zero points
+        detrended_mags = -2.5 * np.log10(detrended_flux) + np.mean(zp)
 
-            if len(detrended_flux_valid) > 0:
-                detrended_mag = -2.5 * np.log10(detrended_flux_valid)
-                # Fill invalid flux values with NaN
-                detrended_mag_full = np.full_like(detrended_flux, np.nan)
-                detrended_mag_full[valid_flux_indices] = detrended_mag
-                detrended_mags.append(detrended_mag_full)
-            else:
-                # If all flux values are invalid, append NaN values for all data points
-                detrended_mags.append(np.full_like(detrended_flux, np.nan))
-
-        detrended_mags_all.append(detrended_mags)
+        # Plot the detrended magnitudes for this star
+        plt.plot(jd_mid, detrended_mags, 'o', color='darkgreen', label='Detrended Magnitudes', alpha=0.5)
+        plt.xlabel('JD Mid')
+        plt.ylabel('Detrended Magnitudes')
+        plt.title(f'Detrended Magnitudes for Star {gaia_id}')
+        plt.show()
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
 
@@ -199,17 +196,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
-
-    # Plot the detrended magnitudes for all stars
-    for i, detrended_mags_star in enumerate(detrended_mags_all):
-        plt.plot(jd_mid, detrended_mags_star, 'o', label=f'Star {i + 1}', alpha=0.5)
-
-    plt.xlabel('JD Mid')
-    plt.ylabel('Detrended Magnitudes')
-    plt.title('Detrended Magnitudes for All Stars')
-    plt.legend()
-    plt.show()
-
     return mean_flux_list, RMS_list, sky_list, tmag_list
 
 
