@@ -144,6 +144,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     RMS_list = []
     sky_list = []
     tmag_list = []
+    mags_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -157,8 +158,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
 
         zp = []
-        mags_list = []  # List to store magnitudes for this star
-
         for frame_id in gaia_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
