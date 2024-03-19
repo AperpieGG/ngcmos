@@ -267,7 +267,7 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def bin_synthetic_flux(synthetic_flux, bin_size):
+def bin_flux(synthetic_flux, bin_size):
     """
     Bin synthetic flux values.
 
@@ -360,11 +360,10 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
     RNS = total_noise / synthetic_flux
 
     # Bin synthetic flux and RNS
-    binned_synthetic_flux = bin_synthetic_flux(synthetic_flux, bin_size)
-    binned_RNS = bin_synthetic_flux(RNS, bin_size)
+    binned_synthetic_flux = bin_flux(synthetic_flux, bin_size)
+    binned_RNS = bin_flux(RNS, bin_size)
 
     return binned_synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, binned_RNS
-
 
 def noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise,
                 mean_flux_list, RMS_list, N, RNS):
@@ -426,7 +425,7 @@ def main(phot_file):
         (synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS) \
             = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'], phot_table['flux_2'], airmass_list)
 
-        binned_synthetic_flux = bin_synthetic_flux(synthetic_flux, bin_size)
+        binned_synthetic_flux = bin_flux(synthetic_flux, bin_size)
 
         # Plot the noise model
         noise_model(binned_synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, mean_flux_list, RMS_list, N, RNS)
