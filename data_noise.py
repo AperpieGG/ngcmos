@@ -267,27 +267,6 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def bin_flux(synthetic_flux, bin_size):
-    """
-    Bin synthetic flux values.
-
-    Parameters
-    ----------
-    synthetic_flux : array containing synthetic flux values.
-    bin_size : int
-        Number of flux values to combine into one bin.
-
-    Returns
-    -------
-    binned_flux : array
-        Binned synthetic flux values.
-    """
-    n_binned = int(len(synthetic_flux) / bin_size)
-    clip = n_binned * bin_size
-    binned_flux = np.average(synthetic_flux[:clip].reshape(n_binned, bin_size), axis=1)
-    return binned_flux
-
-
 def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
     """
     Returns the noise sources for a given flux
