@@ -311,16 +311,16 @@ def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
     dark_current = dark_current_rate * exposure_time * npix
-    dc_noise = np.sqrt(dark_current) / synthetic_flux
+    dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size)
 
     # set read noise from cmos characterisation
     read_noise_pix = 1.56
-    read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux
+    read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size)
     read_signal = npix * (read_noise_pix ** 2)
 
     # set random sky background
     sky_flux = np.mean(sky_list)
-    sky_noise = np.sqrt(sky_flux) / synthetic_flux
+    sky_noise = np.sqrt(sky_flux) / synthetic_flux / np.sqrt(bin_size)
     print('Average sky flux: ', sky_flux)
 
     # set random photon shot noise from the flux
@@ -329,12 +329,10 @@ def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
 
     N = scintilation_noise(airmass_list)
 
-    N_sc = (N * synthetic_flux) ** 2
-    N = N / np.sqrt(bin_size)
+    N_sc = (N / np.sqrt(bin_size) * synthetic_flux) ** 2
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
-    RNS = total_noise / synthetic_flux
-    RNS = RNS / np.sqrt(bin_size)
+    RNS = total_noise / synthetic_flux / np.sqrt(bin_size)
 
     return synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
