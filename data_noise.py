@@ -336,10 +336,10 @@ def noise_sources(mean_flux_list, sky_list, bin_size, airmass_list):
 
     N_sc = (N * synthetic_flux) ** 2
     N = N / np.sqrt(bin_size)
-    N_sc = N_sc / np.sqrt(bin_size)
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux
+    RNS = RNS / np.sqrt(bin_size)
 
     return synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
