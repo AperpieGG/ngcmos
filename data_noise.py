@@ -155,10 +155,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         fluxerr_4 = gaia_id_data['fluxerr_6']
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
 
-        # if np.max(sky_4) > np.max(flux_4):
-        #     print('Sky flux is greater than flux for gaia_id = {} and Tmag = {:.2f}'.format(gaia_id, Tmag))
-        #     continue
-
         # # exclude stars with flux > 200000
         # if np.max(flux_4) > 200000:
         #     print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
