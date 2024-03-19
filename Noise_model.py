@@ -154,7 +154,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
+        # flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
         zp = []
         detrended_mags = []  # List to store detrended magnitudes
@@ -165,7 +165,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp.append(zp_value)
 
             # Convert detrended flux to magnitudes using zero point
-            detrended_mag = -2.5 * np.log10(flux_4_clipped) + zp_value
+            detrended_mag = -2.5 * np.log10(flux_4) + zp_value
             detrended_mags.append(detrended_mag)
 
         # Plot the detrended magnitudes for this star
@@ -175,10 +175,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         plt.title(f'Detrended Magnitudes for Star {gaia_id}')
         plt.show()
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4_clipped, fluxerr_4, bin_size)
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_4_clipped)
+        mean_flux = np.mean(flux_4)
         RMS = np.std(dt_flux_binned) * 1000000
         mean_sky = np.median(sky_4)
 
