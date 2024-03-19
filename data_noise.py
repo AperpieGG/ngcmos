@@ -288,7 +288,7 @@ def bin_flux(synthetic_flux, bin_size):
     return binned_flux
 
 
-def noise_sources(mean_flux_list, sky_list, bin_size, flux):
+def noise_sources(mean_flux_list, sky_list, bin_size):
     """
     Returns the noise sources for a given flux
 
@@ -325,13 +325,8 @@ def noise_sources(mean_flux_list, sky_list, bin_size, flux):
     # set exposure time and and random flux
     exposure_time = 10
 
-    num_points = len(flux)
-
-    # Determine the step size for the synthetic flux range
-    step_size = (1e6 - 100) / num_points
-
     # Generate synthetic_flux_unbinned with the adjusted step size
-    synthetic_flux_unbinned = np.arange(100, 1e6, step_size)
+    synthetic_flux_unbinned = np.arange(100, 1e6, 10)
     print(synthetic_flux_unbinned)
 
     synthetic_flux = bin_flux(synthetic_flux_unbinned, bin_size)
@@ -421,7 +416,7 @@ def main(phot_file):
 
         # Calculate noise sources
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
-         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['flux_6'])
+         dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list, bin_size)
 
         # Plot the noise model
         noise_model(synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
