@@ -157,29 +157,23 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
 
         zp = []
-        dt_mags = []
+        mags = []  # List to store magnitudes for this star
+
         for frame_id in gaia_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
 
-            # Detrend the flux using zero points
-            detrended_flux = flux_4_clipped / zp_value
+            # Convert flux to magnitudes using zero points
+            mag = -2.5 * np.log10(flux_4) + zp_value
+            mags.append(mag)
 
-            # Convert detrended flux to magnitudes using zero points
-            detrended_mags = -2.5 * np.log10(detrended_flux) + zp_value
-
-            # Append to list
-            dt_mags.append(detrended_mags)
-
-        # Plot the detrended magnitudes for this star
-        plt.plot(jd_mid, dt_mags, 'o', color='darkgreen', label='Detrended Magnitudes', alpha=0.5)
+        # Plot the magnitudes for this star
+        plt.plot(jd_mid, mags, 'o', color='darkgreen', label=f'Magnitudes for Star {gaia_id}', alpha=0.5)
         plt.xlabel('JD Mid')
-        plt.ylabel('Detrended Magnitudes')
-        plt.title(f'Detrended Magnitudes for Star {gaia_id}')
-        plt.ylim(np.mean(dt_mags) - 0.5, np.mean(dt_mags) + 0.5)
+        plt.ylabel('Magnitudes')
+        plt.title(f'Magnitudes for Star {gaia_id}')
         plt.show()
-
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
 
         # Calculate mean flux and RMS
