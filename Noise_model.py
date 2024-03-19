@@ -164,9 +164,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
 
-            # Convert flux to magnitudes using zero points
-            mag = -2.5 * np.log10(flux_4) + zp_value
-            mags.append(mag)
+        # Convert flux to magnitudes using zero points
+        mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4, zp)]
 
         # Plot the magnitudes for this star
         plt.plot(jd_mid, mags, 'o', color='darkgreen', label=f'Magnitudes for Star {gaia_id}', alpha=0.5)
@@ -174,6 +173,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         plt.ylabel('Magnitudes')
         plt.title(f'Magnitudes for Star {gaia_id}')
         plt.show()
+        
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
 
         # Calculate mean flux and RMS
