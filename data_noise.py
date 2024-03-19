@@ -365,6 +365,7 @@ def main(phot_file):
     parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
     args = parser.parse_args()
     gaia_id_to_plot = args.gaia_id
+    bin_size = args.bin
 
     # Set plot parameters
     plot_images()
@@ -380,7 +381,8 @@ def main(phot_file):
         plot_lc_with_detrend(phot_table, gaia_id_to_plot)
     else:
         # Calculate mean and RMS for the noise model
-        mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
+        mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=bin_size,
+                                                                     num_stars=args.num_stars)
 
         # Extract airmass from the photometry table
         airmass_list, zp = extract_header(phot_table, current_night_directory)
