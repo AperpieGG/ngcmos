@@ -168,13 +168,13 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4, zp)]
         mag_error = 1.0857 * fluxerr_4 / flux_4
 
-        # Plot the magnitudes for this star
-        plt.figure(figsize=(10, 4))
-        plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
-        plt.xlabel('JD Mid')
-        plt.ylabel('Magnitudes')
-        plt.title(f'Magnitudes for Star {gaia_id}')
-        plt.show()
+        # # Plot the magnitudes for this star
+        # plt.figure(figsize=(10, 4))
+        # plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
+        # plt.xlabel('JD Mid')
+        # plt.ylabel('Magnitudes')
+        # plt.title(f'Magnitudes for Star {gaia_id}')
+        # plt.show()
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4 / trend
