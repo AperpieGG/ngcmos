@@ -166,6 +166,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         # Detrend the flux using zero points
         detrended_flux = flux_4_clipped / np.mean(zp)
+        print(len(jd_mid), len(detrended_flux))
 
         # Convert detrended flux to magnitudes using zero points
         detrended_mags = -2.5 * np.log10(detrended_flux) + np.mean(zp)
