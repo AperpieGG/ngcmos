@@ -267,22 +267,25 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def bin_flux(synthetic_flux, bin_size):
+def bin_synthetic_flux(synthetic_flux, bin_size):
     """
     Bin synthetic flux values.
+
     Parameters
     ----------
-    synthetic_flux : array containing synthetic flux values.
+    synthetic_flux : array
+        Array containing synthetic flux values.
     bin_size : int
         Number of flux values to combine into one bin.
+
     Returns
     -------
-    binned_flux : array
+    binned_synthetic_flux : array
         Binned synthetic flux values.
     """
     n_binned = len(synthetic_flux) // bin_size
-    binned_flux = np.mean(synthetic_flux[:n_binned*bin_size].reshape(-1, bin_size), axis=1)
-    return binned_flux
+    binned_synthetic_flux = np.mean(synthetic_flux[:n_binned * bin_size].reshape(-1, bin_size), axis=1)
+    return binned_synthetic_flux
 
 
 def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list):
@@ -322,8 +325,7 @@ def noise_sources(mean_flux_list, sky_list, bin_size, time_b, flux, airmass_list
     # set exposure time and and random flux
     exposure_time = 10
 
-    synthetic_flux_unbinned = np.arange(100, 1e6, 10)
-    synthetic_flux = bin_flux(synthetic_flux_unbinned, bin_size)
+    synthetic_flux = np.arange(100, 1e6, 10)
     print('Synthetic flux:', synthetic_flux)
 
     # set dark current rate from cmos characterisation
@@ -413,8 +415,10 @@ def main(phot_file):
         (synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS) \
             = noise_sources(mean_flux_list, sky_list, bin_size, phot_table['jd_mid'], phot_table['flux_2'], airmass_list)
 
+        binned_synthetic_flux = bin_synthetic_flux(synthetic_flux, bin_size)
+
         # Plot the noise model
-        noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, mean_flux_list, RMS_list, N, RNS)
+        noise_model(binned_synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noise, mean_flux_list, RMS_list, N, RNS)
 
 
 def main_loop(phot_files):
