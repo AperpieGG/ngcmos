@@ -205,10 +205,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
     return mean_flux_list, RMS_list, sky_list
 
 
-def extract_airmass_from_table(table, image_directory):
+def extract_header(table, image_directory):
     unique_frame_ids = np.unique(table['frame_id'])
 
     airmass_list = []
+    zp_list = []
 
     for frame_id in unique_frame_ids:
         # Get the path to the FITS file
@@ -218,11 +219,13 @@ def extract_airmass_from_table(table, image_directory):
         with fits.open(fits_file_path) as hdul:
             image_header = hdul[0].header
             airmass = round(image_header['AIRMASS'], 3)
+            zp = image_header['MAGZP_T']
 
         # Append airmass value and frame ID to the list
         airmass_list.append(airmass)
+        zp_list.append(zp)
 
-    return airmass_list
+    return airmass_list, zp_list
 
 
 def plot_lc_with_detrend(table, gaia_id_to_plot):
@@ -394,8 +397,9 @@ def main(phot_file):
         mean_flux_list, RMS_list, sky_list = calculate_mean_rms_flux(phot_table, bin_size=1, num_stars=args.num_stars)
 
         # Extract airmass from the photometry table
-        airmass_list = extract_airmass_from_table(phot_table, current_night_directory)
+        airmass_list, zp = extract_header(phot_table, current_night_directory)
         print(f"Average airmass: {np.mean(airmass_list)}")
+        print(f"Average ZP: {np.mean(zp)}")
 
         (synthetic_flux, photon_shot_noise, sky_flux, sky_noise, read_noise, read_signal,
          dark_current, dc_noise) = noise_sources(mean_flux_list, sky_list)
