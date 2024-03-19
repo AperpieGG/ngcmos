@@ -266,7 +266,7 @@ def main(phot_file):
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
     # Plot the noise model
-    noise_model(mean_flux_list, RMS_list, phot_table['Tmag'])
+    noise_model(mean_flux_list, RMS_list, tmag_list)
 
 
 def main_loop(phot_files):
