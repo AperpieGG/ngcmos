@@ -144,6 +144,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     RMS_list = []
     sky_list = []
     tmag_list = []
+    detrended_mags_all = []  # List to store detrended magnitudes for all stars
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -156,27 +157,29 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         flux_4_clipped = sigma_clip(flux_4, sigma=2, maxiters=5)
 
-        zp = []
-        detrended_mags = []  # List to store detrended magnitudes
+        detrended_mags = []  # List to store detrended magnitudes for this star
 
         for frame_id in gaia_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
-            zp.append(zp_value)
 
-        # Detrend the flux using zero points
-        detrended_flux = flux_4_clipped / np.mean(zp)
-        print(len(jd_mid), len(detrended_flux))
+            # Detrend the flux with the corresponding zero point
+            detrended_flux = flux_4 / 10 ** (0.4 * zp_value)  # Convert to flux units
+            detrended_mag = -2.5 * np.log10(detrended_flux)
 
-        # Convert detrended flux to magnitudes using zero points
-        detrended_mags = -2.5 * np.log10(detrended_flux) + np.mean(zp)
+            detrended_mags.append(detrended_mag)
 
-        # Plot the detrended magnitudes for this star
-        plt.plot(jd_mid, detrended_mags, 'o', color='darkgreen', label='Detrended Magnitudes', alpha=0.5)
-        plt.xlabel('JD Mid')
-        plt.ylabel('Detrended Magnitudes')
-        plt.title(f'Detrended Magnitudes for Star {gaia_id}')
-        plt.show()
+        detrended_mags_all.append(detrended_mags)
+
+    # Plot the detrended magnitudes for all stars
+    for i, detrended_mags_star in enumerate(detrended_mags_all):
+        plt.plot(jd_mid, detrended_mags_star, 'o', label=f'Star {i + 1}', alpha=0.5)
+
+    plt.xlabel('JD Mid')
+    plt.ylabel('Detrended Magnitudes')
+    plt.title('Detrended Magnitudes for All Stars')
+    plt.legend()
+    plt.show()
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux_4, fluxerr_4, bin_size)
 
