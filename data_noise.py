@@ -9,7 +9,7 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import plot_images
-from scipy.stats import linregress
+from scipy.stats import sigmaclip
 
 
 def load_config(filename):
@@ -139,12 +139,11 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def calculate_mean_rms_flux(table, bin_size, num_stars):
+def calculate_mean_rms_flux(table, bin_size, num_stars, sigma=5):
     mean_flux_list = []
     RMS_list = []
     sky_list = []
     tmag_list = []
-    low_rms_gaia_ids = []  # Array to store gaia_id values for stars with RMS < 0.005
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -160,14 +159,17 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     print('Stars with gaia_id = {} and Tmag = {:.2f} have been excluded'.format(gaia_id, Tmag))
         #     continue
 
+        # Sigma clipping
+        flux_4_clipped, _, _ = sigmaclip(flux_4, sigma=sigma)
+
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_4 / trend
+        dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4 / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_4)
+        mean_flux = np.mean(flux_4_clipped)
         RMS = np.std(dt_flux_binned)
         mean_sky = np.median(sky_4)
 
@@ -182,6 +184,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     low_rms_gaia_ids.append(gaia_id)
 
     print('The mean RMS is: ', np.mean(RMS_list))
+    num_clipped = len(flux_4) - len(flux_4_clipped)
+    print('Number of data points clipped:', num_clipped)
     # print('Gaia IDs with RMS < 0.005:', low_rms_gaia_ids)  # Print the array of gaia_id values for low RMS stars
 
     return mean_flux_list, RMS_list, sky_list
