@@ -166,7 +166,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         # Convert flux to magnitudes using zero points
         mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4, zp)]
-        mag_error = [2.5 * np.log10(fluxerr) + zp_value for fluxerr, zp_value in zip(fluxerr_4, zp)]
+        mag_error = 1.0857 * fluxerr_4 / flux_4
 
         # Plot the magnitudes for this star
         plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
