@@ -162,10 +162,20 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
+            print(f"ZP value for {frame_id}: {zp_value}")
 
-        # Convert flux to magnitudes using zero points
-        mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4_clipped, zp)]
-        mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
+        mags = []
+        for flux, zp_value in zip(flux_4_clipped, zp):
+            if np.ma.is_masked(flux):  # Check if flux value is masked
+                # If flux value is masked (rejected), skip the calculation
+                mags.append(np.nan)  # or any other value to indicate missing data
+            else:
+                # Convert the non-rejected flux value to magnitude using the zero point
+                mag = -2.5 * np.log10(flux) + zp_value
+                mags.append(mag)
+        # # Convert flux to magnitudes using zero points
+        # mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4_clipped, zp)]
+        # mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
 
         # # Plot the magnitudes for this star
         # plt.figure(figsize=(10, 4))
