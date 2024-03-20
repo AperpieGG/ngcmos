@@ -69,7 +69,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4, zp):
             if flux <= 0 or np.isnan(flux):
-                print(f"The Star with negative flux is {gaia_id}")
+                print(f"The Star {gaia_id} has a negative data point. Skipping the entire light curve.")
                 # Skip the entire light curve if a flux data point is negative or NaN
                 continue
             else:
@@ -98,7 +98,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
         mean_mags = np.mean(mags)
-        RMS = np.std(dt_flux)  # Convert to ppm (the binned goes here)
+        RMS = np.std(dt_flux) * 1000000  # Convert to ppm
         mean_sky = np.median(sky_4)
 
         # Append to lists
@@ -143,7 +143,7 @@ def scintilation_noise(airmass_list):
     H = 8000  # height of atmospheric scale
     airmass = np.mean(airmass_list)  # airmass
     C_y = 1.54  # constant
-    N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
+    N = np.sqrt((C_y ** 2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
     print('Scintilation noise: ', N)
     return N
 
@@ -218,7 +218,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux / np.sqrt(bin_size)
-    RNS = RNS
+    RNS = RNS * 1000000  # Convert to ppm
 
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
