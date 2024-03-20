@@ -169,7 +169,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     """
 
     # set aperture radius
-    aperture_radius = 6
+    aperture_radius = 3
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
@@ -224,8 +224,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     plt.tight_layout()
-    ax.invert_xaxis()
-
+    # ax.invert_xaxis()
     plt.legend(loc='best')
     plt.show()
 
