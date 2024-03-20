@@ -73,7 +73,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 continue
             else:
                 # Convert the non-rejected flux value to magnitude using the zero point
-                mag = -2.5 * np.log10(flux/t) + zp_value
+                zpoint = 20.95
+                mag = -2.5 * np.log10(flux/t) + np.ones(zpoint)
                 mag_error = 1.0857 * fluxerr_4 / flux_4
 
                 mags.append(mag)
