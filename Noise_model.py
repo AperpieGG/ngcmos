@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+"""
+This script calculates the noise model for the TESS data. The noise is calculated using detrended fluxes from airmass
+The fluxes are converted to magnitudes using zero points. The final plot is RMS vs magnitudes.
+"""
+
 import argparse
 import os
 import numpy as np
@@ -57,28 +63,32 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         for flux, zp_value in zip(flux_4_clipped, zp):
             if np.ma.is_masked(flux) or flux <= 0 or np.isnan(flux):
+                print(f"The gaia_id with negative flux is {gaia_id}")
                 # Skip the calculation if flux value is masked, negative, or NaN
                 mags.append(np.nan)  # or any other value to indicate missing data
             else:
                 # Convert the non-rejected flux value to magnitude using the zero point
                 mag = -2.5 * np.log10(flux) + zp_value
+                mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
+
                 mags.append(mag)
 
-        # # Convert flux to magnitudes using zero points
-        # mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4_clipped, zp)]
-        # mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
+        # Plot the magnitudes for this star
+        plt.figure(figsize=(10, 4))
+        plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
+        plt.xlabel('JD Mid')
+        plt.ylabel('Magnitudes')
+        plt.title(f'Magnitudes for Star {gaia_id}')
+        plt.show()
 
-        # # Plot the magnitudes for this star
-        # plt.figure(figsize=(10, 4))
-        # plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
-        # plt.xlabel('JD Mid')
-        # plt.ylabel('Magnitudes')
-        # plt.title(f'Magnitudes for Star {gaia_id}')
-        # plt.show()
+        # Detrend the flux by converting back to fluxes and normalize by the mean lc
+        fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
+        mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
+        dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4 / trend
+        # trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
+        # dt_flux = flux_4_clipped / trend
+        dt_fluxerr = fluxerr_4 / mean_flux
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
