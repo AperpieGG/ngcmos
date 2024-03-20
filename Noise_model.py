@@ -73,8 +73,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 continue
             else:
                 # Convert the non-rejected flux value to magnitude using the zero point
-                zpoint = 20.95
-                mag = -2.5 * np.log10(flux/t) + zpoint
+                mag = -2.5 * np.log10(flux/t) + zp_value
                 mag_error = 1.0857 * fluxerr_4 / flux_4
 
                 mags.append(mag)
@@ -194,7 +193,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     exposure_time = 10
 
     synthetic_flux = np.arange(100, 1e6, 10)
-    synthetic_mag = np.mean(zp) - 2.5*np.log10(synthetic_flux)
+    synthetic_mag = np.mean(zp) - 2.5*np.log10(synthetic_flux/exposure_time)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
