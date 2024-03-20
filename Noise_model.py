@@ -93,7 +93,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
         dt_fluxerr = fluxerr_4 / mean_flux # Normalize the flux errors by dividing by the average flux
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+        # time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
