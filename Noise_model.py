@@ -198,7 +198,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
 
     N = scintilation_noise(airmass_list)
 
-    N_sc = (N * synthetic_mag) ** 2
+    N_sc = (N * synthetic_flux) ** 2
     N = N / np.sqrt(bin_size)
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
@@ -224,7 +224,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     plt.tight_layout()
-    # ax.invert_xaxis()
+    ax.invert_xaxis()
     plt.legend(loc='best')
     plt.show()
 
