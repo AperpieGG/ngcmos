@@ -37,22 +37,24 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     mean_flux_list = []
     RMS_list = []
     sky_list = []
-    tmag_list = []
     mags_list = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
-        Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
         flux_4 = gaia_id_data['flux_6']
         fluxerr_4 = gaia_id_data['fluxerr_6']
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        flux_4_clipped = sigma_clip(flux_4, sigma=5, maxiters=1)
-        flux_4_clipped = flux_4_clipped.data
-        sky_4_clipped = sigma_clip(sky_4, sigma=5, maxiters=1)
-        sky_4_clipped = sky_4_clipped.data
+        # Apply sigma clipping to flux and sky arrays
+        flux_mask = np.logical_or(flux_4 <= 0, np.isnan(flux_4))
+        clipped_flux = sigma_clip(flux_4, sigma=5, mask=flux_mask)
+        flux_4_clipped = clipped_flux.data
+
+        sky_mask = np.logical_or(sky_4 <= 0, np.isnan(sky_4))
+        clipped_sky = sigma_clip(sky_4, sigma=5, mask=sky_mask)
+        sky_4_clipped = clipped_sky.data
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
@@ -102,10 +104,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
-        tmag_list.append(Tmag)
         mags_list.append(mean_mags)
 
-    return mean_flux_list, RMS_list, sky_list, tmag_list, mags_list, zp
+    return mean_flux_list, RMS_list, sky_list, mags_list, zp
 
 
 def extract_header(table, image_directory):
@@ -266,7 +267,7 @@ def main(phot_file):
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, tmag_list, mags_list, zp = calculate_mean_rms_flux(
+    mean_flux_list, RMS_list, sky_list, mags_list, zp = calculate_mean_rms_flux(
         phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Get noise sources
