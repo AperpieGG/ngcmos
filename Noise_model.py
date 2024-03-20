@@ -75,7 +75,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 # Convert the non-rejected flux value to magnitude using the zero point
                 mag = -2.5 * np.log10(flux/t) + zp_value
                 mag_error = 1.0857 * fluxerr_4 / flux_4
-
+                print(f"Running for star {gaia_id} with Tmag = {Tmag:.2f} at mag = {mag:.2f}")
                 mags.append(mag)
 
         # # Plot the magnitudes for this star
