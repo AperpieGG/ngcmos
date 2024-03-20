@@ -78,7 +78,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4_clipped, zp):
-            mag = -2.5 * np.log10(flux) + zp_value
+            mag = -2.5 * np.log10(flux/t) + zp_value
             mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
             mags.append(mag)
 
@@ -91,14 +91,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # plt.show()
 
         # # Detrend the flux by converting back to fluxes and normalize by the mean lc
-        # fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
-        # mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
-        # dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
-        # dt_fluxerr = fluxerr_4 / mean_flux  # Normalize the flux errors by dividing by the average flux
+        fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
+        mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
+        dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
+        dt_fluxerr = fluxerr_4 / mean_flux  # Normalize the flux errors by dividing by the average flux
 
-        trend = np.polyval(np.polyfit(jd_mid_clipped - int(jd_mid_clipped[0]), fluxerr_4_clipped, 2), jd_mid_clipped - int(jd_mid_clipped[0]))
-        dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4_clipped / trend
+        # trend = np.polyval(np.polyfit(jd_mid_clipped - int(jd_mid_clipped[0]), fluxerr_4_clipped, 2),
+        # jd_mid_clipped - int(jd_mid_clipped[0]))
+        # dt_flux = flux_4_clipped / trend
+        # dt_fluxerr = fluxerr_4_clipped / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid_clipped, dt_flux, dt_fluxerr, bin_size)
 
