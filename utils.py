@@ -448,31 +448,6 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def extract_header(table, image_directory):
-    unique_frame_ids = np.unique(table['frame_id'])
-
-    airmass_list = []
-    zp_list = []
-
-    for frame_id in unique_frame_ids:
-        # Get the path to the FITS file
-        fits_file_path = os.path.join(image_directory, frame_id)
-
-        # Read FITS file header to extract airmass
-        with fits.open(fits_file_path) as hdul:
-            image_header = hdul[0].header
-            airmass = round(image_header['AIRMASS'], 3)
-            zp = image_header['MAGZP_T']
-
-        # Append airmass value and frame ID to the list
-        airmass_list.append(airmass)
-        zp_list.append(zp)
-
-    print(f"Average airmass: {np.mean(airmass_list)}")
-    print(f"Average ZP: {np.mean(zp)}")
-
-    return airmass_list, zp_list
-
 
 
 
