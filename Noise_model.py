@@ -47,8 +47,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        print(f"Running light curve for star {gaia_id}...")
-
         # # Apply sigma clipping to flux and sky arrays
         # flux_mask = np.logical_or(flux_4 <= 0, np.isnan(flux_4))
         # clipped_flux = sigma_clipped_stats(flux_4, sigma=5, mask=flux_mask)
@@ -65,18 +63,20 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp.append(zp_value)
 
         mags = []
-        t = 10  # exposure time
-        for flux, zp_value in zip(flux_4, zp):
+        jd_mid_valid = []
+        for flux, jd, zp_value in zip(flux_4, jd_mid, zp):
             if flux <= 0 or np.isnan(flux):
-                print(f"The Star with negative flux is {gaia_id}")
-                # Skip the entire light curve if a flux data point is negative or NaN
+                print(f"Exclude star with negative flux is {gaia_id}")
+                # Skip the entire data point if a flux data point is negative or NaN
                 continue
             else:
                 # Convert the non-rejected flux value to magnitude using the zero point
-                mag = -2.5 * np.log10(flux/t) + zp_value
+                print(f"Running light curve for star {gaia_id}...")
+                mag = -2.5 * np.log10(flux) + zp_value
                 mag_error = 1.0857 * fluxerr_4 / flux_4
 
                 mags.append(mag)
+                jd_mid_valid.append(jd)
 
         # # Plot the magnitudes for this star
         # plt.figure(figsize=(10, 4))
@@ -95,7 +95,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4 / mean_flux
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid_valid, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
