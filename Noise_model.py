@@ -42,12 +42,13 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
+        Tmag = gaia_id_data['Tmag'][0]
         flux_4 = gaia_id_data['flux_6']
         fluxerr_4 = gaia_id_data['fluxerr_6']
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        print(f"Running light curve for star {gaia_id}...")
+        print(f"Running light curve for star {gaia_id} with {Tmag} magnitude...")
 
         # # Apply sigma clipping to flux and sky arrays
         # flux_mask = np.logical_or(flux_4 <= 0, np.isnan(flux_4))
