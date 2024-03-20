@@ -61,7 +61,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 # Convert the non-rejected flux value to magnitude using the zero point
                 mag = -2.5 * np.log10(flux) + zp_value
                 mags.append(mag)
-                
+
         # # Convert flux to magnitudes using zero points
         # mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4_clipped, zp)]
         # mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
@@ -181,11 +181,19 @@ def noise_sources(sky_list, bin_size, zp):
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
 
-def noise_model(RMS_list, mag_list):
+def noise_model(RMS_list, mag_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS):
     fig, ax = plt.subplots(figsize=(10, 8))
     print('RMS list: ', RMS_list)
     print('mag list: ', mag_list)
     ax.plot(mag_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
+
+    ax.plot(synthetic_mag, RNS, color='black', label='total noise')
+    ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
+    ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
+    ax.plot(synthetic_mag, dc_noise, color='purple', label='dark noise', linestyle='--')
+    ax.plot(synthetic_mag, sky_noise, color='blue', label='sky bkg', linestyle='--')
+    ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintilation noise',
+            linestyle='--')
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
