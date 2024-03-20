@@ -61,6 +61,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 # Convert the non-rejected flux value to magnitude using the zero point
                 mag = -2.5 * np.log10(flux) + zp_value
                 mags.append(mag)
+                
         # # Convert flux to magnitudes using zero points
         # mags = [-2.5 * np.log10(flux) + zp_value for flux, zp_value in zip(flux_4_clipped, zp)]
         # mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
@@ -92,7 +93,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         tmag_list.append(Tmag)
         mags_list.append(mean_mags)
 
-    return mean_flux_list, RMS_list, sky_list, tmag_list, mags_list
+    return mean_flux_list, RMS_list, sky_list, tmag_list, mags_list, zp
 
 
 def scintilation_noise():
@@ -102,13 +103,82 @@ def scintilation_noise():
     H = 8000  # height of atmospheric scale
     airmass_list, zp_list = extract_header()
     airmass = np.mean(airmass_list)  # airmass
-    C_y = 1.54
-    secZ = 1.2  # airmass
-    W = 1.75  # wind speed
-    # N = 0.09 * (D ** (-2 / 3) * secZ ** W * np.exp(-h / ho)) * (2 * t) ** (-1 / 2)
+    C_y = 1.54  # constant
     N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
     print('Scintilation noise: ', N)
     return N
+
+
+def noise_sources(sky_list, bin_size, zp):
+    """
+    Returns the noise sources for a given flux
+
+    returns arrays of noise and signal for a given flux
+
+    Parameters
+    ----------
+    sky_list : list
+        values of sky fluxes
+    bin_size : int
+        number of images to bin
+    zp : list
+        values of zero points
+
+    Returns
+    -------
+    synthetic_mag : array
+        values of synthetic magnitudes
+    photon_shot_noise : array
+        values of photon shot noise
+    sky_noise : array
+        values of sky noise
+    read_noise : array
+        values of read noise
+    dc_noise : array
+        values of dark current noise
+    N : array
+        values of scintilation noise
+    RNS : array
+        values of read noise squared
+    """
+
+    # set aperture radius
+    aperture_radius = 6
+    npix = np.pi * aperture_radius ** 2
+
+    # set exposure time and and random flux
+    exposure_time = 10
+
+    synthetic_flux = np.arange(100, 1e6, 10)
+    synthetic_mag = np.mean(zp) - 2.5*np.log10(synthetic_flux)
+
+    # set dark current rate from cmos characterisation
+    dark_current_rate = 1.6
+    dark_current = dark_current_rate * exposure_time * npix
+    dc_noise = np.sqrt(dark_current) / synthetic_mag / np.sqrt(bin_size)
+
+    # set read noise from cmos characterisation
+    read_noise_pix = 1.56
+    read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_mag / np.sqrt(bin_size)
+    read_signal = npix * (read_noise_pix ** 2)
+
+    # set random sky background
+    sky_flux = np.mean(sky_list)
+    sky_noise = np.sqrt(sky_flux) / synthetic_mag / np.sqrt(bin_size)
+    print('Average sky flux: ', sky_flux)
+
+    # set random photon shot noise from the flux
+    photon_shot_noise = np.sqrt(synthetic_mag) / synthetic_mag / np.sqrt(bin_size)
+
+    N = scintilation_noise()
+
+    N_sc = (N * synthetic_mag) ** 2
+    N = N / np.sqrt(bin_size)
+
+    total_noise = np.sqrt(synthetic_mag + sky_flux + dark_current + read_signal + N_sc)
+    RNS = total_noise / synthetic_mag / np.sqrt(bin_size)
+
+    return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
 
 def noise_model(RMS_list, mag_list):
@@ -145,7 +215,7 @@ def main(phot_file):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, tmag_list, mags_list = calculate_mean_rms_flux(
+    mean_flux_list, RMS_list, sky_list, tmag_list, mags_list, zp = calculate_mean_rms_flux(
         phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Plot the noise model
