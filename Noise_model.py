@@ -75,14 +75,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4_clipped, zp):
-            if flux <= 0 or np.isnan(flux):
-                # Skip the entire light curve if a flux data point is negative or NaN
-                continue
-            else:
-                # Convert the non-rejected flux value to magnitude using the zero point
-                mag = -2.5 * np.log10(flux/t) + zp_value
-                mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
-                mags.append(mag)
+            mag = -2.5 * np.log10(flux/t) + zp_value
+            mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
+            mags.append(mag)
 
         # # Plot the magnitudes for this star
         # plt.figure(figsize=(10, 4))
