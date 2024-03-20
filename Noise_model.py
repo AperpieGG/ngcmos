@@ -96,12 +96,37 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     return mean_flux_list, RMS_list, sky_list, tmag_list, mags_list, zp
 
 
-def scintilation_noise():
+def extract_header(table, image_directory):
+    unique_frame_ids = np.unique(table['frame_id'])
+
+    airmass_list = []
+    zp_list = []
+
+    for frame_id in unique_frame_ids:
+        # Get the path to the FITS file
+        fits_file_path = os.path.join(image_directory, frame_id)
+
+        # Read FITS file header to extract airmass
+        with fits.open(fits_file_path) as hdul:
+            image_header = hdul[0].header
+            airmass = round(image_header['AIRMASS'], 3)
+            zp = image_header['MAGZP_T']
+
+        # Append airmass value and frame ID to the list
+        airmass_list.append(airmass)
+        zp_list.append(zp)
+
+    print(f"Average airmass: {np.mean(airmass_list)}")
+    print(f"Average ZP: {np.mean(zp)}")
+
+    return airmass_list, zp_list
+
+
+def scintilation_noise(airmass_list):
     t = 10  # exposure time
     D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
     H = 8000  # height of atmospheric scale
-    airmass_list, zp_list = extract_header()
     airmass = np.mean(airmass_list)  # airmass
     C_y = 1.54  # constant
     N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
@@ -109,7 +134,7 @@ def scintilation_noise():
     return N
 
 
-def noise_sources(sky_list, bin_size, zp):
+def noise_sources(sky_list, bin_size, airmass_list, zp):
     """
     Returns the noise sources for a given flux
 
@@ -121,6 +146,8 @@ def noise_sources(sky_list, bin_size, zp):
         values of sky fluxes
     bin_size : int
         number of images to bin
+    airmass_list : list
+        values of airmass
     zp : list
         values of zero points
 
@@ -170,7 +197,7 @@ def noise_sources(sky_list, bin_size, zp):
     # set random photon shot noise from the flux
     photon_shot_noise = np.sqrt(synthetic_mag) / synthetic_mag / np.sqrt(bin_size)
 
-    N = scintilation_noise()
+    N = scintilation_noise(airmass_list)
 
     N_sc = (N * synthetic_mag) ** 2
     N = N / np.sqrt(bin_size)
@@ -222,12 +249,15 @@ def main(phot_file):
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
+    airmass_list, zp = extract_header(phot_table, current_night_directory)
+
     # Calculate mean and RMS for the noise model
     mean_flux_list, RMS_list, sky_list, tmag_list, mags_list, zp = calculate_mean_rms_flux(
         phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Get noise sources
-    synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = noise_sources(sky_list, bin_size, zp)
+    synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
+        noise_sources(sky_list, bin_size, airmass_list, zp))
 
     # Plot the noise model
     noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS)
