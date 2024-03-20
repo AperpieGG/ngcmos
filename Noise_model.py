@@ -38,10 +38,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
-        flux_4 = gaia_id_data['flux_3']
-        fluxerr_4 = gaia_id_data['fluxerr_3']
-        sky_4 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
-        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
+        flux_4 = gaia_id_data['flux_6']
+        fluxerr_4 = gaia_id_data['fluxerr_6']
+        sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
+        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
         flux_4_clipped = sigma_clip(flux_4, sigma=5, maxiters=1)
 
@@ -82,12 +82,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4_clipped)
         mean_mags = np.mean(mags)
-        RMS = np.std(dt_flux_binned) * 1000000  # Convert to ppm
+        RMS = np.std(dt_flux_binned)  # Convert to ppm
         mean_sky = np.median(sky_4)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
-        RMS_list.append(RMS) 
+        RMS_list.append(RMS)
         sky_list.append(mean_sky)
         tmag_list.append(Tmag)
         mags_list.append(mean_mags)
@@ -169,7 +169,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     """
 
     # set aperture radius
-    aperture_radius = 3
+    aperture_radius = 6
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
@@ -203,7 +203,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
 
     total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
     RNS = total_noise / synthetic_flux / np.sqrt(bin_size)
-    RNS = RNS * 1000000
+    RNS = RNS
 
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
