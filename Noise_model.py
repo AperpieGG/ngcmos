@@ -91,17 +91,14 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
         mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
         dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
-
-        # trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
-        # dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4 / mean_flux
+        dt_fluxerr = fluxerr_4 / mean_flux # Normalize the flux errors by dividing by the average flux
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4)
         mean_mags = np.mean(mags)
-        RMS = np.std(dt_flux_binned)  # Convert to ppm
+        RMS = np.std(dt_flux)  # Convert to ppm (the binned goes here)
         mean_sky = np.median(sky_4)
 
         # Append to lists
