@@ -98,7 +98,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         trend = np.polyval(np.polyfit(jd_mid_clipped - int(jd_mid_clipped[0]), fluxerr_4_clipped, 2), jd_mid_clipped - int(jd_mid_clipped[0]))
         dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4 / trend
+        dt_fluxerr = fluxerr_4_clipped / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid_clipped, dt_flux, dt_fluxerr, bin_size)
 
