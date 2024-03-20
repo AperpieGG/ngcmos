@@ -50,11 +50,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Apply sigma clipping to flux and sky arrays
         flux_mask = np.logical_or(flux_4 <= 0, np.isnan(flux_4))
         clipped_flux = sigma_clipped_stats(flux_4, sigma=5, mask=flux_mask)
-        flux_4_clipped = clipped_flux[0]
+        flux_4_clipped = clipped_flux
 
         sky_mask = np.logical_or(sky_4 <= 0, np.isnan(sky_4))
         clipped_sky = sigma_clipped_stats(sky_4, sigma=5, mask=sky_mask)
-        sky_4_clipped = clipped_sky[0]
+        sky_4_clipped = clipped_sky
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
