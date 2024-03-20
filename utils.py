@@ -1,6 +1,9 @@
 """
 Functions for handling on-sky or on chip coordinates
 """
+import fnmatch
+import os
+from datetime import datetime, timedelta
 from astropy.io import fits
 import sep
 import numpy as np
@@ -334,6 +337,142 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.12):
             # stack the new columns onto the RHS of the table
             Tout = hstack([Tout, T])
     return Tout
+
+
+def find_current_night_directory(directory):
+    """
+    Find the directory for the current night based on the current date.
+    If not found, use the current working directory.
+
+    Parameters
+    ----------
+    directory : str
+        Base path for the directory.
+
+    Returns
+    -------
+    str
+        Path to the current night directory.
+    """
+    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+    current_date_directory = os.path.join(directory, previous_date)
+    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
+
+
+def get_phot_files(directory):
+    """
+    Get photometry files with the pattern 'phot_*.fits' from the directory.
+
+    Parameters
+    ----------
+    directory : str
+        Directory containing the files.
+
+    Returns
+    -------
+    list of str
+        List of photometry files matching the pattern.
+    """
+    phot_files = []
+    for filename in os.listdir(directory):
+        if fnmatch.fnmatch(filename, 'phot_*.fits'):
+            phot_files.append(filename)
+    return phot_files
+
+
+def read_phot_file(filename):
+    """
+    Read the photometry file.
+
+    Parameters
+    ----------
+    filename : str
+        Photometry file to read.
+
+    Returns
+    -------
+    astropy.table.table.Table
+        Table containing the photometry data.
+    """
+    # Read the photometry file here using fits or any other appropriate method
+    try:
+        with fits.open(filename) as ff:
+            # Access the data in the photometry file as needed
+            tab = ff[1].data
+            return tab
+    except Exception as e:
+        print(f"Error reading photometry file {filename}: {e}")
+        return None
+
+
+def bin_time_flux_error(time, flux, error, bin_fact):
+    """
+    Use reshape to bin light curve data, clip under filled bins
+    Works with 2D arrays of flux and errors
+
+    Note: under filled bins are clipped off the end of the series
+
+    Parameters
+    ----------
+    time : array         of times to bin
+    flux : array         of flux values to bin
+    error : array         of error values to bin
+    bin_fact : int
+        Number of measurements to combine
+
+    Returns
+    -------
+    times_b : array
+        Binned times
+    flux_b : array
+        Binned fluxes
+    error_b : array
+        Binned errors
+
+    Raises
+    ------
+    None
+    """
+    n_binned = int(len(time) / bin_fact)
+    clip = n_binned * bin_fact
+    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
+    # determine if 1 or 2d flux/err inputs
+    if len(flux.shape) == 1:
+        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
+        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
+    else:
+        # assumed 2d with 1 row per star
+        n_stars = len(flux)
+        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
+        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
+    return time_b, flux_b, error_b
+
+
+def extract_header(table, image_directory):
+    unique_frame_ids = np.unique(table['frame_id'])
+
+    airmass_list = []
+    zp_list = []
+
+    for frame_id in unique_frame_ids:
+        # Get the path to the FITS file
+        fits_file_path = os.path.join(image_directory, frame_id)
+
+        # Read FITS file header to extract airmass
+        with fits.open(fits_file_path) as hdul:
+            image_header = hdul[0].header
+            airmass = round(image_header['AIRMASS'], 3)
+            zp = image_header['MAGZP_T']
+
+        # Append airmass value and frame ID to the list
+        airmass_list.append(airmass)
+        zp_list.append(zp)
+
+    print(f"Average airmass: {np.mean(airmass_list)}")
+    print(f"Average ZP: {np.mean(zp)}")
+
+    return airmass_list, zp_list
+
 
 
 
