@@ -44,6 +44,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
         flux_4_clipped = sigma_clip(flux_4, sigma=5, maxiters=1)
+        flux_4_clipped = flux_4_clipped.data
+        sky_4_clipped = sigma_clip(sky_4, sigma=5, maxiters=1)
+        sky_4_clipped = sky_4_clipped.data
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
@@ -83,7 +86,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mean_flux = np.mean(flux_4_clipped)
         mean_mags = np.mean(mags)
         RMS = np.std(dt_flux_binned)  # Convert to ppm
-        mean_sky = np.median(sky_4)
+        mean_sky = np.median(sky_4_clipped)
 
         # Append to lists
         mean_flux_list.append(mean_flux)
