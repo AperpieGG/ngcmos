@@ -52,12 +52,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
 
-        plt.figure(figsize=(10, 4))
-        plt.plot(jd_mid, zp, 'o', color='black')
-        plt.xlabel('JD Mid')
-        plt.ylabel('ZP')
-        plt.show()
-
         mags = []
         for flux, zp_value in zip(flux_4_clipped, zp):
             if np.ma.is_masked(flux):  # Check if flux value is masked
@@ -79,6 +73,11 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # plt.title(f'Magnitudes for Star {gaia_id}')
         # plt.show()
 
+        plt.figure(figsize=(10, 4))
+        plt.plot(jd_mid, zp, 'o', color='black')
+        plt.xlabel('JD Mid')
+        plt.ylabel('ZP')
+        plt.show()
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
