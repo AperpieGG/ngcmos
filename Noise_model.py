@@ -181,11 +181,11 @@ def noise_sources(sky_list, bin_size, zp):
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
 
-def noise_model(RMS_list, mag_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS):
+def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS):
     fig, ax = plt.subplots(figsize=(10, 8))
     print('RMS list: ', RMS_list)
-    print('mag list: ', mag_list)
-    ax.plot(mag_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
+    print('mag list: ', mags_list)
+    ax.plot(mags_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
 
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
@@ -226,8 +226,11 @@ def main(phot_file):
     mean_flux_list, RMS_list, sky_list, tmag_list, mags_list, zp = calculate_mean_rms_flux(
         phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
+    # Get noise sources
+    synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = noise_sources(sky_list, bin_size, zp)
+
     # Plot the noise model
-    noise_model(RMS_list, mags_list)
+    noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS)
 
 
 def main_loop(phot_files):
