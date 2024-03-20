@@ -48,15 +48,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
         print(f"Running light curve for star {gaia_id}...")
-        
-        # Apply sigma clipping to flux and sky arrays
-        flux_mask = np.logical_or(flux_4 <= 0, np.isnan(flux_4))
-        clipped_flux = sigma_clipped_stats(flux_4, sigma=5, mask=flux_mask)
-        flux_4_clipped = clipped_flux
 
-        sky_mask = np.logical_or(sky_4 <= 0, np.isnan(sky_4))
-        clipped_sky = sigma_clipped_stats(sky_4, sigma=5, mask=sky_mask)
-        sky_4_clipped = clipped_sky
+        # # Apply sigma clipping to flux and sky arrays
+        # flux_mask = np.logical_or(flux_4 <= 0, np.isnan(flux_4))
+        # clipped_flux = sigma_clipped_stats(flux_4, sigma=5, mask=flux_mask)
+        # flux_4_clipped = clipped_flux
+        #
+        # sky_mask = np.logical_or(sky_4 <= 0, np.isnan(sky_4))
+        # clipped_sky = sigma_clipped_stats(sky_4, sigma=5, mask=sky_mask)
+        # sky_4_clipped = clipped_sky
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
@@ -65,7 +65,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp.append(zp_value)
 
         mags = []
-        for flux, zp_value in zip(flux_4_clipped, zp):
+        for flux, zp_value in zip(flux_4, zp):
             if flux <= 0 or np.isnan(flux):
                 print(f"The Star with negative flux is {gaia_id}")
                 # Skip the entire light curve if a flux data point is negative or NaN
@@ -73,7 +73,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             else:
                 # Convert the non-rejected flux value to magnitude using the zero point
                 mag = -2.5 * np.log10(flux) + zp_value
-                mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
+                mag_error = 1.0857 * fluxerr_4 / flux_4
 
                 mags.append(mag)
 
