@@ -78,7 +78,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4_clipped, zp):
-            mag = -2.5 * np.log10(flux/t) + zp_value
+            mag = -2.5 * np.log10(flux) + zp_value
             mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
             mags.append(mag)
 
