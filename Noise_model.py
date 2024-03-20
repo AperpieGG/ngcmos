@@ -104,7 +104,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid_clipped, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(fluxes_detrended)
+        mean_flux = np.mean(dt_flux_binned)
         mean_mags = np.mean(mags)
         RMS = np.std(dt_flux_binned) * 1000000  # Convert to ppm
         mean_sky = np.median(sky_4)
