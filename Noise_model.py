@@ -52,7 +52,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         # Apply sigma clipping to flux and sky arrays
         # Apply sigma clipping to identify outliers
-        clipped_flux = sigma_clip(flux_4, sigma=5)
+        clipped_flux = sigma_clip(flux_4, sigma=3, maxiters=5)
 
         # Replace outliers with NaN in flux_4
         flux_4_clipped = flux_4.copy()  # Make a copy of flux_4
@@ -73,6 +73,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4_clipped, zp):
+            if flux is np.nan:
+                continue
             mag = -2.5 * np.log10(flux/t) + zp_value
             mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
             mags.append(mag)
