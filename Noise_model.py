@@ -65,8 +65,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         # Mask outliers in flux_4 and jd_mid
         flux_4_clipped = flux_4[~clipped_flux.mask]
+        fluxerr_4_clipped = fluxerr_4[~clipped_flux.mask]
         jd_mid_clipped = jd_mid[~clipped_flux.mask]
-        print(f"Number of non-outliers: {len(flux_4_clipped)}")
+        print(f"Number of non-outliers: {len(clipped_flux.mask)}")
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
@@ -78,7 +79,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4_clipped, zp):
             mag = -2.5 * np.log10(flux/t) + zp_value
-            mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
+            mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
             mags.append(mag)
 
         # # Plot the magnitudes for this star
