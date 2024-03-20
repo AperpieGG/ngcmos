@@ -54,17 +54,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Apply sigma clipping to identify outliers
         clipped_flux = sigma_clip(flux_4, sigma=5)
 
-        # Replace outliers with NaN
+        # Replace outliers with NaN in flux_4
         flux_4_clipped = flux_4.copy()  # Make a copy of flux_4
         flux_4_clipped[clipped_flux.mask] = np.nan
+        print(f"Number of outliers: {np.sum(clipped_flux.mask)}")
 
         # Replace corresponding jd_mid values with NaN
         jd_mid_clipped = jd_mid.copy()  # Make a copy of jd_mid
         jd_mid_clipped[clipped_flux.mask] = np.nan
-
-        # sky_mask = np.logical_or(sky_4 <= 0, np.isnan(sky_4))
-        # clipped_sky = sigma_clipped_stats(sky_4, sigma=5, mask=sky_mask)
-        # sky_4_clipped = clipped_sky
+        print(f"Number of outliers in jd_mid: {np.sum(clipped_flux.mask)}")
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
