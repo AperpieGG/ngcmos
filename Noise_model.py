@@ -63,8 +63,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         for flux, zp_value in zip(flux_4_clipped, zp):
             if flux <= 0 or np.isnan(flux):
-                print(f"The gaia_id with negative flux is {gaia_id}")
-                mags.append(np.nan)  # or any other value to indicate missing data
+                print(f"The Star with negative flux is {gaia_id}")
+                # Skip the entire light curve if a flux data point is negative or NaN
                 continue
             else:
                 # Convert the non-rejected flux value to magnitude using the zero point
