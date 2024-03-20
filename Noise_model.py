@@ -62,7 +62,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         mags = []
         for flux, zp_value in zip(flux_4_clipped, zp):
-            if np.ma.is_masked(flux) or flux <= 0 or np.isnan(flux):
+            if flux <= 0 or np.isnan(flux):
                 print(f"The gaia_id with negative flux is {gaia_id}")
                 # Skip the calculation if flux value is masked, negative, or NaN
                 mags.append(np.nan)  # or any other value to indicate missing data
