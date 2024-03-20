@@ -56,8 +56,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         mags = []
         for flux, zp_value in zip(flux_4_clipped, zp):
-            if np.ma.is_masked(flux):  # Check if flux value is masked
-                # If flux value is masked (rejected), skip the calculation
+            if np.ma.is_masked(flux) or flux <= 0 or np.isnan(flux):
+                # Skip the calculation if flux value is masked, negative, or NaN
                 mags.append(np.nan)  # or any other value to indicate missing data
             else:
                 # Convert the non-rejected flux value to magnitude using the zero point
@@ -228,6 +228,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(5.5, 14)
+    ax.set_ylim(0.001, 10)
     ax.invert_xaxis()
     plt.legend(loc='best')
     plt.tight_layout()
