@@ -77,9 +77,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         mags = []
         t = 10  # exposure time
-        for flux, zp_value in zip(flux_4, zp):
+        for flux, zp_value in zip(flux_4_clipped, zp):
             mag = -2.5 * np.log10(flux/t) + zp_value
-            mag_error = 1.0857 * fluxerr_4 / flux_4
+            mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
             mags.append(mag)
 
         # # Plot the magnitudes for this star
@@ -96,14 +96,14 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
         # dt_fluxerr = fluxerr_4 / mean_flux  # Normalize the flux errors by dividing by the average flux
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxerr_4, 2), jd_mid - int(jd_mid[0]))
-        dt_flux = flux_4 / trend
-        dt_fluxerr = fluxerr_4 / trend
+        trend = np.polyval(np.polyfit(jd_mid_clipped - int(jd_mid_clipped[0]), fluxerr_4_clipped, 2), jd_mid_clipped - int(jd_mid_clipped[0]))
+        dt_flux = flux_4_clipped / trend
+        dt_fluxerr = fluxerr_4_clipped / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
-
+        
         # Calculate mean flux and RMS
-        mean_flux = np.mean(dt_flux_binned)
+        mean_flux = np.mean(flux_4_clipped)
         mean_mags = np.mean(mags)
         RMS = np.std(dt_flux_binned) * 1000000  # Convert to ppm
         mean_sky = np.median(sky_4)
