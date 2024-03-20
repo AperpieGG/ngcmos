@@ -48,7 +48,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
         skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
-        print(f"Running light curve for star {gaia_id} with {Tmag} magnitude...")
+        print(f"Running light curve for star {gaia_id} with {round(Tmag, 3)} Tmag...")
 
         # # Apply sigma clipping to flux and sky arrays
         # flux_mask = np.logical_or(flux_4 <= 0, np.isnan(flux_4))
