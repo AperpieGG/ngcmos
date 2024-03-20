@@ -68,7 +68,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4, zp):
-            if flux <= 0 or np.isnan(flux):
+            if flux <= 0:
                 print(f"The Star {gaia_id} has a negative data point. Skipping the entire light curve.")
                 # Skip the entire light curve if a flux data point is negative or NaN
                 continue
