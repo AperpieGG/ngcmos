@@ -175,18 +175,18 @@ def plot_rms_time(table, num_stars, gaia_id=None):
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
 
-        # # Check if the first RMS value is greater than 0.0065
-        # if RMS_values[21] > 0.00115:
-        #     print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 1100 ppm'.format(current_gaia_id, Tmag))
-        #     num_stars_excluded += 1
-        #     continue
-        # if np.max(flux_5) > 200000:
-        #     print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(current_gaia_id, Tmag))
-        #     num_stars_excluded += 1
-        #     continue
-        # else:
-        #     print('Using star with gaia_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
-        #           format(current_gaia_id, Tmag, RMS_values[0]))
+        # Check if the first RMS value is greater than 0.0065
+        if RMS_values[21] > 0.00115:
+            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 1100 ppm'.format(current_gaia_id, Tmag))
+            num_stars_excluded += 1
+            continue
+        if np.max(flux_5) > 200000:
+            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(current_gaia_id, Tmag))
+            num_stars_excluded += 1
+            continue
+        else:
+            print('Using star with gaia_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
+                  format(current_gaia_id, Tmag, RMS_values[0]))
 
         num_stars_used += 1
         average_rms_values.append(RMS_values)
