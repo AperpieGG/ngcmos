@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 import argparse
-import datetime
-import json
 import os
-import fnmatch
-from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
-from utils import plot_images
 from astropy.stats import sigma_clip
+import json
+from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error,
+                   plot_images, extract_header)
 
 
 def load_config(filename):
@@ -28,115 +26,6 @@ out_paths = config["out_paths"]
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
         break
-
-
-def find_current_night_directory(directory):
-    """
-    Find the directory for the current night based on the current date.
-    If not found, use the current working directory.
-
-    Parameters
-    ----------
-    directory : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str
-        Path to the current night directory.
-    """
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-    current_date_directory = os.path.join(directory, previous_date)
-    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
-
-
-def get_phot_files(directory):
-    """
-    Get photometry files with the pattern 'phot_*.fits' from the directory.
-
-    Parameters
-    ----------
-    directory : str
-        Directory containing the files.
-
-    Returns
-    -------
-    list of str
-        List of photometry files matching the pattern.
-    """
-    phot_files = []
-    for filename in os.listdir(directory):
-        if fnmatch.fnmatch(filename, 'phot_*.fits'):
-            phot_files.append(filename)
-    return phot_files
-
-
-def read_phot_file(filename):
-    """
-    Read the photometry file.
-
-    Parameters
-    ----------
-    filename : str
-        Photometry file to read.
-
-    Returns
-    -------
-    astropy.table.table.Table
-        Table containing the photometry data.
-    """
-    # Read the photometry file here using fits or any other appropriate method
-    try:
-        with fits.open(filename) as ff:
-            # Access the data in the photometry file as needed
-            tab = ff[1].data
-            return tab
-    except Exception as e:
-        print(f"Error reading photometry file {filename}: {e}")
-        return None
-
-
-def bin_time_flux_error(time, flux, error, bin_fact):
-    """
-    Use reshape to bin light curve data, clip under filled bins
-    Works with 2D arrays of flux and errors
-
-    Note: under filled bins are clipped off the end of the series
-
-    Parameters
-    ----------
-    time : array         of times to bin
-    flux : array         of flux values to bin
-    error : array         of error values to bin
-    bin_fact : int
-        Number of measurements to combine
-
-    Returns
-    -------
-    times_b : array
-        Binned times
-    flux_b : array
-        Binned fluxes
-    error_b : array
-        Binned errors
-
-    Raises
-    ------
-    None
-    """
-    n_binned = int(len(time) / bin_fact)
-    clip = n_binned * bin_fact
-    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
-    # determine if 1 or 2d flux/err inputs
-    if len(flux.shape) == 1:
-        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
-        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
-    else:
-        # assumed 2d with 1 row per star
-        n_stars = len(flux)
-        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
-        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
-    return time_b, flux_b, error_b
 
 
 def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
@@ -163,6 +52,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
 
+        plt.figure(figsize=(10, 4))
+        plt.plot(jd_mid, zp, 'o', color='black')
+        plt.xlabel('JD Mid')
+        plt.ylabel('ZP')
+        plt.show()
+
         mags = []
         for flux, zp_value in zip(flux_4_clipped, zp):
             if np.ma.is_masked(flux):  # Check if flux value is masked
@@ -184,6 +79,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # plt.title(f'Magnitudes for Star {gaia_id}')
         # plt.show()
 
+
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4 / trend
@@ -203,45 +99,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         tmag_list.append(Tmag)
         mags_list.append(mean_mags)
 
-        # # Store gaia_id for stars with RMS lower than 0.005
-        # if RMS < 0.005:
-        #     low_rms_gaia_ids.append(gaia_id)
-
-    print('The mean RMS is: ', np.mean(RMS_list))
     return mean_flux_list, RMS_list, sky_list, tmag_list, mags_list
 
 
-def extract_header(table, image_directory):
-    unique_frame_ids = np.unique(table['frame_id'])
-
-    airmass_list = []
-    zp_list = []
-
-    for frame_id in unique_frame_ids:
-        # Get the path to the FITS file
-        fits_file_path = os.path.join(image_directory, frame_id)
-
-        # Read FITS file header to extract airmass
-        with fits.open(fits_file_path) as hdul:
-            image_header = hdul[0].header
-            airmass = round(image_header['AIRMASS'], 3)
-            zp = image_header['MAGZP_T']
-
-        # Append airmass value and frame ID to the list
-        airmass_list.append(airmass)
-        zp_list.append(zp)
-
-    print(f"Average airmass: {np.mean(airmass_list)}")
-    print(f"Average ZP: {np.mean(zp)}")
-
-    return airmass_list, zp_list
-
-
-def scintilation_noise(airmass_list):
+def scintilation_noise():
     t = 10  # exposure time
     D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
     H = 8000  # height of atmospheric scale
+    airmass_list, zp_list = extract_header()
     airmass = np.mean(airmass_list)  # airmass
     C_y = 1.54
     secZ = 1.2  # airmass
@@ -252,7 +118,7 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def noise_model(mean_flux_list, RMS_list, tmag_list, mag_list):
+def noise_model(RMS_list, mag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
     print('RMS list: ', RMS_list)
     print('mag list: ', mag_list)
@@ -290,7 +156,7 @@ def main(phot_file):
         phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Plot the noise model
-    noise_model(mean_flux_list, RMS_list, tmag_list, mags_list)
+    noise_model(RMS_list, mags_list)
 
 
 def main_loop(phot_files):
