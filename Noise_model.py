@@ -39,10 +39,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         Tmag = gaia_id_data['Tmag'][0]
         jd_mid = gaia_id_data['jd_mid']
-        flux_4 = gaia_id_data['flux_6']
-        fluxerr_4 = gaia_id_data['fluxerr_6']
-        sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
-        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
+        flux_4 = gaia_id_data['flux_3']
+        fluxerr_4 = gaia_id_data['fluxerr_3']
+        sky_4 = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
+        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
 
         flux_4_clipped = sigma_clip(flux_4, sigma=5, maxiters=1)
 
@@ -72,12 +72,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # plt.ylabel('Magnitudes')
         # plt.title(f'Magnitudes for Star {gaia_id}')
         # plt.show()
-
-        plt.figure(figsize=(10, 4))
-        plt.plot(jd_mid, zp, 'o', color='black')
-        plt.xlabel('JD Mid')
-        plt.ylabel('ZP')
-        plt.show()
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4_clipped, 2), jd_mid - int(jd_mid[0]))
         dt_flux = flux_4_clipped / trend
