@@ -241,7 +241,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
-    ax.set_xlim(5.5, 14)
+    ax.set_xlim(7.5, 16)
     ax.set_ylim(0.001, 1)
     ax.invert_xaxis()
     plt.legend(loc='best')
