@@ -78,13 +78,13 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
                 mags.append(mag)
 
-        # Plot the magnitudes for this star
-        plt.figure(figsize=(10, 4))
-        plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
-        plt.xlabel('JD Mid')
-        plt.ylabel('Magnitudes')
-        plt.title(f'Magnitudes for Star {gaia_id}')
-        plt.show()
+        # # Plot the magnitudes for this star
+        # plt.figure(figsize=(10, 4))
+        # plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
+        # plt.xlabel('JD Mid')
+        # plt.ylabel('Magnitudes')
+        # plt.title(f'Magnitudes for Star {gaia_id}')
+        # plt.show()
 
         # Detrend the flux by converting back to fluxes and normalize by the mean lc
         fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
