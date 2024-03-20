@@ -68,8 +68,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4, zp):
-            if flux <= 0:
-                print(f"The Star {gaia_id} has a negative data point. Skipping the entire light curve.")
+            if flux <= 0 or np.isnan(flux):
                 # Skip the entire light curve if a flux data point is negative or NaN
                 continue
             else:
@@ -240,7 +239,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 16)
-    ax.set_ylim(1000, 100000)
+    ax.set_ylim(1000, 1000000)
     ax.invert_xaxis()
     plt.legend(loc='best')
     plt.tight_layout()
