@@ -6,8 +6,7 @@ from astropy.io import fits
 from matplotlib import pyplot as plt
 from astropy.stats import sigma_clip
 import json
-from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error,
-                   plot_images, extract_header)
+from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error, plot_images)
 
 
 def load_config(filename):
