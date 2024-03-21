@@ -354,7 +354,7 @@ def main(phot_file):
     file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
-        json.dump(output_data, json_file)
+        json.dump(output_data, json_file, indent=4)
 
 
 def main_loop(phot_files):
