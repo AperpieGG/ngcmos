@@ -112,7 +112,7 @@ def main():
         # Check if gaia_id exists in the current photometry file
         if args.gaia_id in phot_table['gaia_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc_with_detrend(phot_table, args.gaia_id)
+            plot_lc_with_detrend(phot_table, args.gaia_id, args.bin)
             break  # Stop looping if gaia_id is found
         else:
             print(f"Gaia ID {args.gaia_id} not found in {phot_file}")
