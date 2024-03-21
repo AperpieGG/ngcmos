@@ -329,8 +329,6 @@ def main(phot_file):
     # Plot the noise model
     noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS)
 
-    # Save RMS_list and mags_list to a JSON file
-    # Convert NumPy arrays to lists
     synthetic_mag_list = synthetic_mag.tolist()
     photon_shot_noise_list = photon_shot_noise.tolist()
     sky_noise_list = sky_noise.tolist()
@@ -338,6 +336,7 @@ def main(phot_file):
     dc_noise_list = dc_noise.tolist()
     N_list = N.tolist()
     RNS_list = RNS.tolist()
+    negative_fluxes_stars = [int(x) for x in negative_fluxes_stars]
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
