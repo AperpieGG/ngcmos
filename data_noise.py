@@ -172,7 +172,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4_clipped / trend
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid_clipped, dt_flux, dt_fluxerr, bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4_clipped)
