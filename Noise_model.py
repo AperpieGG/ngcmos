@@ -339,6 +339,7 @@ def main(phot_file):
     dc_noise_list = dc_noise.tolist()
     N_list = N.tolist()
     RNS_list = RNS.tolist()
+    bad_stars_list = negative_fluxes_stars.tolist()
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
@@ -351,7 +352,7 @@ def main(phot_file):
         "dc_noise": dc_noise_list,
         "N": N_list,
         "RNS": RNS_list,
-        "negative_fluxes_stars": negative_fluxes_stars
+        "negative_fluxes_stars": bad_stars_list
     }
     file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
