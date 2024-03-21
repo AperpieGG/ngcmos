@@ -159,7 +159,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
         mags_list.append(mean_mags)
-        Tmags_list.append(Tmag)
+        Tmags_list.append(np.round(Tmag, 2))
 
     return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list
 
@@ -338,6 +338,7 @@ def main(phot_file):
     N_list = N.tolist()
     RNS_list = RNS.tolist()
     negative_fluxes_stars = [int(x) for x in negative_fluxes_stars]
+    Tmags_list = [float(x) for x in Tmags_list]
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
