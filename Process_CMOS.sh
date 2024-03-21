@@ -3,12 +3,12 @@
 echo "Starting processing..."
 
 # Run the Python scripts
-python QC_Donuts.py
-python QC_control.py
-python calibration_images.py
-python Simple_wrapper.py
-python check_cmos.py
-python adding_headers.py
-python process_cmos.py
+python /home/ops/ngcmos/QC_Donuts.py
+python /home/ops/ngcmos/QC_control.py
+python /home/ops/ngcmos/calibration_images.py
+python /home/ops/ngcmos/Simple_wrapper.py
+python /home/ops/ngcmos/check_cmos.py
+python /home/ops/ngcmos/adding_headers.py
+python /home/ops/ngcmos/process_cmos.py
 
 echo "Finishing processing!"
