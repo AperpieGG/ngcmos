@@ -329,7 +329,9 @@ def main(phot_file):
     noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS)
 
     # Save RMS_list and mags_list to a JSON file
-    output_data = {"RMS_list": RMS_list, "mags_list": mags_list}
+    output_data = {"RMS_list": RMS_list, "mags_list": mags_list, "synthetic_mag": synthetic_mag,
+                   "photon_shot_noise": photon_shot_noise, "sky_noise": sky_noise, "read_noise": read_noise,
+                   "dc_noise": dc_noise, "N": N, "RNS": RNS}
     file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
