@@ -110,6 +110,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         mags = []
         t = 10  # exposure time
+        gaia_id_printed = False  # Flag to track whether gaia_id has been printed
+
         for flux, zp_value in zip(flux_4_clipped, zp):
             if flux <= 0:
                 if not gaia_id_printed:
