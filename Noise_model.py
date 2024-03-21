@@ -112,11 +112,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         t = 10  # exposure time
         for flux, zp_value in zip(flux_4_clipped, zp):
             if flux <= 0:
+                if not gaia_id_printed:
+                    print("The nan flux belongs to the star with gaia_id =", gaia_id)
+                    gaia_id_printed = True
                 mag = np.nan
-                mags.append(mag)
-                continue
-            print("The nan flux belongs to the star with gaia_id = ", gaia_id)
-            mag = -2.5 * np.log10(flux / t) + zp_value
+            else:
+                mag = -2.5 * np.log10(flux / t) + zp_value
             mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
             mags.append(mag)
 
