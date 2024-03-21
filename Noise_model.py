@@ -109,25 +109,15 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp.append(zp_value)
 
         mags = []
-        # t = 10  # exposure time
-        # for flux, zp_value in zip(flux_4_clipped, zp):
-        #     mag = -2.5 * np.log10(flux / t) + zp_value
-        #     mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
-        #     mags.append(mag)
-
-        # Calculate mean flux and zero point
-        mean_flux = np.nanmean(flux_4_clipped)
-        mean_zp = np.nanmean(zp)
         t = 10  # exposure time
-
-        # Convert mean flux to magnitude
-        mean_mag = -2.5 * np.log10(mean_flux / t) + mean_zp
-
-        # Convert fluxes to magnitudes using mean values
-        mags = [-2.5 * np.log10(flux / t) + mean_zp for flux in flux_4_clipped]
-
-        # Calculate magnitude errors
-        mag_errors = 1.0857 * fluxerr_4_clipped / flux_4_clipped
+        for flux, zp_value in zip(flux_4_clipped, zp):
+            if flux <= 0:
+                mag = np.nan
+                mags.append(mag)
+                continue
+            mag = -2.5 * np.log10(flux / t) + zp_value
+            mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
+            mags.append(mag)
 
         # # Plot the magnitudes for this star
         # plt.figure(figsize=(10, 4))
