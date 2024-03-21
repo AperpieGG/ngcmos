@@ -86,7 +86,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         print(f"Running for star {gaia_id} with Tmag = {Tmag:.2f}")
 
         # Apply sigma clipping to flux and sky arrays
-        clipped_flux = sigma_clip(flux_4, sigma=4, maxiters=5)
+        clipped_flux = sigma_clip(flux_4, sigma=3, maxiters=5)
 
         # # Replace outliers with NaN in flux_4
         # flux_4_clipped = flux_4.copy()  # Make a copy of flux_4
