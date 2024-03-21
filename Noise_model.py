@@ -329,9 +329,20 @@ def main(phot_file):
     noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS)
 
     # Save RMS_list and mags_list to a JSON file
-    output_data = {"RMS_list": RMS_list, "mags_list": mags_list, "synthetic_mag": synthetic_mag,
-                   "photon_shot_noise": photon_shot_noise, "sky_noise": sky_noise, "read_noise": read_noise,
-                   "dc_noise": dc_noise, "N": N, "RNS": RNS}
+    # Convert NumPy arrays to lists
+    synthetic_mag_list = synthetic_mag.tolist()
+    photon_shot_noise_list = photon_shot_noise.tolist()
+    sky_noise_list = sky_noise.tolist()
+    read_noise_list = read_noise.tolist()
+    dc_noise_list = dc_noise.tolist()
+    N_list = N.tolist()
+    RNS_list = RNS.tolist()
+
+    # Save RMS_list, mags_list, and other lists to a JSON file
+    output_data = {"RMS_list": RMS_list, "mags_list": mags_list,
+                   "synthetic_mag": synthetic_mag_list, "photon_shot_noise": photon_shot_noise_list,
+                   "sky_noise": sky_noise_list, "read_noise": read_noise_list,
+                   "dc_noise": dc_noise_list, "N": N_list, "RNS": RNS_list}
     file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
