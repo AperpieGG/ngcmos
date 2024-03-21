@@ -3,6 +3,7 @@ import argparse
 from matplotlib import pyplot as plt
 import json
 import numpy as np
+from utils import plot_images
 
 
 def load_rms_mags_data(filename):
@@ -46,6 +47,8 @@ def plot_noise_model(data):
 
 
 def main(json_file):
+    # Set plot parameters
+    plot_images()
     # Load RMS and magnitude data from JSON file
     data = load_rms_mags_data(json_file)
 
