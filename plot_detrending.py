@@ -48,7 +48,10 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     tmag = gaia_id_data['Tmag'][0]
 
     # Extract fluxes and errors based on Tmag
-    if tmag < 11:
+    if tmag < 10:
+        fluxes = gaia_id_data['flux_6']
+        fluxerrs = gaia_id_data['fluxerr_6']
+    elif 10 <= tmag < 11:
         fluxes = gaia_id_data['flux_5']
         fluxerrs = gaia_id_data['fluxerr_5']
     elif 12 > tmag >= 11:
@@ -68,7 +71,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
     RMS = np.std(dt_flux_binned)
-    print(f"RMS for Gaia ID {gaia_id_to_plot} = {RMS:.2f}")
+    print(f"RMS for Gaia ID {gaia_id_to_plot} = {RMS:.4f}")
 
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
