@@ -117,7 +117,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 if not gaia_id_printed:
                     print("The nan flux belongs to the star with gaia_id =", gaia_id)
                     gaia_id_printed = True
-                print("Negative flux value:", flux)
                 mag = np.nan
             else:
                 mag = -2.5 * np.log10(flux / t) + zp_value
@@ -328,6 +327,13 @@ def main(phot_file):
 
     # Plot the noise model
     noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS)
+
+    # Save RMS_list and mags_list to a JSON file
+    output_data = {"RMS_list": RMS_list, "mags_list": mags_list}
+    file_name = f"rms_mags_{phot_file.replace('.fits', '')}.json"
+    output_path = os.path.join(os.getcwd(), file_name)
+    with open(output_path, 'w', overwrite=True) as json_file:
+        json.dump(output_data, json_file)
 
 
 def main_loop(phot_files):
