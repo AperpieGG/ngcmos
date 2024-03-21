@@ -2,6 +2,7 @@
 import argparse
 from matplotlib import pyplot as plt
 import json
+import numpy as np
 
 
 def load_rms_mags_data(filename):
@@ -13,18 +14,34 @@ def load_rms_mags_data(filename):
     return data
 
 
-def plot_rms_vs_mag(data):
-    """
-    Plot RMS vs magnitudes
-    """
-    RMS_list = data["RMS_list"]
-    mag_list = data["mags_list"]
+def plot_noise_model(data):
+    fig, ax = plt.subplots(figsize=(10, 8))
+    RMS_list = data['RMS']
+    mags_list = data['mags']
+    synthetic_mag = data['synthetic_mag']
+    RNS = data['RNS']
+    photon_shot_noise = data['photon_shot_noise']
+    read_noise = data['read_noise']
+    dc_noise = data['dc_noise']
+    sky_noise = data['sky_noise']
+    N = data['N']
+    ax.plot(mags_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
 
-    plt.figure(figsize=(10, 6))
-    plt.scatter(mag_list, RMS_list, color='blue', alpha=0.5)
-    plt.xlabel('Magnitudes')
-    plt.ylabel('RMS (ppm)')
-    plt.title('RMS vs Magnitudes')
+    ax.plot(synthetic_mag, RNS, color='black', label='total noise')
+    ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
+    ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
+    ax.plot(synthetic_mag, dc_noise, color='purple', label='dark noise', linestyle='--')
+    ax.plot(synthetic_mag, sky_noise, color='blue', label='sky bkg', linestyle='--')
+    ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintilation noise',
+            linestyle='--')
+    ax.set_xlabel('TESS Magnitude')
+    ax.set_ylabel('RMS (ppm)')
+    ax.set_yscale('log')
+    ax.set_xlim(7.5, 16)
+    ax.set_ylim(1000, 1000000)
+    ax.invert_xaxis()
+    plt.legend(loc='best')
+    plt.tight_layout()
     plt.show()
 
 
@@ -33,7 +50,7 @@ def main(json_file):
     data = load_rms_mags_data(json_file)
 
     # Plot RMS vs magnitudes
-    plot_rms_vs_mag(data)
+    plot_noise_model(data)
 
 
 if __name__ == "__main__":
