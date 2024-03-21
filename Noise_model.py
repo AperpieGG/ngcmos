@@ -110,7 +110,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp.append(zp_value)
 
         mags = []
-        bad_stars = []
         t = 10  # exposure time
         gaia_id_printed = False  # Flag to track whether gaia_id has been printed
 
@@ -118,7 +117,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             if flux <= 0:
                 if not gaia_id_printed:
                     print("The nan flux belongs to the star with gaia_id =", gaia_id)
-                    bad_stars.append(gaia_id)
+                    negative_fluxes_stars.append(gaia_id)
                     gaia_id_printed = True
                 mag = np.nan
             else:
@@ -155,7 +154,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mean_sky = np.median(sky_4)
 
         # Append to lists
-        print(bad_stars)
+        print(negative_fluxes_stars)
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
