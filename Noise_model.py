@@ -330,7 +330,7 @@ def main(phot_file):
 
     # Save RMS_list and mags_list to a JSON file
     output_data = {"RMS_list": RMS_list, "mags_list": mags_list}
-    file_name = f"rms_mags_{phot_file.replace('.fits', '')}.json"
+    file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
         json.dump(output_data, json_file)
