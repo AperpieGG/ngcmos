@@ -74,7 +74,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     # Plot raw flux with wotan model
-    ax1.plot(jd_mid, fluxes, '.', color='black', label='Raw Flux')
+    ax1.errorbar(jd_mid, fluxes, yerr=fluxerrs, fmt='.', color='black', alpha=0.5)
     ax1.plot(jd_mid, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
@@ -84,7 +84,6 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     ax2.errorbar(time_binned, dt_flux_binned, yerr=dt_fluxerr_binned, fmt='o', color='black', markerfacecolor='white')
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
-    ax2.legend()
     plt.tight_layout()
     plt.show()
 
