@@ -80,7 +80,7 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-    ax2.errorbar(jd_mid, dt_flux, yerr=dt_fluxerr, fmt='.', color='blue', label='Detrended Flux')
+    ax2.errorbar(jd_mid, dt_flux, yerr=dt_fluxerr, fmt='.', color='blue', alpha=0.3)
     ax2.errorbar(time_binned, dt_flux_binned, yerr=dt_fluxerr_binned, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
