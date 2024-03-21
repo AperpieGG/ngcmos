@@ -85,7 +85,11 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-    ax2.errorbar(jd_mid, dt_flux, yerr=dt_fluxerr, fmt='.', color='black', alpha=0.5)
+    if dt_fluxerr <= 0:
+        print(f"This star has negative flux error at some point. Gaia ID: {gaia_id_to_plot}")
+        ax2.plot(jd_mid, dt_flux, '.', color='black', alpha=0.5)
+    else:
+        ax2.errorbar(jd_mid, dt_flux, yerr=dt_fluxerr, fmt='.', color='black', alpha=0.5)
     if bin_size > 1:
         ax2.errorbar(time_binned, dt_flux_binned, yerr=dt_fluxerr_binned, fmt='o', color='black',
                      markerfacecolor='blue')
