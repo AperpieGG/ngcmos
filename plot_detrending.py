@@ -90,7 +90,10 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
         ax2.plot(jd_mid, dt_flux, '.', color='black', alpha=0.5)
     else:
         ax2.errorbar(jd_mid, dt_flux, yerr=dt_fluxerr, fmt='.', color='black', alpha=0.5)
-    if bin_size > 1:
+    if bin_size > 1 and dt_fluxerr_binned < 0:
+        ax2.errorbar(time_binned, dt_flux_binned, yerr=dt_fluxerr_binned, fmt='o', color='black',
+                     markerfacecolor='blue')
+    else:
         ax2.errorbar(time_binned, dt_flux_binned, yerr=dt_fluxerr_binned, fmt='o', color='black',
                      markerfacecolor='blue')
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
