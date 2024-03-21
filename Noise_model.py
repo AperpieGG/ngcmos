@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """
-This script calculates the noise model for the TESS data. The noise is calculated using detrended fluxes from airmass
+This script calculates the noise model for the TESS data.
+The light curves are detrended using a second order polynomial to correct for the airmass.
+The noise is calculated from the detrended and normalized light curves.
 The fluxes are converted to magnitudes using zero points. The final plot is RMS vs magnitudes.
 """
 
@@ -16,6 +18,9 @@ from utils import (find_current_night_directory, read_phot_file, get_phot_files,
 
 
 def load_config(filename):
+    """
+    Load configuration file
+    """
     with open(filename, 'r') as file:
         config = json.load(file)
     return config
@@ -34,6 +39,34 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
 
 
 def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
+    """
+    Calculate the mean flux and RMS for a given number of stars
+
+    Parameters
+    ----------
+    table : astropy.table.Table
+        Table containing the photometry data
+    bin_size : int
+        Number of images to bin
+    num_stars : int
+        Number of stars to plot
+    directory : str
+        Directory containing the images
+
+    Returns
+    -------
+    mean_flux_list : list
+        values of mean fluxes
+    RMS_list : list
+        values of RMS values
+    sky_list : list
+        values of sky values
+    mags_list : list
+        values of magnitudes
+    zp : list
+        values of zero points
+
+    """
     mean_flux_list = []
     RMS_list = []
     sky_list = []
@@ -76,11 +109,25 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             zp.append(zp_value)
 
         mags = []
+        # t = 10  # exposure time
+        # for flux, zp_value in zip(flux_4_clipped, zp):
+        #     mag = -2.5 * np.log10(flux / t) + zp_value
+        #     mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
+        #     mags.append(mag)
+
+        # Calculate mean flux and zero point
+        mean_flux = np.nanmean(flux_4_clipped)
+        mean_zp = np.nanmean(zp)
         t = 10  # exposure time
-        for flux, zp_value in zip(flux_4_clipped, zp):
-            mag = -2.5 * np.log10(flux / t) + zp_value
-            mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
-            mags.append(mag)
+
+        # Convert mean flux to magnitude
+        mean_mag = -2.5 * np.log10(mean_flux / t) + mean_zp
+
+        # Convert fluxes to magnitudes using mean values
+        mags = [-2.5 * np.log10(flux / t) + mean_zp for flux in flux_4_clipped]
+
+        # Calculate magnitude errors
+        mag_errors = 1.0857 * fluxerr_4_clipped / flux_4_clipped
 
         # # Plot the magnitudes for this star
         # plt.figure(figsize=(10, 4))
