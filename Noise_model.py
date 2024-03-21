@@ -337,7 +337,6 @@ def main(phot_file):
     dc_noise_list = dc_noise.tolist()
     N_list = N.tolist()
     RNS_list = RNS.tolist()
-    negative_fluxes_stars = negative_fluxes_stars.tolist()
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
