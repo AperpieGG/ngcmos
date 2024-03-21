@@ -117,6 +117,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 if not gaia_id_printed:
                     print("The nan flux belongs to the star with gaia_id =", gaia_id)
                     gaia_id_printed = True
+                print("Negative flux value:", flux)
                 mag = np.nan
             else:
                 mag = -2.5 * np.log10(flux / t) + zp_value
