@@ -155,8 +155,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mean_sky = np.median(sky_4)
 
         # Append to lists
-        negative_fluxes_stars.append(bad_stars)
-        print(negative_fluxes_stars)
+        print(bad_stars)
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
