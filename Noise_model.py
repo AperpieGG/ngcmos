@@ -76,10 +76,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         gaia_id_data = table[table['gaia_id'] == gaia_id]
         jd_mid = gaia_id_data['jd_mid']
         Tmag = gaia_id_data['Tmag'][0]
-        flux_4 = gaia_id_data['flux_6']
-        fluxerr_4 = gaia_id_data['fluxerr_6']
-        sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
-        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
+        flux_4 = gaia_id_data['flux_2']
+        fluxerr_4 = gaia_id_data['fluxerr_2']
+        sky_4 = gaia_id_data['flux_w_sky_2'] - gaia_id_data['flux_2']
+        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_2'] ** 2 + gaia_id_data['fluxerr_w_sky_2'] ** 2)
 
         print(f"Running for star {gaia_id} with Tmag = {Tmag:.2f}")
 
