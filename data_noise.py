@@ -160,11 +160,17 @@ def calculate_mean_rms_flux(table, bin_size, num_stars):
         #     continue
 
         # Sigma clipping
-        flux_4_clipped = sigma_clip(flux_4, sigma=3, maxiters=5)
+        clipped_flux = sigma_clip(flux_4, sigma=4, maxiters=5)
 
-        trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_4, 2), jd_mid - int(jd_mid[0]))
+        # Mask outliers in flux_4 and jd_mid
+        flux_4_clipped = flux_4[~clipped_flux.mask]
+        fluxerr_4_clipped = fluxerr_4[~clipped_flux.mask]
+        jd_mid_clipped = jd_mid[~clipped_flux.mask]
+        print(f"Number of non-outliers: {len(clipped_flux.mask)}")
+
+        trend = np.polyval(np.polyfit(jd_mid_clipped - int(jd_mid_clipped[0]), flux_4_clipped, 2), jd_mid_clipped - int(jd_mid_clipped[0]))
         dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4 / trend
+        dt_fluxerr = fluxerr_4_clipped / trend
 
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
