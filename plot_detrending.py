@@ -46,20 +46,22 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = gaia_id_data['jd_mid']
     tmag = gaia_id_data['Tmag'][0]
+    fluxes = gaia_id_data['flux_6']
+    fluxerrs = gaia_id_data['fluxerr_6']
 
     # Extract fluxes and errors based on Tmag
-    if tmag < 10.5:
-        fluxes = gaia_id_data['flux_6']
-        fluxerrs = gaia_id_data['fluxerr_6']
-    elif 10.5 <= tmag < 11:
-        fluxes = gaia_id_data['flux_5']
-        fluxerrs = gaia_id_data['fluxerr_5']
-    elif 12 > tmag >= 11:
-        fluxes = gaia_id_data['flux_4']
-        fluxerrs = gaia_id_data['fluxerr_4']
-    else:
-        fluxes = gaia_id_data['flux_3']
-        fluxerrs = gaia_id_data['fluxerr_3']
+    # if tmag < 10.5:
+    #     fluxes = gaia_id_data['flux_6']
+    #     fluxerrs = gaia_id_data['fluxerr_6']
+    # elif 10.5 <= tmag < 11:
+    #     fluxes = gaia_id_data['flux_5']
+    #     fluxerrs = gaia_id_data['fluxerr_5']
+    # elif 12 > tmag >= 11:
+    #     fluxes = gaia_id_data['flux_4']
+    #     fluxerrs = gaia_id_data['fluxerr_4']
+    # else:
+    #     fluxes = gaia_id_data['flux_3']
+    #     fluxerrs = gaia_id_data['fluxerr_3']
 
     # use polyfit to detrend the light curve
     trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, 2),
