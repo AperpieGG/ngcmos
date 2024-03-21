@@ -277,8 +277,6 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
 
 def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS):
     fig, ax = plt.subplots(figsize=(10, 8))
-    print('RMS list: ', RMS_list)
-    print('mag list: ', mags_list)
     ax.plot(mags_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
 
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
@@ -341,11 +339,16 @@ def main(phot_file):
     RNS_list = RNS.tolist()
 
     # Save RMS_list, mags_list, and other lists to a JSON file
-    output_data = {"RMS_list": RMS_list, "mags_list": mags_list,
-                   "synthetic_mag": synthetic_mag_list, "photon_shot_noise": photon_shot_noise_list,
-                   "sky_noise": sky_noise_list, "read_noise": read_noise_list,
-                   "dc_noise": dc_noise_list, "N": N_list, "RNS": RNS_list,
-                   "negative_fluxes_stars": negative_fluxes_stars}
+    output_data = {{"RMS_list": RMS_list},
+                   {"mags_list": mags_list},
+                   {"synthetic_mag": synthetic_mag_list},
+                   {"photon_shot_noise": photon_shot_noise_list},
+                   {"sky_noise": sky_noise_list},
+                   {"read_noise": read_noise_list},
+                   {"dc_noise": dc_noise_list},
+                   {"N": N_list},
+                   {"RNS": RNS_list},
+                   {"negative_fluxes_stars": negative_fluxes_stars}}
     file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
