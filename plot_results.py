@@ -18,7 +18,7 @@ def load_rms_mags_data(filename):
 def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
-    mags_list = data['mag_list']
+    mags_list = data['mags_list']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
     photon_shot_noise = data['photon_shot_noise']
