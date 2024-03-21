@@ -357,7 +357,7 @@ def main():
 
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
+    print(f"Photometry files: {os.path.basename(phot_files)}")
 
     # Plot the first photometry file
     print(f"Plotting the first photometry file {phot_files[0]}...")
