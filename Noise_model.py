@@ -71,6 +71,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     RMS_list = []
     sky_list = []
     mags_list = []
+    negative_fluxes_stars = []
 
     for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
         gaia_id_data = table[table['gaia_id'] == gaia_id]
@@ -116,6 +117,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             if flux <= 0:
                 if not gaia_id_printed:
                     print("The nan flux belongs to the star with gaia_id =", gaia_id)
+                    negative_fluxes_stars.append(gaia_id)
                     gaia_id_printed = True
                 mag = np.nan
             else:
@@ -157,7 +159,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         sky_list.append(mean_sky)
         mags_list.append(mean_mags)
 
-    return mean_flux_list, RMS_list, sky_list, mags_list, zp
+    return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars
 
 
 def extract_header(table, image_directory):
@@ -318,7 +320,7 @@ def main(phot_file):
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, mags_list, zp = calculate_mean_rms_flux(
+    mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars = calculate_mean_rms_flux(
         phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Get noise sources
@@ -342,7 +344,8 @@ def main(phot_file):
     output_data = {"RMS_list": RMS_list, "mags_list": mags_list,
                    "synthetic_mag": synthetic_mag_list, "photon_shot_noise": photon_shot_noise_list,
                    "sky_noise": sky_noise_list, "read_noise": read_noise_list,
-                   "dc_noise": dc_noise_list, "N": N_list, "RNS": RNS_list}
+                   "dc_noise": dc_noise_list, "N": N_list, "RNS": RNS_list,
+                   "negative_fluxes_stars": negative_fluxes_stars}
     file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
