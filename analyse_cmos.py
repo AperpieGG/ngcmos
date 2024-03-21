@@ -1,15 +1,11 @@
 #!/usr/bin/env python
-
-import datetime
 import json
 import os
-import fnmatch
 import argparse
-from datetime import datetime, timedelta
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
-from utils import plot_images
+from utils import plot_images, find_current_night_directory, get_phot_files, read_phot_file, bin_time_flux_error
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
 from astropy.stats import sigma_clip
@@ -31,115 +27,6 @@ out_paths = config["out_paths"]
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
     if os.path.exists(base_path):
         break
-
-
-def find_current_night_directory(directory):
-    """
-    Find the directory for the current night based on the current date.
-    If not found, use the current working directory.
-
-    Parameters
-    ----------
-    directory : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str
-        Path to the current night directory.
-    """
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-    current_date_directory = os.path.join(directory, previous_date)
-    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
-
-
-def get_phot_files(directory):
-    """
-    Get photometry files with the pattern 'phot_*.fits' from the directory.
-
-    Parameters
-    ----------
-    directory : str
-        Directory containing the files.
-
-    Returns
-    -------
-    list of str
-        List of photometry files matching the pattern.
-    """
-    phot_files = []
-    for filename in os.listdir(directory):
-        if fnmatch.fnmatch(filename, 'phot_*.fits'):
-            phot_files.append(filename)
-    return phot_files
-
-
-def read_phot_file(filename):
-    """
-    Read the photometry file.
-
-    Parameters
-    ----------
-    filename : str
-        Photometry file to read.
-
-    Returns
-    -------
-    astropy.table.table.Table
-        Table containing the photometry data.
-    """
-    # Read the photometry file here using fits or any other appropriate method
-    try:
-        with fits.open(filename) as ff:
-            # Access the data in the photometry file as needed
-            tab = ff[1].data
-            return tab
-    except Exception as e:
-        print(f"Error reading photometry file {filename}: {e}")
-        return None
-
-
-def bin_time_flux_error(time, flux, error, bin_fact):
-    """
-    Use reshape to bin light curve data, clip under filled bins
-    Works with 2D arrays of flux and errors
-
-    Note: under filled bins are clipped off the end of the series
-
-    Parameters
-    ----------
-    time : array         of times to bin
-    flux : array         of flux values to bin
-    error : array         of error values to bin
-    bin_fact : int
-        Number of measurements to combine
-
-    Returns
-    -------
-    times_b : array
-        Binned times
-    flux_b : array
-        Binned fluxes
-    error_b : array
-        Binned errors
-
-    Raises
-    ------
-    None
-    """
-    n_binned = int(len(time) / bin_fact)
-    clip = n_binned * bin_fact
-    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
-    # determine if 1 or 2d flux/err inputs
-    if len(flux.shape) == 1:
-        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
-        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
-    else:
-        # assumed 2d with 1 row per star
-        n_stars = len(flux)
-        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
-        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
-    return time_b, flux_b, error_b
 
 
 def get_image_data(frame_id, image_directory):
@@ -330,12 +217,10 @@ def plot_lc_with_detrend(table, gaia_id_to_plot):
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-
     ax2.errorbar(jd_mid, norm_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
     ax2.set_ylabel('Detrended Flux [e-]')
     ax2.set_xlabel('MJD [days]')
     ax2.legend()
-
     plt.tight_layout()
     plt.show()
 
