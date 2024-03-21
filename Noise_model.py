@@ -87,21 +87,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Apply sigma clipping to flux and sky arrays
         clipped_flux = sigma_clip(flux_4, sigma=4, maxiters=5)
 
-        # # Replace outliers with NaN in flux_4
-        # flux_4_clipped = flux_4.copy()  # Make a copy of flux_4
-        # flux_4_clipped[clipped_flux.mask] = np.nan
-        # print(f"Number of outliers: {np.sum(clipped_flux.mask)}")
-        #
-        # # Replace corresponding jd_mid values with NaN
-        # jd_mid_clipped = jd_mid.copy()  # Make a copy of jd_mid
-        # jd_mid_clipped[clipped_flux.mask] = np.nan
-        # print(f"Number of outliers in jd_mid: {np.sum(clipped_flux.mask)}")
-
         # Mask outliers in flux_4 and jd_mid
         flux_4_clipped = flux_4[~clipped_flux.mask]
         fluxerr_4_clipped = fluxerr_4[~clipped_flux.mask]
         jd_mid_clipped = jd_mid[~clipped_flux.mask]
-        print(f"Number of non-outliers: {len(clipped_flux.mask)}")
 
         zp = []
         for frame_id in gaia_id_data['frame_id']:
@@ -112,33 +101,17 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags = []
         bad_stars = []
         t = 10  # exposure time
-        gaia_id_printed = False  # Flag to track whether gaia_id has been printed
 
         for flux, zp_value in zip(flux_4_clipped, zp):
             if flux <= 0:
-                if not gaia_id_printed:
-                    print("The nan flux belongs to the star with gaia_id =", gaia_id)
-                    bad_stars.append(gaia_id)
-                    gaia_id_printed = True
+                bad_stars.append(gaia_id)
                 mag = np.nan
             else:
                 mag = -2.5 * np.log10(flux / t) + zp_value
             mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
             mags.append(mag)
 
-        # # Plot the magnitudes for this star
-        # plt.figure(figsize=(10, 4))
-        # plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
-        # plt.xlabel('JD Mid')
-        # plt.ylabel('Magnitudes')
-        # plt.title(f'Magnitudes for Star {gaia_id}')
-        # plt.show()
-
-        # # Detrend the flux by converting back to fluxes and normalize by the mean lc
         fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
-        # mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
-        # dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
-        # dt_fluxerr = fluxerr_4 / mean_flux  # Normalize the flux errors by dividing by the average flux
 
         trend = np.polyval(np.polyfit(jd_mid_clipped - int(jd_mid_clipped[0]), flux_4_clipped, 2),
                            jd_mid_clipped - int(jd_mid_clipped[0]))
@@ -148,14 +121,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid_clipped, dt_flux, dt_fluxerr,
                                                                              bin_size)
 
-        # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4_clipped)
         mean_mags = np.mean(mags)
         RMS = np.std(dt_flux_binned) * 1000000  # Convert to ppm
         mean_sky = np.median(sky_4)
 
-        # Append to lists
-        negative_fluxes_stars.append(bad_stars)
+        negative_fluxes_stars.extend(bad_stars)
         mean_flux_list.append(mean_flux)
         RMS_list.append(RMS)
         sky_list.append(mean_sky)
@@ -339,7 +310,6 @@ def main(phot_file):
     dc_noise_list = dc_noise.tolist()
     N_list = N.tolist()
     RNS_list = RNS.tolist()
-    bad_stars_list = negative_fluxes_stars.tolist()
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
@@ -352,7 +322,7 @@ def main(phot_file):
         "dc_noise": dc_noise_list,
         "N": N_list,
         "RNS": RNS_list,
-        "negative_fluxes_stars": bad_stars_list
+        "negative_fluxes_stars": negative_fluxes_stars
     }
     file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
