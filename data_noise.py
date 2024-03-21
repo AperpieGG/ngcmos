@@ -316,7 +316,7 @@ def noise_sources(sky_list, bin_size, airmass_list):
     # set exposure time and and random flux
     exposure_time = 10
 
-    synthetic_flux = np.arange(100, 1e6, 10)
+    synthetic_flux = np.arange(100, 1e7, 10)
 
     # set dark current rate from cmos characterisation
     dark_current_rate = 1.6
@@ -366,7 +366,7 @@ def noise_model(synthetic_flux, photon_shot_noise, sky_noise, read_noise, dc_noi
     ax.set_ylabel('RMS')
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_ylim(100, 100000)
+    ax.set_ylim(1000, 100000)
     ax.set_xlim(100, 1e6)
     plt.tight_layout()
 
