@@ -48,10 +48,10 @@ def plot_lc_with_detrend(table, gaia_id_to_plot, bin_size):
     tmag = gaia_id_data['Tmag'][0]
 
     # Extract fluxes and errors based on Tmag
-    if tmag < 10:
+    if tmag < 10.5:
         fluxes = gaia_id_data['flux_6']
         fluxerrs = gaia_id_data['fluxerr_6']
-    elif 10 <= tmag < 11:
+    elif 10.5 <= tmag < 11:
         fluxes = gaia_id_data['flux_5']
         fluxerrs = gaia_id_data['fluxerr_5']
     elif 12 > tmag >= 11:
