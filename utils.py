@@ -450,22 +450,28 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def sigma_clip_lc(time, flux):
+def remove_outliers(time, flux, flux_err):
     """
     Remove massive outliers in 3 rounds of clipping
     """
     n_time = np.copy(time)
     n_flux = np.copy(flux)
+    n_flux_err = np.copy(flux_err)
+
     for _ in range(3):
-        mad = median_abs_deviation(flux)
-        loc = np.where(((flux < np.median(flux) + 10*mad) & (flux > np.median(flux) - 10*mad)))[0]
-        n_time = time[loc]
-        n_flux = flux[loc]
+        mad = median_abs_deviation(n_flux)
+        loc = np.where(((n_flux < np.median(n_flux) + 10 * mad) & (n_flux > np.median(n_flux) - 10 * mad)))[0]
+
+        # Update time, flux, and flux_err with non-outlier values
+        n_time = n_time[loc]
+        n_flux = n_flux[loc]
+        n_flux_err = n_flux_err[loc]
+
+        # If no outliers were removed in this round, return the filtered arrays
         if len(n_time) == len(time):
-            return n_time, n_flux
-        flux = flux[loc]
-        time = time[loc]
-    return n_time, n_flux
+            return n_time, n_flux, n_flux_err
+
+    return n_time, n_flux, n_flux_err
 
 
 
