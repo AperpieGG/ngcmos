@@ -117,7 +117,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         for flux, zp_value in zip(flux_4_clipped, zp):
             if flux <= 0:
                 if not tic_id_printed:
-                    print("The nan flux belongs to the star with gaia_id =", tic_id)
+                    print("The nan flux belongs to the star with tic_id =", tic_id)
                     negative_fluxes_stars.append(tic_id)
                     tic_id_printed = True
                 mag = np.nan
