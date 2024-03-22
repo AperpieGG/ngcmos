@@ -112,7 +112,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
         mags = []
         t = 10  # exposure time
-        tic_id_printed = False  # Flag to track whether gaia_id has been printed
+        tic_id_printed = False  # Flag to track whether tic_id has been printed
 
         for flux, zp_value in zip(flux_4_clipped, zp):
             if flux <= 0:
@@ -131,7 +131,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
         # plt.xlabel('JD Mid')
         # plt.ylabel('Magnitudes')
-        # plt.title(f'Magnitudes for Star {gaia_id}')
+        # plt.title(f'Magnitudes for Star {tic_id}')
         # plt.show()
 
         # # Detrend the flux by converting back to fluxes and normalize by the mean lc
