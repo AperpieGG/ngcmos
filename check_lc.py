@@ -57,39 +57,39 @@ def get_image_data(frame_id, image_directory):
         return None
 
 
-def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
-    # Select rows with the specified Gaia ID
-    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
+def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
+    # Select rows with the specified TIC ID
+    tic_id_data = table[table['tic_id'] == tic_id_to_plot]
 
-    if len(gaia_id_data) == 0:
-        print(f"Gaia ID {gaia_id_to_plot} not found in the current photometry file.")
+    if len(tic_id_data) == 0:
+        print(f"TIC ID {tic_id_to_plot} not found in the current photometry file.")
         return
-    tmag = gaia_id_data['Tmag'][0]
-    jd_mid = gaia_id_data['jd_mid']
-    x = gaia_id_data['x'][0]
-    y = gaia_id_data['y'][0]
+    tmag = tic_id_data['Tmag'][0]
+    jd_mid = tic_id_data['jd_mid']
+    x = tic_id_data['x'][0]
+    y = tic_id_data['y'][0]
 
     # # Extract fluxes and errors based on Tmag
     # if tmag < 11:
-    #     fluxes = gaia_id_data['flux_5']
-    #     fluxerrs = gaia_id_data['fluxerr_5']
-    #     sky = gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']
-    #     skyerrs = np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)
+    #     fluxes = tic_id_data['flux_5']
+    #     fluxerrs = tic_id_data['fluxerr_5']
+    #     sky = tic_id_data['flux_w_sky_5'] - tic_id_data['flux_5']
+    #     skyerrs = np.sqrt(tic_id_data['fluxerr_5'] ** 2 + tic_id_data['fluxerr_w_sky_5'] ** 2)
     # elif 12 > tmag >= 11:
-    #     fluxes = gaia_id_data['flux_4']
-    #     fluxerrs = gaia_id_data['fluxerr_4']
-    #     sky = gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']
-    #     skyerrs = np.sqrt(gaia_id_data['fluxerr_4'] ** 2 + gaia_id_data['fluxerr_w_sky_4'] ** 2)
+    #     fluxes = tic_id_data['flux_4']
+    #     fluxerrs = tic_id_data['fluxerr_4']
+    #     sky = tic_id_data['flux_w_sky_4'] - tic_id_data['flux_4']
+    #     skyerrs = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
     # else:
-    #     fluxes = gaia_id_data['flux_3']
-    #     fluxerrs = gaia_id_data['fluxerr_3']
-    #     sky = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
-    #     skyerrs = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
+    #     fluxes = tic_id_data['flux_3']
+    #     fluxerrs = tic_id_data['fluxerr_3']
+    #     sky = tic_id_data['flux_w_sky_3'] - tic_id_data['flux_3']
+    #     skyerrs = np.sqrt(tic_id_data['fluxerr_3'] ** 2 + tic_id_data['fluxerr_w_sky_3'] ** 2)
 
-    fluxes = gaia_id_data['flux_6']
-    fluxerrs = gaia_id_data['fluxerr_6']
-    sky = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
-    skyerrs = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
+    fluxes = tic_id_data['flux_6']
+    fluxerrs = tic_id_data['fluxerr_6']
+    sky = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
+    skyerrs = np.sqrt(tic_id_data['fluxerr_6'] ** 2 + tic_id_data['fluxerr_w_sky_6'] ** 2)
 
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
@@ -101,13 +101,13 @@ def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
 
     airmass = []
     # take data for the first frame_id
-    image_data = get_image_data(gaia_id_data['frame_id'][0], image_directory)
+    image_data = get_image_data(tic_id_data['frame_id'][0], image_directory)
 
     # Get airmass for each frame_id
-    for frame_id in gaia_id_data['frame_id']:
+    for frame_id in tic_id_data['frame_id']:
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
         airmass.append(round(image_header['AIRMASS'], 2))
-    print(f"The star has GAIA id: {gaia_id_to_plot}")
+    print(f"The star has TIC id: {tic_id_to_plot}")
     print(len(airmass))
     print(len(jd_mid_binned))
 
@@ -161,7 +161,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
 
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
-        axs[0].set_title(f'LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
+        axs[0].set_title(f'LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
@@ -184,8 +184,8 @@ def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
 
 def main():
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
+    parser.add_argument('--tic_id', type=int, help='The TIC ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
@@ -204,16 +204,16 @@ def main():
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-        # Check if gaia_id exists in the current photometry file
-        if args.gaia_id in phot_table['gaia_id']:
+        # Check if tic_id exists in the current photometry file
+        if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc(phot_table, args.gaia_id, bin_size, image_directory=current_night_directory)
-            break  # Stop looping if gaia_id is found
+            plot_lc(phot_table, args.tic_id, bin_size, image_directory=current_night_directory)
+            break  # Stop looping if tic_id is found
         else:
-            print(f"Gaia ID {args.gaia_id} not found in {phot_file}")
+            print(f"TIC ID {args.tic_id} not found in {phot_file}")
 
     else:
-        print(f"Gaia ID {args.gaia_id} not found in any photometry file.")
+        print(f"TIC ID {args.tic_id} not found in any photometry file.")
 
 
 if __name__ == "__main__":
