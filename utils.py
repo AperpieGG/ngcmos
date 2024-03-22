@@ -12,6 +12,8 @@ from astropy.wcs import WCS
 import astropy.units as u
 from astropy.table import Table, hstack
 import matplotlib.pyplot as plt
+from scipy.stats import median_abs_deviation
+
 
 # pylint: disable=invalid-name
 # pylint: disable=no-member
@@ -446,6 +448,24 @@ def bin_time_flux_error(time, flux, error, bin_fact):
         flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
         error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
     return time_b, flux_b, error_b
+
+
+def sigma_clip_lc(time, flux):
+    """
+    Remove massive outliers in 3 rounds of clipping
+    """
+    n_time = np.copy(time)
+    n_flux = np.copy(flux)
+    for _ in range(3):
+        mad = median_abs_deviation(flux)
+        loc = np.where(((flux < np.median(flux) + 10*mad) & (flux > np.median(flux) - 10*mad)))[0]
+        n_time = time[loc]
+        n_flux = flux[loc]
+        if len(n_time) == len(time):
+            return n_time, n_flux
+        flux = flux[loc]
+        time = time[loc]
+    return n_time, n_flux
 
 
 
