@@ -4,6 +4,7 @@ import json
 import os
 from astropy.io import fits
 import numpy as np
+from utils import find_current_night_directory
 
 
 def load_config(filename):
@@ -132,7 +133,7 @@ def main():
     """
     Main function to create the master bias, dark, and flat.
     """
-    print(base_path)
+    base_path = find_current_night_directory()
 
     master_bias = bias(base_path, out_path)
     master_dark = dark(base_path, out_path, master_bias)
