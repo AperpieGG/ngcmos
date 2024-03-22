@@ -78,10 +78,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         tic_id_data = table[table['tic_id'] == tic_id]
         jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
-        flux_4 = tic_id_data['flux_6']
-        fluxerr_4 = tic_id_data['fluxerr_6']
-        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
-        skyerrs_4 = np.sqrt(tic_id_data['fluxerr_6'] ** 2 + tic_id_data['fluxerr_w_sky_6'] ** 2)
+        flux_4 = tic_id_data['flux_5']
+        fluxerr_4 = tic_id_data['fluxerr_5']
+        sky_4 = tic_id_data['flux_w_sky_5'] - tic_id_data['flux_5']
+        skyerrs_4 = np.sqrt(tic_id_data['fluxerr_5'] ** 2 + tic_id_data['fluxerr_w_sky_5'] ** 2)
 
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
