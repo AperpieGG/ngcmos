@@ -66,7 +66,7 @@ def main(json_file):
 
     # Plot RMS vs magnitudes
     plot_noise_model(data)
-    plot_tmag_vs_mag(data['Tmag_list'], data['mag_list'])
+    plot_tmag_vs_mag(data['Tmag_list'], data['mags_list'])
 
 
 if __name__ == "__main__":
