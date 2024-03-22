@@ -46,6 +46,18 @@ def plot_noise_model(data):
     plt.show()
 
 
+def plot_tmag_vs_mag(tmag_list, mag_list):
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.plot(tmag_list, mag_list, 'o', color='darkgreen', label='data', alpha=0.5)
+    ax.set_xlabel('Tmag')
+    ax.set_ylabel('Mean Magnitude')
+    ax.set_xlim(7.5, 16)
+    ax.set_ylim(7.5, 16)
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+
+
 def main(json_file):
     # Set plot parameters
     plot_images()
@@ -54,6 +66,7 @@ def main(json_file):
 
     # Plot RMS vs magnitudes
     plot_noise_model(data)
+    plot_tmag_vs_mag(data['tmag_list'], data['mag_list'])
 
 
 if __name__ == "__main__":
