@@ -60,6 +60,10 @@ def get_image_data(frame_id, image_directory):
 def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
+
+    if len(gaia_id_data) == 0:
+        print(f"Gaia ID {gaia_id_to_plot} not found in the current photometry file.")
+        return
     tmag = gaia_id_data['Tmag'][0]
     jd_mid = gaia_id_data['jd_mid']
     x = gaia_id_data['x'][0]
@@ -203,7 +207,6 @@ def main():
 
     else:
         print(f"Gaia ID {args.gaia_id} not found in any photometry file.")
-
 
 
 if __name__ == "__main__":
