@@ -5,7 +5,7 @@ import json
 import numpy as np
 from utils import plot_images
 
-plt.style.use('dark_background')
+# plt.style.use('dark_background')
 
 
 def load_rms_mags_data(filename):
@@ -36,7 +36,7 @@ def plot_noise_model(data):
 
     ax.plot(filtered_mags, filtered_RMS, 'o', color='darkgreen', label='data', alpha=0.5)
 
-    ax.plot(synthetic_mag, RNS, color='white', label='total noise')
+    ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_mag, dc_noise, color='purple', label='dark noise', linestyle='--')
