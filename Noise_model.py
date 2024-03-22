@@ -80,7 +80,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         Tmag = tic_id_data['Tmag'][0]
         flux_4 = tic_id_data['flux_6']
         fluxerr_4 = tic_id_data['fluxerr_6']
-        sky_4 = tic_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
+        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         skyerrs_4 = np.sqrt(tic_id_data['fluxerr_6'] ** 2 + tic_id_data['fluxerr_w_sky_6'] ** 2)
 
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
