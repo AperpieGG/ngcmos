@@ -58,7 +58,7 @@ def dark(out_path):
         return None
 
 
-def flat(base_path, master_bias, master_dark, dark_exposure=10):
+def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     """
     Create the master flat from the flat files.
 
@@ -97,7 +97,7 @@ def flat(base_path, master_bias, master_dark, dark_exposure=10):
 
     # Save the master flat to the current working directory
     master_flat_filename = 'master_flat.fits'
-    master_flat_path = os.path.join(os.getcwd(), master_flat_filename)
+    master_flat_path = os.path.join(out_path, master_flat_filename)
     fits.writeto(master_flat_path, master_flat, overwrite=True)
 
     print(f'Master flat saved to: {master_flat_path}')
@@ -112,7 +112,7 @@ def main():
 
     master_bias = bias(out_path)
     master_dark = dark(out_path)
-    flat(base_path, master_bias, master_dark)
+    flat(base_path, out_path, master_bias, master_dark)
 
 
 if __name__ == '__main__':
