@@ -185,7 +185,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
+    parser.add_argument('-gaia_ids', nargs='+', type=int, help='List of Gaia IDs of the stars to plot', required=True)
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
