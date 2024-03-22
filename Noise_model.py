@@ -238,7 +238,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     """
 
     # set aperture radius
-    aperture_radius = 6
+    aperture_radius = 5
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
