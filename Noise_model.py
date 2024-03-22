@@ -74,16 +74,16 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     negative_fluxes_stars = []
     Tmags_list = []
 
-    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        jd_mid = gaia_id_data['jd_mid']
-        Tmag = gaia_id_data['Tmag'][0]
-        flux_4 = gaia_id_data['flux_6']
-        fluxerr_4 = gaia_id_data['fluxerr_6']
-        sky_4 = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
-        skyerrs_4 = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
+    for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
+        tic_id_data = table[table['tic_id'] == tic_id]
+        jd_mid = tic_id_data['jd_mid']
+        Tmag = tic_id_data['Tmag'][0]
+        flux_4 = tic_id_data['flux_6']
+        fluxerr_4 = tic_id_data['fluxerr_6']
+        sky_4 = tic_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
+        skyerrs_4 = np.sqrt(tic_id_data['fluxerr_6'] ** 2 + tic_id_data['fluxerr_w_sky_6'] ** 2)
 
-        print(f"Running for star {gaia_id} with Tmag = {Tmag:.2f}")
+        print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
         # Apply sigma clipping to flux and sky arrays
         clipped_flux = sigma_clip(flux_4, sigma=3, maxiters=5)
@@ -105,21 +105,21 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         print(f"Number of non-outliers: {len(clipped_flux.mask)}")
 
         zp = []
-        for frame_id in gaia_id_data['frame_id']:
+        for frame_id in tic_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
 
         mags = []
         t = 10  # exposure time
-        gaia_id_printed = False  # Flag to track whether gaia_id has been printed
+        tic_id_printed = False  # Flag to track whether gaia_id has been printed
 
         for flux, zp_value in zip(flux_4_clipped, zp):
             if flux <= 0:
-                if not gaia_id_printed:
-                    print("The nan flux belongs to the star with gaia_id =", gaia_id)
-                    negative_fluxes_stars.append(gaia_id)
-                    gaia_id_printed = True
+                if not tic_id_printed:
+                    print("The nan flux belongs to the star with gaia_id =", tic_id)
+                    negative_fluxes_stars.append(tic_id)
+                    tic_id_printed = True
                 mag = np.nan
             else:
                 mag = -2.5 * np.log10(flux / t) + zp_value
@@ -301,7 +301,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
 
 def main(phot_file):
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
     args = parser.parse_args()
