@@ -5,7 +5,8 @@ import argparse
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
-from utils import plot_images, find_current_night_directory, get_phot_files, read_phot_file, bin_time_flux_error
+from utils import (plot_images, find_current_night_directory, get_phot_files, read_phot_file,
+                   bin_time_flux_error, sigma_clip_lc)
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
 from astropy.stats import sigma_clip
@@ -83,9 +84,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         skyerrs = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
 
     fluxes_clipped = sigma_clip(fluxes, sigma=5, maxiters=5)
+    time_clipped, fluxes_clipped = sigma_clip_lc(fluxes, jd_mid)
 
     # Bin flux data
-    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes_clipped, fluxerrs, bin_size)
+    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(time_clipped, fluxes_clipped, fluxerrs, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
     _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
 
@@ -128,7 +130,9 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         axs[2].set_ylabel('Y')
 
         # Draw a circle around the target star
-        if tmag < 11:
+        if tmag < 10.5:
+            circle_radii = [6]
+        elif 10.5 <= tmag < 11:
             circle_radii = [5]
         elif 12 > tmag >= 11:
             circle_radii = [4]
@@ -179,50 +183,7 @@ def plot_lc_for_all_stars(table, bin_size):
     for gaia_id_to_plot in unique_gaia_ids:
         # Plot the light curve for the current Gaia ID
         plot_lc(table, gaia_id_to_plot, bin_size)
-
-
-def plot_lc_with_detrend(table, gaia_id_to_plot):
-    # Select rows with the specified Gaia ID
-    gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
-    jd_mid = gaia_id_data['jd_mid']
-    tmag = gaia_id_data['Tmag'][0]
-
-    # Extract fluxes and errors based on Tmag
-    if tmag < 11:
-        fluxes = gaia_id_data['flux_5']
-        fluxerrs = gaia_id_data['fluxerr_5']
-    elif 12 > tmag >= 11:
-        fluxes = gaia_id_data['flux_4']
-        fluxerrs = gaia_id_data['fluxerr_4']
-    else:
-        fluxes = gaia_id_data['flux_3']
-        fluxerrs = gaia_id_data['fluxerr_3']
-
-    # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, 2), jd_mid - int(jd_mid[0]))
-
-    # Compute Detrended flux and errors
-    norm_flux = fluxes / trend
-    relative_err = fluxerrs / trend
-    rms = np.std(norm_flux)
-    print(f"RMS for Gaia ID {gaia_id_to_plot} = {rms:.4f}")
-
-    # Create subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-
-    # Plot raw flux with wotan model
-    ax1.plot(jd_mid, fluxes, 'o', color='black', label='Raw Flux')
-    ax1.plot(jd_mid, trend, color='red', label='Model fit')
-    ax1.set_title(f'Detrended LC for Gaia ID {gaia_id_to_plot} (Tmag = {tmag:.2f})')
-    ax1.set_xlabel('MJD [days]')
-    ax1.set_ylabel('Flux [e-]')
-    ax1.legend()
-    ax2.errorbar(jd_mid, norm_flux, yerr=relative_err, fmt='o', color='black', label='Detrended Flux')
-    ax2.set_ylabel('Detrended Flux [e-]')
-    ax2.set_xlabel('MJD [days]')
-    ax2.legend()
-    plt.tight_layout()
-    plt.show()
+        plt.show()
 
 
 def main():
@@ -248,12 +209,7 @@ def main():
     print(f"Plotting the first photometry file {phot_files[1]}...")
     phot_table = read_phot_file(phot_files[1])
 
-    if gaia_id_to_plot is None:
-        plot_lc_for_all_stars(phot_table, bin_size)
-    else:
-        plot_lc_with_detrend(phot_table, gaia_id_to_plot)
-
-    plt.show()
+    plot_lc_for_all_stars(phot_table, bin_size)
 
 
 if __name__ == "__main__":
