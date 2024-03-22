@@ -59,7 +59,7 @@ def dark(out_path):
         return None
 
 
-def flat(base_path, outer_path, master_bias, master_dark, dark_exposure=10):
+def flat(outer_path, master_bias, master_dark, dark_exposure=10):
     """
     Create the master flat from the flat files.
 
@@ -82,7 +82,7 @@ def flat(base_path, outer_path, master_bias, master_dark, dark_exposure=10):
         Master flat.
     """
     # Find and read the flat files
-    evening_files = glob.glob(os.path.join(base_path, 'evening*.fits'))
+    evening_files = glob.glob(os.path.join(outer_path, 'evening*.fits'))
     if evening_files is None:
         print('No evening files found, exiting!')
         return None
@@ -124,7 +124,7 @@ def main():
 
     master_bias = bias(out_path)
     master_dark = dark(out_path)
-    flat(base_path, outer_path, master_bias, master_dark)
+    flat(outer_path, master_bias, master_dark)
 
 
 if __name__ == '__main__':
