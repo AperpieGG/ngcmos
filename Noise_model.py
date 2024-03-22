@@ -344,8 +344,17 @@ def main(phot_file):
         json.dump(output_data, json_file, indent=4)
 
 
-def main_loop(phot_files):
+def main_loop(phot_files, bin_size):
     for phot_file in phot_files:
+        output_file = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
+        output_path = os.path.join(os.getcwd(), output_file)
+
+        # Check if the output file already exists
+        if os.path.exists(output_path):
+            print(f"Output file '{output_file}' already exists. Skipping '{phot_file}'.")
+            continue
+
+        # If the output file doesn't exist, run the main function
         main(phot_file)
 
 
