@@ -118,7 +118,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
 
     # Save the master flat to the current working directory
     master_flat_filename = 'master_flat.fits'
-    master_flat_path = os.path.join(out_path, master_flat_filename)
+    master_flat_path = os.path.join(base_path, master_flat_filename)
     fits.writeto(master_flat_path, master_flat, overwrite=True)
 
     print(f'Master flat saved to: {master_flat_path}')
