@@ -54,7 +54,12 @@ def plot_noise_model(data):
 
 def plot_tmag_vs_mag(tmag_list, mag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
-    ax.plot(tmag_list, mag_list, 'o', color='darkgreen', label='data', alpha=0.5)
+
+    filtered_indices = np.where(np.array(mag_list) > 8.8)[0]
+    filtered_mags = [mag_list[i] for i in filtered_indices]
+    filtered_tmags = [tmag_list[i] for i in filtered_indices]
+
+    ax.plot(filtered_tmags, filtered_mags, 'o', color='darkgreen', label='data', alpha=0.5)
     ax.set_xlabel('Tmag')
     ax.set_ylabel('Mean Magnitude')
     ax.set_xlim(7.5, 16)
