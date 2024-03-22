@@ -7,7 +7,8 @@ from utils import find_current_night_directory
 
 calibration_path = "/home/ops/data/20231212/"
 base_path = "/home/ops/data/20231212/"
-out_path = os.getcwd()
+out_path = "/home/ops/data/calibration_images/"
+outer_path = os.getcwd()
 
 
 def bias(out_path):
@@ -58,7 +59,7 @@ def dark(out_path):
         return None
 
 
-def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
+def flat(base_path, outer_path, master_bias, master_dark, dark_exposure=10):
     """
     Create the master flat from the flat files.
 
@@ -66,7 +67,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     ----------
     base_path : str
         Base path for the directory.
-    out_path : str
+    outer_path : str
         Path to the output directory.
     master_bias : numpy.ndarray
         Master bias.
@@ -105,13 +106,13 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
 
         # Write the master flat with the copied header
         hdu = fits.PrimaryHDU(master_flat, header=header)
-        hdu.writeto(os.path.join(out_path, 'master_flat.fits'), overwrite=True)
+        hdu.writeto(os.path.join(outer_path, 'master_flat.fits'), overwrite=True)
 
-        hdul = fits.open(os.path.join(out_path, 'master_flat.fits'), mode='update')
+        hdul = fits.open(os.path.join(outer_path, 'master_flat.fits'), mode='update')
         hdul[0].header['FILTER'] = 'NGTS'
         hdul.close()
 
-        print(f'Master flat saved to: {os.path.join(out_path, "master_flat.fits")}')
+        print(f'Master flat saved to: {os.path.join(outer_path, "master_flat.fits")}')
         return master_flat
 
 
@@ -123,7 +124,7 @@ def main():
 
     master_bias = bias(out_path)
     master_dark = dark(out_path)
-    flat(base_path, out_path, master_bias, master_dark)
+    flat(base_path, outer_path, master_bias, master_dark)
 
 
 if __name__ == '__main__':
