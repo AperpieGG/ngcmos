@@ -283,14 +283,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     plt.show()
 
 
-def main(phot_file):
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
-    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
-    args = parser.parse_args()
-    bin_size = args.bin
-
+def main(phot_file, bin_size):
     # Set plot parameters
     plot_images()
 
@@ -355,7 +348,7 @@ def main_loop(phot_files, bin_size):
             continue
 
         # If the output file doesn't exist, run the main function
-        main(phot_file)
+        main(phot_file, bin_size)
 
 
 if __name__ == "__main__":
@@ -366,5 +359,12 @@ if __name__ == "__main__":
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
+    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
+    args = parser.parse_args()
+    bin_size = args.bin
+
     # Run the main function for each photometry file
-    main_loop(phot_files)
+    main_loop(phot_files, bin_size)
