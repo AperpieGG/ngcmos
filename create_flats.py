@@ -133,7 +133,7 @@ def main():
     """
     Main function to create the master bias, dark, and flat.
     """
-    base_path = find_current_night_directory()
+    base_path = find_current_night_directory(base_paths[0])
 
     master_bias = bias(base_path, out_path)
     master_dark = dark(base_path, out_path, master_bias)
