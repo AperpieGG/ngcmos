@@ -121,10 +121,6 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     master_flat_path = os.path.join(out_path, master_flat_filename)
     fits.writeto(master_flat_path, master_flat, overwrite=True)
 
-    with fits.open(master_flat, mode='update') as hdul:
-        if 'FILTER' not in hdul[0].header:
-            hdul[0].header['FILTER'] = 'NGTS'
-
     print(f'Master flat saved to: {master_flat_path}')
     return master_flat
 
@@ -134,6 +130,7 @@ def main():
     Main function to create the master bias, dark, and flat.
     """
     base_path = find_current_night_directory(base_paths[0])
+    print(f'Using base path: {base_path}')
 
     master_bias = bias(base_path, out_path)
     master_dark = dark(base_path, out_path, master_bias)
