@@ -198,13 +198,9 @@ def main():
             frame_ids = [filename for i in range(len(phot_x))]
             print(f"Found {len(frame_ids)} sources")
 
-            # frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
-            #                         time_jd.value, phot_x, phot_y],
-            #                        names=("frame_id", "gaia_id", "Tmag", "tic_id", "jd_mid", "x", "y"))
-
-            frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'],
+            frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
                                     time_jd.value, phot_x, phot_y],
-                                   names=("frame_id", "gaia_id", "Tmag", "jd_mid", "x", "y"))
+                                   names=("frame_id", "gaia_id", "Tmag", "tic_id", "jd_mid", "x", "y"))
 
             # Extract photometry at locations
             frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
