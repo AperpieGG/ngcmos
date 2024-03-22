@@ -170,10 +170,6 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     # If current_night_directory is None, set it to the current working directory
     if current_night_directory is None:
         current_night_directory = os.getcwd()
-        print('Using current working directory and the master flat found in:',
-              (os.path.join(current_night_directory, 'master_flat.fits')))
-        return fits.getdata(os.path.join(current_night_directory, 'master_flat.fits'))
-
     elif current_night_directory:  # Check if current_night_directory is not None and has a value
         # Check if there is a master flat specific to the current night directory
         current_night_master_flat_filename = f'master_flat_{os.path.basename(current_night_directory)}.fits'
@@ -224,18 +220,19 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         print(f'Master flat for current night directory created in {current_night_master_flat_path}')
         return master_flat
 
-    # If current_night_directory is None or the master flat for the current night directory doesn't exist
-    # and current_night_directory is the current working directory
-    # and the create_flats has not run manually from the user
     if current_night_directory == os.getcwd():
         print('Current night directory is the current working directory.')
-        master_flat_filename = 'master_flat.fits'
-        master_flat_path = os.path.join(out_path, master_flat_filename)
-        if os.path.exists(master_flat_path):
-            print(f'Found master flat in {master_flat_path}\n')
-            return fits.getdata(master_flat_path)
+
+        if os.path.exists(os.path.join(current_night_directory, 'master_flat.fits')):
+            print('Using current working directory and the master flat found in:',
+                  os.path.join(current_night_directory, 'master_flat.fits'))
+            return fits.getdata(os.path.join(current_night_directory, 'master_flat.fits'))
+
+        elif os.path.exists(os.path.join(out_path, 'master_flat.fits')):
+            print('Using master flat found in:', os.path.join(out_path, 'master_flat.fits'))
+            return fits.getdata(os.path.join(out_path, 'master_flat.fits'))
         else:
-            print("Master flat file not found in out path:", master_flat_path)
+            print("Master flat file not found in out path:", os.path.join(out_path, 'master_flat.fits'))
             return None
     else:
         print('No current night directory found.')
