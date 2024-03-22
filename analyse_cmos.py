@@ -85,11 +85,12 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
 
     fluxes_clipped = sigma_clip(fluxes, sigma=5, maxiters=5)
     time_clipped, fluxes_clipped = sigma_clip_lc(jd_mid, fluxes)
+    time_clipped, sky_clipped = sigma_clip_lc(jd_mid, sky)
 
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(time_clipped, fluxes_clipped, fluxerrs, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
-    _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
+    _, sky_binned, skyerrs_binned = bin_time_flux_error(time_clipped, sky_clipped, skyerrs, bin_size)
 
     # Define the size of the figure
     fig, axs = plt.subplots(3, 1, figsize=(10, 10))
