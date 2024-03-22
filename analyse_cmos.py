@@ -69,22 +69,27 @@ def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
     x = gaia_id_data['x'][0]
     y = gaia_id_data['y'][0]
 
-    # Extract fluxes and errors based on Tmag
-    if tmag < 11:
-        fluxes = gaia_id_data['flux_5']
-        fluxerrs = gaia_id_data['fluxerr_5']
-        sky = gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']
-        skyerrs = np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)
-    elif 12 > tmag >= 11:
-        fluxes = gaia_id_data['flux_4']
-        fluxerrs = gaia_id_data['fluxerr_4']
-        sky = gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']
-        skyerrs = np.sqrt(gaia_id_data['fluxerr_4'] ** 2 + gaia_id_data['fluxerr_w_sky_4'] ** 2)
-    else:
-        fluxes = gaia_id_data['flux_3']
-        fluxerrs = gaia_id_data['fluxerr_3']
-        sky = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
-        skyerrs = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
+    # # Extract fluxes and errors based on Tmag
+    # if tmag < 11:
+    #     fluxes = gaia_id_data['flux_5']
+    #     fluxerrs = gaia_id_data['fluxerr_5']
+    #     sky = gaia_id_data['flux_w_sky_5'] - gaia_id_data['flux_5']
+    #     skyerrs = np.sqrt(gaia_id_data['fluxerr_5'] ** 2 + gaia_id_data['fluxerr_w_sky_5'] ** 2)
+    # elif 12 > tmag >= 11:
+    #     fluxes = gaia_id_data['flux_4']
+    #     fluxerrs = gaia_id_data['fluxerr_4']
+    #     sky = gaia_id_data['flux_w_sky_4'] - gaia_id_data['flux_4']
+    #     skyerrs = np.sqrt(gaia_id_data['fluxerr_4'] ** 2 + gaia_id_data['fluxerr_w_sky_4'] ** 2)
+    # else:
+    #     fluxes = gaia_id_data['flux_3']
+    #     fluxerrs = gaia_id_data['fluxerr_3']
+    #     sky = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
+    #     skyerrs = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
+
+    fluxes = gaia_id_data['flux_6']
+    fluxerrs = gaia_id_data['fluxerr_6']
+    sky = gaia_id_data['flux_w_sky_6'] - gaia_id_data['flux_6']
+    skyerrs = np.sqrt(gaia_id_data['fluxerr_6'] ** 2 + gaia_id_data['fluxerr_w_sky_6'] ** 2)
 
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
@@ -130,14 +135,16 @@ def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
         axs[2].set_ylabel('Y')
 
         # Draw a circle around the target star
-        if tmag < 10.5:
-            circle_radii = [6]
-        elif 10.5 <= tmag < 11:
-            circle_radii = [5]
-        elif 12 > tmag >= 11:
-            circle_radii = [4]
-        else:
-            circle_radii = [3]
+        # if tmag < 10.5:
+        #     circle_radii = [6]
+        # elif 10.5 <= tmag < 11:
+        #     circle_radii = [5]
+        # elif 12 > tmag >= 11:
+        #     circle_radii = [4]
+        # else:
+        #     circle_radii = [3]
+
+        circle_radii = [6]
 
         for radius in circle_radii:
             circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
