@@ -7,7 +7,7 @@ from utils import find_current_night_directory
 
 calibration_path = "/home/ops/data/20231212/"
 base_path = "/home/ops/data/20231212/"
-out_path = "/home/ops/data/calibration_images/"
+out_path = os.getcwd()
 
 
 def bias(out_path):
