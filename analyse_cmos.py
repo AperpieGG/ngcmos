@@ -6,10 +6,9 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import (plot_images, find_current_night_directory, get_phot_files, read_phot_file,
-                   bin_time_flux_error, sigma_clip_lc)
+                   bin_time_flux_error)
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
-from astropy.stats import sigma_clip
 
 
 def load_config(filename):
@@ -58,7 +57,7 @@ def get_image_data(frame_id, image_directory):
         return None
 
 
-def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_directory=""):
+def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
     # Select rows with the specified Gaia ID
     gaia_id_data = table[table['gaia_id'] == gaia_id_to_plot]
     tmag = gaia_id_data['Tmag'][0]
@@ -83,14 +82,10 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         sky = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
         skyerrs = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
 
-    # fluxes_clipped = sigma_clip(fluxes, sigma=5, maxiters=5)
-    time_clipped, fluxes_clipped = sigma_clip_lc(jd_mid, fluxes)
-    time_clipped, sky_clipped = sigma_clip_lc(jd_mid, sky)
-
     # Bin flux data
-    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(time_clipped, fluxes_clipped, fluxerrs, bin_size)
+    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
-    _, sky_binned, skyerrs_binned = bin_time_flux_error(time_clipped, sky_clipped, skyerrs, bin_size)
+    _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
 
     # Define the size of the figure
     fig, axs = plt.subplots(3, 1, figsize=(10, 10))
@@ -176,24 +171,12 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         plt.show()
 
 
-def plot_lc_for_all_stars(table, bin_size):
-    # Get unique Gaia IDs from the table
-    unique_gaia_ids = np.unique(table['gaia_id'])
-
-    # Iterate over each unique Gaia ID
-    for gaia_id_to_plot in unique_gaia_ids:
-        # Plot the light curve for the current Gaia ID
-        plot_lc(table, gaia_id_to_plot, bin_size)
-        plt.show()
-
-
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
     parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
-    gaia_id_to_plot = args.gaia_id
     bin_size = args.bin
 
     # Set plot parameters
@@ -206,11 +189,21 @@ def main():
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Plot the first photometry file
-    print(f"Plotting the first photometry file {phot_files[1]}...")
-    phot_table = read_phot_file(phot_files[1])
+    # Loop through photometry files
+    for phot_file in phot_files:
+        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-    plot_lc_for_all_stars(phot_table, bin_size)
+        # Check if gaia_id exists in the current photometry file
+        if args.gaia_id in phot_table['gaia_id']:
+            print('Found star in photometry file:', phot_file)
+            plot_lc(phot_table, args.gaia_id, bin_size, image_directory=os.path.join(base_path, 'images'))
+            break  # Stop looping if gaia_id is found
+        else:
+            print(f"Gaia ID {args.gaia_id} not found in {phot_file}")
+
+    else:
+        print(f"Gaia ID {args.gaia_id} not found in any photometry file.")
+
 
 
 if __name__ == "__main__":
