@@ -12,9 +12,10 @@ import os
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
-from astropy.stats import sigma_clip, sigma_clipped_stats
+from astropy.stats import sigma_clip
 import json
-from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error, plot_images)
+from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error, plot_images,
+                   sigma_clip_lc)
 
 
 def load_config(filename):
@@ -86,23 +87,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
         # Apply sigma clipping to flux and sky arrays
-        clipped_flux = sigma_clip(flux_4, sigma=3, maxiters=5)
-
-        # # Replace outliers with NaN in flux_4
-        # flux_4_clipped = flux_4.copy()  # Make a copy of flux_4
-        # flux_4_clipped[clipped_flux.mask] = np.nan
-        # print(f"Number of outliers: {np.sum(clipped_flux.mask)}")
-        #
-        # # Replace corresponding jd_mid values with NaN
-        # jd_mid_clipped = jd_mid.copy()  # Make a copy of jd_mid
-        # jd_mid_clipped[clipped_flux.mask] = np.nan
-        # print(f"Number of outliers in jd_mid: {np.sum(clipped_flux.mask)}")
-
-        # Mask outliers in flux_4 and jd_mid
-        flux_4_clipped = flux_4[~clipped_flux.mask]
-        fluxerr_4_clipped = fluxerr_4[~clipped_flux.mask]
-        jd_mid_clipped = jd_mid[~clipped_flux.mask]
-        print(f"Number of non-outliers: {len(clipped_flux.mask)}")
+        time_clipped, flux_4_clipped, fluxerr_4_clipped = sigma_clip_lc(jd_mid, flux_4, fluxerr_4)
 
         zp = []
         for frame_id in tic_id_data['frame_id']:
@@ -123,7 +108,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
                 mag = np.nan
             else:
                 mag = -2.5 * np.log10(flux / t) + zp_value
-            mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
+            mag_error = 1.0857 * fluxerr_4 / flux_4_clipped
             mags.append(mag)
 
         # # Plot the magnitudes for this star
@@ -140,12 +125,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
         # dt_fluxerr = fluxerr_4 / mean_flux  # Normalize the flux errors by dividing by the average flux
 
-        trend = np.polyval(np.polyfit(jd_mid_clipped - int(jd_mid_clipped[0]), flux_4_clipped, 2),
-                           jd_mid_clipped - int(jd_mid_clipped[0]))
+        trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), flux_4_clipped, 2),
+                           time_clipped - int(time_clipped[0]))
         dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4_clipped / trend
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid_clipped, dt_flux, dt_fluxerr,
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr,
                                                                              bin_size)
 
         # Calculate mean flux and RMS
