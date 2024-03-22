@@ -82,11 +82,19 @@ def flat(outer_path, master_bias, master_dark, dark_exposure=10):
         Master flat.
     """
     # Find and read the flat files
-    evening_files = glob.glob(os.path.join(outer_path, 'evening*.fits'))
-    if evening_files is None:
-        print('No evening files found, using morning files')
-        evening_files = glob.glob(os.path.join(outer_path, 'morning*.fits'))
-        return evening_files
+    # Find appropriate files for creating the master flat
+    evening_files = [f for f in glob.glob(os.path.join(outer_path, 'evening*.fits')) if
+                     'HDR' in fits.getheader(f)['READMODE']]
+
+    if not evening_files:
+        # If evening files don't exist, use morning files
+        evening_files = [f for f in glob.glob(os.path.join(outer_path, 'morning*.fits')) if
+                         'HDR' in fits.getheader(f)['READMODE']]
+
+    if not evening_files:
+        print('No suitable flat field files found.')
+        return None  # or handle the case where no files are found
+    
     else:
         print(f'Found {len(evening_files)} evening files')
 
