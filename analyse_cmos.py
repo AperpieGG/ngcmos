@@ -213,7 +213,7 @@ def main():
         else:
             print(f"Gaia IDs {args.gaia_ids} not found in {phot_file}")
     else:
-        print(f"Gaia ID {args.gaia_id} not found in any photometry file.")
+        print(f"Gaia ID {args.gaia_ids} not found in any photometry file.")
 
 
 if __name__ == "__main__":
