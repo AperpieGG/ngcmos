@@ -185,7 +185,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size, image_directory=""):
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
-    parser.add_argument('-gaia_ids', nargs='+', type=int, help='List of Gaia IDs of the stars to plot', required=True)
+    parser.add_argument('--gaia_id', type=int, help='The Gaia ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
@@ -205,15 +205,15 @@ def main():
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
         # Check if gaia_id exists in the current photometry file
-        for gaia_id in args.gaia_ids:
-            if gaia_id in phot_table['gaia_id']:
-                print('Found star in photometry file:', phot_file)
-                plot_lc(phot_table, gaia_id, bin_size, image_directory=current_night_directory)
-                break
+        if args.gaia_id in phot_table['gaia_id']:
+            print('Found star in photometry file:', phot_file)
+            plot_lc(phot_table, args.gaia_id, bin_size, image_directory=current_night_directory)
+            break  # Stop looping if gaia_id is found
         else:
-            print(f"Gaia IDs {args.gaia_ids} not found in {phot_file}")
+            print(f"Gaia ID {args.gaia_id} not found in {phot_file}")
+
     else:
-        print(f"Gaia ID {args.gaia_ids} not found in any photometry file.")
+        print(f"Gaia ID {args.gaia_id} not found in any photometry file.")
 
 
 if __name__ == "__main__":
