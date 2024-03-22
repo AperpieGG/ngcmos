@@ -84,8 +84,9 @@ def flat(outer_path, master_bias, master_dark, dark_exposure=10):
     # Find and read the flat files
     evening_files = glob.glob(os.path.join(outer_path, 'evening*.fits'))
     if evening_files is None:
-        print('No evening files found, exiting!')
-        return None
+        print('No evening files found, using morning files')
+        evening_files = glob.glob(os.path.join(outer_path, 'morning*.fits'))
+        return evening_files
     else:
         print(f'Found {len(evening_files)} evening files')
 
