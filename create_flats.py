@@ -126,3 +126,16 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
 
     print(f'Master flat saved to: {master_flat_path}')
     return master_flat
+
+
+def main():
+    """
+    Main function to create the master bias, dark, and flat.
+    """
+    master_bias = bias(base_path, out_path)
+    master_dark = dark(base_path, out_path, master_bias)
+    flat(base_path, out_path, master_bias, master_dark)
+
+    
+if __name__ == '__main__':
+    main()
