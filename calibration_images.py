@@ -1,4 +1,22 @@
 #!/usr/bin/env python
+
+"""
+This script is used to reduce the images in the specified directory.
+It will create a master bias or read it if it already exists in the calibration directory.
+It will create a master dark or read it if it already exists in the calibration directory.
+
+If this script works as a cronjob and the night directory is found then it will check if the
+master_flat_<night_directory>.fits already exists in the calibration path and use that.
+Otherwise, it will create it and use it for the reduction of the images.
+
+If the current night directory is not found (running it manually) then it will create
+a master_flat.fits (created from the create_flats.py) from the flat files in the
+current working directory and use it for the reduction of the images.
+
+if the master_flat is not created from the create_flats then it will take the general master_flat.fits
+from the calibration directory and use it for the reduction of the images.
+"""
+
 import glob
 import os
 from datetime import datetime, timedelta
@@ -155,6 +173,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         print('Using current working directory and the master flat found in:',
               (os.path.join(current_night_directory, 'master_flat.fits')))
         return fits.getdata(os.path.join(current_night_directory, 'master_flat.fits'))
+
     elif current_night_directory:  # Check if current_night_directory is not None and has a value
         # Check if there is a master flat specific to the current night directory
         current_night_master_flat_filename = f'master_flat_{os.path.basename(current_night_directory)}.fits'
@@ -207,6 +226,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
 
     # If current_night_directory is None or the master flat for the current night directory doesn't exist
     # and current_night_directory is the current working directory
+    # and the create_flats has not run manually from the user
     if current_night_directory == os.getcwd():
         print('Current night directory is the current working directory.')
         master_flat_filename = 'master_flat.fits'
