@@ -47,10 +47,8 @@ The script ran as cronjobs in the nuc computer which is in Chile currently. The 
    
    ```calibration_images.py```
    Will search for master bias and darks on the calibration directory. We dont have shutter so bias and darks kept fixed assuming their performance is stable through months of             observations. There are additional steps of how the master_flat is created:
-      1. If master_flat_{night}.fits already exists in the calibration path, it will use it
-      2. If not it will create the master_flat_{night}.fits and save it to the calibration path
-      3. If the user want to ran the process on a given directory then the run create_flats.py to create a master_flat.fits and save it in the cwd
-      4. If the user havent run the create_flats.py then as last resort it will use a general master_flat from the calibration path
+      3. The user, on a given directory has to run the run create_flats.py to create a master_flat.fits. This will be saved on the cwd.
+      4. If the user havent run the create_flats.py then as last resort it will use a general master_flat from the calibration path.
          
 10) ```analyse_cmos.py```
    This script will do an inspection of the lightcurves using the gaia_id as an argument. It will plot fluc, sky-background and the ROI of the star from the first frame, with the aperture and annulus used.
