@@ -81,26 +81,32 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
         Master flat.
     """
     # Find and read the flat files
-    flat_files = glob.glob(os.path.join(base_path, 'evening*.fits'))
+    evening_files = glob.glob(os.path.join(base_path, 'evening*.fits'))
 
-    # Limit the number of files to the first 21
-    flat_files = flat_files[:21]
+    print('Creating master flat')
+    # take only the first 21
+    files = evening_files[:21]
 
-    # Read and stack the flat frames
-    cube = np.zeros((*master_bias.shape, len(flat_files)))
-    for i, f in enumerate(flat_files):
+    cube = np.zeros((*master_bias.shape, len(files)))
+    for i, f in enumerate(files):
         data, header = fits.getdata(f, header=True)
-        cube[:, :, i] = (data - master_bias - master_dark * header['EXPTIME'] / dark_exposure) / np.median(data)
+        cube[:, :, i] = data - master_bias - master_dark * header['EXPTIME'] / dark_exposure
+        cube[:, :, i] = cube[:, :, i] / np.average(cube[:, :, i])
 
-    # Create the master flat by taking the median along the stack
     master_flat = np.median(cube, axis=2)
 
-    # Save the master flat to the current working directory
-    master_flat_filename = 'master_flat.fits'
-    master_flat_path = os.path.join(out_path, master_flat_filename)
-    fits.writeto(master_flat_path, master_flat, overwrite=True)
+    # Copy header from one of the input files
+    header = fits.getheader(files[0])
 
-    print(f'Master flat saved to: {master_flat_path}')
+    # Write the master flat with the copied header
+    hdu = fits.PrimaryHDU(master_flat, header=header)
+    hdu.writeto(os.path.join(out_path, 'master_flat.fits'), overwrite=True)
+
+    hdul = fits.open(os.path.join(out_path, 'master_flat.fits'), mode='update')
+    hdul[0].header['FILTER'] = 'NGTS'
+    hdul.close()
+
+    print(f'Master flat saved to: {os.path.join(out_path, "master_flat.fits")}')
     return master_flat
 
 
