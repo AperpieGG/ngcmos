@@ -26,7 +26,13 @@ def plot_noise_model(data):
     dc_noise = data['dc_noise']
     sky_noise = data['sky_noise']
     N = data['N']
-    ax.plot(mags_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
+
+    # Filter out data points brighter than magnitude 8.5
+    filtered_indices = np.where(np.array(mags_list) > 8.6)[0]
+    filtered_mags = [mags_list[i] for i in filtered_indices]
+    filtered_RMS = [RMS_list[i] for i in filtered_indices]
+
+    ax.plot(filtered_mags, filtered_RMS, 'o', color='darkgreen', label='data', alpha=0.5)
 
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
