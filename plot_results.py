@@ -55,6 +55,8 @@ def plot_tmag_vs_mag(tmag_list, mag_list):
     ax.set_ylim(7.5, 16)
     plt.legend(loc='best')
     plt.tight_layout()
+    plt.gca().invert_xaxis()
+    plt.gca().invert_yaxis()
     plt.show()
 
 
