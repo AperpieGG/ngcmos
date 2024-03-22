@@ -5,6 +5,8 @@ import json
 import numpy as np
 from utils import plot_images
 
+plt.style.use('dark_background')
+
 
 def load_rms_mags_data(filename):
     """
