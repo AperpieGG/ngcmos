@@ -134,10 +134,9 @@ def main():
     """
 
     master_bias = bias(base_path, out_path)
-    print(master_bias)
     master_dark = dark(base_path, out_path, master_bias)
-    print(master_dark)
     flat(base_path, out_path, master_bias, master_dark)
+    print(base_path)
 
 
 if __name__ == '__main__':
