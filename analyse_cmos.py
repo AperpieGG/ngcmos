@@ -83,7 +83,7 @@ def plot_lc(table, gaia_id_to_plot, bin_size=1, exposure_time=10, image_director
         sky = gaia_id_data['flux_w_sky_3'] - gaia_id_data['flux_3']
         skyerrs = np.sqrt(gaia_id_data['fluxerr_3'] ** 2 + gaia_id_data['fluxerr_w_sky_3'] ** 2)
 
-    fluxes_clipped = sigma_clip(fluxes, sigma=5, maxiters=5)
+    # fluxes_clipped = sigma_clip(fluxes, sigma=5, maxiters=5)
     time_clipped, fluxes_clipped = sigma_clip_lc(jd_mid, fluxes)
     time_clipped, sky_clipped = sigma_clip_lc(jd_mid, sky)
 
