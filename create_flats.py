@@ -6,7 +6,7 @@ import numpy as np
 from utils import find_current_night_directory
 
 calibration_paths = '/home/ops/data/20231212/'
-base_paths = 'home/ops/data/'
+base_paths = '/home/ops/data/'
 out_paths = '/home/ops/data/calibration_images/'
 
 # Select directory based on existence
