@@ -81,7 +81,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     # Plot raw flux with wotan model
     ax1.plot(jd_mid, fluxes, '.', color='black', label='Raw Flux')
     ax1.plot(jd_mid, trend, color='red', label='Model fit')
-    ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
+    ax1.set_title(f'Detrended LC for TIC-{tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
