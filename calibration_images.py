@@ -152,6 +152,7 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     # If current_night_directory is None, set it to the current working directory
     if current_night_directory is None:
         current_night_directory = os.getcwd()
+        return fits.getdata(os.path.join(current_night_directory, 'master_flat.fits'))
     elif current_night_directory:  # Check if current_night_directory is not None and has a value
         # Check if there is a master flat specific to the current night directory
         current_night_master_flat_filename = f'master_flat_{os.path.basename(current_night_directory)}.fits'
