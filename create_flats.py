@@ -25,14 +25,12 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def bias(base_path, out_path):
+def bias(out_path):
     """
     Create the master bias from the bias files.
 
     Parameters
     ----------
-    base_path : str
-        Base path for the directory.
     out_path : str
         Path to the output directory.
 
@@ -51,18 +49,14 @@ def bias(base_path, out_path):
         return None
 
 
-def dark(base_path, out_path, master_bias):
+def dark(out_path):
     """
     Create the master dark from the dark files.
 
     Parameters
     ----------
-    base_path : str
-        Base path for the directory.
     out_path : str
         Path to the output directory.
-    master_bias : numpy.ndarray
-        Master bias.
 
     Returns
     -------
@@ -79,7 +73,7 @@ def dark(base_path, out_path, master_bias):
         return None
 
 
-def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
+def flat(base_path, master_bias, master_dark, dark_exposure=10):
     """
     Create the master flat from the flat files.
 
@@ -132,9 +126,9 @@ def main():
     base_path = find_current_night_directory(base_paths[0])
     print(f'Using base path: {base_path}')
 
-    master_bias = bias(base_path, out_path)
-    master_dark = dark(base_path, out_path, master_bias)
-    flat(base_path, out_path, master_bias, master_dark)
+    master_bias = bias(out_path)
+    master_dark = dark(out_path)
+    flat(base_path, master_bias, master_dark)
 
 
 if __name__ == '__main__':
