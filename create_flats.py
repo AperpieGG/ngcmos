@@ -5,14 +5,9 @@ from astropy.io import fits
 import numpy as np
 from utils import find_current_night_directory
 
-calibration_paths = '/home/ops/data/20231212/'
-base_paths = '/home/ops/data/'
-out_paths = '/home/ops/data/calibration_images/'
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
+calibration_path = "/home/ops/data/20231212/"
+base_path = "/home/ops/data/"
+out_path = "/home/ops/data/calibration_images/"
 
 
 def bias(out_path):
@@ -113,7 +108,6 @@ def main():
     """
     Main function to create the master bias, dark, and flat.
     """
-    base_path = find_current_night_directory(base_paths[0])
     print(f'Using base path: {base_path}')
 
     master_bias = bias(out_path)
