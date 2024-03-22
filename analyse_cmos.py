@@ -200,7 +200,7 @@ def main():
         # Check if gaia_id exists in the current photometry file
         if args.gaia_id in phot_table['gaia_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc(phot_table, args.gaia_id, bin_size, image_directory=os.path.join(base_path, 'images'))
+            plot_lc(phot_table, args.gaia_id, bin_size, image_directory=current_night_directory)
             break  # Stop looping if gaia_id is found
         else:
             print(f"Gaia ID {args.gaia_id} not found in {phot_file}")
