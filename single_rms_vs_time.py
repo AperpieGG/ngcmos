@@ -138,7 +138,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def plot_rms_time(table, num_stars, gaia_id=None):
+def plot_rms_time(table, num_stars, tic_id=None):
     filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10.5)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
@@ -157,10 +157,10 @@ def plot_rms_time(table, num_stars, gaia_id=None):
         jd_mid = Tmag_data['jd_mid']
         flux_5 = Tmag_data['flux_5']
         fluxerr_5 = Tmag_data['fluxerr_5']
-        current_gaia_id = Tmag_data['gaia_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
+        current_tic_id = Tmag_data['tic_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
-        # Check if gaia_id is specified and matches current_gaia_id
-        if gaia_id is not None and current_gaia_id != gaia_id:
+        # Check if tic_id is specified and matches current_tic_id
+        if tic_id is not None and current_tic_id != tic_id:
             continue
 
         trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), flux_5, 2), jd_mid - int(jd_mid[0]))
@@ -177,16 +177,16 @@ def plot_rms_time(table, num_stars, gaia_id=None):
 
         # # Check if the first RMS value is greater than 0.0065
         # if RMS_values[21] > 0.00115:
-        #     print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to RMS > 1100 ppm'.format(current_gaia_id, Tmag))
+        #     print('Excluding star with tic_id = {} and Tmag = {:.2f} due to RMS > 1100 ppm'.format(current_tic_id, Tmag))
         #     num_stars_excluded += 1
         #     continue
         if np.max(flux_5) > 200000:
-            print('Excluding star with gaia_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(current_gaia_id, Tmag))
+            print('Excluding star with tic_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(current_tic_id, Tmag))
             num_stars_excluded += 1
             continue
         else:
-            print('Using star with gaia_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
-                  format(current_gaia_id, Tmag, RMS_values[0]))
+            print('Using star with tic_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
+                  format(current_tic_id, Tmag, RMS_values[0]))
 
         num_stars_used += 1
         average_rms_values.append(RMS_values)
@@ -226,7 +226,7 @@ def plot_rms_time(table, num_stars, gaia_id=None):
     plt.show()
 
 
-def run_for_one(phot_file, gaia_id=None):
+def run_for_one(phot_file, tic_id=None):
     # Set plot parameters
     plot_images()
 
@@ -238,7 +238,7 @@ def run_for_one(phot_file, gaia_id=None):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, 5, gaia_id)  # Always plot for 5 stars
+    plot_rms_time(phot_table, 5, tic_id)  # Always plot for 5 stars
 
 
 def run_for_more(phot_file, num_stars):
@@ -265,17 +265,17 @@ if __name__ == "__main__":
     print(f"Photometry files: {phot_files}")
 
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('--num_stars', type=int, default=0, help='Number of stars to plot')
-    parser.add_argument('--gaia_id', type=int, help='Specify the Gaia ID for plotting the time vs. binned RMS for a '
+    parser.add_argument('--tic_id', type=int, help='Specify the TIC ID for plotting the time vs. binned RMS for a '
                                                     'particular star')
     args = parser.parse_args()
 
     # Run the main function for each photometry file
-    if args.gaia_id is not None:
+    if args.tic_id is not None:
         for phot_file in phot_files:
-            # main(phot_file, args.gaia_id)
-            run_for_one(phot_file, args.gaia_id)
+            # main(phot_file, args.tic_id)
+            run_for_one(phot_file, args.tic_id)
     else:
         for phot_file in phot_files:
             # main(phot_file, args.num_stars)
