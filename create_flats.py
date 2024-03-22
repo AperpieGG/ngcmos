@@ -1,23 +1,13 @@
 #!/usr/bin/env python
 import glob
-import json
 import os
 from astropy.io import fits
 import numpy as np
 from utils import find_current_night_directory
 
-
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
+calibration_paths = '/home/ops/data/20231212/'
+base_paths = 'home/ops/data/'
+out_paths = '/home/ops/data/calibration_images/'
 
 # Select directory based on existence
 for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
