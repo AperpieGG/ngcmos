@@ -82,32 +82,37 @@ def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     """
     # Find and read the flat files
     evening_files = glob.glob(os.path.join(base_path, 'evening*.fits'))
+    if evening_files is None:
+        print('No evening files found, exiting!')
+        return None
+    else:
+        print(f'Found {len(evening_files)} evening files')
 
-    print('Creating master flat')
-    # take only the first 21
-    files = evening_files[:21]
+        print('Creating master flat')
+        # take only the first 21
+        files = evening_files[:21]
 
-    cube = np.zeros((*master_bias.shape, len(files)))
-    for i, f in enumerate(files):
-        data, header = fits.getdata(f, header=True)
-        cube[:, :, i] = data - master_bias - master_dark * header['EXPTIME'] / dark_exposure
-        cube[:, :, i] = cube[:, :, i] / np.average(cube[:, :, i])
+        cube = np.zeros((*master_bias.shape, len(files)))
+        for i, f in enumerate(files):
+            data, header = fits.getdata(f, header=True)
+            cube[:, :, i] = data - master_bias - master_dark * header['EXPTIME'] / dark_exposure
+            cube[:, :, i] = cube[:, :, i] / np.average(cube[:, :, i])
 
-    master_flat = np.median(cube, axis=2)
+        master_flat = np.median(cube, axis=2)
 
-    # Copy header from one of the input files
-    header = fits.getheader(files[0])
+        # Copy header from one of the input files
+        header = fits.getheader(files[0])
 
-    # Write the master flat with the copied header
-    hdu = fits.PrimaryHDU(master_flat, header=header)
-    hdu.writeto(os.path.join(out_path, 'master_flat.fits'), overwrite=True)
+        # Write the master flat with the copied header
+        hdu = fits.PrimaryHDU(master_flat, header=header)
+        hdu.writeto(os.path.join(out_path, 'master_flat.fits'), overwrite=True)
 
-    hdul = fits.open(os.path.join(out_path, 'master_flat.fits'), mode='update')
-    hdul[0].header['FILTER'] = 'NGTS'
-    hdul.close()
+        hdul = fits.open(os.path.join(out_path, 'master_flat.fits'), mode='update')
+        hdul[0].header['FILTER'] = 'NGTS'
+        hdul.close()
 
-    print(f'Master flat saved to: {os.path.join(out_path, "master_flat.fits")}')
-    return master_flat
+        print(f'Master flat saved to: {os.path.join(out_path, "master_flat.fits")}')
+        return master_flat
 
 
 def main():
