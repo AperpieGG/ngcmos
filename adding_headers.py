@@ -78,11 +78,11 @@ def main():
 
     if args.directory:
         custom_directory = args.directory
-        update_header(custom_directory)
-        print(f"Using custom directory {custom_directory}")
     else:
-        custom_directory = None
-        print("No custom directory specified")
+        custom_directory = os.getcwd()  # Use the current working directory if no custom directory is provided
+
+    update_header(custom_directory)
+    print(f"Using directory: {custom_directory}")
 
 
 if __name__ == "__main__":
