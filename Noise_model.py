@@ -280,7 +280,7 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     ax.invert_xaxis()
     plt.legend(loc='best')
     plt.tight_layout()
-    plt.show()
+    # plt.show()
 
 
 def main(phot_file, bin_size):
