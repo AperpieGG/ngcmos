@@ -88,4 +88,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-# TODO: add parse arguments to the main function for the directory path
