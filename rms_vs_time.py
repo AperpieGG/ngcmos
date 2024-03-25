@@ -159,22 +159,15 @@ if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('--num_stars', type=int, default=0, help='Number of stars to plot')
-    parser.add_argument('--tic_id', type=int, help='Plot the time vs. binned RMS for a particular star')
-    parser.add_argument('--mags', type=str, help='Magnitude range (e.g., 8-10)')
+    parser.add_argument('--tic_id', type=int, help='plot the time vs. binned RMS for a particular star')
     args = parser.parse_args()
-
-    # Parse magnitude range
-    if args.mags:
-        min_mag, max_mag = map(float, args.mags.split('-'))
-    else:
-        min_mag, max_mag = None, None
 
     # Run the main function for each photometry file
     if args.tic_id is not None:
         for phot_file in phot_files:
+            # main(phot_file, args.tic_id)
             run_for_one(phot_file, args.tic_id)
     else:
         for phot_file in phot_files:
-            phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-            filtered_table = phot_table[(phot_table['Tmag'] >= min_mag) & (phot_table['Tmag'] <= max_mag)]
-            run_for_more(filtered_table, args.num_stars)
+            # main(phot_file, args.num_stars)
+            run_for_more(phot_file, args.num_stars)
