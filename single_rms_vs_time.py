@@ -139,7 +139,8 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
-    filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10.5)]
+    # filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10.5)]
+    filtered_table = table[(table['Tmag'] >= 12) & (table['Tmag'] <= 13)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
