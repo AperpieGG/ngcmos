@@ -3,6 +3,8 @@ import argparse
 from matplotlib import pyplot as plt
 import json
 import numpy as np
+from scipy.optimize import curve_fit
+
 from utils import plot_images
 
 # plt.style.use('dark_background')
@@ -77,7 +79,13 @@ def plot_tmag_vs_mag(data):
     filtered_mags = [mags_list[i] for i in total_indices]
     filtered_tmags = [tmag_list[i] for i in total_indices]
 
-    ax.plot(filtered_tmags, filtered_mags, 'o', color='darkgreen', label='data', alpha=0.5)
+    # add a curve_fit model to the plot and print slope and intercept
+    popt, pcov = curve_fit(lambda x, m, b: m*x + b, filtered_tmags, filtered_mags)
+    slope, intercept = popt
+    print(f'Slope: {slope}, Intercept: {intercept}')
+
+    ax.plot(filtered_tmags, filtered_mags, 'o', color='black', label='data', alpha=0.5)
+    ax.plot(filtered_tmags, slope * np.array(filtered_tmags) + intercept, color='red', label='model')
     ax.set_xlabel('Tmag')
     ax.set_ylabel('Mean Magnitude')
     ax.set_xlim(7.5, 16)
