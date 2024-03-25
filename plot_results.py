@@ -85,20 +85,20 @@ def plot_tmag_vs_mag(data):
     filtered_mags = [mags_list[i] for i in total_indices]
     filtered_tmags = [tmag_list[i] for i in total_indices]
 
-    # # Remove NaN values
-    # filtered_tmags = np.array(filtered_tmags)
-    # filtered_mags = np.array(filtered_mags)
-    # valid_indices = ~np.isnan(filtered_tmags) & ~np.isnan(filtered_mags)
-    # filtered_tmags = filtered_tmags[valid_indices]
-    # filtered_mags = filtered_mags[valid_indices]
-    #
-    # # add a curve_fit model to the plot and print slope and intercept
-    # popt, pcov = curve_fit(linear_model, filtered_tmags, filtered_mags)
-    # slope, intercept = popt
-    # print(f'Slope: {slope}, Intercept: {intercept}')
+    # Remove NaN values
+    filtered_tmags = np.array(filtered_tmags)
+    filtered_mags = np.array(filtered_mags)
+    valid_indices = ~np.isnan(filtered_tmags) & ~np.isnan(filtered_mags)
+    filtered_tmags = filtered_tmags[valid_indices]
+    filtered_mags = filtered_mags[valid_indices]
+
+    # Perform linear regression
+    slope, intercept = np.polyfit(filtered_tmags, filtered_mags, 1)
+
+    print(f'Slope: {slope}, Intercept: {intercept}')
 
     ax.plot(filtered_tmags, filtered_mags, 'o', color='black', label='data', alpha=0.5)
-    # ax.plot(filtered_tmags, slope * np.array(filtered_tmags) + intercept, color='red', label='model')
+    ax.plot(filtered_tmags, slope * np.array(filtered_tmags) + intercept, color='red', label='linear fit')
     ax.set_xlabel('Tmag')
     ax.set_ylabel('Mean Magnitude')
     ax.set_xlim(7.5, 16)
