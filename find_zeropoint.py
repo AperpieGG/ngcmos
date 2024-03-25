@@ -3,15 +3,11 @@ import argparse
 import datetime
 import json
 import os
-import fnmatch
-from datetime import datetime, timedelta
 import numpy as np
-from astropy.io import fits
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
-
-from utils import plot_images
-from scipy.stats import linregress
+from utils import (plot_images, find_current_night_directory, get_phot_files, read_phot_file,
+                   bin_time_flux_error, remove_outliers)
 
 
 def load_config(filename):
@@ -32,115 +28,6 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def find_current_night_directory(directory):
-    """
-    Find the directory for the current night based on the current date.
-    If not found, use the current working directory.
-
-    Parameters
-    ----------
-    directory : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str
-        Path to the current night directory.
-    """
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-    current_date_directory = os.path.join(directory, previous_date)
-    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
-
-
-def get_phot_files(directory):
-    """
-    Get photometry files with the pattern 'phot_*.fits' from the directory.
-
-    Parameters
-    ----------
-    directory : str
-        Directory containing the files.
-
-    Returns
-    -------
-    list of str
-        List of photometry files matching the pattern.
-    """
-    phot_files = []
-    for filename in os.listdir(directory):
-        if fnmatch.fnmatch(filename, 'phot_*.fits'):
-            phot_files.append(filename)
-    return phot_files
-
-
-def read_phot_file(filename):
-    """
-    Read the photometry file.
-
-    Parameters
-    ----------
-    filename : str
-        Photometry file to read.
-
-    Returns
-    -------
-    astropy.table.table.Table
-        Table containing the photometry data.
-    """
-    # Read the photometry file here using fits or any other appropriate method
-    try:
-        with fits.open(filename) as ff:
-            # Access the data in the photometry file as needed
-            tab = ff[1].data
-            return tab
-    except Exception as e:
-        print(f"Error reading photometry file {filename}: {e}")
-        return None
-
-
-def bin_time_flux_error(time, flux, error, bin_fact):
-    """
-    Use reshape to bin light curve data, clip under filled bins
-    Works with 2D arrays of flux and errors
-
-    Note: under filled bins are clipped off the end of the series
-
-    Parameters
-    ----------
-    time : array         of times to bin
-    flux : array         of flux values to bin
-    error : array         of error values to bin
-    bin_fact : int
-        Number of measurements to combine
-
-    Returns
-    -------
-    times_b : array
-        Binned times
-    flux_b : array
-        Binned fluxes
-    error_b : array
-        Binned errors
-
-    Raises
-    ------
-    None
-    """
-    n_binned = int(len(time) / bin_fact)
-    clip = n_binned * bin_fact
-    time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
-    # determine if 1 or 2d flux/err inputs
-    if len(flux.shape) == 1:
-        flux_b = np.average(flux[:clip].reshape(n_binned, bin_fact), axis=1)
-        error_b = np.sqrt(np.sum(error[:clip].reshape(n_binned, bin_fact) ** 2, axis=1)) / bin_fact
-    else:
-        # assumed 2d with 1 row per star
-        n_stars = len(flux)
-        flux_b = np.average(flux[:clip].reshape((n_stars, n_binned, bin_fact)), axis=2)
-        error_b = np.sqrt(np.sum(error[:clip].reshape((n_stars, n_binned, bin_fact)) ** 2, axis=2)) / bin_fact
-    return time_b, flux_b, error_b
-
-
 def linear_model(x, m, b):
     return m * x + b
 
@@ -152,10 +39,15 @@ def calculate_mean_rms_flux(table, num_stars):
     for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
         tic_id_data = table[table['tic_id'] == tic_id]
         Tmag = tic_id_data['Tmag'][0]
+        jd_mid = tic_id_data['jd_mid']
         # Check if Tmag is between 8.8 and 14
         if 8.8 <= Tmag <= 14:
             flux_6 = tic_id_data['flux_6']
-            mean_flux = np.mean(flux_6)
+            fluxerr_6 = tic_id_data['fluxerr_6']
+
+            time_clipped, flux_6_clipped, fluxerr_6_clipped = remove_outliers(jd_mid, flux_6, fluxerr_6)
+            mean_flux = np.mean(flux_6_clipped)
+
             if mean_flux > 0:  # Filter out zero or negative flux values
                 mean_flux_list.append(mean_flux)
                 tmag_list.append(Tmag)
