@@ -21,7 +21,7 @@ def filter_data(mags_list, RMS_list):
     """
     Filter data points based on magnitude and RMS criteria
     """
-    filtered_indices = np.where((np.array(mags_list) > 8) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 6000))[0]
+    filtered_indices = np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 6000))[0]
     return filtered_indices
 
 
@@ -41,9 +41,6 @@ def plot_noise_model(data):
     filtered_indices = filter_data(mags_list, RMS_list)
     filtered_mags = [mags_list[i] for i in filtered_indices]
     filtered_RMS = [RMS_list[i] for i in filtered_indices]
-
-    # Plot filtered data
-    ax.plot(filtered_mags, filtered_RMS, 'o', color='darkgreen', label='filtered data', alpha=0.5)
 
     # Plot total data excluding filtered points
     total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
