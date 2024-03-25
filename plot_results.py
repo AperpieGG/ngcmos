@@ -63,10 +63,11 @@ def plot_noise_model(data):
     plt.tight_layout()
     plt.show()
 
+
 def plot_tmag_vs_mag(tmag_list, mag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    filtered_indices = np.where(np.array(mag_list) > 8.8)[0]
+    filtered_indices = filter_data(mag_list, tmag_list)
     filtered_mags = [mag_list[i] for i in filtered_indices]
     filtered_tmags = [tmag_list[i] for i in filtered_indices]
 
