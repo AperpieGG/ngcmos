@@ -65,10 +65,14 @@ def plot_noise_model(data):
     plt.show()
 
 
-def plot_tmag_vs_mag(tmag_list, mags_list):
+def plot_tmag_vs_mag(data):
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    filtered_indices = filter_data(mags_list, tmag_list)
+    mags_list = data['mags_list']
+    tmag_list = data['Tmag_list']
+    RMS_list = data['RMS_list']
+
+    filtered_indices = filter_data(mags_list, RMS_list)
     total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
     filtered_mags = [mags_list[i] for i in total_indices]
     filtered_tmags = [tmag_list[i] for i in total_indices]
@@ -93,7 +97,7 @@ def main(json_file):
 
     # Plot RMS vs magnitudes
     plot_noise_model(data)
-    plot_tmag_vs_mag(data['Tmag_list'], data['mags_list'])
+    plot_tmag_vs_mag(data)
 
 
 if __name__ == "__main__":
