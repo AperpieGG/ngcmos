@@ -100,7 +100,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(6, 10))
     plt.plot(times_binned[0], average_rms_values, 'o', color='black', label='Actual RMS')
     plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
     plt.xscale('log')
