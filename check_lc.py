@@ -185,7 +185,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
-    parser.add_argument('--tic_id', type=int, help='The TIC ID of the star to plot')
+    parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
