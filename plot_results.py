@@ -44,6 +44,7 @@ def plot_noise_model(data):
     total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
     total_mags = [mags_list[i] for i in total_indices]
     total_RMS = [RMS_list[i] for i in total_indices]
+
     ax.plot(total_mags, total_RMS, 'o', color='darkgreen', label='total data', alpha=0.5)
 
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
@@ -64,12 +65,12 @@ def plot_noise_model(data):
     plt.show()
 
 
-def plot_tmag_vs_mag(tmag_list, mag_list):
+def plot_tmag_vs_mag(tmag_list, mags_list):
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    filtered_indices = filter_data(mag_list, tmag_list)
-    total_indices = [i for i in range(len(mag_list)) if i not in filtered_indices]
-    filtered_mags = [mag_list[i] for i in total_indices]
+    filtered_indices = filter_data(mags_list, tmag_list)
+    total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
+    filtered_mags = [mags_list[i] for i in total_indices]
     filtered_tmags = [tmag_list[i] for i in total_indices]
 
     ax.plot(filtered_tmags, filtered_mags, 'o', color='darkgreen', label='data', alpha=0.5)
