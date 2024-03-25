@@ -78,6 +78,13 @@ def plot_tmag_vs_mag(data):
     total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
     filtered_mags = [mags_list[i] for i in total_indices]
     filtered_tmags = [tmag_list[i] for i in total_indices]
+    
+    # Remove NaN values
+    filtered_tmags = np.array(filtered_tmags)
+    filtered_mags = np.array(filtered_mags)
+    valid_indices = ~np.isnan(filtered_tmags) & ~np.isnan(filtered_mags)
+    filtered_tmags = filtered_tmags[valid_indices]
+    filtered_mags = filtered_mags[valid_indices]
 
     # add a curve_fit model to the plot and print slope and intercept
     popt, pcov = curve_fit(lambda x, m, b: m*x + b, filtered_tmags, filtered_mags)
