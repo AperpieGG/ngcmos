@@ -88,7 +88,7 @@ def plot_tmag_vs_mag(data):
 def identify_outliers(data, deviation_threshold):
     tmag_list = data['Tmag_list']
     mags_list = data['mags_list']
-    tic_ids = data['tic_ids']
+    tic_ids = data['TIC_IDs']
 
     outliers = []
 
