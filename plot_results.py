@@ -7,6 +7,7 @@ from scipy.optimize import curve_fit
 
 from utils import plot_images
 
+
 # plt.style.use('dark_background')
 
 
@@ -23,7 +24,8 @@ def filter_data(mags_list, RMS_list):
     """
     Filter data points based on magnitude and RMS criteria
     """
-    filtered_indices = np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 6000))[0]
+    filtered_indices = \
+    np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 6000))[0]
     return filtered_indices
 
 
@@ -66,8 +68,10 @@ def plot_noise_model(data):
     plt.tight_layout()
     plt.show()
 
+
 def linear_model(x, m, b):
     return m * x + b
+
 
 def plot_tmag_vs_mag(data):
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -124,5 +128,3 @@ if __name__ == "__main__":
 
     # Run main function
     main(args.json_file)
-
-
