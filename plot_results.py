@@ -20,7 +20,7 @@ def filter_data(mags_list, RMS_list):
     Filter data points based on magnitude and RMS criteria
     """
     filtered_indices = \
-        np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 6000))[0]
+        np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 400))[0]
     return filtered_indices
 
 
