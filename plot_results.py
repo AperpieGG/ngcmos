@@ -42,14 +42,21 @@ def plot_noise_model(data):
     filtered_mags = [mags_list[i] for i in filtered_indices]
     filtered_RMS = [RMS_list[i] for i in filtered_indices]
 
-    ax.plot(filtered_mags, filtered_RMS, 'o', color='darkgreen', label='data', alpha=0.5)
+    # Plot filtered data
+    ax.plot(filtered_mags, filtered_RMS, 'o', color='darkgreen', label='filtered data', alpha=0.5)
+
+    # Plot total data excluding filtered points
+    total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
+    total_mags = [mags_list[i] for i in total_indices]
+    total_RMS = [RMS_list[i] for i in total_indices]
+    ax.plot(total_mags, total_RMS, 'o', color='blue', label='total data', alpha=0.5)
 
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_mag, dc_noise, color='purple', label='dark noise', linestyle='--')
     ax.plot(synthetic_mag, sky_noise, color='blue', label='sky bkg', linestyle='--')
-    ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintilation noise',
+    ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintillation noise',
             linestyle='--')
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
@@ -60,7 +67,6 @@ def plot_noise_model(data):
     plt.legend(loc='best')
     plt.tight_layout()
     plt.show()
-
 
 def plot_tmag_vs_mag(tmag_list, mag_list):
     fig, ax = plt.subplots(figsize=(10, 8))
