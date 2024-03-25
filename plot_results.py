@@ -34,7 +34,7 @@ def plot_noise_model(data):
     # filtered_mags = [mags_list[i] for i in filtered_indices]
     # filtered_RMS = [RMS_list[i] for i in filtered_indices]
 
-    filtered_indices = np.where((np.array(mags_list) > 10) | (np.array(mags_list) < 8) | (np.array(RMS_list) > 6000))[0]
+    filtered_indices = np.where(np.array(RMS_list) > 6000)[0]
     filtered_mags = [mags_list[i] for i in filtered_indices]
     filtered_RMS = [RMS_list[i] for i in filtered_indices]
 
