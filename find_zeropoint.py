@@ -40,9 +40,8 @@ def calculate_mean_rms_flux(table, num_stars):
         tic_id_data = table[table['tic_id'] == tic_id]
         Tmag = tic_id_data['Tmag'][0]
         jd_mid = tic_id_data['jd_mid']
-    # Check if Tmag is between 8.8 and 14
-        flux_6 = tic_id_data['flux_6']
-        fluxerr_6 = tic_id_data['fluxerr_6']
+        flux_6 = tic_id_data['flux_3']
+        fluxerr_6 = tic_id_data['fluxerr_3']
 
         time_clipped, flux_6_clipped, fluxerr_6_clipped = remove_outliers(jd_mid, flux_6, fluxerr_6)
         mean_flux = np.mean(flux_6_clipped)
