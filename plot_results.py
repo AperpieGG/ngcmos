@@ -60,7 +60,6 @@ def plot_noise_model(data):
     # ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
-    plt.tight_layout()
 
     # if binning 30min
     ax.set_ylim(100, 4000)
@@ -68,6 +67,7 @@ def plot_noise_model(data):
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
     ax.set_ylabel('RMS (ppm per 30 min)')
+    plt.tight_layout()
     plt.show()
 
 
