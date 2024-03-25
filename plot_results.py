@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import argparse
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, ticker
 import json
 import numpy as np
 from utils import plot_images
+
 
 def load_rms_mags_data(filename):
     """
@@ -56,10 +57,13 @@ def plot_noise_model(data):
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 14)
-    ax.set_ylim(1000, 100000)
+    # ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
     plt.tight_layout()
+    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().tick_params(axis='y', which='minor', length=4)
     plt.show()
 
 
