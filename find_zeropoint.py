@@ -157,6 +157,8 @@ def calculate_mean_rms_flux(table, num_stars):
             flux_6 = gaia_id_data['flux_6']
             t = 10  # Exposure time in seconds
             flux_6 = -2.5 * np.log10(flux_6 / t)
+            if np.isnan(flux_6).any():
+                continue
 
             mean_flux = np.mean(flux_6)
             if mean_flux > 0:  # Filter out zero or negative flux values
