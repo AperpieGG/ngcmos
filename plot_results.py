@@ -3,8 +3,6 @@ import argparse
 from matplotlib import pyplot as plt
 import json
 import numpy as np
-from scipy.optimize import curve_fit
-
 from utils import plot_images
 
 
@@ -25,7 +23,7 @@ def filter_data(mags_list, RMS_list):
     Filter data points based on magnitude and RMS criteria
     """
     filtered_indices = \
-    np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 6000))[0]
+        np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 6000))[0]
     return filtered_indices
 
 
@@ -78,27 +76,8 @@ def plot_tmag_vs_mag(data):
 
     mags_list = data['mags_list']
     tmag_list = data['Tmag_list']
-    RMS_list = data['RMS_list']
 
-    filtered_indices = filter_data(mags_list, RMS_list)
-    total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
-    filtered_mags = [mags_list[i] for i in total_indices]
-    filtered_tmags = [tmag_list[i] for i in total_indices]
-
-    # Remove NaN values
-    filtered_tmags = np.array(filtered_tmags)
-    filtered_mags = np.array(filtered_mags)
-    valid_indices = ~np.isnan(filtered_tmags) & ~np.isnan(filtered_mags)
-    filtered_tmags = filtered_tmags[valid_indices]
-    filtered_mags = filtered_mags[valid_indices]
-
-    # Perform linear regression
-    slope, intercept = np.polyfit(filtered_tmags, filtered_mags, 1)
-
-    print(f'Slope: {slope}, Intercept: {intercept}')
-
-    ax.plot(filtered_tmags, filtered_mags, 'o', color='black', label='data', alpha=0.5)
-    ax.plot(filtered_tmags, slope * np.array(filtered_tmags) + intercept, color='red', label='linear fit')
+    ax.plot(tmag_list, mags_list, 'o', color='black', label='data', alpha=0.5)
     ax.set_xlabel('Tmag')
     ax.set_ylabel('Mean Magnitude')
     ax.set_xlim(7.5, 16)
