@@ -149,16 +149,14 @@ def calculate_mean_rms_flux(table, num_stars):
     mean_flux_list = []
     tmag_list = []
 
-    for gaia_id in table['gaia_id'][:num_stars]:  # Selecting the first num_stars stars
-        gaia_id_data = table[table['gaia_id'] == gaia_id]
-        Tmag = gaia_id_data['Tmag'][0]
+    for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
+        tic_id_data = table[table['tic_id'] == tic_id]
+        Tmag = tic_id_data['Tmag'][0]
         # Check if Tmag is between 8.8 and 14
         if 8.8 <= Tmag <= 14:
-            flux_6 = gaia_id_data['flux_6']
+            flux_6 = tic_id_data['flux_3']
             t = 10  # Exposure time in seconds
             flux_6 = -2.5 * np.log10(flux_6 / t)
-            if np.isnan(flux_6).any():
-                continue
 
             mean_flux = np.mean(flux_6)
             if mean_flux > 0:  # Filter out zero or negative flux values
@@ -192,7 +190,7 @@ def calculate_mean_rms_flux(table, num_stars):
 
 def main(phot_file):
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific Gaia ID')
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
     args = parser.parse_args()
 
