@@ -11,7 +11,7 @@ import argparse
 import os
 import numpy as np
 from astropy.io import fits
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, ticker
 import json
 from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error, plot_images,
                    remove_outliers)
@@ -273,10 +273,14 @@ def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 16)
-    ax.set_ylim(1000, 1000000)
+    # ax.set_ylim(1000, 1000000)
     ax.invert_xaxis()
     plt.legend(loc='best')
     plt.tight_layout()
+
+    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().tick_params(axis='y', which='minor', length=4)
     # plt.show()
 
 
