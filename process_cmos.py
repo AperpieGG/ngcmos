@@ -199,7 +199,7 @@ def main():
             print(f"Found {len(frame_ids)} sources")
 
             frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
-                                    time_jd.value, phot_x, phot_y],
+                                    phot_cat['blended'], time_jd.value, phot_x, phot_y],
                                    names=("frame_id", "gaia_id", "Tmag", "tic_id", "jd_mid", "x", "y"))
 
             # Extract photometry at locations
