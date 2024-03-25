@@ -5,10 +5,6 @@ import json
 import numpy as np
 from utils import plot_images
 
-
-# plt.style.use('dark_background')
-
-
 def load_rms_mags_data(filename):
     """
     Load RMS and magnitude data from JSON file
@@ -89,6 +85,21 @@ def plot_tmag_vs_mag(data):
     plt.show()
 
 
+def identify_outliers(data, deviation_threshold):
+    tmag_list = data['Tmag_list']
+    mags_list = data['mags_list']
+    tic_ids = data['tic_ids']
+
+    outliers = []
+
+    for tmag, mag, tic_id in zip(tmag_list, mags_list, tic_ids):
+        deviation = abs(tmag - mag)
+        if deviation > deviation_threshold:
+            outliers.append((tic_id, tmag, mag))
+
+    return outliers
+
+
 def main(json_file):
     # Set plot parameters
     plot_images()
@@ -98,6 +109,13 @@ def main(json_file):
     # Plot RMS vs magnitudes
     plot_noise_model(data)
     plot_tmag_vs_mag(data)
+
+    # Identify outliers
+    deviation_threshold = 2  # Adjust the threshold as needed
+    outliers = identify_outliers(data, deviation_threshold)
+    print("Outliers:")
+    for tic_id, tmag, mag in outliers:
+        print(f"TIC ID: {tic_id}, Tmag: {tmag}, Calculated Magnitude: {mag}")
 
 
 if __name__ == "__main__":
