@@ -39,11 +39,6 @@ def plot_noise_model(data):
 
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
-    filtered_mags = [mags_list[i] for i in filtered_indices]
-    filtered_RMS = [RMS_list[i] for i in filtered_indices]
-
-    # Plot filtered data
-    ax.plot(filtered_mags, filtered_RMS, 'o', color='darkgreen', label='filtered data', alpha=0.5)
 
     # Plot total data excluding filtered points
     total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
