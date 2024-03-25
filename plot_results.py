@@ -20,7 +20,7 @@ def filter_data(mags_list, RMS_list):
     Filter data points based on magnitude and RMS criteria
     """
     filtered_indices = \
-        np.where((np.array(mags_list) > 7.5) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 400))[0]
+        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 10) & (np.array(RMS_list) >= 400))[0]
     return filtered_indices
 
 
@@ -54,7 +54,7 @@ def plot_noise_model(data):
     ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintillation noise',
             linestyle='--')
     ax.set_xlabel('TESS Magnitude')
-    ax.set_ylabel('RMS (ppm)')
+    # ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 14)
     # ax.set_ylim(1000, 100000)
@@ -67,6 +67,7 @@ def plot_noise_model(data):
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
+    ax.set_ylabel('RMS (ppm per 30 min)')
     plt.show()
 
 
