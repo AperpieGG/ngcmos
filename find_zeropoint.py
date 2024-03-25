@@ -154,10 +154,7 @@ def calculate_mean_rms_flux(table, num_stars):
         Tmag = tic_id_data['Tmag'][0]
         # Check if Tmag is between 8.8 and 14
         if 8.8 <= Tmag <= 14:
-            flux_6 = tic_id_data['flux_3']
-            t = 10  # Exposure time in seconds
-            flux_6 = -2.5 * np.log10(flux_6 / t)
-
+            flux_6 = tic_id_data['flux_6']
             mean_flux = np.mean(flux_6)
             if mean_flux > 0:  # Filter out zero or negative flux values
                 mean_flux_list.append(mean_flux)
