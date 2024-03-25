@@ -63,7 +63,7 @@ def plot_noise_model(data):
     plt.tight_layout()
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().tick_params(axis='y', which='minor', length=4)
+    plt.gca().tick_params(axis='y', which='minor', length=10)
     plt.show()
 
 
