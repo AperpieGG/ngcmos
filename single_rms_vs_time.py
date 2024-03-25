@@ -88,6 +88,10 @@ def plot_rms_time(table, num_stars, tic_id=None):
         if num_stars_used >= num_stars:
             break
 
+    if not average_rms_values:
+        print("No stars found with RMS less than 6000 ppm. Skipping this photometry file.")
+        return
+
     print('The bright stars are: {}, Stars used: {}, Stars excluded: {}'.format(
         len(unique_tmags), num_stars_used, num_stars_excluded))
 
@@ -130,10 +134,7 @@ def run_for_one(phot_file, tic_id=None):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    try:
-        plot_rms_time(phot_table, num_stars=1)
-    except ValueError:
-        print(f"No stars with RMS less than 6000 found in photometry file {phot_file}. Continuing to the next file...")
+    plot_rms_time(phot_table, 5, tic_id)  # Always plot for 5 stars
 
 
 def run_for_more(phot_file, num_stars):
