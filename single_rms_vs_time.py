@@ -130,7 +130,10 @@ def run_for_one(phot_file, tic_id=None):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, 5, tic_id)  # Always plot for 5 stars
+    try:
+        plot_rms_time(phot_table, num_stars=1)
+    except ValueError:
+        print(f"No stars with RMS less than 6000 found in photometry file {phot_file}. Continuing to the next file...")
 
 
 def run_for_more(phot_file, num_stars):
