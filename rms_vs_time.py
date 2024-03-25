@@ -159,8 +159,7 @@ if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('--num_stars', type=int, default=0, help='Number of stars to plot')
-    parser.add_argument('--tic_id', type=int, help='Specify the TIC ID for plotting the time vs. binned RMS for a '
-                                                    'particular star')
+    parser.add_argument('--tic_id', type=int, help='plot the time vs. binned RMS for a particular star')
     args = parser.parse_args()
 
     # Run the main function for each photometry file
