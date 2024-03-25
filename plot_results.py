@@ -17,6 +17,14 @@ def load_rms_mags_data(filename):
     return data
 
 
+def filter_data(mags_list, RMS_list):
+    """
+    Filter data points based on magnitude and RMS criteria
+    """
+    filtered_indices = np.where((np.array(mags_list) > 8) & (np.array(mags_list) < 10) & (np.array(RMS_list) <= 6000))[0]
+    return filtered_indices
+
+
 def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
@@ -29,8 +37,8 @@ def plot_noise_model(data):
     sky_noise = data['sky_noise']
     N = data['N']
 
-    # Filter out data points brighter than magnitude 8.5
-    filtered_indices = np.where(np.array(mags_list) > 8.8)[0]
+    # Filter data points based on magnitude and RMS
+    filtered_indices = filter_data(mags_list, RMS_list)
     filtered_mags = [mags_list[i] for i in filtered_indices]
     filtered_RMS = [RMS_list[i] for i in filtered_indices]
 
