@@ -40,17 +40,16 @@ def calculate_mean_rms_flux(table, num_stars):
         tic_id_data = table[table['tic_id'] == tic_id]
         Tmag = tic_id_data['Tmag'][0]
         jd_mid = tic_id_data['jd_mid']
-        # Check if Tmag is between 8.8 and 14
-        if 8.8 <= Tmag <= 14:
-            flux_6 = tic_id_data['flux_6']
-            fluxerr_6 = tic_id_data['fluxerr_6']
+    # Check if Tmag is between 8.8 and 14
+        flux_6 = tic_id_data['flux_6']
+        fluxerr_6 = tic_id_data['fluxerr_6']
 
-            time_clipped, flux_6_clipped, fluxerr_6_clipped = remove_outliers(jd_mid, flux_6, fluxerr_6)
-            mean_flux = np.mean(flux_6_clipped)
+        time_clipped, flux_6_clipped, fluxerr_6_clipped = remove_outliers(jd_mid, flux_6, fluxerr_6)
+        mean_flux = np.mean(flux_6_clipped)
 
-            if mean_flux > 0:  # Filter out zero or negative flux values
-                mean_flux_list.append(mean_flux)
-                tmag_list.append(Tmag)
+        if mean_flux > 0:  # Filter out zero or negative flux values
+            mean_flux_list.append(mean_flux)
+            tmag_list.append(Tmag)
 
     mean_flux = np.array(mean_flux_list)
     tmag = np.array(tmag_list)
@@ -76,6 +75,27 @@ def calculate_mean_rms_flux(table, num_stars):
 
     plt.show()
 
+    return slope, intercept, mean_flux, tmag
+
+
+def save_results_to_json(results, phot_file):
+    slope, intercept, mean_flux, tmag = results
+
+    # Create data dictionary
+    data = {
+        "slope": slope,
+        "intercept": intercept,
+        "mean_flux": mean_flux.tolist(),
+        "tmag": tmag.tolist()
+    }
+
+    # Save data to JSON file
+    filename = f'zeropoint_{phot_file}.json'
+    with open(filename, 'w') as json_file:
+        json.dump(data, json_file)
+
+    print(f"Results saved to {filename}")
+
 
 def main(phot_file):
     # Parse command-line arguments
@@ -93,7 +113,10 @@ def main(phot_file):
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-    calculate_mean_rms_flux(phot_table, num_stars=args.num_stars)
+    results = calculate_mean_rms_flux(phot_table, num_stars=args.num_stars)
+
+    # Save results to JSON file
+    save_results_to_json(results, phot_file)
 
 
 def main_loop(phot_files):
