@@ -110,14 +110,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
             # mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
             mags.append(mag)
 
-        # # Plot the magnitudes for this star
-        # plt.figure(figsize=(10, 4))
-        # plt.errorbar(jd_mid, mags, yerr=mag_error, fmt='o', color='black')
-        # plt.xlabel('JD Mid')
-        # plt.ylabel('Magnitudes')
-        # plt.title(f'Magnitudes for Star {tic_id}')
-        # plt.show()
-
         # # Detrend the flux by converting back to fluxes and normalize by the mean lc
         # fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
         # mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
@@ -130,8 +122,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         dt_flux = flux_4_clipped / trend
         dt_fluxerr = fluxerr_4_clipped / trend
 
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr,
-                                                                             bin_size)
+        # time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr,
+        #                                                                      bin_size)
+
+        time_binned = time_clipped / np.sqrt(bin_size)
+        dt_flux_binned = dt_flux / np.sqrt(bin_size)
+        dt_fluxerr_binned = dt_fluxerr / np.sqrt(bin_size)
 
         # Calculate mean flux and RMS
         mean_flux = np.mean(flux_4_clipped)
