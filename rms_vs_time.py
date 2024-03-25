@@ -27,7 +27,6 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
-    # filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10.5)]
     filtered_table = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 9.6)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
@@ -44,8 +43,8 @@ def plot_rms_time(table, num_stars, tic_id=None):
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
-        flux_5 = Tmag_data['flux_6']
-        fluxerr_5 = Tmag_data['fluxerr_6']
+        flux_5 = Tmag_data['flux_2']
+        fluxerr_5 = Tmag_data['fluxerr_2']
         current_tic_id = Tmag_data['tic_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # Check if tic_id is specified and matches current_tic_id
@@ -69,7 +68,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
 
         # Check if the first RMS value is greater than 0.0065
         # if RMS_values[0] > 0.006:
-        #     print('Excluding star with tic_id = {} and Tmag = {:.2f} due to RMS > 6000 ppm'.format(current_tic_id, Tmag))
+        #     print('Excluding tic_id = {} and Tmag = {:.2f} due to RMS > 6000 ppm'.format(current_tic_id, Tmag))
         #     num_stars_excluded += 1
         #     continue
         else:
