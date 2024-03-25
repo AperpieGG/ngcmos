@@ -66,6 +66,8 @@ def plot_noise_model(data):
     plt.tight_layout()
     plt.show()
 
+def linear_model(x, m, b):
+    return m * x + b
 
 def plot_tmag_vs_mag(data):
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -78,7 +80,7 @@ def plot_tmag_vs_mag(data):
     total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
     filtered_mags = [mags_list[i] for i in total_indices]
     filtered_tmags = [tmag_list[i] for i in total_indices]
-    
+
     # Remove NaN values
     filtered_tmags = np.array(filtered_tmags)
     filtered_mags = np.array(filtered_mags)
@@ -87,7 +89,7 @@ def plot_tmag_vs_mag(data):
     filtered_mags = filtered_mags[valid_indices]
 
     # add a curve_fit model to the plot and print slope and intercept
-    popt, pcov = curve_fit(lambda x, m, b: m*x + b, filtered_tmags, filtered_mags)
+    popt, pcov = curve_fit(linear_model, filtered_tmags, filtered_mags)
     slope, intercept = popt
     print(f'Slope: {slope}, Intercept: {intercept}')
 
