@@ -68,10 +68,10 @@ def plot_rms_time(table, num_stars, tic_id=None):
             time_seconds.append(exposure_time_seconds)
 
         # Check if the first RMS value is greater than 0.0065
-        if RMS_values[0] > 0.006:
-            print('Excluding star with tic_id = {} and Tmag = {:.2f} due to RMS > 6000 ppm'.format(current_tic_id, Tmag))
-            num_stars_excluded += 1
-            continue
+        # if RMS_values[0] > 0.006:
+        #     print('Excluding star with tic_id = {} and Tmag = {:.2f} due to RMS > 6000 ppm'.format(current_tic_id, Tmag))
+        #     num_stars_excluded += 1
+        #     continue
         # if np.max(flux_5_clipped) > 200000:
         #     print('Excluding star with tic_id = {} and Tmag = {:.2f} due to max flux > 250000'.format(current_tic_id, Tmag))
         #     num_stars_excluded += 1
