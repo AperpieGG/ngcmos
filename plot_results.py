@@ -30,8 +30,7 @@ def plot_noise_model(data):
     N = data['N']
 
     # Filter out data points brighter than magnitude 8.5
-    # filtered_indices = np.where(np.array(mags_list) > 8.8)[0]
-    filtered_indices = np.where((np.array(RMS_list) > 6000) & (np.array(mags_list) >= 8) & (np.array(mags_list) <= 10))[0]
+    filtered_indices = np.where(np.array(mags_list) > 8.8)[0]
     filtered_mags = [mags_list[i] for i in filtered_indices]
     filtered_RMS = [RMS_list[i] for i in filtered_indices]
 
