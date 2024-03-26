@@ -75,7 +75,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     Tmags_list = []
 
     for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
-        tic_id_data = table[(table['tic_id'] == tic_id) & (table['blended'] == 0)]
+        tic_id_data = table[(table['tic_id'] == tic_id) & (table['blended'] == 'F')]
         if not tic_id_data.empty:
             jd_mid = tic_id_data['jd_mid']
             Tmag = tic_id_data['Tmag'][0]
