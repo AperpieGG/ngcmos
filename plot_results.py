@@ -75,7 +75,7 @@ def plot_noise_model(data):
     # plt.gca().tick_params(axis='y', which='minor', length=4)
     # ax.set_ylabel('RMS (ppm per 30 min)')
     # plt.tight_layout()
-    # plt.show()
+    plt.show()
 
 
 def linear_model(x, m, b):
@@ -122,8 +122,8 @@ def main(json_file):
     data = load_rms_mags_data(json_file)
 
     # Plot RMS vs magnitudes
-    plot_noise_model(data)
-    plot_tmag_vs_mag(data)
+    # plot_noise_model(data)
+    # plot_tmag_vs_mag(data)
 
     # Identify outliers
     deviation_threshold = 2  # Adjust the threshold as needed
@@ -137,3 +137,4 @@ def main(json_file):
 
     # Plot noise model with outliers excluded
     plot_noise_model(data, filtered_indices)
+    plot_tmag_vs_mag(data, filtered_indices)
