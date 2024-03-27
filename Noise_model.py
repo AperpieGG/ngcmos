@@ -65,7 +65,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         values of magnitudes
     zp : list
         values of zero points
-
+    max_num_stars : int
+        maximum number of stars
     """
     mean_flux_list = []
     RMS_list = []
@@ -82,7 +83,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         fluxerr_4 = tic_id_data['fluxerr_6']
         sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         # skyerrs_4 = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
-        print(len(jd_mid))
+
+        # Update max_num_stars if necessary
+        max_num_stars = max(max_num_stars, len(jd_mid))
 
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
@@ -143,7 +146,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags_list.append(mean_mags)
         Tmags_list.append(np.round(Tmag, 2))
 
-    return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list
+    return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list, max_num_stars
 
 
 def extract_header(table, image_directory):
@@ -274,14 +277,12 @@ def main(phot_file, bin_size, max_num_stars):
 
     # Calculate mean and RMS for the noise model
     num_stars = min(max_num_stars, args.num_stars)  # Cap num_stars at the maximum available
-    mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=num_stars, directory=current_night_directory)
+    mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list, max_num_stars = (
+        calculate_mean_rms_flux(phot_table, bin_size=bin_size, num_stars=num_stars, directory=current_night_directory))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
         noise_sources(sky_list, bin_size, airmass_list, zp))
-
-    # Plot the noise model
 
     synthetic_mag_list = synthetic_mag.tolist()
     photon_shot_noise_list = photon_shot_noise.tolist()
@@ -325,7 +326,7 @@ def main_loop(phot_files, bin_size, max_num_stars):
             continue
 
         # If the output file doesn't exist, run the main function
-        main(phot_file, bin_size)
+        main(phot_file, bin_size, max_num_stars)
 
 
 if __name__ == "__main__":
@@ -343,16 +344,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     bin_size = args.bin
 
+    max_num_stars = 100  # Set the default value if max_num_stars is not defined
+
+    print(f"Maximum available number of stars: {max_num_stars}")
+
     # Run the main function for each photometry file
-    for phot_file in phot_files:
-        # Read the photometry file
-        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-        # Determine the maximum available number of stars in the current photometry file
-        max_num_stars = max(len(tic_id_data) for tic_id_data in phot_table['jd_mid'])
-
-        # Limit the number of stars to plot based on the maximum available
-        num_stars = min(max_num_stars, args.num_stars)
-
-        # Run the main function
-        main(phot_file, bin_size, num_stars)
+    main_loop(phot_files, bin_size, max_num_stars)
