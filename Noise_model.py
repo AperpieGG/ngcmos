@@ -65,8 +65,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         values of magnitudes
     zp : list
         values of zero points
-    max_num_stars : int
-        maximum number of stars
+
     """
     mean_flux_list = []
     RMS_list = []
@@ -83,10 +82,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         fluxerr_4 = tic_id_data['fluxerr_6']
         sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         # skyerrs_4 = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
-
-        # Update max_num_stars if necessary
-        max_num_stars = max(max_num_stars, len(jd_mid))
-
+        print('The max number of stars is: ', len(table['tic_id']))
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
         # Apply sigma clipping to flux and sky arrays
@@ -146,7 +142,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         mags_list.append(mean_mags)
         Tmags_list.append(np.round(Tmag, 2))
 
-    return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list, max_num_stars
+    return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list
 
 
 def extract_header(table, image_directory):
@@ -262,7 +258,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
 
-def main(phot_file, bin_size, max_num_stars):
+def main(phot_file, bin_size):
     # Set plot parameters
     plot_images()
 
@@ -276,13 +272,14 @@ def main(phot_file, bin_size, max_num_stars):
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
     # Calculate mean and RMS for the noise model
-    num_stars = min(max_num_stars, args.num_stars)  # Cap num_stars at the maximum available
-    mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list, max_num_stars = (
-        calculate_mean_rms_flux(phot_table, bin_size=bin_size, num_stars=num_stars, directory=current_night_directory))
+    mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list = calculate_mean_rms_flux(
+        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
         noise_sources(sky_list, bin_size, airmass_list, zp))
+
+    # Plot the noise model
 
     synthetic_mag_list = synthetic_mag.tolist()
     photon_shot_noise_list = photon_shot_noise.tolist()
@@ -296,7 +293,7 @@ def main(phot_file, bin_size, max_num_stars):
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
-        "TIC_IDs": phot_table['tic_id'][:num_stars].tolist(),  # Adding TIC IDs
+        "TIC_IDs": phot_table['tic_id'][:args.num_stars].tolist(),  # Adding TIC IDs
         "RMS_list": RMS_list,
         "mags_list": mags_list,
         "Tmag_list": Tmags_list,
@@ -315,7 +312,7 @@ def main(phot_file, bin_size, max_num_stars):
         json.dump(output_data, json_file, indent=4)
 
 
-def main_loop(phot_files, bin_size, max_num_stars):
+def main_loop(phot_files, bin_size):
     for phot_file in phot_files:
         output_file = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
         output_path = os.path.join(os.getcwd(), output_file)
@@ -326,7 +323,7 @@ def main_loop(phot_files, bin_size, max_num_stars):
             continue
 
         # If the output file doesn't exist, run the main function
-        main(phot_file, bin_size, max_num_stars)
+        main(phot_file, bin_size)
 
 
 if __name__ == "__main__":
@@ -344,9 +341,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     bin_size = args.bin
 
-    max_num_stars = 100  # Set the default value if max_num_stars is not defined
-
-    print(f"Maximum available number of stars: {max_num_stars}")
-
     # Run the main function for each photometry file
-    main_loop(phot_files, bin_size, max_num_stars)
+    main_loop(phot_files, bin_size)
