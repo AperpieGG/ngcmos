@@ -27,7 +27,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
-    filtered_table = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 9.6)]
+    filtered_table = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
@@ -84,7 +84,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
             break
 
     if not average_rms_values:
-        print("No stars found with RMS less than 6000 ppm. Skipping this photometry file.")
+        print("No stars found. Skipping this photometry file.")
         return
 
     print('The bright stars are: {}, Stars used: {}, Stars excluded: {}'.format(
