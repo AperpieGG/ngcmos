@@ -25,44 +25,6 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def calculate_master_reference_flux(table, min_mag, max_mag):
-    """
-    Calculate the master reference flux from stars within the specified magnitude range.
-
-    Parameters:
-    table : astropy.table.Table
-        Table containing the photometry data
-    min_mag : float
-        Minimum magnitude for selecting reference stars
-    max_mag : float
-        Maximum magnitude for selecting reference stars
-
-    Returns:
-    master_reference_flux : float
-        Mean flux of the selected reference stars
-    """
-    selected_stars = table[(table['Tmag'] >= min_mag) & (table['Tmag'] <= max_mag)]
-    print(f"Number of selected stars: {len(selected_stars)}")
-    master_reference_flux = np.mean(selected_stars['flux_6'])
-    return master_reference_flux
-
-
-def correct_light_curves(table, master_reference_flux):
-    """
-    Correct light curves using the master reference flux.
-
-    Parameters:
-    table : astropy.table.Table
-        Table containing the photometry data
-    master_reference_flux : float
-        Master reference flux for normalization
-    """
-    for row in table:
-        # Normalize each star's flux by dividing by the master reference flux
-        row['flux_4'] /= master_reference_flux
-        # Update other flux columns if needed
-
-
 def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     """
     Plot the light curve for a specific TIC ID with detrending
@@ -87,13 +49,28 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     fluxes = tic_id_data['flux_6']
     fluxerrs = tic_id_data['fluxerr_6']
 
-    # Calculate the master reference flux
-    min_mag = 10
-    max_mag = 12
-    master_reference_flux = calculate_master_reference_flux(table, min_mag, max_mag)
+    # Extract fluxes and errors based on Tmag
+    # if tmag < 10.5:
+    #     fluxes = tic_id_data['flux_6']
+    #     fluxerrs = tic_id_data['fluxerr_6']
+    # elif 10.5 <= tmag < 11:
+    #     fluxes = tic_id_data['flux_5']
+    #     fluxerrs = tic_id_data['fluxerr_5']
+    # elif 12 > tmag >= 11:
+    #     fluxes = tic_id_data['flux_4']
+    #     fluxerrs = tic_id_data['fluxerr_4']
+    # else:
+    #     fluxes = tic_id_data['flux_3']
+    #     fluxerrs = tic_id_data['fluxerr_3']
 
-    # Normalize each star's flux by dividing by the master reference flux
-    dt_flux_binned = fluxes / master_reference_flux
+    # use polyfit to detrend the light curve
+    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, 2),
+                       jd_mid - int(jd_mid[0]))
+    dt_flux = fluxes / trend
+    dt_fluxerr = fluxerrs / trend
+
+    # Bin the time, flux, and error
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
     RMS = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
@@ -103,13 +80,16 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 
     # Plot raw flux with wotan model
     ax1.plot(jd_mid, fluxes, '.', color='black', label='Raw Flux')
-    ax1.set_title(f'Detrended LC for TIC-{tic_id_to_plot} (Tmag = {tmag:.2f})')
+    ax1.plot(jd_mid, trend, color='red', label='Model fit')
+    ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-    ax2.plot(jd_mid, dt_flux_binned, '.', color='black', alpha=0.5)
+    ax2.plot(jd_mid, dt_flux, '.', color='black', alpha=0.5)
+    if bin_size > 1:
+        ax2.plot(time_binned, dt_flux_binned, 'o', color='black', markerfacecolor='blue')
+    ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
-    ax2.set_ylabel('Normalized Flux')
     plt.tight_layout()
     plt.show()
 
@@ -138,10 +118,6 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            # Correct light curves using the master reference flux
-            master_reference_flux = calculate_master_reference_flux(phot_table, 10, 12)
-            correct_light_curves(phot_table, master_reference_flux)
-            # Plot the light curve with detrending
             plot_lc_with_detrend(phot_table, args.tic_id, args.bin)
             break  # Stop looping if tic_id is found
         else:
