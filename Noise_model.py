@@ -82,6 +82,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         fluxerr_4 = tic_id_data['fluxerr_6']
         sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         # skyerrs_4 = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
+        print(len(jd_mid))
 
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
@@ -258,33 +259,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
 
-def noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS):
-    fig, ax = plt.subplots(figsize=(10, 8))
-    ax.plot(mags_list, RMS_list, 'o', color='darkgreen', label='data', alpha=0.5)
-
-    ax.plot(synthetic_mag, RNS, color='black', label='total noise')
-    ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
-    ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
-    ax.plot(synthetic_mag, dc_noise, color='purple', label='dark noise', linestyle='--')
-    ax.plot(synthetic_mag, sky_noise, color='blue', label='sky bkg', linestyle='--')
-    ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintilation noise',
-            linestyle='--')
-    ax.set_xlabel('TESS Magnitude')
-    ax.set_ylabel('RMS (ppm)')
-    ax.set_yscale('log')
-    ax.set_xlim(7.5, 16)
-    # ax.set_ylim(1000, 1000000)
-    ax.invert_xaxis()
-    plt.legend(loc='best')
-    plt.tight_layout()
-
-    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().tick_params(axis='y', which='minor', length=4)
-    # plt.show()
-
-
-def main(phot_file, bin_size):
+def main(phot_file, bin_size, max_num_stars):
     # Set plot parameters
     plot_images()
 
@@ -298,15 +273,15 @@ def main(phot_file, bin_size):
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
     # Calculate mean and RMS for the noise model
+    num_stars = min(max_num_stars, args.num_stars)  # Cap num_stars at the maximum available
     mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
+        phot_table, bin_size=bin_size, num_stars=num_stars, directory=current_night_directory)
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
         noise_sources(sky_list, bin_size, airmass_list, zp))
 
     # Plot the noise model
-    noise_model(RMS_list, mags_list, synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS)
 
     synthetic_mag_list = synthetic_mag.tolist()
     photon_shot_noise_list = photon_shot_noise.tolist()
@@ -320,7 +295,7 @@ def main(phot_file, bin_size):
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
-        "TIC_IDs": phot_table['tic_id'][:args.num_stars].tolist(),  # Adding TIC IDs
+        "TIC_IDs": phot_table['tic_id'][:num_stars].tolist(),  # Adding TIC IDs
         "RMS_list": RMS_list,
         "mags_list": mags_list,
         "Tmag_list": Tmags_list,
@@ -339,7 +314,7 @@ def main(phot_file, bin_size):
         json.dump(output_data, json_file, indent=4)
 
 
-def main_loop(phot_files, bin_size):
+def main_loop(phot_files, bin_size, max_num_stars):
     for phot_file in phot_files:
         output_file = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
         output_path = os.path.join(os.getcwd(), output_file)
@@ -368,5 +343,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     bin_size = args.bin
 
+    # Get the maximum available number of stars
+    max_num_stars = max(len(tic_id_data['jd_mid']) for phot_file in phot_files
+                        for tic_id_data in read_phot_file(os.path.join(current_night_directory, phot_file)))
+
+    print(f"Maximum available number of stars: {max_num_stars}")
+
     # Run the main function for each photometry file
-    main_loop(phot_files, bin_size)
+    main_loop(phot_files, bin_size, max_num_stars)
