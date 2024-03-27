@@ -76,71 +76,75 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
 
     for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
         tic_id_data = table[(table['tic_id'] == tic_id)]
-        jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
-        flux_4 = tic_id_data['flux_6']
-        fluxerr_4 = tic_id_data['fluxerr_6']
-        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
-        # skyerrs_4 = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
-        print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
-        # Apply sigma clipping to flux and sky arrays
-        time_clipped, flux_4_clipped, fluxerr_4_clipped = remove_outliers(jd_mid, flux_4, fluxerr_4)
+        # Check if the magnitude is less than 14
+        if Tmag < 14:
+            jd_mid = tic_id_data['jd_mid']
+            Tmag = tic_id_data['Tmag'][0]
+            flux_4 = tic_id_data['flux_6']
+            fluxerr_4 = tic_id_data['fluxerr_6']
+            sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
+            # skyerrs_4 = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
+            print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
-        zp = []
-        for frame_id in tic_id_data['frame_id']:
-            image_header = fits.getheader(os.path.join(directory, frame_id))
-            zp_value = round(image_header['MAGZP_T'], 3)
-            zp.append(zp_value)
+            # Apply sigma clipping to flux and sky arrays
+            time_clipped, flux_4_clipped, fluxerr_4_clipped = remove_outliers(jd_mid, flux_4, fluxerr_4)
 
-        mags = []
-        t = 10  # exposure time
-        tic_id_printed = False  # Flag to track whether tic_id has been printed
+            zp = []
+            for frame_id in tic_id_data['frame_id']:
+                image_header = fits.getheader(os.path.join(directory, frame_id))
+                zp_value = round(image_header['MAGZP_T'], 3)
+                zp.append(zp_value)
 
-        for flux, zp_value in zip(flux_4_clipped, zp):
-            if flux <= 0:
-                if not tic_id_printed:
-                    print("The nan flux belongs to the star with tic_id =", tic_id)
-                    negative_fluxes_stars.append(tic_id)
-                    tic_id_printed = True
-                mag = np.nan
-            else:
-                mag = -2.5 * np.log10(flux / t) + zp_value
-            # mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
-            mags.append(mag)
+            mags = []
+            t = 10  # exposure time
+            tic_id_printed = False  # Flag to track whether tic_id has been printed
 
-        # # Detrend the flux by converting back to fluxes and normalize by the mean lc
-        # fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
-        # mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
-        # dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
-        # dt_fluxerr = fluxerr_4_clipped / mean_flux  # Normalize the flux errors by dividing by the average flux
+            for flux, zp_value in zip(flux_4_clipped, zp):
+                if flux <= 0:
+                    if not tic_id_printed:
+                        print("The nan flux belongs to the star with tic_id =", tic_id)
+                        negative_fluxes_stars.append(tic_id)
+                        tic_id_printed = True
+                    mag = np.nan
+                else:
+                    mag = -2.5 * np.log10(flux / t) + zp_value
+                # mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
+                mags.append(mag)
 
-        # Fit a second order polynomial to the detrended flux for airmass
-        trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), flux_4_clipped, 2),
-                           time_clipped - int(time_clipped[0]))
-        dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4_clipped / trend
+            # # Detrend the flux by converting back to fluxes and normalize by the mean lc
+            # fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
+            # mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
+            # dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
+            # dt_fluxerr = fluxerr_4_clipped / mean_flux  # Normalize the flux errors by dividing by the average flux
 
-        # time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr,
-        #                                                                      bin_size)
+            # Fit a second order polynomial to the detrended flux for airmass
+            trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), flux_4_clipped, 2),
+                               time_clipped - int(time_clipped[0]))
+            dt_flux = flux_4_clipped / trend
+            dt_fluxerr = fluxerr_4_clipped / trend
 
-        time_binned = time_clipped / np.sqrt(bin_size)
-        dt_flux_binned = dt_flux / np.sqrt(bin_size)
-        dt_fluxerr_binned = dt_fluxerr / np.sqrt(bin_size)
+            # time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr,
+            #                                                                      bin_size)
 
-        # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_4_clipped)
-        mean_mags = np.mean(mags)
-        RMS = np.std(dt_flux_binned) * 1000000  # Convert to ppm
-        mean_sky = np.median(sky_4)
+            time_binned = time_clipped / np.sqrt(bin_size)
+            dt_flux_binned = dt_flux / np.sqrt(bin_size)
+            dt_fluxerr_binned = dt_fluxerr / np.sqrt(bin_size)
 
-        # Append to lists
-        mean_flux_list.append(mean_flux)
-        RMS_list.append(RMS)
-        sky_list.append(mean_sky)
-        mags_list.append(mean_mags)
-        Tmags_list.append(np.round(Tmag, 2))
-    print('The max number of stars is: ', len(np.unique(table['tic_id'])))
+            # Calculate mean flux and RMS
+            mean_flux = np.mean(flux_4_clipped)
+            mean_mags = np.mean(mags)
+            RMS = np.std(dt_flux_binned) * 1000000  # Convert to ppm
+            mean_sky = np.median(sky_4)
+
+            # Append to lists
+            mean_flux_list.append(mean_flux)
+            RMS_list.append(RMS)
+            sky_list.append(mean_sky)
+            mags_list.append(mean_mags)
+            Tmags_list.append(np.round(Tmag, 2))
+        print('The max number of stars is: ', len(np.unique(table['tic_id'])))
 
     return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list
 
