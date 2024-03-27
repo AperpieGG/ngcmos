@@ -40,7 +40,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
 
     for Tmag in unique_tmags:
         # Get data for the current Tmag
-        Tmag_data = table[table['Tmag'] == Tmag and table['blended'] == 0]
+        Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
         jd_mid = Tmag_data['jd_mid']
         flux_5 = Tmag_data['flux_6']
