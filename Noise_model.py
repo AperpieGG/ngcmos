@@ -343,11 +343,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
     bin_size = args.bin
 
-    # Get the maximum available number of stars
-    max_num_stars = max(len(tic_id_data['jd_mid']) for phot_file in phot_files
-                        for tic_id_data in read_phot_file(os.path.join(current_night_directory, phot_file)))
-
-    print(f"Maximum available number of stars: {max_num_stars}")
-
     # Run the main function for each photometry file
-    main_loop(phot_files, bin_size, max_num_stars)
+    for phot_file in phot_files:
+        # Read the photometry file
+        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+
+        # Determine the maximum available number of stars in the current photometry file
+        max_num_stars = max(len(tic_id_data) for tic_id_data in phot_table['jd_mid'])
+
+        # Limit the number of stars to plot based on the maximum available
+        num_stars = min(max_num_stars, args.num_stars)
+
+        # Run the main function
+        main(phot_file, bin_size, num_stars)
