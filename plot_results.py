@@ -138,3 +138,11 @@ def main(json_file):
     # Plot noise model with outliers excluded
     plot_noise_model(data, filtered_indices)
     plot_tmag_vs_mag(data, filtered_indices)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Plot RMS vs magnitudes from JSON file.')
+    parser.add_argument('json_file', type=str, help='JSON file containing RMS and magnitude data')
+    args = parser.parse_args()
+
+    main(args.json_file)
