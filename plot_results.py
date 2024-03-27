@@ -15,12 +15,19 @@ def load_rms_mags_data(filename):
     return data
 
 
-def filter_data(mags_list, RMS_list):
+def filter_data(mags_list, RMS_list, outliers=None):
     """
     Filter data points based on magnitude and RMS criteria
     """
-    filtered_indices = \
-        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 5500))[0]
+    if outliers is None:
+        outliers = []
+
+    filtered_indices = np.where(
+        (np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 5500))[0]
+
+    # Exclude outliers
+    filtered_indices = [i for i in filtered_indices if i not in outliers]
+
     return filtered_indices
 
 
@@ -125,11 +132,8 @@ def main(json_file):
     for tic_id, tmag, mag in outliers:
         print(f"TIC ID: {tic_id}, Tmag: {tmag}, Calculated Magnitude: {mag}")
 
+    # Filter data excluding outliers
+    filtered_indices = filter_data(data['mags_list'], data['RMS_list'], outliers)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Plot RMS vs Magnitudes')
-    parser.add_argument('json_file', type=str, help='Path to the JSON file containing RMS and magnitude data')
-    args = parser.parse_args()
-
-    # Run main function
-    main(args.json_file)
+    # Plot noise model with outliers excluded
+    plot_noise_model(data, filtered_indices)
