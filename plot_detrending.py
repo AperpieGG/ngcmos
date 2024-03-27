@@ -108,6 +108,10 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
     ax2.plot(jd_mid, dt_flux_binned, '.', color='black', alpha=0.5)
+    ax2.set_xlabel('MJD [days]')
+    ax2.set_ylabel('Normalized Flux')
+    plt.tight_layout()
+    plt.show()
 
 
 def main():
