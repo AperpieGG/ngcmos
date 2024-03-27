@@ -82,7 +82,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         fluxerr_4 = tic_id_data['fluxerr_6']
         sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         # skyerrs_4 = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
-        print('The max number of stars is: ', len(np.unique(table['tic_id'])))
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
         # Apply sigma clipping to flux and sky arrays
@@ -141,6 +140,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         sky_list.append(mean_sky)
         mags_list.append(mean_mags)
         Tmags_list.append(np.round(Tmag, 2))
+    print('The max number of stars is: ', len(np.unique(table['tic_id'])))
 
     return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list
 
