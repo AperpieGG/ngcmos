@@ -58,10 +58,14 @@ def plot_noise_model(data):
     dc_noise = data['dc_noise']
     sky_noise = data['sky_noise']
     N = data['N']
-    print(len(mags_list), len(RMS_list))
 
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
+
+    # Exclude specific TIC_ID (20322271) from the filtered indices
+    exclude_tic_id = '20322271'
+    exclude_indices = [i for i, tic_id in enumerate(tic_ids) if tic_id == exclude_tic_id]
+    filtered_indices = list(set(filtered_indices) - set(exclude_indices))
 
     # Exclude outliers from the total data
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
