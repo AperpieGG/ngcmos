@@ -59,12 +59,12 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
         # Get fluxes of the current star
         star_fluxes = master_star_data[master_star_data['tic_id'] == master_tic_id]['flux_6']
         print('The stars are: ', master_tic_id)
-        print(len(star_fluxes))
         # Append unique fluxes of the current star to the list
         master_fluxes.extend(np.unique(star_fluxes))
 
     # Calculate the median flux for the master reference star
     master_reference_flux = np.median(master_fluxes)
+    print(len(master_reference_flux))
     # Normalize the fluxes
     fluxes_clipped = fluxes_clipped / master_reference_flux
     fluxerrs_clipped = fluxerrs_clipped / master_reference_flux
