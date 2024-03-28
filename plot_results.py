@@ -20,7 +20,8 @@ def filter_data(mags_list, RMS_list):
     Filter data points based on magnitude and RMS criteria
     """
     filtered_indices = \
-        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 400))[0]
+        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 400))[0] and \
+        np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 2000))[0]
 
     return filtered_indices
 
@@ -61,11 +62,6 @@ def plot_noise_model(data):
 
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
-
-    # Exclude specific TIC_ID (20322271) from the filtered indices
-    exclude_tic_id = '20322271'
-    exclude_index = np.where(np.array(tic_ids) == exclude_tic_id)
-    filtered_indices = np.append(filtered_indices, exclude_index)
 
     # Exclude outliers from the total data
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
