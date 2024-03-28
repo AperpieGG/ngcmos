@@ -54,9 +54,11 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 
     # Select stars for master reference star
     master_star_data = table[(table['Tmag'] < 11) & (table['Tmag'] > 9.5)]
-    master_fluxes = master_star_data['flux_6']
-
+    master_fluxes = []
+    for master_tic_id in master_star_data['tic_id']:
+        master_fluxes.extend(table[table['tic_id'] == master_tic_id]['flux_6'])
     # Calculate the median flux for the master reference star
+
     master_reference_flux = np.average(master_fluxes)
 
     # Normalize the fluxes
