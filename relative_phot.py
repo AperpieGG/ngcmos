@@ -53,7 +53,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     # Select stars for master reference star
-    master_star_data = table[(table['Tmag'] < 11) & (table['Tmag'] > 9.5)]
+    master_star_data = table[(table['Tmag'] < 10) & (table['Tmag'] > 9.5)]
     master_fluxes = []
     for master_tic_id in master_star_data['tic_id']:
         master_fluxes.extend(table[table['tic_id'] == master_tic_id]['flux_6'])
