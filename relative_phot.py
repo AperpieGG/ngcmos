@@ -53,7 +53,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     # Select stars for master reference star
-    master_star_data = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 11)]
+    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11)]
     master_fluxes_dict = {}
 
     # Loop through each unique TIC ID within the specified magnitude range
@@ -85,23 +85,21 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
                        time_clipped - int(time_clipped[0]))
     dt_flux = fluxes_clipped / trend
     dt_fluxerr = fluxerrs_clipped / trend
-
-    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr, bin_size)
-
-    RMS = np.std(dt_flux_binned)
+    
+    RMS = np.std(dt_flux)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     # Plot raw flux with wotan model
-    ax1.plot(time_binned, dt_flux_binned, '.', color='black', label='Raw Flux')
-    ax1.plot(time_binned, trend, color='red', label='Model fit')
+    ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
+    ax1.plot(time_clipped, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-    ax2.plot(time_binned, dt_flux, '.', color='black')
+    ax2.plot(time_clipped, dt_flux, '.', color='black', alpha=0.5)
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
     plt.tight_layout()
