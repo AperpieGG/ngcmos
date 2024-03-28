@@ -78,45 +78,30 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     # Convert master reference fluxes to a numpy array
     master_reference_flux = np.array(master_reference_fluxes)
 
-    # Now, you can normalize the fluxes using the master reference flux
-    fluxes_clipped_normalized = fluxes_clipped / master_reference_flux
-    fluxerrs_clipped_normalized = fluxerrs_clipped / master_reference_flux
+    # use polyfit to detrend the light curve
+    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
+                       time_clipped - int(time_clipped[0]))
+    dt_flux = fluxes_clipped / trend
+    dt_fluxerr = fluxerrs_clipped / trend
 
-    # Detrend with polynomial fit
-    trend_poly = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped_normalized, 2),
-                            time_clipped - int(time_clipped[0]))
-    dt_flux_poly_detrended = fluxes_clipped_normalized / trend_poly
+    RMS = np.std(dt_flux)
+    print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
-    # Detrend with master reference stars
-    dt_flux_master_ref_detrended = fluxes_clipped_normalized / master_reference_flux
-
-    # Calculate RMS after detrending with both methods
-    RMS_poly_detrended = np.std(dt_flux_poly_detrended)
-    RMS_master_ref_detrended = np.std(dt_flux_master_ref_detrended)
-    print(f"RMS after detrending with polynomial fit: {RMS_poly_detrended:.4f}")
-    print(f"RMS after detrending with master reference stars: {RMS_master_ref_detrended:.4f}")
-
-    # Plotting
+    # Create subplots
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
 
-    # Plot raw flux with polynomial fit
+    # Plot raw flux with wotan model
     ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
-    ax1.plot(time_clipped, trend_poly, color='red', label='Polyfit Trend')
+    ax1.plot(time_clipped, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-
-    # Plot detrended flux with polynomial fit
-    ax2.plot(time_clipped, dt_flux_poly_detrended, '.', color='black', alpha=0.5)
-    ax2.set_ylabel('Detrended Flux [e-], Polynomial Fit')
+    ax2.plot(time_clipped, dt_flux, '.', color='black', alpha=0.5)
+    ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
 
-    # Plot master reference flux
     ax3.plot(time_clipped, master_reference_flux, '.', color='black')
-    ax3.set_ylabel('Master Reference Flux [e-]')
-    ax3.set_xlabel('MJD [days]')
-
     plt.tight_layout()
     plt.show()
 
