@@ -67,11 +67,12 @@ def plot_noise_model(data):
     for tic_id, tmag, mag, RMS in outliers:
         print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag,2)}, Mag: {np.round(mag,2)}, RMS: {RMS}")
 
-    # exclude both filtered indices and outliers
-    filtered_indices += [i for i in range(len(mags_list)) if i in [tic_id[0] for tic_id in outliers]]
-    
-    # Plot total data excluding filtered points
-    total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
+    # Combine filtered indices and outliers
+    indices_to_exclude = set(filtered_indices)
+    indices_to_exclude.update([tic_id[0] for tic_id in outliers])
+
+    # Plot total data excluding filtered points and outliers
+    total_indices = [i for i in range(len(mags_list)) if i not in indices_to_exclude]
     total_mags = [mags_list[i] for i in total_indices]
     total_RMS = [RMS_list[i] for i in total_indices]
 
