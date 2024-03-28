@@ -78,14 +78,14 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     # Convert master reference fluxes to a numpy array
     master_reference_flux = np.array(master_reference_fluxes)
 
-    fluxes_clipped = fluxes_clipped / master_reference_flux
+    fluxes_clipped = fluxes_clipped - master_reference_flux
 
     # use polyfit to detrend the light curve
     trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
                        time_clipped - int(time_clipped[0]))
     dt_flux = fluxes_clipped / trend
     dt_fluxerr = fluxerrs_clipped / trend
-    
+
     RMS = np.std(dt_flux)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
@@ -97,7 +97,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     ax1.plot(time_clipped, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
-    ax1.set_ylabel('Flux [e-]')
+    ax1.set_ylabel('Relative Flux [e-]')
     ax1.legend()
     ax2.plot(time_clipped, dt_flux, '.', color='black', alpha=0.5)
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
