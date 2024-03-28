@@ -22,8 +22,8 @@ def filter_data(mags_list, RMS_list):
     filtered_indices_bright = \
         np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 9000))[0]
 
-    filtered_indices_dim = \
-        np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 2000))[0]
+    filtered_indices_dim = []
+    # filtered_indices_dim = np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 2000))[0]
 
     return filtered_indices_bright, filtered_indices_dim
 
