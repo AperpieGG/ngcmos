@@ -282,6 +282,10 @@ def reduce_images(base_path, out_path, prefix_filenames):
             time_bary = time_jd.tdb + ltt_bary
             time_helio = time_jd.utc + ltt_helio
 
+            # Update header with Barycentric Time and Heliocentric Time
+            hdr['TIME_BARY'] = (time_bary.jd, 'Barycentric Time')
+            hdr['TIME_HELIO'] = (time_helio.jd, 'Heliocentric Time')
+
             # Reduce image
             fd = (fd - master_bias - master_dark * hdr['EXPTIME'] / 10) / master_flat
             reduced_data.append(fd)  # Append the reduced image to the list
