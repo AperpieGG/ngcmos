@@ -67,15 +67,12 @@ def plot_noise_model(data):
     for tic_id, tmag, mag, RMS in outliers:
         print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag, 2)}, Mag: {np.round(mag, 2)}, RMS: {RMS}")
 
-    # Plot total data excluding filtered points and outliers
-    total_indices = np.setdiff1d(np.arange(len(mags_list)), filtered_indices)
-
     # Exclude outliers from the total data
-    total_RMS = [RMS_list[i] for i in total_indices if i not in [tic_id[0] for tic_id in outliers]]
-    total_mags = [mags_list[i] for i in total_indices if i not in [tic_id[0] for tic_id in outliers]]
+    total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
+    total_mags = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
 
     ax.plot(total_mags, total_RMS, 'o', color='black', label='total data', alpha=0.5)
-    
+
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
