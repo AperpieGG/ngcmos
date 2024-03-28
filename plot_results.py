@@ -29,11 +29,10 @@ def identify_outliers(data, deviation_threshold):
     tmag_list = data['Tmag_list']
     mags_list = data['mags_list']
     tic_ids = data['TIC_IDs']
-    RMS_list = data['RMS_list']
 
     outliers = []
 
-    for tmag, mag, tic_id, RMS in zip(tmag_list, mags_list, tic_ids, RMS_list):
+    for tmag, mag, tic_id in zip(tmag_list, mags_list, tic_ids):
         deviation = abs(tmag - mag)
         if deviation > deviation_threshold:
             outliers.append((tic_id, tmag, mag))
@@ -54,20 +53,14 @@ def plot_noise_model(data):
     sky_noise = data['sky_noise']
     N = data['N']
     print(len(mags_list), len(RMS_list))
+
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
 
-    # Identify outliers
-    outliers = identify_outliers(data, deviation_threshold=2)  # Adjust deviation_threshold as needed
-
-    # Exclude filtered points and outliers
-    indices_to_exclude = list(filtered_indices) + [tic_ids.index(tic_id) for tic_id, _, _ in outliers]
-
-    # Plot total data excluding filtered points and outliers
-    total_indices = [i for i in range(len(mags_list)) if i not in indices_to_exclude]
-    total_mags = [mags_list[i] for i in filtered_indices]
-    total_RMS = [RMS_list[i] for i in filtered_indices]
-    print(len(total_mags), len(total_RMS))
+    # Plot total data excluding filtered points
+    total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
+    total_mags = [mags_list[i] for i in total_indices]
+    total_RMS = [RMS_list[i] for i in total_indices]
 
     ax.plot(total_mags, total_RMS, 'o', color='black', label='total data', alpha=0.5)
 
@@ -133,7 +126,7 @@ def main(json_file):
     outliers = identify_outliers(data, deviation_threshold)
     print("Outliers:")
     for tic_id, tmag, mag in outliers:
-        print(f"TIC ID: {tic_id}, Tmag: {tmag}, Calculated Magnitude: {mag}")
+        print(f"TIC ID: {tic_id} and Tmag: {np.round(tmag, 2)}, Calculated Magnitude: {np.round(mag,2)}")
 
 
 if __name__ == "__main__":
