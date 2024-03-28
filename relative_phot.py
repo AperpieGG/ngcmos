@@ -52,16 +52,18 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
-    # Select stars for master reference star
     master_star_data = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 9.6)]
     master_fluxes = []
-    for master_tic_id in master_star_data['tic_id']:
-        print(f"stars to use for master reference star: {master_tic_id}")
-        master_fluxes.extend(np.unique(master_star_data[master_star_data['tic_id'] == master_tic_id]['flux_6']))
+
+    for master_tic_id in np.unique(master_star_data['tic_id']):
+        # Get fluxes of the current star
+        star_fluxes = master_star_data[master_star_data['tic_id'] == master_tic_id]['flux_6']
+        print('The stars are: ', master_tic_id)
+        # Append unique fluxes of the current star to the list
+        master_fluxes.extend(np.unique(star_fluxes))
+
     # Calculate the median flux for the master reference star
-
-    master_reference_flux = np.average(master_fluxes)
-
+    master_reference_flux = np.median(master_fluxes)
     # Normalize the fluxes
     fluxes_clipped = fluxes_clipped / master_reference_flux
     fluxerrs_clipped = fluxerrs_clipped / master_reference_flux
