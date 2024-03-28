@@ -57,17 +57,15 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     master_fluxes = master_star_data['flux_6']
 
     # Calculate the median flux for the master reference star
-    average_flux = np.average(master_fluxes)
+    median_flux = np.median(master_fluxes)
 
     # Normalize the fluxes
-    fluxes_clipped = fluxes_clipped / average_flux
-    fluxerrs_clipped = fluxerrs_clipped / average_flux
+    normalized_fluxes_target = fluxes_clipped / median_flux
 
-    # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
+    # Detrend the light curve
+    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), normalized_fluxes_target, 2),
                        time_clipped - int(time_clipped[0]))
-    dt_flux = fluxes_clipped / trend
-    dt_fluxerr = fluxerrs_clipped / trend
+    dt_flux = normalized_fluxes_target / trend
 
     RMS = np.std(dt_flux)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
