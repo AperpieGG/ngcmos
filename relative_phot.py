@@ -52,22 +52,31 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
+    # Select stars for master reference star
     master_star_data = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 9.6)]
-    master_fluxes = []
+    master_fluxes_dict = {}
 
+    # Loop through each unique TIC ID within the specified magnitude range
     for master_tic_id in np.unique(master_star_data['tic_id']):
-        # Get fluxes of the current star
-        star_fluxes = master_star_data[master_star_data['tic_id'] == master_tic_id]['flux_6']
-        print('The stars are: ', master_tic_id)
-        # Append unique fluxes of the current star to the list
-        master_fluxes.extend(np.unique(star_fluxes))
+        # Get the fluxes and corresponding jd_mid for the current star
+        star_data = master_star_data[master_star_data['tic_id'] == master_tic_id]
+        star_fluxes = star_data['flux_6']
+        star_jd_mid = star_data['jd_mid']
 
-    # Calculate the median flux for the master reference star
-    master_reference_flux = np.median(master_fluxes)
-    print(len(master_reference_flux))
-    # Normalize the fluxes
-    fluxes_clipped = fluxes_clipped / master_reference_flux
-    fluxerrs_clipped = fluxerrs_clipped / master_reference_flux
+        # Add the fluxes of the current star to the dictionary
+        for jd, flux in zip(star_jd_mid, star_fluxes):
+            if jd not in master_fluxes_dict:
+                master_fluxes_dict[jd] = []
+            master_fluxes_dict[jd].append(flux)
+
+    # Calculate the average flux for each time point to create the master reference flux
+    master_reference_fluxes = []
+    for jd in sorted(master_fluxes_dict.keys()):
+        average_flux = np.mean(master_fluxes_dict[jd])
+        master_reference_fluxes.append(average_flux)
+
+    # Convert master reference fluxes to a numpy array
+    master_reference_flux = np.array(master_reference_fluxes)
 
     # use polyfit to detrend the light curve
     trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
