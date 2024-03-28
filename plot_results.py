@@ -126,6 +126,10 @@ def main(json_file):
     plot_noise_model(data)
     plot_tmag_vs_mag(data)
 
+    # Identify outliers
+    deviation_threshold = 2
+    identify_outliers(data, deviation_threshold)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plot RMS vs Magnitudes')
