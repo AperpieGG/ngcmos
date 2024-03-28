@@ -21,7 +21,23 @@ def filter_data(mags_list, RMS_list):
     """
     filtered_indices = \
         np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 400))[0]
+
     return filtered_indices
+
+
+def identify_outliers(data, deviation_threshold):
+    tmag_list = data['Tmag_list']
+    mags_list = data['mags_list']
+    tic_ids = data['TIC_IDs']
+
+    outliers = []
+
+    for tmag, mag, tic_id in zip(tmag_list, mags_list, tic_ids):
+        deviation = abs(tmag - mag)
+        if deviation > deviation_threshold:
+            outliers.append((tic_id, tmag, mag))
+
+    return outliers
 
 
 def plot_noise_model(data):
@@ -37,17 +53,19 @@ def plot_noise_model(data):
     sky_noise = data['sky_noise']
     N = data['N']
 
-    exclude_tic_id = "20319695"  # Set the TIC_ID to exclude
-
-    # Check if any of the TIC_IDs match the one to be excluded
-    if exclude_tic_id in tic_ids:
-        return  # Skip plotting if TIC_ID matches the one to be excluded
-
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
 
-    # Plot total data excluding filtered points
-    total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
+    # Identify outliers
+    outliers = identify_outliers(data, deviation_threshold=2)  # Adjust deviation_threshold as needed
+
+    # Combine filtered indices and outliers
+    indices_to_exclude = set(filtered_indices)
+    for tic_id, _, _ in outliers:
+        indices_to_exclude.add(np.where(np.array(tic_ids) == tic_id)[0][0])
+
+    # Plot total data excluding filtered points and outliers
+    total_indices = [i for i in range(len(mags_list)) if i not in indices_to_exclude]
     total_mags = [mags_list[i] for i in total_indices]
     total_RMS = [RMS_list[i] for i in total_indices]
 
@@ -98,21 +116,6 @@ def plot_tmag_vs_mag(data):
     plt.gca().invert_xaxis()
     plt.gca().invert_yaxis()
     plt.show()
-
-
-def identify_outliers(data, deviation_threshold):
-    tmag_list = data['Tmag_list']
-    mags_list = data['mags_list']
-    tic_ids = data['TIC_IDs']
-
-    outliers = []
-
-    for tmag, mag, tic_id in zip(tmag_list, mags_list, tic_ids):
-        deviation = abs(tmag - mag)
-        if deviation > deviation_threshold:
-            outliers.append((tic_id, tmag, mag))
-
-    return outliers
 
 
 def main(json_file):
