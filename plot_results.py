@@ -82,21 +82,21 @@ def plot_noise_model(data):
     ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintillation noise',
             linestyle='--')
     ax.set_xlabel('TESS Magnitude')
-    # ax.set_ylabel('RMS (ppm)')
+    ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 14)
-    # ax.set_ylim(1000, 100000)
+    ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
 
     # if binning 30min
-    ax.set_ylim(100, 4000)
-    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().tick_params(axis='y', which='minor', length=4)
-    ax.set_ylabel('RMS (ppm per 30 min)')
-    plt.tight_layout()
-    plt.show()
+    # ax.set_ylim(100, 4000)
+    # plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    # plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    # plt.gca().tick_params(axis='y', which='minor', length=4)
+    # ax.set_ylabel('RMS (ppm per 30 min)')
+    # plt.tight_layout()
+    # plt.show()
 
 
 def linear_model(x, m, b):
