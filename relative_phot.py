@@ -78,13 +78,16 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     # Convert master reference fluxes to a numpy array
     master_reference_flux = np.array(master_reference_fluxes)
 
-    fluxes_clipped = fluxes_clipped - master_reference_flux
+    fluxes_clipped = fluxes_clipped / master_reference_flux
 
     # use polyfit to detrend the light curve
     trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
                        time_clipped - int(time_clipped[0]))
     dt_flux = fluxes_clipped / trend
     dt_fluxerr = fluxerrs_clipped / trend
+
+    # Bin the time, flux, and error
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr, bin_size)
 
     RMS = np.std(dt_flux)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
