@@ -19,12 +19,13 @@ def filter_data(mags_list, RMS_list):
     """
     Filter data points based on magnitude and RMS criteria
     """
-    filtered_indices = np.where(
-        ((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 400)) &
-        ((np.array(mags_list) < 12) & (np.array(RMS_list) >= 2000))
-    )[0]
+    filtered_indices_bright = \
+        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 400))[0]
 
-    return filtered_indices
+    filtered_indices_dim = \
+        np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 2000))[0]
+
+    return filtered_indices_bright, filtered_indices_dim
 
 
 def identify_outliers(data, deviation_threshold):
@@ -62,8 +63,11 @@ def plot_noise_model(data):
     N = data['N']
 
     # Filter data points based on magnitude and RMS
-    filtered_indices = filter_data(mags_list, RMS_list)
+    filtered_indices_bright, filtered_indices_dim = filter_data(mags_list, RMS_list)
 
+    # append the indices of the outliers
+    filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
+    
     # Exclude outliers from the total data
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
     total_mags = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
