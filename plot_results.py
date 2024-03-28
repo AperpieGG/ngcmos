@@ -29,13 +29,16 @@ def identify_outliers(data, deviation_threshold):
     tmag_list = data['Tmag_list']
     mags_list = data['mags_list']
     tic_ids = data['TIC_IDs']
+    RMS_list = data['RMS_list']  # Assuming RMS data is available in 'data'
 
     outliers = []
 
     for tmag, mag, tic_id in zip(tmag_list, mags_list, tic_ids):
         deviation = abs(tmag - mag)
         if deviation > deviation_threshold:
-            outliers.append((tic_id, tmag, mag))
+            # Find the index of the outlier using TIC_IDs
+            outlier_index = np.where(np.array(data['TIC_IDs']) == tic_id)[0][0]
+            outliers.append((tic_id, tmag, mag, RMS_list[outlier_index]))
 
     return outliers
 
@@ -56,6 +59,13 @@ def plot_noise_model(data):
 
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
+
+    # Identify outliers
+    deviation_threshold = 2  # Adjust the threshold as needed
+    outliers = identify_outliers(data, deviation_threshold)
+    print("Outliers:")
+    for tic_id, tmag, mag, RMS in outliers:
+        print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag,2)}, Mag: {np.round(mag,2)}, RMS: {RMS}")
 
     # Plot total data excluding filtered points
     total_indices = [i for i in range(len(mags_list)) if i not in filtered_indices]
@@ -120,13 +130,6 @@ def main(json_file):
     # Plot RMS vs magnitudes
     plot_noise_model(data)
     plot_tmag_vs_mag(data)
-
-    # Identify outliers
-    deviation_threshold = 2  # Adjust the threshold as needed
-    outliers = identify_outliers(data, deviation_threshold)
-    print("Outliers:")
-    for tic_id, tmag, mag in outliers:
-        print(f"TIC ID: {tic_id} and Tmag: {np.round(tmag, 2)}, Calculated Magnitude: {np.round(mag,2)}")
 
 
 if __name__ == "__main__":
