@@ -53,7 +53,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     # Select stars for master reference star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11)]
+    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10)]
     master_fluxes_dict = {}
 
     # Loop through each unique TIC ID within the specified magnitude range
