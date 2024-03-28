@@ -90,7 +90,9 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr, bin_size)
 
     RMS = np.std(dt_flux)
+    RMS_binned = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
+    print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
 
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
@@ -102,7 +104,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Relative Flux [e-]')
     ax1.legend()
-    ax2.plot(time_binned, dt_flux_binned, 'o', color='black', markerfacecolor='blue')
+    ax2.plot(time_binned, dt_flux_binned, 'o', color='black', markerfacecolor='red')
     ax2.plot(time_clipped, dt_flux, '.', color='black')
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
