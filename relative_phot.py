@@ -111,12 +111,8 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     ax2.set_xlabel('MJD [days]')
 
     # Set limits only for the binned data axis
-    # Calculate the average of the binned detrended flux
-    average_dt_flux_binned = np.mean(dt_flux_binned)
-
-    # Set the limits to be 2 times larger than the average
-    ax2.set_ylim([average_dt_flux_binned - (2 * average_dt_flux_binned),
-                  average_dt_flux_binned + (2 * average_dt_flux_binned)])
+    ax2.set_ylim([np.min(dt_flux_binned) * np.abs(np.min(dt_flux_binned)),
+                  np.max(dt_flux_binned) * np.abs(np.max(dt_flux_binned))])
     plt.tight_layout()
     plt.show()
 
