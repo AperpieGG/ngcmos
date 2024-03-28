@@ -64,9 +64,9 @@ def plot_noise_model(data):
 
     # Exclude specific TIC_ID (20322271) from the filtered indices
     exclude_tic_id = '20322271'
-    exclude_index = np.where(np.array(tic_ids) == exclude_tic_id)[0][0]
+    exclude_index = np.where(np.array(tic_ids) == exclude_tic_id)
     filtered_indices = np.append(filtered_indices, exclude_index)
-    
+
     # Exclude outliers from the total data
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
     total_mags = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
