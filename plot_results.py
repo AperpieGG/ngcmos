@@ -39,6 +39,9 @@ def identify_outliers(data, deviation_threshold):
             # Find the index of the outlier using TIC_IDs
             outlier_index = np.where(np.array(data['TIC_IDs']) == tic_id)[0][0]
             outliers.append((tic_id, tmag, mag, RMS_list[outlier_index]))
+    print("Outliers:")
+    for tic_id, tmag, mag, RMS in outliers:
+        print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag, 2)}, Mag: {np.round(mag, 2)}, RMS: {RMS}")
 
     return outliers
 
@@ -59,13 +62,6 @@ def plot_noise_model(data):
 
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
-
-    # Identify outliers
-    deviation_threshold = 2  # Adjust the threshold as needed
-    outliers = identify_outliers(data, deviation_threshold)
-    print("Outliers:")
-    for tic_id, tmag, mag, RMS in outliers:
-        print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag, 2)}, Mag: {np.round(mag, 2)}, RMS: {RMS}")
 
     # Exclude outliers from the total data
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
