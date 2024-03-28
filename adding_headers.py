@@ -63,10 +63,7 @@ def update_header(directory):
                 hdul[0].header['AIRMASS'] = airmass
             else:
                 print(f"AIRMASS already present for {filename}")
-
-            if 'TIME_BARY' in hdul[0].header:
-                print(f"TIME_BARY already present for {filename}")
-            else:
+            if 'TIME_BARY' not in hdul[0].header:
                 # Additional calculations based on header information
                 data_exp = round(float(hdul[0].header['EXPTIME']), 2)
                 half_exptime = data_exp / 2.
@@ -82,6 +79,8 @@ def update_header(directory):
                 # Update the header with barycentric and heliocentric times
                 hdul[0].header['TIME_BARY'] = (time_bary.jd, 'Barycentric Time (JD)')
                 hdul[0].header['TIME_HELIO'] = (time_helio.jd, 'Heliocentric Time (JD)')
+            else:
+                print(f"TIME_BARY already present for {filename}")
 
                 hdul.flush()
     print("All headers updated")
