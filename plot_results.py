@@ -52,7 +52,7 @@ def plot_noise_model(data):
     dc_noise = data['dc_noise']
     sky_noise = data['sky_noise']
     N = data['N']
-
+    print(len(mags_list), len(RMS_list))
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
 
@@ -70,6 +70,7 @@ def plot_noise_model(data):
     total_indices = [i for i in range(len(mags_list)) if i not in indices_to_exclude]
     total_mags = [mags_list[i] for i in total_indices]
     total_RMS = [RMS_list[i] for i in total_indices]
+    print(len(total_mags), len(total_RMS))
 
     ax.plot(total_mags, total_RMS, 'o', color='darkgreen', label='total data', alpha=0.5)
 
