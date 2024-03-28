@@ -52,7 +52,16 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
-    # take the best stars with Tmag < 11 and Tmag > 9.5 and average for master reference star
+    # Select stars for master reference star
+    master_star_data = table[(table['Tmag'] < 11) & (table['Tmag'] > 9.5)]
+    master_fluxes = master_star_data['flux_6']
+
+    # Calculate the median flux for the master reference star
+    average_flux = np.average(master_fluxes)
+
+    # Normalize the fluxes
+    fluxes_clipped = fluxes_clipped / average_flux
+    fluxerrs_clipped = fluxerrs_clipped / average_flux
 
     # use polyfit to detrend the light curve
     trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
