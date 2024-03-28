@@ -57,21 +57,23 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     master_fluxes = master_star_data['flux_6']
 
     # Calculate the median flux for the master reference star
-    median_flux = np.median(master_fluxes)
+    master_reference_flux = np.average(master_fluxes)
 
     # Normalize the fluxes
-    normalized_fluxes_target = fluxes_clipped / median_flux
+    fluxes_clipped = fluxes_clipped / master_reference_flux
+    fluxerrs_clipped = fluxerrs_clipped / master_reference_flux
 
-    # Detrend the light curve
-    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), normalized_fluxes_target, 2),
+    # use polyfit to detrend the light curve
+    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
                        time_clipped - int(time_clipped[0]))
-    dt_flux = normalized_fluxes_target / trend
+    dt_flux = fluxes_clipped / trend
+    dt_fluxerr = fluxerrs_clipped / trend
 
     RMS = np.std(dt_flux)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
     # Create subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
 
     # Plot raw flux with wotan model
     ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
@@ -83,6 +85,8 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     ax2.plot(time_clipped, dt_flux, '.', color='black', alpha=0.5)
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
+
+    ax3.plot(time_clipped, master_reference_flux, '.', color='black')
     plt.tight_layout()
     plt.show()
 
