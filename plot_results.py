@@ -27,6 +27,7 @@ def filter_data(mags_list, RMS_list):
 def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
+    tic_id = data['TIC_IDs']
     mags_list = data['mags_list']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
@@ -35,6 +36,9 @@ def plot_noise_model(data):
     dc_noise = data['dc_noise']
     sky_noise = data['sky_noise']
     N = data['N']
+
+    if tic_id == "20319695":
+        return  # Skip plotting if TIC_ID matches the one to be excluded
 
     # Filter data points based on magnitude and RMS
     filtered_indices = filter_data(mags_list, RMS_list)
