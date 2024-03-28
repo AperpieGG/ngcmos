@@ -65,8 +65,8 @@ def plot_noise_model(data):
 
     # Plot total data excluding filtered points and outliers
     total_indices = [i for i in range(len(mags_list)) if i not in indices_to_exclude]
-    total_mags = [mags_list[i] for i in total_indices]
-    total_RMS = [RMS_list[i] for i in total_indices]
+    total_mags = [mags_list[i] for i in filtered_indices]
+    total_RMS = [RMS_list[i] for i in filtered_indices]
     print(len(total_mags), len(total_RMS))
 
     ax.plot(total_mags, total_RMS, 'o', color='black', label='total data', alpha=0.5)
