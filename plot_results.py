@@ -65,12 +65,14 @@ def plot_noise_model(data):
     outliers = identify_outliers(data, deviation_threshold)
     print("Outliers:")
     for tic_id, tmag, mag, RMS in outliers:
-        print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag,2)}, Mag: {np.round(mag,2)}, RMS: {RMS}")
+        print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag, 2)}, Mag: {np.round(mag, 2)}, RMS: {RMS}")
 
     # Plot total data excluding filtered points and outliers
     total_indices = np.setdiff1d(np.arange(len(mags_list)), filtered_indices)
-    total_mags = [mags_list[i] for i in total_indices]
-    total_RMS = [RMS_list[i] for i in total_indices]
+
+    # Exclude outliers from the total data
+    total_RMS = [RMS_list[i] for i in total_indices if i not in [tic_id[0] for tic_id in outliers]]
+    total_mags = [mags_list[i] for i in total_indices if i not in [tic_id[0] for tic_id in outliers]]
 
     ax.plot(total_mags, total_RMS, 'o', color='black', label='total data', alpha=0.5)
 
