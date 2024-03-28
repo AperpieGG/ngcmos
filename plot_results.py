@@ -29,10 +29,11 @@ def identify_outliers(data, deviation_threshold):
     tmag_list = data['Tmag_list']
     mags_list = data['mags_list']
     tic_ids = data['TIC_IDs']
+    RMS_list = data['RMS_list']
 
     outliers = []
 
-    for tmag, mag, tic_id in zip(tmag_list, mags_list, tic_ids):
+    for tmag, mag, tic_id, RMS in zip(tmag_list, mags_list, tic_ids, RMS_list):
         deviation = abs(tmag - mag)
         if deviation > deviation_threshold:
             outliers.append((tic_id, tmag, mag))
