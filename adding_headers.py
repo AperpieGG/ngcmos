@@ -9,11 +9,12 @@ python adding_headers.py
 
 """
 import argparse
-import glob
-from datetime import datetime, timedelta
 from astropy.io import fits
 import os
 import numpy as np
+from astropy.time import Time
+import astropy.units as u
+from utils import get_location, get_light_travel_times
 
 
 def filter_filenames(directory):
@@ -62,8 +63,27 @@ def update_header(directory):
                 hdul[0].header['AIRMASS'] = airmass
             else:
                 print(f"AIRMASS already present for {filename}")
-            hdul.flush()
-            print(f"Updated header for {filename}")
+
+            if 'TIME_BARY' in hdul[0].header:
+                print(f"TIME_BARY already present for {filename}")
+            else:
+                # Additional calculations based on header information
+                data_exp = round(float(hdul[0].header['EXPTIME']), 2)
+                half_exptime = data_exp / 2.
+                time_isot = Time(hdul[0].header['DATE-OBS'], format='isot', scale='utc', location=get_location())
+                time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+                time_jd += half_exptime * u.second
+                ra = hdul[0].header['TELRAD']
+                dec = hdul[0].header['TELDECD']
+                ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
+                time_bary = time_jd.tdb + ltt_bary
+                time_helio = time_jd.utc + ltt_helio
+
+                # Update the header with barycentric and heliocentric times
+                hdul[0].header['TIME_BARY'] = (time_bary.jd, 'Barycentric Time (JD)')
+                hdul[0].header['TIME_HELIO'] = (time_helio.jd, 'Heliocentric Time (JD)')
+
+                hdul.flush()
     print("All headers updated")
 
 
