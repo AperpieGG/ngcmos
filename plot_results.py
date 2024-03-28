@@ -59,12 +59,8 @@ def plot_noise_model(data):
     # Identify outliers
     outliers = identify_outliers(data, deviation_threshold=2)  # Adjust deviation_threshold as needed
 
-    # Combine filtered indices and outliers
-    indices_to_exclude = set(filtered_indices)
-    for tic_id, _, _ in outliers:
-        indices_to_exclude.add(np.where(np.array(tic_ids) == tic_id)[0][0])
-
-    print("tic_ids to exclude from the plot:", [tic_ids[i] for i in indices_to_exclude])
+    # Exclude filtered points and outliers
+    indices_to_exclude = list(filtered_indices) + [tic_ids.index(tic_id) for tic_id, _, _ in outliers]
 
     # Plot total data excluding filtered points and outliers
     total_indices = [i for i in range(len(mags_list)) if i not in indices_to_exclude]
@@ -72,7 +68,7 @@ def plot_noise_model(data):
     total_RMS = [RMS_list[i] for i in total_indices]
     print(len(total_mags), len(total_RMS))
 
-    ax.plot(total_mags, total_RMS, 'o', color='darkgreen', label='total data', alpha=0.5)
+    ax.plot(total_mags, total_RMS, 'o', color='black', label='total data', alpha=0.5)
 
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
