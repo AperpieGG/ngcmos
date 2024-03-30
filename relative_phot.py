@@ -64,7 +64,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
             if jd not in master_fluxes_dict:
                 master_fluxes_dict[jd] = []
             master_fluxes_dict[jd].append(flux)
-    print(f"Stars used for master reference: {len(stars_used)}")
+    print("Stars used for master reference: {len(stars_used)}")
     # Calculate the average flux for each time point to create the master reference flux
     master_reference_fluxes = []
     for jd in sorted(master_fluxes_dict.keys()):
