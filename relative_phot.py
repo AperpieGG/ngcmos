@@ -64,7 +64,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
             if jd not in master_fluxes_dict:
                 master_fluxes_dict[jd] = []
             master_fluxes_dict[jd].append(flux)
-    print("Stars used for master reference: {len(stars_used)}")
+    print(f"Stars used for master reference: {len(stars_used)}")
     # Calculate the average flux for each time point to create the master reference flux
     master_reference_fluxes = []
     for jd in sorted(master_fluxes_dict.keys()):
@@ -89,8 +89,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     RMS = np.std(dt_flux)
     RMS_binned = np.std(dt_flux_binned)
-    print("RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
-    print("RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
+    print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
+    print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
 
     return time_clipped, fluxes_clipped, fluxerrs_clipped, trend, dt_flux, dt_fluxerr, time_binned, dt_flux_binned
 
@@ -129,7 +129,7 @@ def plot_relative_lc(time_clipped, fluxes_clipped, trend, dt_flux,
     # Plot raw flux with wotan model
     ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
     ax1.plot(time_clipped, trend, color='red', label='Model fit')
-    ax1.set_title('Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
+    ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Relative Flux [e-]')
     ax1.legend()
@@ -161,7 +161,7 @@ def main():
 
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
-    print("Photometry files: {phot_files}")
+    print(f"Photometry files: {phot_files}")
 
     # Loop through photometry files
     for phot_file in phot_files:
@@ -176,10 +176,10 @@ def main():
                              dt_fluxerr, time_binned, dt_flux_binned, args.tic_id, phot_table['Tmag'][0], args.bin)
             break  # Stop looping if tic_id is found
         else:
-            print("TIC ID {args.tic_id} not found in {phot_file}")
+            print(f"TIC ID {args.tic_id} not found in {phot_file}")
 
     else:
-        print("TIC ID {args.tic_id} not found in any photometry file.")
+        print(f"TIC ID {args.tic_id} not found in any photometry file.")
 
 
 if __name__ == "__main__":
