@@ -2,7 +2,7 @@
 
 """
 This is a script to run Donuts on a set of images, compute the shifts, and save the results to a JSON file.
-It also created an mp4 animation of the images with shifts greater than 0.5 pixels.
+It also created a mp4 animation of the images with shifts greater than 0.5 pixels.
 """
 
 import json
@@ -14,41 +14,12 @@ import glob
 from matplotlib import pyplot as plt
 import warnings
 from astropy.io import fits
-from astropy.time import Time
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import Normalize
+from utils import plot_images, utc_to_jd
 
 warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.fromnumeric")
 warnings.filterwarnings("ignore", category=UserWarning, module="donuts.image")
-
-
-def plot_images():
-    plt.rcParams['figure.dpi'] = 100
-    plt.rcParams['xtick.top'] = True
-    plt.rcParams['xtick.labeltop'] = False
-    plt.rcParams['xtick.labelbottom'] = True
-    plt.rcParams['xtick.bottom'] = True
-    plt.rcParams['xtick.direction'] = 'in'
-    plt.rcParams['xtick.minor.visible'] = True
-    plt.rcParams['xtick.major.top'] = True
-    plt.rcParams['xtick.minor.top'] = True
-    plt.rcParams['xtick.minor.bottom'] = True
-    plt.rcParams['xtick.alignment'] = 'center'
-
-    plt.rcParams['ytick.left'] = True
-    plt.rcParams['ytick.labelleft'] = True
-    plt.rcParams['ytick.right'] = True
-    plt.rcParams['ytick.minor.visible'] = True
-    plt.rcParams['ytick.major.right'] = True
-    plt.rcParams['ytick.major.left'] = True
-    plt.rcParams['ytick.minor.right'] = True
-    plt.rcParams['ytick.minor.left'] = True
-    plt.rcParams['font.size'] = 12
-    plt.rcParams['legend.frameon'] = True
-    plt.rcParams['legend.framealpha'] = 0.8
-    plt.rcParams['legend.loc'] = 'best'
-    plt.rcParams['legend.fancybox'] = True
-    plt.rcParams['legend.fontsize'] = 12
 
 
 def find_current_night_directory(base_path):
@@ -265,16 +236,6 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
         animation = FuncAnimation(fig, update, frames=len(images_with_large_shift), blit=True)
         animation.save(gif_file_path, writer='ffmpeg', fps=5)
         print(f"Animation saved to: {gif_file_path}\n")
-
-
-def utc_to_jd(utc_time_str):
-    # Convert DATE-OBS to Astropy Time object
-    t = Time(utc_time_str, format='isot', scale='utc')
-
-    # Convert to Julian Date
-    jd = t.jd
-
-    return jd
 
 
 def acquire_header_info(directory, prefix):
