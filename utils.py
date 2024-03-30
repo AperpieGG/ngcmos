@@ -13,6 +13,7 @@ import astropy.units as u
 from astropy.table import Table, hstack
 import matplotlib.pyplot as plt
 from scipy.stats import median_abs_deviation
+from astropy.time import Time
 
 
 # pylint: disable=invalid-name
@@ -453,6 +454,24 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 def remove_outliers(time, flux, flux_err):
     """
     Remove massive outliers in 3 rounds of clipping
+
+    Parameters
+    ----------
+    time : array
+        Time values
+    flux : array
+        Flux values
+    flux_err : array
+        Flux error values
+
+    Returns
+    -------
+    n_time : array
+        Non-outlier time values
+    n_flux : array
+        Non-outlier flux values
+    n_flux_err : array
+        Non-outlier flux error values
     """
     n_time = np.copy(time)
     n_flux = np.copy(flux)
@@ -473,6 +492,27 @@ def remove_outliers(time, flux, flux_err):
 
     return n_time, n_flux, n_flux_err
 
+
+def utc_to_jd(utc_time_str):
+    """
+    Convert UTC time string to Julian Date
+
+    Parameters
+    ----------
+    utc_time_str : str
+        UTC time string in the format 'YYYY-MM-DDTHH:MM:SS'
+
+    Returns
+    -------
+    jd : float
+        Julian Date
+    """
+    t = Time(utc_time_str, format='isot', scale='utc')
+
+    # Convert to Julian Date
+    jd = t.jd
+
+    return jd
 
 
 
