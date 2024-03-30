@@ -26,9 +26,9 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
+def relative_phot(table, tic_id_to_plot, bin_size):
     """
-    Plot the light curve for a specific TIC ID with detrending
+    Create a relative light curve for a specific TIC ID
 
     Parameters:
     table : astropy.table.Table
@@ -92,6 +92,37 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
     print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
 
+    return time_clipped, fluxes_clipped, fluxerrs_clipped, trend, dt_flux, dt_fluxerr, time_binned, dt_flux_binned
+
+
+def plot_relative_lc(time_clipped, fluxes_clipped, trend, dt_flux,
+                     dt_fluxerr, time_binned, dt_flux_binned, tic_id_to_plot, tmag, bin_size):
+    """
+    Plot the relative light curve for a specific TIC ID
+
+    Parameters:
+    time_clipped : numpy.ndarray
+        Clipped time values
+    fluxes_clipped : numpy.ndarray
+        Clipped flux values
+    trend : numpy.ndarray
+        Trend values
+    dt_flux : numpy.ndarray
+        Detrended flux values
+    dt_fluxerr : numpy.ndarray
+        Detrended flux error values
+    time_binned : numpy.ndarray
+        Binned time values
+    dt_flux_binned : numpy.ndarray
+        Binned detrended flux values
+    tic_id_to_plot : int
+        TIC ID of the star to plot
+    tmag : float
+        Tmag value of the star
+    bin_size : int
+        Number of images to bin
+
+    """
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
@@ -139,7 +170,10 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc_with_detrend(phot_table, args.tic_id, args.bin)
+            (time_clipped, fluxes_clipped, fluxerrs_clipped, trend,
+             dt_flux, dt_fluxerr, time_binned, dt_flux_binned) = relative_phot(phot_table, args.tic_id, args.bin)
+            plot_relative_lc(time_clipped, fluxes_clipped, trend, dt_flux,
+                             dt_fluxerr, time_binned, dt_flux_binned, args.tic_id, phot_table['Tmag'][0], args.bin)
             break  # Stop looping if tic_id is found
         else:
             print(f"TIC ID {args.tic_id} not found in {phot_file}")
