@@ -5,7 +5,7 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 from utils import (plot_images, find_current_night_directory,
-                   get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers)
+                   get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file)
 
 
 def load_config(filename):
@@ -42,13 +42,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
         None
 
     """
-    # Select rows with the specified TIC ID
-    tic_id_data = table[table['tic_id'] == tic_id_to_plot]
-    # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
-    jd_mid = tic_id_data['jd_mid']
-    tmag = tic_id_data['Tmag'][0]
-    fluxes = tic_id_data['flux_6']
-    fluxerrs = tic_id_data['fluxerr_6']
+    jd_mid, tmag, fluxes, fluxerrs = extract_phot_file(table, tic_id_to_plot)
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
