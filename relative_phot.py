@@ -48,11 +48,12 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 
     # Select stars for master reference star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11)]
-    print(len(master_star_data))
     master_fluxes_dict = {}
+    stars_used = []
 
     # Loop through each unique TIC ID within the specified magnitude range
     for master_tic_id in np.unique(master_star_data['tic_id']):
+        stars_used.append(master_tic_id)
         # Get the fluxes and corresponding jd_mid for the current star
         star_data = master_star_data[master_star_data['tic_id'] == master_tic_id]
         star_fluxes = star_data['flux_6']
@@ -63,7 +64,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
             if jd not in master_fluxes_dict:
                 master_fluxes_dict[jd] = []
             master_fluxes_dict[jd].append(flux)
-
+    print(f"Stars used for master reference: {stars_used}")
     # Calculate the average flux for each time point to create the master reference flux
     master_reference_fluxes = []
     for jd in sorted(master_fluxes_dict.keys()):
