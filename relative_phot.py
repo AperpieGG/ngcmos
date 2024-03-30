@@ -73,6 +73,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 
     # Convert master reference fluxes to a numpy array
     master_reference_flux = np.array(master_reference_fluxes)
+    print(len(master_reference_flux))
 
     fluxes_clipped = fluxes_clipped / master_reference_flux
     fluxerrs_clipped = fluxerrs_clipped / master_reference_flux
