@@ -56,6 +56,9 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
         star_data = master_star_data[master_star_data['tic_id'] == master_tic_id]
         star_fluxes = star_data['flux_6']
         star_jd_mid = star_data['jd_mid']
+        star_fluxes_err = star_data['fluxerr_6']
+
+        star_jd_mid, star_fluxes, star_fluxes_err = remove_outliers(star_jd_mid, star_fluxes, star_fluxes_err)
 
         # Add the fluxes of the current star to the dictionary
         for jd, flux in zip(star_jd_mid, star_fluxes):
