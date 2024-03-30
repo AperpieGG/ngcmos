@@ -100,7 +100,8 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     ax1.set_ylabel('Relative Flux [e-]')
     ax1.legend()
     ax2.errorbar(time_clipped, dt_flux, yerr=dt_fluxerr, fmt='.', color='black', alpha=0.2)
-    ax2.plot(time_binned, dt_flux_binned, 'o', markerfacecolor='red')
+    if bin_size > 1:
+        ax2.plot(time_binned, dt_flux_binned, 'o', markerfacecolor='red')
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
     ax2.set_xlabel('MJD [days]')
 
