@@ -149,8 +149,9 @@ def main():
         for filename in prefix_filenames:
             print(f"Processing filename {filename}......")
             # Calibrate image and get FITS file
+            print(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
             reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
-
+            print(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
             # Convert reduced_data to a dictionary with filenames as keys
             reduced_data_dict = {filename: (data, header) for data, header in zip(reduced_data, reduced_header)}
 
