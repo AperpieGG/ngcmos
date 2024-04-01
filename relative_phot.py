@@ -173,7 +173,7 @@ def main():
             (time_clipped, fluxes_clipped, fluxerrs_clipped, trend,
              dt_flux, dt_fluxerr, time_binned, dt_flux_binned) = relative_phot(phot_table, args.tic_id, args.bin)
             plot_relative_lc(time_clipped, fluxes_clipped, trend, dt_flux,
-                             dt_fluxerr, time_binned, dt_flux_binned, args.tic_id, phot_table['Tmag'][0], args.bin)
+                             dt_fluxerr, time_binned, dt_flux_binned, args.tic_id, phot_table['Tmag'], args.bin)
             break  # Stop looping if tic_id is found
         else:
             print(f"TIC ID {args.tic_id} not found in {phot_file}")
