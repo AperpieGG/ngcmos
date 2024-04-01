@@ -100,7 +100,8 @@ def plot_noise_model(data):
     plt.gca().tick_params(axis='y', which='minor', length=4)
     ax.set_ylabel('RMS (ppm per 30 min)')
     plt.tight_layout()
-    plt.savefig('rms_vs_mag_180.pdf', bbox_inches='tight')
+    path = '/home/ops/ngcmos/'
+    plt.savefig(path + 'rms_vs_mag_180.pdf', bbox_inches='tight')
     plt.show()
 
 
