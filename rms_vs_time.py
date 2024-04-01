@@ -30,7 +30,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
-    filtered_table = table[(table['Tmag'] >= 12) & (table['Tmag'] <= 12.5)]
+    filtered_table = table[(table['Tmag'] >= 14) & (table['Tmag'] <= 14.5)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
@@ -118,7 +118,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
     plt.legend()
     plt.tight_layout()
     path = '/home/ops/ngcmos/'
-    plt.savefig(path + 'rms_vs_time_12.pdf', bbox_inches='tight')
+    plt.savefig(path + 'rms_vs_time_14.pdf', bbox_inches='tight')
 
 
 def run_for_one(phot_file, tic_id=None):
