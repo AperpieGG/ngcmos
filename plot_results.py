@@ -24,10 +24,10 @@ def filter_data(mags_list, RMS_list):
     Filter data points based on magnitude and RMS criteria
     """
     filtered_indices_bright = \
-        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 400))[0]
+        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 9000))[0]
 
     filtered_indices_dim = []
-    filtered_indices_dim = np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 2000))[0]
+    # filtered_indices_dim = np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 2000))[0]
 
     return filtered_indices_bright, filtered_indices_dim
 
@@ -89,19 +89,19 @@ def plot_noise_model(data):
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 14)
-    # ax.set_ylim(1000, 100000)
+    ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
 
-    # if binning 30min
-    ax.set_ylim(100, 4000)
-    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().tick_params(axis='y', which='minor', length=4)
-    ax.set_ylabel('RMS (ppm per 30 min)')
-    plt.tight_layout()
-    path = '/home/ops/ngcmos/'
-    plt.savefig(path + 'rms_vs_mag_180.pdf', bbox_inches='tight')
+    # # if binning 30min
+    # ax.set_ylim(100, 4000)
+    # plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    # plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    # plt.gca().tick_params(axis='y', which='minor', length=4)
+    # ax.set_ylabel('RMS (ppm per 30 min)')
+    # plt.tight_layout()
+    # path = '/home/ops/ngcmos/'
+    # plt.savefig(path + 'rms_vs_mag_180.pdf', bbox_inches='tight')
     plt.show()
 
 
