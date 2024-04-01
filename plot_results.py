@@ -9,6 +9,7 @@ from utils import plot_images
 # dark background
 plt.style.use('dark_background')
 
+
 def load_rms_mags_data(filename):
     """
     Load RMS and magnitude data from JSON file
@@ -75,9 +76,9 @@ def plot_noise_model(data):
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
     total_mags = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
 
-    ax.plot(total_mags, total_RMS, 'o', color='black', label='total data', alpha=0.5)
+    ax.plot(total_mags, total_RMS, 'o', color='c', label='total data', alpha=0.5)
 
-    ax.plot(synthetic_mag, RNS, color='black', label='total noise')
+    ax.plot(synthetic_mag, RNS, color='c', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
     ax.plot(synthetic_mag, dc_noise, color='purple', label='dark noise', linestyle='--')
@@ -88,18 +89,19 @@ def plot_noise_model(data):
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 14)
-    ax.set_ylim(1000, 100000)
+    # ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
 
     # if binning 30min
-    # ax.set_ylim(100, 4000)
-    # plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    # plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    # plt.gca().tick_params(axis='y', which='minor', length=4)
-    # ax.set_ylabel('RMS (ppm per 30 min)')
-    # plt.tight_layout()
-    # plt.show()
+    ax.set_ylim(100, 4000)
+    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().tick_params(axis='y', which='minor', length=4)
+    ax.set_ylabel('RMS (ppm per 30 min)')
+    plt.tight_layout()
+    plt.savefig('rms_vs_mag_180.pdf', bbox_inches='tight')
+    plt.show()
 
 
 def linear_model(x, m, b):
