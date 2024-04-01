@@ -7,6 +7,9 @@ from matplotlib import pyplot as plt, ticker
 from utils import (plot_images, find_current_night_directory, get_phot_files,
                    read_phot_file, bin_time_flux_error, remove_outliers)
 
+# use dark background for plots
+plt.style.use('dark_background')
+
 
 def load_config(filename):
     with open(filename, 'r') as file:
