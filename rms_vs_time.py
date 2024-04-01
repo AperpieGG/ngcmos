@@ -30,7 +30,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
-    filtered_table = table[(table['Tmag'] >= 9.3) & (table['Tmag'] <= 9.6)]
+    filtered_table = table[(table['Tmag'] >= 9.34) & (table['Tmag'] <= 9.6)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
