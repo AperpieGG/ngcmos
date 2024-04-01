@@ -118,7 +118,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
     plt.legend()
     plt.tight_layout()
     path = '/home/ops/ngcmos/'
-    plt.savefig(path + 'rms_vs_time_12.pdf', bbox_inches='tight', overwrite=True)
+    plt.savefig(path + 'rms_vs_time_12.pdf', bbox_inches='tight')
 
 
 def run_for_one(phot_file, tic_id=None):
