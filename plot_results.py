@@ -92,6 +92,7 @@ def plot_noise_model(data):
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
+    plt.tight_layout()
 
     # # if binning 30min
     # ax.set_ylim(100, 4000)
