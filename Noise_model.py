@@ -75,8 +75,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     Tmags_list = []
 
     for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
-        # Get data for the current TIC ID
-        jd_mid, flux_4, fluxerr_4, sky_4, Tmag = extract_phot_file(table, tic_id)
+
+        tic_id_data, jd_mid, flux_4, fluxerr_4, sky_4, Tmag = extract_phot_file(table, tic_id)
 
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
@@ -84,7 +84,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         time_clipped, flux_4_clipped, fluxerr_4_clipped = remove_outliers(jd_mid, flux_4, fluxerr_4)
 
         zp = []
-        for frame_id in tic_id['frame_id']:
+        for frame_id in tic_id_data['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
