@@ -45,11 +45,11 @@ def plot_rms_time(table, num_stars, tic_id=None):
         # Extract relevant data using the extract_phot_file function
         jd_mid, tmag, fluxes, fluxerrs = extract_phot_file(table, Tmag)
 
-        current_tic_id = table[table['Tmag'] == Tmag]['tic_id']
-
-        if tic_id is not None and current_tic_id != tic_id:
-            continue
-
+        # If a specific TIC ID is provided, plot the RMS vs. time for that star
+        if tic_id is not None:
+            if tic_id != Tmag:
+                continue
+        
         time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
         trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
