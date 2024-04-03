@@ -126,7 +126,7 @@ def run_for_one(phot_file, tic_id=None):
     plot_images()
     current_night_directory = find_current_night_directory(base_path)
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    times_binned, average_rms_values, RMS_model = bin_rms_time(phot_table, 1, tic_id)
+    times_binned, average_rms_values, RMS_model = bin_rms_time(phot_table, 5, tic_id)
     plot_rms_vs_time(times_binned, average_rms_values, RMS_model)
 
 
