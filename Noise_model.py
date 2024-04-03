@@ -131,7 +131,7 @@ def extract_header(table, image_directory):
         zp_list.append(zp)
 
     print(f"Average airmass: {np.mean(airmass_list)}")
-    print(f"Average ZP: {np.mean(zp)}")
+    print(f"Average ZP: {np.mean(zp_list)}")
 
     return airmass_list, zp_list
 
