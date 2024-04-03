@@ -14,7 +14,7 @@ from astropy.io import fits
 from matplotlib import pyplot as plt, ticker
 import json
 from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error, plot_images,
-                   remove_outliers, calculate_trend_and_flux, extract_phot_file)
+                   remove_outliers, calculate_trend_and_flux)
 
 
 def load_config(filename):
@@ -75,9 +75,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     Tmags_list = []
 
     for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
-
-        tic_id_data, jd_mid, flux_4, fluxerr_4, sky_4, Tmag = extract_phot_file(table, tic_id)
-
+        tic_id_data = table[(table['tic_id'] == tic_id)]
+        jd_mid = tic_id_data['jd_mid']
+        Tmag = tic_id_data['Tmag'][0]
+        flux_4 = tic_id_data['flux_6']
+        fluxerr_4 = tic_id_data['fluxerr_6']
+        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
         # Apply sigma clipping to flux and sky arrays
