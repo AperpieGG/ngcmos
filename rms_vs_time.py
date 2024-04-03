@@ -121,32 +121,16 @@ def plot_rms_time(table, num_stars, tic_id=None):
 
 
 def run_for_one(phot_file, tic_id=None):
-    # Set plot parameters
     plot_images()
-
-    # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
-
-    # Plot the current photometry file
-    print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-    # Calculate mean and RMS for the noise model
-    plot_rms_time(phot_table, 5, tic_id)  # Always plot for 5 stars
+    plot_rms_time(phot_table, 5, tic_id)
 
 
 def run_for_more(phot_file, num_stars):
-    # Set plot parameters
     plot_images()
-
-    # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
-
-    # Plot the current photometry file
-    print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-    # Calculate mean and RMS for the noise model
     plot_rms_time(phot_table, num_stars)
 
 
