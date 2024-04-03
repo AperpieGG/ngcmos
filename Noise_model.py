@@ -38,7 +38,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
+def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
     """
     Calculate the mean flux and RMS for a given number of stars
 
@@ -52,6 +52,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         Number of stars to plot
     directory : str
         Directory containing the images
+    average_zp : float
+        Average zero point value
 
     Returns
     -------
@@ -63,9 +65,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         values of sky values
     mags_list : list
         values of magnitudes
-    zp : list
-        values of zero points
-
+    Tmags_list : list
+        values of Tmag
     """
     mean_flux_list = []
     RMS_list = []
@@ -87,56 +88,26 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # Apply sigma clipping to flux and sky arrays
         time_clipped, flux_4_clipped, fluxerr_4_clipped = remove_outliers(jd_mid, flux_4, fluxerr_4)
 
-        zp = []
-        for frame_id in tic_id_data['frame_id']:
-            image_header = fits.getheader(os.path.join(directory, frame_id))
-            zp_value = round(image_header['MAGZP_T'], 3)
-            zp.append(zp_value)
-
-        mags = []
-        t = 10  # exposure time
-        tic_id_printed = False  # Flag to track whether tic_id has been printed
-
-        for flux, zp_value in zip(flux_4_clipped, zp):
-            if flux <= 0:
-                if not tic_id_printed:
-                    print("The nan flux belongs to the star with tic_id =", tic_id)
-                    negative_fluxes_stars.append(tic_id)
-                    tic_id_printed = True
-                mag = np.nan
-            else:
-                mag = -2.5 * np.log10(flux / t) + zp_value
-            # mag_error = 1.0857 * fluxerr_4_clipped / flux_4_clipped
-            mags.append(mag)
-
-        # # Detrend the flux by converting back to fluxes and normalize by the mean lc
-        # fluxes_detrended = 10 ** (-0.4 * np.array(mags))  # Convert magnitudes back to fluxes
-        # mean_flux = np.mean(fluxes_detrended)  # Calculate the average flux
-        # dt_flux = fluxes_detrended / mean_flux  # Normalize the fluxes by dividing by the average flux
-        # dt_fluxerr = fluxerr_4_clipped / mean_flux  # Normalize the flux errors by dividing by the average flux
-
-        # Fit a second order polynomial to the detrended flux for airmass
+        # Detrend the flux by converting back to fluxes and normalize by the mean lc
         trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_4_clipped, fluxerr_4_clipped)
-
         # Bin the time, flux, and error
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr,
                                                                              bin_size)
-
-        # time_binned = time_clipped / np.sqrt(bin_size)
-        # dt_flux_binned = dt_flux / np.sqrt(bin_size)
-        # dt_fluxerr_binned = dt_fluxerr / np.sqrt(bin_size)
 
         # Calculate mean flux and RMS
         mean_flux_list.append(np.mean(flux_4_clipped))
         RMS_list.append(np.std(dt_flux_binned) * 1000000)  # Convert to ppm
         sky_list.append(np.median(sky_4))
+
+        # Calculate magnitudes using the average zp
+        mags = -2.5 * np.log10(flux_4_clipped / 10) + average_zp
         mags_list.append(np.mean(mags))
         Tmags_list.append(round(Tmag, 2))
 
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f} and calculated mag = {np.mean(mags):.2f}")
     print('The max number of stars is: ', len(np.unique(table['tic_id'])))
 
-    return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list
+    return mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list
 
 
 def extract_header(table, image_directory):
@@ -266,8 +237,8 @@ def main(phot_file, bin_size):
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory)
+    mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
+        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory, average_zp=np.mean(zp))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
