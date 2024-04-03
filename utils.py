@@ -546,4 +546,26 @@ def extract_phot_file(table, tic_id_to_plot):
     return jd_mid, tmag, fluxes, fluxerrs
 
 
+def calculate_trend(time, flux, degree=2):
+    """
+    Calculate the trend of the flux values over time.
+
+    Parameters:
+    time : array-like
+        Array containing the time values.
+    flux : array-like
+        Array containing the flux values.
+    degree : int, optional
+        Degree of the polynomial to fit (default is 2).
+
+    Returns:
+    trend : array-like
+        Array containing the trend values.
+    """
+    # Calculate the polynomial coefficients
+    coefficients = np.polyfit(time - int(time[0]), flux, degree)
+    # Calculate the trend using the polynomial coefficients
+    trend = np.polyval(coefficients, time - int(time[0]))
+    return trend
+
 
