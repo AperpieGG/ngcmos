@@ -81,7 +81,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         flux_4 = tic_id_data['flux_6']
         fluxerr_4 = tic_id_data['fluxerr_6']
         sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
-        print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
         if Tmag > 14:
             continue
 
@@ -128,17 +127,13 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # dt_fluxerr_binned = dt_fluxerr / np.sqrt(bin_size)
 
         # Calculate mean flux and RMS
-        mean_flux = np.mean(flux_4_clipped)
-        mean_mags = np.mean(mags)
-        RMS = np.std(dt_flux_binned) * 1000000  # Convert to ppm
-        mean_sky = np.median(sky_4)
+        mean_flux_list.append(np.mean(flux_4_clipped))
+        RMS_list.append(np.std(dt_flux_binned) * 1000000)  # Convert to ppm
+        sky_list.append(np.median(sky_4))
+        mags_list.append(np.mean(mags))
+        Tmags_list.append(round(Tmag, 2))
 
-        # Append to lists
-        mean_flux_list.append(mean_flux)
-        RMS_list.append(RMS)
-        sky_list.append(mean_sky)
-        mags_list.append(mean_mags)
-        Tmags_list.append(np.round(Tmag, 2))
+        print(f"Running for star {tic_id} with Tmag = {Tmag:.2f} and calculated mag = {np.mean(mags):.2f}")
     print('The max number of stars is: ', len(np.unique(table['tic_id'])))
 
     return mean_flux_list, RMS_list, sky_list, mags_list, zp, negative_fluxes_stars, Tmags_list
