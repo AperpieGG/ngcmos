@@ -115,7 +115,9 @@ def plot_tmag_vs_mag(data):
     fig, ax = plt.subplots(figsize=(10, 8))
 
     mags_list = data['mags_list']
+    print('The length of mags_list is:', len(mags_list))
     tmag_list = data['Tmag_list']
+    print('The length of tmag_list is:', len(tmag_list))
 
     ax.plot(tmag_list, mags_list, 'o', color='red', label='data', alpha=0.5)
     ax.set_xlabel('Tmag')
