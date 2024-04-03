@@ -42,7 +42,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         None
 
     """
-    jd_mid, tmag, fluxes, fluxerrs = extract_phot_file(table, tic_id_to_plot)
+    jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot)
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
