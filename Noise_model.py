@@ -72,7 +72,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
     RMS_list = []
     sky_list = []
     mags_list = []
-    negative_fluxes_stars = []
     Tmags_list = []
 
     for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
@@ -253,7 +252,6 @@ def main(phot_file, bin_size):
     dc_noise_list = dc_noise.tolist()
     N_list = N.tolist()
     RNS_list = RNS.tolist()
-    negative_fluxes_stars = [int(x) for x in negative_fluxes_stars]
     Tmags_list = [float(x) for x in Tmags_list]
 
     # Save RMS_list, mags_list, and other lists to a JSON file
@@ -262,7 +260,6 @@ def main(phot_file, bin_size):
         "RMS_list": RMS_list,
         "mags_list": mags_list,
         "Tmag_list": Tmags_list,
-        "negative_fluxes_stars": negative_fluxes_stars,
         "synthetic_mag": synthetic_mag_list,
         "photon_shot_noise": photon_shot_noise_list,
         "sky_noise": sky_noise_list,
