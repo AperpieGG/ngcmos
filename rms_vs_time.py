@@ -29,7 +29,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def plot_rms_time(table, num_stars, tic_id=None):
+def bin_rms_time(table, num_stars, tic_id=None):
     filtered_table = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 9.6)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
@@ -100,6 +100,10 @@ def plot_rms_time(table, num_stars, tic_id=None):
     # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
+    return times_binned, average_rms_values, RMS_model
+
+
+def plot_rms_vs_time(times_binned, average_rms_values, RMS_model):
     # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(6, 10))
     plt.plot(times_binned[0], average_rms_values, 'o', color='blue', label='Actual RMS')
@@ -122,14 +126,16 @@ def run_for_one(phot_file, tic_id=None):
     plot_images()
     current_night_directory = find_current_night_directory(base_path)
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, 5, tic_id)
+    times_binned, average_rms_values, RMS_model = bin_rms_time(phot_table, 1, tic_id)
+    plot_rms_vs_time(times_binned, average_rms_values, RMS_model)
 
 
 def run_for_more(phot_file, num_stars):
     plot_images()
     current_night_directory = find_current_night_directory(base_path)
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, num_stars)
+    times_binned, average_rms_values, RMS_model = bin_rms_time(phot_table, num_stars)
+    plot_rms_vs_time(times_binned, average_rms_values, RMS_model)
 
 
 if __name__ == "__main__":
