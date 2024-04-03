@@ -14,7 +14,7 @@ from astropy.io import fits
 from matplotlib import pyplot as plt, ticker
 import json
 from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error, plot_images,
-                   remove_outliers)
+                   remove_outliers, calculate_trend_and_flux, extract_phot_file)
 
 
 def load_config(filename):
@@ -75,20 +75,16 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
     Tmags_list = []
 
     for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
-        tic_id_data = table[(table['tic_id'] == tic_id)]
-        jd_mid = tic_id_data['jd_mid']
-        Tmag = tic_id_data['Tmag'][0]
-        flux_4 = tic_id_data['flux_6']
-        fluxerr_4 = tic_id_data['fluxerr_6']
-        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
-        # skyerrs_4 = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
+        # Get data for the current TIC ID
+        jd_mid, flux_4, fluxerr_4, sky_4, Tmag = extract_phot_file(table, tic_id)
+
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
 
         # Apply sigma clipping to flux and sky arrays
         time_clipped, flux_4_clipped, fluxerr_4_clipped = remove_outliers(jd_mid, flux_4, fluxerr_4)
 
         zp = []
-        for frame_id in tic_id_data['frame_id']:
+        for frame_id in tic_id['frame_id']:
             image_header = fits.getheader(os.path.join(directory, frame_id))
             zp_value = round(image_header['MAGZP_T'], 3)
             zp.append(zp_value)
@@ -116,11 +112,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         # dt_fluxerr = fluxerr_4_clipped / mean_flux  # Normalize the flux errors by dividing by the average flux
 
         # Fit a second order polynomial to the detrended flux for airmass
-        trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), flux_4_clipped, 2),
-                           time_clipped - int(time_clipped[0]))
-        dt_flux = flux_4_clipped / trend
-        dt_fluxerr = fluxerr_4_clipped / trend
+        trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_4_clipped, fluxerr_4_clipped)
 
+        # Bin the time, flux, and error
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr,
                                                                              bin_size)
 
