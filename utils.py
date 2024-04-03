@@ -542,8 +542,9 @@ def extract_phot_file(table, tic_id_to_plot):
     tmag = tic_id_data['Tmag'][0]
     fluxes = tic_id_data['flux_6']
     fluxerrs = tic_id_data['fluxerr_6']
+    sky = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
 
-    return jd_mid, tmag, fluxes, fluxerrs
+    return jd_mid, tmag, fluxes, fluxerrs, sky
 
 
 def calculate_trend_and_flux(time, flux, fluxerr, degree=2):
