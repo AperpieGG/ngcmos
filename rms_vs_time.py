@@ -5,7 +5,7 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
 from utils import (plot_images, find_current_night_directory, get_phot_files,
-                   read_phot_file, bin_time_flux_error, remove_outliers, calculate_trend)
+                   read_phot_file, bin_time_flux_error, remove_outliers, calculate_trend_and_flux)
 
 # use dark background for plots
 # plt.style.use('dark_background')
@@ -56,10 +56,8 @@ def plot_rms_time(table, num_stars, tic_id=None):
 
         time_clipped, flux_5_clipped, fluxerr_5_clipped = remove_outliers(jd_mid, flux_5, fluxerr_5)
 
-        trend = calculate_trend(time_clipped, flux_5_clipped)
+        trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_5_clipped, fluxerr_5_clipped)
 
-        dt_flux = flux_5_clipped / trend
-        dt_fluxerr = fluxerr_5_clipped / trend
         RMS_values = []
         time_seconds = []
         for i in range(1, max_binning):
