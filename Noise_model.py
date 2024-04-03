@@ -82,6 +82,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory):
         fluxerr_4 = tic_id_data['fluxerr_6']
         sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f}")
+        if Tmag > 14:
+            continue
 
         # Apply sigma clipping to flux and sky arrays
         time_clipped, flux_4_clipped, fluxerr_4_clipped = remove_outliers(jd_mid, flux_4, fluxerr_4)
