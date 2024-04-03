@@ -103,7 +103,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
         mags_list.append(np.mean(mags))
         Tmags_list.append(round(Tmag, 2))
 
-        print(f"Running for star {tic_id} with Tmag = {Tmag:.2f} and calculated mag = {np.mean(mags):.2f}")
+        print(f"Running for star {tic_id} with Tmag = {Tmag:.2f} and mag = {np.mean(mags):.2f} "
+              f"and RMS = {np.std(dt_flux_binned) * 1000000:.2f}")
     print('The max number of stars is: ', len(np.unique(table['tic_id'])))
 
     return mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list
