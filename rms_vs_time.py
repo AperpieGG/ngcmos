@@ -5,7 +5,7 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
 from utils import (plot_images, find_current_night_directory, get_phot_files,
-                   read_phot_file, bin_time_flux_error, remove_outliers)
+                   read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file)
 
 # use dark background for plots
 # plt.style.use('dark_background')
@@ -42,24 +42,20 @@ def plot_rms_time(table, num_stars, tic_id=None):
     num_stars_excluded = 0
 
     for Tmag in unique_tmags:
-        # Get data for the current Tmag
-        Tmag_data = table[table['Tmag'] == Tmag]
-        # Extract relevant data
-        jd_mid = Tmag_data['jd_mid']
-        flux_5 = Tmag_data['flux_6']
-        fluxerr_5 = Tmag_data['fluxerr_6']
-        current_tic_id = Tmag_data['tic_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
+        # Extract relevant data using the extract_phot_file function
+        jd_mid, tmag, fluxes, fluxerrs = extract_phot_file(table, Tmag)
 
-        # Check if tic_id is specified and matches current_tic_id
+        current_tic_id = table[table['Tmag'] == Tmag]['tic_id'][0]
+
         if tic_id is not None and current_tic_id != tic_id:
             continue
 
-        time_clipped, flux_5_clipped, fluxerr_5_clipped = remove_outliers(jd_mid, flux_5, fluxerr_5)
+        time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
-        trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), flux_5_clipped, 2),
+        trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
                            time_clipped - int(time_clipped[0]))
-        dt_flux = flux_5_clipped / trend
-        dt_fluxerr = fluxerr_5_clipped / trend
+        dt_flux = fluxes_clipped / trend
+        dt_fluxerr = fluxerrs_clipped / trend
         RMS_values = []
         time_seconds = []
         for i in range(1, max_binning):
