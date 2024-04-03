@@ -117,7 +117,7 @@ def plot_tmag_vs_mag(data):
     mags_list = data['mags_list']
     tmag_list = data['Tmag_list']
 
-    ax.plot(tmag_list, mags_list, 'o', color='black', label='data', alpha=0.5)
+    ax.plot(tmag_list, mags_list, 'o', color='red', label='data', alpha=0.5)
     ax.set_xlabel('Tmag')
     ax.set_ylabel('Mean Magnitude')
     ax.set_xlim(7.5, 16)
