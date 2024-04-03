@@ -43,7 +43,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
 
     for Tmag in unique_tmags:
         # Extract relevant data using the extract_phot_file function
-        jd_mid, tmag, fluxes, fluxerrs = extract_phot_file(table, Tmag)
+        jd_mid, fluxes, fluxerrs = extract_phot_file(table)
 
         current_tic_id = table[table['Tmag'] == Tmag]['tic_id'][0]
 
