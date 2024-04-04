@@ -162,8 +162,7 @@ def main():
     parent_directory = os.getcwd()
 
     # get a list of subdirectories inside the parent directory
-    subdirectories = [name for name in os.listdir(parent_directory) if
-                      os.path.isdir(os.path.join(parent_directory, name))]
+    subdirectories = [name for name in os.listdir(parent_directory) if os.path.isdir(os.path.join(parent_directory, name))]
 
     # iterate over each subdirectory
     for subdirectory in subdirectories:
@@ -179,21 +178,14 @@ def main():
             filenames = filter_filenames(directory)
             print(f"Number of files: {len(filenames)}")
 
-            # Iterate over each filename to get the prefix
-            prefixes = get_prefix(filenames, directory)
-            print(f"The prefixes are: {prefixes}")
-
-            # Get filenames corresponding to each prefix
-            prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in
-                                prefixes]
-
             # Check headers for CTYPE1 and CTYPE2
             check_headers(directory, filenames)
 
-            # Check donuts for each group
-            check_donuts(prefix_filenames, filenames)
+            # Check donuts for the current subdirectory
+            check_donuts(subdirectory, filenames)
 
     print("Done.")
+    
 
 if __name__ == "__main__":
     main()
