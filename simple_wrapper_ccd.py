@@ -50,6 +50,8 @@ if __name__ == "__main__":
             # Maintain a dictionary to keep track of which catalogs have been created
             catalog_dict = {}
 
+            print(f"Processing subdirectory: {subdirectory_path}")
+
             # get a list of all fits images
             all_fits = sorted([f for f in g.glob("*.fits.bz2") if fits.getheader(f)['IMGCLASS'] == 'SCIENCE'])
 
