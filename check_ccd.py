@@ -36,6 +36,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
     if os.path.exists(base_path):
         break
 
+
 def filter_filenames(directory):
     """
     Filter filenames based on specific criteria.
@@ -149,8 +150,8 @@ def check_donuts(directory, filenames):
 
             if np.sum(shifts > 50) > 0:
                 print(f'{filename} image shift too big X: {sx} Y: {sy}')
-                if not os.path.exists('failed_donuts'):
-                    os.mkdir('failed_donuts')
+                if not os.path.exists(os.path.join(directory, 'failed_donuts')):
+                    os.mkdir('/failed_donuts')
                 comm = f'mv {filename} failed_donuts/'
                 print(comm)
                 os.system(comm)
@@ -163,7 +164,8 @@ def main():
     parent_directory = os.getcwd()
 
     # get a list of subdirectories inside the parent directory
-    subdirectories = [name for name in os.listdir(parent_directory) if os.path.isdir(os.path.join(parent_directory, name))]
+    subdirectories = [name for name in os.listdir(parent_directory) if
+                      os.path.isdir(os.path.join(parent_directory, name))]
 
     # iterate over each subdirectory
     for subdirectory in subdirectories:
@@ -180,7 +182,7 @@ def main():
             print(f"Number of files: {len(filenames)}")
 
             # Check headers for CTYPE1 and CTYPE2
-            check_headers(directory, filenames)
+            check_headers(subdirectory, filenames)
 
             # Check donuts for the current subdirectory
             check_donuts(subdirectory, filenames)
