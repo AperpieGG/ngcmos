@@ -77,8 +77,6 @@ if __name__ == "__main__":
             # Get a list of all FITS images
             all_fits = sorted([f for f in g.glob("*.fits.bz2") if fits.getheader(f)['IMGCLASS'] == 'SCIENCE'])
             print("The number of science FITS files found:", len(all_fits))
-            prefix = fits.getheader(all_fits[0])['OBJECT']
-            print("The prefix is:", prefix)
 
             # Check if there are any FITS files in the subdirectory
             if not all_fits:
@@ -86,6 +84,7 @@ if __name__ == "__main__":
                 continue
 
             # Use the first FITS file to extract prefix and create catalog filename
+            prefix = subdirectory  # Use subdirectory name as prefix
             cat_file = f"{prefix}_catalog.fits"
 
             # Check if catalog for this subdirectory has already been created
@@ -100,14 +99,6 @@ if __name__ == "__main__":
                 # Call the catalog maker
                 cmd_args = ["/home/ops/refcatpipe2/cmos/make_ref_catalog.py",
                             ra, dec, box_size, box_size, epoch, cat_file]
-
-                # Add optional arguments based on command-line arguments
-                if args.save_matched_cat:
-                    cmd_args.append("--save_matched_cat")
-                if args.defocus is not None:
-                    cmd_args.append("--defocus {:.2f}".format(args.defocus))
-                if args.force3rd:
-                    cmd_args.append("--force3rd")
 
                 cmd = " ".join(cmd_args)
                 os.system(cmd)
