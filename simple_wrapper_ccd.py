@@ -135,11 +135,10 @@ if __name__ == "__main__":
                         if "_cat" not in fits_file and fits_file != ref_image:
                             # Check if keywords exist
                             if 'CTYPE1' in hdulist[0].header and 'CTYPE2' in hdulist[0].header and 'ZP_ORDER' in hdulist[0].header:
-                                print("Image is already solved. Skipping:", fits_file)
+                                print("Image {} is already solved. Skipping..\n".format(fits_file))
                                 continue
 
-                            print("Solving image:", fits_file)
-                            print()
+                            print("Solving image {} \n".format(fits_file))
                             # Solve the image with the same catalog file
                             cmd2_args = ["/home/ops/refcatpipe2/cmos/solve_ref_images.py",
                                          cat_file, fits_file]
@@ -154,7 +153,7 @@ if __name__ == "__main__":
 
                             cmd2 = " ".join(cmd2_args)
                             os.system(cmd2)
-                            print("Solved image:", fits_file)
+                            print("Solved image {}\n".format(fits_file))
 
             # Move back to the parent directory for the next subdirectory iteration
             os.chdir(parent_directory)
