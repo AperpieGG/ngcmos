@@ -188,7 +188,7 @@ def main():
     print(f"Number of files: {len(filenames)}")
 
     # Iterate over each filename to get the prefix
-    prefixes = get_prefix(filenames)
+    prefixes = get_prefix(filenames, directory)
     print(f"The prefixes are: {prefixes}")
 
     # Get filenames corresponding to each prefix
