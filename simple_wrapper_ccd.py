@@ -48,7 +48,7 @@ if __name__ == "__main__":
             os.chdir(subdirectory_path)
 
             print('Starting processing for subdirectory:', subdirectory)
-            
+
             # get a list of all fits images
             all_fits = sorted(g.glob("*.fits.bz2"))
 
@@ -58,7 +58,8 @@ if __name__ == "__main__":
             # Iterate over reference images
             for ref_image in ref_images:
                 print("Processing reference image:", ref_image)
-                base_name = ref_image.split('.fits')[0]
+                base_name = ref_image.split('.fits.bz2')[0]
+                print('The prefix in the header is:', fits.getheader(ref_image)['OBJECT'])
                 cat_file = f"{base_name}_catalog.fits"
 
                 # get the coords from the header, use this to make a catalog
