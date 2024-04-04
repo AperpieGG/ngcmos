@@ -8,13 +8,15 @@ Usage:
 python check_headers.py
 """
 
-from datetime import datetime, timedelta
 from donuts import Donuts
 from astropy.io import fits
 import numpy as np
 import os
 import json
 import warnings
+from utils import get_location, get_light_travel_times
+import astropy.units as u
+from astropy.time import Time
 
 warnings.simplefilter('ignore', category=UserWarning)
 
@@ -123,6 +125,42 @@ def check_headers(directory, filenames):
     print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
 
 
+def update_header(directory):
+    """
+    Update the header of FITS files in the specified directory.
+
+    Parameters
+    ----------
+    directory : str
+        Path to the directory containing FITS files.
+    """
+
+    for filename in filter_filenames(directory):
+        filename = os.path.join(directory, filename)
+        with fits.open(filename, mode='update') as hdul:
+            if 'BJD' not in hdul[0].header:
+                # Additional calculations based on header information
+                data_exp = round(float(hdul[0].header['EXPTIME']), 2)
+                half_exptime = data_exp / 2.
+                time_isot = Time(hdul[0].header['DATE-OBS'], format='isot', scale='utc', location=get_location())
+                time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+                time_jd += half_exptime * u.second
+                ra = hdul[0].header['TELRAD']
+                dec = hdul[0].header['TELDECD']
+                ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
+                time_bary = time_jd.tdb + ltt_bary
+                time_helio = time_jd.utc + ltt_helio
+
+                # Update the header with barycentric and heliocentric times
+                hdul[0].header['BJD'] = (time_bary.jd, 'Barycentric Julian Date')
+                hdul[0].header['HJD'] = (time_helio.jd, 'Heliocentric Julian Date')
+            else:
+                print(f"TIME_BARY already present for {filename}")
+
+                hdul.flush()
+    print("All headers updated")
+
+
 def check_donuts(directory, filenames):
     """
     Check donuts for each image in the directory.
@@ -153,7 +191,7 @@ def check_donuts(directory, filenames):
                 failed_donuts_dir = os.path.join(directory, 'failed_donuts')
                 if not os.path.exists(failed_donuts_dir):
                     os.mkdir(failed_donuts_dir)
-                comm = f'mv {filename} {failed_donuts_dir}/'
+                comm = f'mv {os.path.join(directory, filename)} {failed_donuts_dir}/'
                 print(comm)
                 os.system(comm)
         else:
@@ -184,6 +222,9 @@ def main():
 
             # Check headers for CTYPE1 and CTYPE2
             check_headers(subdirectory, filenames)
+
+            # Update headers with BJD and HJD
+            update_header(subdirectory)
 
             # Check donuts for the current subdirectory
             check_donuts(subdirectory, filenames)
