@@ -36,27 +36,6 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
     if os.path.exists(base_path):
         break
 
-
-def find_current_night_directory(directory):
-    """
-    Find the directory for the current night based on the current date.
-    If not found, use the current working directory.
-
-    Parameters
-    ----------
-    directory : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str
-        Path to the current night directory.
-    """
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-    current_date_directory = os.path.join(directory, previous_date)
-    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
-
-
 def filter_filenames(directory):
     """
     Filter filenames based on specific criteria.
@@ -84,7 +63,7 @@ def filter_filenames(directory):
 
 def get_prefix(filenames, directory):
     """
-    Extract unique prefixes from a list of filenames.
+    Extract unique prefixes from a list of filenames based on the OBJECT keyword in FITS headers.
 
     Parameters
     ----------
@@ -96,7 +75,7 @@ def get_prefix(filenames, directory):
     Returns
     -------
     set of str
-        Set of unique prefixes extracted from the filenames.
+        Set of unique prefixes extracted from the OBJECT keyword in the FITS headers.
     """
     prefixes = set()
     for filename in filenames:
@@ -179,30 +158,42 @@ def check_donuts(file_groups, filenames):
 
 
 def main():
-    # set directory for the current night or use the current working directory
-    directory = find_current_night_directory(base_path)
-    print(f"Directory: {directory}")
+    # get the current working directory
+    parent_directory = os.getcwd()
 
-    # filter filenames only for .fits data files
-    filenames = filter_filenames(directory)
-    print(f"Number of files: {len(filenames)}")
+    # get a list of subdirectories inside the parent directory
+    subdirectories = [name for name in os.listdir(parent_directory) if
+                      os.path.isdir(os.path.join(parent_directory, name))]
 
-    # Iterate over each filename to get the prefix
-    prefixes = get_prefix(filenames, directory)
-    print(f"The prefixes are: {prefixes}")
+    # iterate over each subdirectory
+    for subdirectory in subdirectories:
+        if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
+            # form the full path to the subdirectory
+            subdirectory_path = os.path.join(parent_directory, subdirectory)
 
-    # Get filenames corresponding to each prefix
-    prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
-    print(prefix_filenames)
+            # set directory for the current subdirectory
+            directory = subdirectory_path
+            print(f"Directory: {directory}")
 
-    # Check headers for CTYPE1 and CTYPE2
-    check_headers(directory, filenames)
+            # filter filenames only for .fits data files
+            filenames = filter_filenames(directory)
+            print(f"Number of files: {len(filenames)}")
 
-    # Check donuts for each group
-    check_donuts(prefix_filenames, filenames)
+            # Iterate over each filename to get the prefix
+            prefixes = get_prefix(filenames, directory)
+            print(f"The prefixes are: {prefixes}")
+
+            # Get filenames corresponding to each prefix
+            prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in
+                                prefixes]
+
+            # Check headers for CTYPE1 and CTYPE2
+            check_headers(directory, filenames)
+
+            # Check donuts for each group
+            check_donuts(prefix_filenames, filenames)
 
     print("Done.")
-
 
 if __name__ == "__main__":
     main()
