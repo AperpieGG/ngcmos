@@ -135,9 +135,9 @@ def check_donuts(directory, filenames):
     """
     for filename in filenames:
         # Assuming Donuts class and measure_shift function are defined elsewhere
-        d = Donuts(os.path.join(directory, filename))
+        d = Donuts(filename)
 
-        shift = d.measure_shift(filename)
+        shift = d.measure_shift()
         sx = round(shift.x.value, 2)
         sy = round(shift.y.value, 2)
         print(f'{filename} shift X: {sx} Y: {sy}')
