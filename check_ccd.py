@@ -135,6 +135,7 @@ def check_donuts(file_groups, filenames):
     """
     for filename, file_group in zip(filenames, file_groups):
         # Using the first filename as the reference image
+        print(f"File group: {file_group}")
         reference_image = file_group[0]
         print(f"Reference image: {reference_image}")
 
@@ -185,7 +186,7 @@ def main():
             check_donuts(subdirectory, filenames)
 
     print("Done.")
-    
+
 
 if __name__ == "__main__":
     main()
