@@ -152,6 +152,6 @@ if __name__ == "__main__":
                             cmd2 = " ".join(cmd2_args)
                             os.system(cmd2)
                             print("Solved image:", fits_file)
-                            
-                            # Move back to the parent directory for the next subdirectory iteration
-                            os.chdir(parent_directory)
+
+                # Move back to the parent directory for the next subdirectory iteration
+                os.chdir(parent_directory)
