@@ -47,13 +47,13 @@ if __name__ == "__main__":
             # change the working directory to the subdirectory
             os.chdir(subdirectory_path)
 
+            print('Starting processing for subdirectory:', subdirectory)
+            
             # get a list of all fits images
             all_fits = sorted(g.glob("*.fits.bz2"))
 
             # filter out the catalogs
             ref_images = [f for f in all_fits if "_cat" not in f]
-
-            print("Found the following reference images:", ref_images)
 
             # Iterate over reference images
             for ref_image in ref_images:
