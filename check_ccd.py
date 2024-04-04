@@ -145,8 +145,8 @@ def update_header(directory):
                 time_isot = Time(hdul[0].header['DATE-OBS'], format='isot', scale='utc', location=get_location())
                 time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
                 time_jd += half_exptime * u.second
-                ra = hdul[0].header['TELRAD']
-                dec = hdul[0].header['TELDECD']
+                ra = hdul[0].header['RA']
+                dec = hdul[0].header['DEC']
                 ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
                 time_bary = time_jd.tdb + ltt_bary
                 time_helio = time_jd.utc + ltt_helio
