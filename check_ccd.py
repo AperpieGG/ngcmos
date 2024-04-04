@@ -138,7 +138,7 @@ def check_donuts(directory, filenames):
         fits_path = os.path.join(directory, filename)
         d = Donuts(fits_path)
 
-        shift = d.measure_shift()
+        shift = d.measure_shift(fits_path)
         sx = round(shift.x.value, 2)
         sy = round(shift.y.value, 2)
         print(f'{filename} shift X: {sx} Y: {sy}')
@@ -151,7 +151,7 @@ def check_donuts(directory, filenames):
             comm = f'mv {filename} failed_donuts/'
             print(comm)
             os.system(comm)
-            
+
 
 def main():
     # get the current working directory
