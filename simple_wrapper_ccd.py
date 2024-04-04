@@ -132,7 +132,7 @@ if __name__ == "__main__":
                         object_keyword = hdulist[0].header.get('OBJECT', '')
                         if "_cat" not in fits_file and fits_file != ref_image:
                             # Check if keywords exist
-                            if 'CTYPE1' in hdulist[0].header and 'CTYPE2' in hdulist[0].header in hdulist[0].header:
+                            if 'CTYPE1' in hdulist[0].header and 'CTYPE2' in hdulist[0].header and 'ZP_ORDER' in hdulist[0].header:
                                 print("Image is already solved. Skipping:", fits_file)
                                 continue
 
@@ -153,5 +153,5 @@ if __name__ == "__main__":
                             os.system(cmd2)
                             print("Solved image:", fits_file)
 
-                # Move back to the parent directory for the next subdirectory iteration
-                os.chdir(parent_directory)
+            # Move back to the parent directory for the next subdirectory iteration
+            os.chdir(parent_directory)
