@@ -122,41 +122,35 @@ def check_headers(directory, filenames):
     print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
 
 
-def check_donuts(file_groups, filenames):
+def check_donuts(directory, filenames):
     """
-    Check donuts for each group of images with the same prefix.
+    Check donuts for each image in the directory.
 
     Parameters
     ----------
-    file_groups : list of str
-        Prefixes for the groups of images.
+    directory : str
+        Directory containing the images.
     filenames : list of str
-        List of lists of filenames for the groups of images.
+        List of filenames.
     """
-    for filename, file_group in zip(filenames, file_groups):
-        # Using the first filename as the reference image
-        print(f"File group: {file_group}")
-        reference_image = file_group[0]
-        print(f"Reference image: {reference_image}")
-
+    for filename in filenames:
         # Assuming Donuts class and measure_shift function are defined elsewhere
-        d = Donuts(reference_image)
+        d = Donuts(os.path.join(directory, filename))
 
-        for filename in file_group[1:]:
-            shift = d.measure_shift(filename)
-            sx = round(shift.x.value, 2)
-            sy = round(shift.y.value, 2)
-            print(f'{filename} shift X: {sx} Y: {sy}')
-            shifts = np.array([abs(sx), abs(sy)])
+        shift = d.measure_shift()
+        sx = round(shift.x.value, 2)
+        sy = round(shift.y.value, 2)
+        print(f'{filename} shift X: {sx} Y: {sy}')
+        shifts = np.array([abs(sx), abs(sy)])
 
-            if np.sum(shifts > 50) > 0:
-                print(f'{filename} image shift too big X: {sx} Y: {sy}')
-                if not os.path.exists('failed_donuts'):
-                    os.mkdir('failed_donuts')
-                comm = f'mv {filename} failed_donuts/'
-                print(comm)
-                os.system(comm)
-
+        if np.sum(shifts > 50) > 0:
+            print(f'{filename} image shift too big X: {sx} Y: {sy}')
+            if not os.path.exists('failed_donuts'):
+                os.mkdir('failed_donuts')
+            comm = f'mv {filename} failed_donuts/'
+            print(comm)
+            os.system(comm)
+            
 
 def main():
     # get the current working directory
