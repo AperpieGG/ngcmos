@@ -54,6 +54,8 @@ if __name__ == "__main__":
 
             # get a list of all fits images
             all_fits = sorted([f for f in g.glob("*.fits.bz2") if fits.getheader(f)['IMGCLASS'] == 'SCIENCE'])
+            print("The number of science FITS files found:", len(all_fits))
+            print("The prefix is:", fits.getheader(all_fits[0])['OBJECT'])
 
             # filter out the catalogs
             ref_images = [f for f in all_fits if "_cat" not in f]
