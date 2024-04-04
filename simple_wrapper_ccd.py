@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
             if not os.path.exists(cat_file):
                 # call the catalog maker only for the first image of each prefix
-                cmd_args = ["/home/ops/refcatpipe2/make_ref_catalog.py",
+                cmd_args = ["/home/ops/refcatpipe2/cmos/make_ref_catalog.py",
                             ra, dec, box_size, box_size, epoch, cat_file]
                 cmd = " ".join(cmd_args)
                 os.system(cmd)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
                 print("Solving image:", ref_image)
 
                 # Solve the reference image with this catalog file
-                cmd2_args = ["/home/ops/refcatpipe2/solve_ref_images.py",
+                cmd2_args = ["/home/ops/refcatpipe2/cmos/solve_ref_images.py",
                              cat_file, ref_image]
 
                 # Add optional arguments based on command-line arguments
@@ -132,13 +132,13 @@ if __name__ == "__main__":
                         object_keyword = hdulist[0].header.get('OBJECT', '')
                         if "_cat" not in fits_file and fits_file != ref_image:
                             # Check if keywords exist
-                            if 'CTYPE1' in hdulist[0].header and 'CTYPE2' in hdulist[0].header:
+                            if 'CTYPE1' in hdulist[0].header and 'CTYPE2' in hdulist[0].header and 'ZP_ORDER' in hdulist[0].header:
                                 print("Image is already solved. Skipping:", fits_file)
                                 continue
 
                             print("Solving image:", fits_file)
                             # Solve the image with the same catalog file
-                            cmd2_args = ["/home/ops/refcatpipe2/solve_ref_images.py",
+                            cmd2_args = ["/home/ops/refcatpipe2/cmos/solve_ref_images.py",
                                          cat_file, fits_file]
 
                             # Add optional arguments based on command-line arguments
