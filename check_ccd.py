@@ -136,9 +136,10 @@ def check_donuts(directory, filenames):
     for filename in filenames:
         # Assuming Donuts class and measure_shift function are defined elsewhere
         fits_path = os.path.join(directory, filename)
-        d = Donuts(fits_path)
+        reference_image = fits_path[0]
+        d = Donuts(reference_image)
 
-        shift = d.measure_shift(fits_path)
+        shift = d.measure_shift(fits_path[1:])
         sx = round(shift.x.value, 2)
         sy = round(shift.y.value, 2)
         print(f'{filename} shift X: {sx} Y: {sy}')
