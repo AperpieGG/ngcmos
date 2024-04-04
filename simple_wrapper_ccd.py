@@ -5,14 +5,39 @@ and try solving them one by one
 """
 import os
 import glob as g
-import argparse as ap
 from astropy.io import fits
 
 # pylint: disable=invalid-name
 # pylint: disable=no-member
 
 
+def get_subdirectories(parent_directory):
+    """
+    Get a list of subdirectories inside the parent directory.
+
+    Parameters
+    ----------
+    parent_directory : str
+        The parent directory to search for subdirectories.
+
+    Returns
+    -------
+    list of str
+        List of subdirectories.
+    """
+    subdirectories = [name for name in os.listdir(parent_directory) if os.path.isdir(os.path.join(parent_directory, name))]
+    return subdirectories
+
+
 if __name__ == "__main__":
+
+    # get the current working directory
+    parent_directory = os.getcwd()
+
+    # get a list of subdirectories inside the parent directory
+    subdirectories = get_subdirectories(parent_directory)
+
+    print('The subdirectories are:', subdirectories)
 
     # get a list of all fits images
     all_fits = sorted(g.glob("*.fits.bz2"))
