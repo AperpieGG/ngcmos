@@ -111,7 +111,7 @@ if __name__ == "__main__":
                 print("Solving image:", ref_image)
 
                 # Solve the reference image with this catalog file
-                cmd2_args = ["/home/ops/refcatpipe2/cmos/solve_ref_images.py",
+                cmd2_args = ["/home/ops/refcatpipe2/solve_ref_images.py",
                              cat_file, ref_image]
 
                 # Add optional arguments based on command-line arguments
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
                             print("Solving image:", fits_file)
                             # Solve the image with the same catalog file
-                            cmd2_args = ["/home/ops/refcatpipe2/cmos/solve_ref_images.py",
+                            cmd2_args = ["/home/ops/refcatpipe2/solve_ref_images.py",
                                          cat_file, fits_file]
 
                             # Add optional arguments based on command-line arguments
