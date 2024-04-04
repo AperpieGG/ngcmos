@@ -206,6 +206,8 @@ def main():
     subdirectories = [name for name in os.listdir(parent_directory) if
                       os.path.isdir(os.path.join(parent_directory, name))]
 
+    print('The subdirectories are:', subdirectories)
+
     # iterate over each subdirectory
     for subdirectory in subdirectories:
         if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
