@@ -133,25 +133,27 @@ def check_donuts(directory, filenames):
     filenames : list of str
         List of filenames.
     """
-    for filename in filenames:
-        # Assuming Donuts class and measure_shift function are defined elsewhere
-        fits_path = os.path.join(directory, filename)
-        reference_image = filename[0]
-        d = Donuts(reference_image)
+    # Assuming Donuts class and measure_shift function are defined elsewhere
+    if filenames:
+        reference_image = filenames[0]
+        d = Donuts(os.path.join(directory, reference_image))
 
-        shift = d.measure_shift(filename[1:])
-        sx = round(shift.x.value, 2)
-        sy = round(shift.y.value, 2)
-        print(f'{filename} shift X: {sx} Y: {sy}')
-        shifts = np.array([abs(sx), abs(sy)])
+        for filename in filenames[1:]:
+            shift = d.measure_shift(os.path.join(directory, filename))
+            sx = round(shift.x.value, 2)
+            sy = round(shift.y.value, 2)
+            print(f'{filename} shift X: {sx} Y: {sy}')
+            shifts = np.array([abs(sx), abs(sy)])
 
-        if np.sum(shifts > 50) > 0:
-            print(f'{filename} image shift too big X: {sx} Y: {sy}')
-            if not os.path.exists('failed_donuts'):
-                os.mkdir('failed_donuts')
-            comm = f'mv {filename} failed_donuts/'
-            print(comm)
-            os.system(comm)
+            if np.sum(shifts > 50) > 0:
+                print(f'{filename} image shift too big X: {sx} Y: {sy}')
+                if not os.path.exists('failed_donuts'):
+                    os.mkdir('failed_donuts')
+                comm = f'mv {filename} failed_donuts/'
+                print(comm)
+                os.system(comm)
+    else:
+        print("No files to process in the directory.")
 
 
 def main():
