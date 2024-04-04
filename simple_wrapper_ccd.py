@@ -47,10 +47,11 @@ if __name__ == "__main__":
             # change the working directory to the subdirectory
             os.chdir(subdirectory_path)
 
-            print('Starting processing for subdirectory:', subdirectory)
+            # Maintain a dictionary to keep track of which catalogs have been created
+            catalog_dict = {}
 
             # get a list of all fits images
-            all_fits = sorted(g.glob("*.fits.bz2"))
+            all_fits = sorted([f for f in g.glob("*.fits.bz2") if fits.getheader(f)['IMGCLASS'] == 'SCIENCE'])
 
             # filter out the catalogs
             ref_images = [f for f in all_fits if "_cat" not in f]
@@ -59,7 +60,6 @@ if __name__ == "__main__":
             for ref_image in ref_images:
                 print("Processing reference image:", ref_image)
                 base_name = ref_image.split('.fits.bz2')[0]
-                print('The prefix in the header is:', fits.getheader(ref_image)['OBJECT'])
                 cat_file = f"{base_name}_catalog.fits"
 
                 # get the coords from the header, use this to make a catalog
@@ -69,13 +69,19 @@ if __name__ == "__main__":
                     epoch = str(ff[0].header['DATE-OBS'])
                     box_size = "2.8"  # You can adjust this as needed
 
-                if not os.path.exists(cat_file):
-                    # call the catalog maker only for the first image
+                # Check if catalog for this prefix has already been created
+                prefix = ref_image.split('_')[0]  # Extract prefix from filename
+                if prefix not in catalog_dict:
+                    catalog_dict[prefix] = cat_file  # Add catalog filename to dictionary
+                    # Call the catalog maker only if it hasn't been created already
                     cmd_args = ["/home/ops/refcatpipe2/cmos/make_ref_catalog.py",
                                 ra, dec, box_size, box_size, epoch, cat_file]
                     cmd = " ".join(cmd_args)
                     os.system(cmd)
                     print("Catalog created for reference image:", ref_image)
+                else:
+                    # Catalog for this prefix has already been created, use the existing one
+                    cat_file = catalog_dict[prefix]
 
                 if os.path.exists(cat_file):
                     print("Found catalog file:", cat_file)
