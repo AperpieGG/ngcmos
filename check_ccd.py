@@ -136,6 +136,7 @@ def check_donuts(directory, filenames):
     # Assuming Donuts class and measure_shift function are defined elsewhere
     if filenames:
         reference_image = filenames[0]
+        print(reference_image)
         d = Donuts(os.path.join(directory, reference_image))
 
         for filename in filenames[1:]:
