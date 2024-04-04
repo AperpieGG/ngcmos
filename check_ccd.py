@@ -105,7 +105,6 @@ def check_headers(directory, filenames):
         os.makedirs(no_wcs)
 
     for file in filenames:
-        print(f"Checking header for {file}")
         try:
             with fits.open(os.path.join(directory, file)) as hdulist:
                 header = hdulist[0].header
