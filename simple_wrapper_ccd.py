@@ -109,6 +109,7 @@ if __name__ == "__main__":
 
             if os.path.exists(cat_file):
                 print("Found cat file:", cat_file)
+                print()
                 print("Solving image:", ref_image)
 
                 # Solve the reference image with this catalog file
@@ -138,6 +139,7 @@ if __name__ == "__main__":
                                 continue
 
                             print("Solving image:", fits_file)
+                            print()
                             # Solve the image with the same catalog file
                             cmd2_args = ["/home/ops/refcatpipe2/cmos/solve_ref_images.py",
                                          cat_file, fits_file]
