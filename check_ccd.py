@@ -193,6 +193,7 @@ def main():
 
     # Get filenames corresponding to each prefix
     prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
+    print(prefix_filenames)
 
     # Check headers for CTYPE1 and CTYPE2
     check_headers(directory, filenames)
