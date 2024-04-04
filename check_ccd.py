@@ -59,8 +59,7 @@ def filter_filenames(directory):
             fits_path = os.path.join(directory, filename)
             with fits.open(fits_path) as hdul:
                 header = hdul[0].header
-                if 'IMGCLASS' in header and header['IMGCLASS'] == 'SCIENCE' or 'IMGCLASS' in header and header[
-                    'IMGCLASS'] == 'CAL':
+                if 'IMGCLASS' in header and header['IMGCLASS'] == 'SCIENCE':
                     filtered_filenames.append(filename)  # Append only the filename without the directory path
     return sorted(filtered_filenames)
 
