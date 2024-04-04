@@ -7,6 +7,7 @@ and moves the files without CTYPE1 and/or CTYPE2 to a separate directory.
 Usage:
 python check_headers.py
 """
+import subprocess
 
 from donuts import Donuts
 from astropy.io import fits
@@ -55,7 +56,7 @@ def filter_filenames(directory):
     """
     filtered_filenames = []
     for filename in os.listdir(directory):
-        if filename.endswith('.fits') or filename.endswith('.fits.bz2'):
+        if filename.endswith('.fits'):
             fits_path = os.path.join(directory, filename)
             with fits.open(fits_path) as hdul:
                 header = hdul[0].header
@@ -198,6 +199,38 @@ def check_donuts(directory, filenames):
             print("No files to process in the directory.")
 
 
+def unzip_fits(directory):
+    """
+    Unzip .fits.bz2 files in the specified directory.
+
+    Parameters
+    ----------
+    directory : str
+        Directory containing .fits.bz2 files.
+    """
+    bz2_files = [f for f in os.listdir(directory) if f.endswith('.fits.bz2')]
+    for bz2_file in bz2_files:
+        subprocess.run(['bzip2', '-d', os.path.join(directory, bz2_file)])
+
+    print("All .fits.bz2 files unzipped.")
+
+
+def zip_fits(directory):
+    """
+    Zip .fits files in the specified directory.
+
+    Parameters
+    ----------
+    directory : str
+        Directory containing .fits files.
+    """
+    fits_files = [f for f in os.listdir(directory) if f.endswith('.fits')]
+    for fits_file in fits_files:
+        subprocess.run(['bzip2', os.path.join(directory, fits_file)])
+
+    print("All .fits files zipped.")
+
+
 def main():
     # get the current working directory
     parent_directory = os.getcwd()
@@ -211,6 +244,8 @@ def main():
     # iterate over each subdirectory
     for subdirectory in subdirectories:
         if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
+            # Unzip .fits.bz2 files
+            unzip_fits(subdirectory)
             # form the full path to the subdirectory
             subdirectory_path = os.path.join(parent_directory, subdirectory)
 
@@ -230,6 +265,9 @@ def main():
 
             # Check donuts for the current subdirectory
             check_donuts(subdirectory, filenames)
+
+            # Zip .fits files back
+            zip_fits(subdirectory)
 
     print("Done.")
 
