@@ -150,13 +150,14 @@ def check_donuts(directory, filenames):
 
             if np.sum(shifts > 50) > 0:
                 print(f'{filename} image shift too big X: {sx} Y: {sy}')
-                if not os.path.exists(os.path.join(directory, 'failed_donuts')):
-                    os.mkdir('/failed_donuts')
-                comm = f'mv {filename} failed_donuts/'
+                failed_donuts_dir = os.path.join(directory, 'failed_donuts')
+                if not os.path.exists(failed_donuts_dir):
+                    os.mkdir(failed_donuts_dir)
+                comm = f'mv {filename} {failed_donuts_dir}/'
                 print(comm)
                 os.system(comm)
-    else:
-        print("No files to process in the directory.")
+        else:
+            print("No files to process in the directory.")
 
 
 def main():
