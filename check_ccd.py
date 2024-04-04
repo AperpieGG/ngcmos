@@ -178,7 +178,8 @@ def check_donuts(directory, filenames):
         sorted_filenames = sorted(filenames)  # Sort the filenames
         reference_image = sorted_filenames[0]  # Use the first filename as the reference image
         d = Donuts(os.path.join(directory, reference_image))
-        print('The reference image has prefix:', get_prefix([reference_image], directory))
+        print('The reference image is:', reference_image)
+        print('The prefix is :', get_prefix([reference_image], directory))
 
         for filename in filenames[1:]:
             shift = d.measure_shift(os.path.join(directory, filename))
