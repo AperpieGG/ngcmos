@@ -226,7 +226,7 @@ def main():
             check_headers(subdirectory, filenames)
 
             # Update headers with BJD and HJD
-            update_header(subdirectory)
+            # update_header(subdirectory) # Uncomment this line to update headers
 
             # Check donuts for the current subdirectory
             check_donuts(subdirectory, filenames)
