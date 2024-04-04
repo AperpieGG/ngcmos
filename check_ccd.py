@@ -135,7 +135,8 @@ def check_donuts(directory, filenames):
     """
     for filename in filenames:
         # Assuming Donuts class and measure_shift function are defined elsewhere
-        d = Donuts(filename)
+        fits_path = os.path.join(directory, filename)
+        d = Donuts(fits_path)
 
         shift = d.measure_shift()
         sx = round(shift.x.value, 2)
@@ -150,7 +151,7 @@ def check_donuts(directory, filenames):
             comm = f'mv {filename} failed_donuts/'
             print(comm)
             os.system(comm)
-
+            
 
 def main():
     # get the current working directory
