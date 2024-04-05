@@ -177,43 +177,50 @@ def main():
                 # Calibrate image and get FITS file
                 ref_frame_data, ref_header = load_fits_image(os.path.join(directory, filename), ext=0,
                                                              force_float=True)
-
+                print(f"The average pixel value for {filename} is {np.mean(ref_frame_data)}")
                 # Reduce the image
                 if ref_frame_data.shape == (2048, 2088):
                     ref_oscan = np.median(ref_frame_data[:, 2075:], axis=1)
                     ref_frame_data = ref_frame_data[:, 20:2068]
                     ref_frame_data_corr = ref_frame_data - ref_oscan
 
+                print(f"The average pixel value for {filename} is {np.mean(ref_frame_data)}")
+                # Convert reduced_data to a dictionary with filenames as keys
+                reduced_data_dict = {filename: (ref_frame_data, ref_header)}
+
+                frame_data, frame_hdr = reduced_data_dict[filename]
+                print(f"Extracting photometry for {filename}\n")
+
                 wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
                 wcs_header = {}
-                for line in [ref_header[i:i + 80] for i in range(0, len(ref_header), 80)]:
+                for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
                     key = line[0:8].strip()
                     if '=' in line and key not in wcs_ignore_cards:
                         card = fits.Card.fromstring(line)
                         wcs_header[card.keyword] = card.value
 
-                ref_frame_bg = sep.Background(ref_frame_data_corr)
-                ref_frame_data_corr_no_bg = ref_frame_data_corr - ref_frame_bg
-                estimate_coord = SkyCoord(ra=ref_header['CMD_RA'],
-                                          dec=ref_header['CMD_DEC'],
+                frame_bg = sep.Background(frame_data)
+                frame_data_corr_no_bg = frame_data - frame_bg
+                estimate_coord = SkyCoord(ra=frame_hdr['CMD_RA'],
+                                          dec=frame_hdr['CMD_DEC'],
                                           unit=(u.deg, u.deg))
                 estimate_coord_radius = 3 * u.deg
 
-                frame_objects = _detect_objects_sep(ref_frame_data_corr_no_bg, ref_frame_bg.globalrms,
+                frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
                                                     AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
                 if len(frame_objects) < N_OBJECTS_LIMIT:
                     print(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!\n")
                     continue
 
                 # Load the photometry catalog
-                phot_cat, _ = get_catalog(os.path.join(directory, f"{prefix}_catalog_input.fits"), ext=1)
+                phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
                 print(f"Found catalog with name {prefix}_catalog_input.fits\n")
                 # Convert RA and DEC to pixel coordinates using the WCS information from the header
-                phot_x, phot_y = WCS(ref_header).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+                phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
                 # Do time conversions - one time value per format per target
-                half_exptime = ref_header['EXPTIME'] / 2.
-                time_isot = Time([ref_header['DATE-OBS'] for i in range(len(phot_x))],
+                half_exptime = frame_hdr['EXPTIME'] / 2.
+                time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
                                  format='isot', scale='utc', location=get_location())
                 time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
                 # Correct to mid-exposure time
@@ -227,11 +234,10 @@ def main():
                 frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
                                         phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, phot_x, phot_y],
                                        names=(
-                                       "frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid", "x",
-                                       "y"))
+                                       "frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid", "x", "y"))
 
                 # Extract photometry at locations
-                frame_phot = wcs_phot(ref_frame_data_corr, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+                frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
 
                 # Stack the photometry and preamble
                 frame_output = hstack([frame_preamble, frame_phot])
@@ -247,6 +253,15 @@ def main():
                     phot_table = vstack([phot_table, frame_output])
 
                 print(f"Finished photometry for {filename}\n")
+
+                # Save the photometry for the current prefix
+            if phot_table is not None:
+                phot_table.write(phot_output_filename, overwrite=True)
+                print(f"Saved photometry for prefix {prefix} to {phot_output_filename}\n")
+            else:
+                print(f"No photometry data for prefix {prefix}.\n")
+
+            print("Done!\n")
 
 
 if __name__ == "__main__":
