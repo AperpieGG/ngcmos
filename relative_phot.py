@@ -48,7 +48,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
-    print(f"Master star data: {master_star_data}")
+    print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
 
     # Calculate reference star flux
     reference_fluxes = np.sum(master_star_data['flux_6'], axis=0)
@@ -113,7 +113,7 @@ def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, ti
 
     # Plot raw flux with wotan model
     ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
-    # ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
+    ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Relative Flux [e-]')
     ax1.legend()
