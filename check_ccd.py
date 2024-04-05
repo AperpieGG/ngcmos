@@ -55,7 +55,7 @@ def filter_filenames(directory):
     """
     filtered_filenames = []
     for filename in os.listdir(directory):
-        if filename.endswith('.fits') or filename.endswith('.fits.bz2'):
+        if filename.endswith('.fits') and not filename.endswith('.fits.bz2'):
             fits_path = os.path.join(directory, filename)
             with fits.open(fits_path) as hdul:
                 header = hdul[0].header
