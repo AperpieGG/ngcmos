@@ -23,7 +23,7 @@ warnings.simplefilter('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 
 
-GAIN = 1
+GAIN = 2
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
 APERTURE_RADII = [2, 3, 4, 5, 6]
@@ -188,7 +188,7 @@ def main():
                     ref_frame_data_corr = ref_frame_data - ref_oscan
                 else:
                     ref_frame_data_corr = ref_frame_data
-            
+
                 print(f"After overscan subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
