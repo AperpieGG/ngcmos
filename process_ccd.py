@@ -187,9 +187,9 @@ def main():
                     ref_frame_data = ref_frame_data[:, 20:2068]
                     ref_frame_data_corr = ref_frame_data - ref_oscan
 
-                print(f"The average pixel value for {filename} is {np.mean(ref_frame_data)}")
+                print(f"The average pixel value for {filename} is {np.mean(ref_frame_data_corr)}")
                 # Convert reduced_data to a dictionary with filenames as keys
-                reduced_data_dict = {filename: (ref_frame_data, ref_header)}
+                reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
 
                 frame_data, frame_hdr = reduced_data_dict[filename]
                 print(f"Extracting photometry for {filename}\n")
