@@ -75,13 +75,15 @@ if __name__ == "__main__":
             print(f"Processing subdirectory: {subdirectory_path}")
 
             # Get a list of all FITS images
-            all_fits = sorted([f for f in g.glob("*.fits") if
-                               not f.endswith('.fits.bz2') and not f.endswith('_catalog.fits') and
-                               not f.endswith('_input.fits')])
-            print("The number of science FITS files found:", len(all_fits))
+            all_fits = sorted(g.glob("*.fits"))
 
-            ref_images_pre = [f for f in all_fits if "_cat" not in f]
-            ref_images = [f for f in ref_images_pre if fits.getheader(f['IMGCLASS'] == 'SCIENCE')]
+            # Filter the FITS images based on criteria
+            ref_images = []
+            for fits_file in all_fits:
+                if fits_file.startswith("IMAGE") and fits_file.endswith(".fits"):
+                    header = fits.getheader(fits_file)
+                    if header.get("IMGCLASS") == "SCIENCE":
+                        ref_images.append(fits_file)
 
             ref_image = ref_images[0]
 
