@@ -139,7 +139,7 @@ def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, ti
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
-    parser.add_argument('--tic_id', type=int, help='The TIC ID of the star to plot')
+    parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
 
@@ -160,10 +160,10 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            (time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag,
-             time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, args.tic_id, args.bin)
-            plot_relative_lc(time_clipped, fluxes_clipped, dt_flux,
-                             dt_fluxerr, time_binned, dt_flux_binned, args.tic_id, tmag, args.bin)
+            (time_clipped, fluxes_clipped, dt_flux, dt_fluxerr,
+             tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, args.tic_id, args.bin)
+            plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
+                             dt_flux_binned, args.tic_id, args.bin)
             break  # Stop looping if tic_id is found
         else:
             print(f"TIC ID {args.tic_id} not found in {phot_file}")
