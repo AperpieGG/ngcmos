@@ -105,7 +105,7 @@ def get_prefix(filenames, directory):
     return prefix
 
 
-def get_catalog(filename, ext=0):
+def load_fits(filename, ext=0):
     """
     Read a fits image and header with fitsio
 
@@ -179,7 +179,7 @@ def main():
             for filename in filenames:
                 print(f"Processing filename {filename}......")
                 # Calibrate image and get FITS file
-                ref_frame_data, ref_header = get_catalog(os.path.join(directory, filename))
+                ref_frame_data, ref_header = load_fits(os.path.join(directory, filename))
                 print(f"The average pixel value for {filename} is {np.mean(ref_frame_data)}")
                 # Reduce the image
                 if ref_frame_data.shape == (2048, 2088):
