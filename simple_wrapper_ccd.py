@@ -137,7 +137,7 @@ if __name__ == "__main__":
                 for fits_file in ref_images:
                     with fits.open(fits_file) as hdulist:
                         object_keyword = hdulist[0].header.get('OBJECT', '')
-                        if "_cat" and "phot_" not in fits_file and fits_file != ref_image:
+                        if "_cat" not in fits_file and fits_file != ref_image:
                             # Check if keywords exist
                             if 'CTYPE1' in hdulist[0].header and 'CTYPE2' in hdulist[0].header and 'ZP_ORDER' in hdulist[0].header:
                                 print("Image {} is already solved. Skipping..\n".format(fits_file))
