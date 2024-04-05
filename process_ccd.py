@@ -105,7 +105,7 @@ def get_prefix(filenames, directory):
     return prefix
 
 
-def load_fits_image(filename, ext=0, force_float=False):
+def get_catalog(filename, ext=0):
     """
     Read a fits image and header with fitsio
 
@@ -115,8 +115,6 @@ def load_fits_image(filename, ext=0, force_float=False):
         filename to load
     ext : int
         extension to load
-    force_float : bool
-        force image data to be float on load
 
     Returns
     -------
@@ -129,9 +127,7 @@ def load_fits_image(filename, ext=0, force_float=False):
     ------
     None
     """
-    data, header = fitsio.read(filename, header=True, ext=ext)
-    if force_float:
-        data = data.astype(float)
+    data, header = fits.getdata(filename, header=True, ext=ext)
     return data, header
 
 
@@ -175,8 +171,7 @@ def main():
             for filename in filenames:
                 print(f"Processing filename {filename}......")
                 # Calibrate image and get FITS file
-                ref_frame_data, ref_header = load_fits_image(os.path.join(directory, filename), ext=0,
-                                                             force_float=True)
+                ref_frame_data, ref_header = get_catalog(os.path.join(directory, filename))
                 print(f"The average pixel value for {filename} is {np.mean(ref_frame_data)}")
                 # Reduce the image
                 if ref_frame_data.shape == (2048, 2088):
