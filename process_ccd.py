@@ -128,6 +128,8 @@ def get_catalog(filename, ext=0):
     None
     """
     data, header = fits.getdata(filename, header=True, ext=ext)
+    data = data.astype(float)
+    
     return data, header
 
 
