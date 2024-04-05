@@ -76,7 +76,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
 
 def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
-                     dt_flux_binned, dt_fluxerr_binned, tic_id_to_plot, bin_size):
+                     dt_flux_binned, tic_id_to_plot, bin_size):
     """
     Plot the relative light curve for a specific TIC ID
 
