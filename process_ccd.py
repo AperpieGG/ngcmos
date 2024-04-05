@@ -180,14 +180,15 @@ def main():
                 print(f"Processing filename {filename}......")
                 # Calibrate image and get FITS file
                 ref_frame_data, ref_header = load_fits(os.path.join(directory, filename))
-                print(f"The average pixel value for {filename} is {np.mean(ref_frame_data)}")
                 # Reduce the image
                 print(ref_frame_data.shape)
                 if ref_frame_data.shape == (2048, 2088):
                     ref_oscan = np.median(ref_frame_data[:, 2075:], axis=1)
                     ref_frame_data = ref_frame_data[:, 20:2068]
                     ref_frame_data_corr = ref_frame_data - ref_oscan
-
+                else:
+                    ref_frame_data_corr = ref_frame_data
+            
                 print(f"After overscan subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
