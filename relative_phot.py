@@ -48,10 +48,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
+    print(f"Master star data: {master_star_data}")
 
     # Calculate reference star flux
     reference_fluxes = np.sum(master_star_data['flux_6'], axis=0)
-    print(f"The number of reference stars is {len(master_star_data)}")
     reference_flux_mean = np.mean(reference_fluxes)
     print(f"Reference flux mean = {reference_flux_mean:.2f}")
 
@@ -60,8 +60,9 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"Reference flux normalized = {reference_flux_normalized}")
 
     # Normalize target star flux
-    target_flux_normalized = fluxes_clipped / reference_flux_mean
+    target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
     print(f"Target flux normalized = {target_flux_normalized}")
+    print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
     # Perform relative photometry
     dt_flux = target_flux_normalized / reference_flux_normalized
@@ -75,7 +76,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     RMS_binned = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
     print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
-    print(f"The tmag for TIC ID {tic_id_to_plot} is {tmag:.2f}")
 
     return time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
 
