@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 print("Solved image:", ref_image)
 
                 # Now, iterate over all FITS files again and solve for each image
-                for fits_file in all_fits:
+                for fits_file in ref_images:
                     with fits.open(fits_file) as hdulist:
                         object_keyword = hdulist[0].header.get('OBJECT', '')
                         if "_cat" and "phot_" not in fits_file and fits_file != ref_image:
