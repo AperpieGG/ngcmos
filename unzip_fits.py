@@ -34,5 +34,30 @@ def unzip_fits_bz2_files():
     print("Unzipping complete.")
 
 
+def main():
+
+    # Get the current working directory
+    parent_directory = os.getcwd()
+
+    # Get a list of subdirectories inside the parent directory
+    subdirectories = [name for name in os.listdir(parent_directory) if
+                      os.path.isdir(os.path.join(parent_directory, name))]
+
+    print('The subdirectories are:', subdirectories)
+
+    # Iterate over each subdirectory
+    for subdirectory in subdirectories:
+        if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
+            # Form the full path to the subdirectory
+            subdirectory_path = os.path.join(parent_directory, subdirectory)
+
+            # Change the working directory to the subdirectory
+            os.chdir(subdirectory_path)
+
+            print(f"Processing subdirectory: {subdirectory_path}")
+
+            unzip_fits_bz2_files()
+
+
 if __name__ == "__main__":
-    unzip_fits_bz2_files()
+    main()
