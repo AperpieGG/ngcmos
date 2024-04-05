@@ -93,6 +93,7 @@ if __name__ == "__main__":
 
             print("Reference image found:", ref_image)
             base_name = ref_image.split('.fits')[0]
+            print("Base name:", base_name)
             prefix = fits.getheader(ref_image)['OBJECT']
             cat_file = f"{prefix}_catalog.fits"
 
