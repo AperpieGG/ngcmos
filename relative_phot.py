@@ -149,9 +149,9 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            (time_clipped, fluxes_clipped, fluxerrs_clipped, trend,
+            (time_clipped, fluxes_clipped, fluxerrs_clipped,
              dt_flux, dt_fluxerr, time_binned, dt_flux_binned, tmag) = relative_phot(phot_table, args.tic_id, args.bin)
-            plot_relative_lc(time_clipped, fluxes_clipped, trend, dt_flux,
+            plot_relative_lc(time_clipped, fluxes_clipped, dt_flux,
                              dt_fluxerr, time_binned, dt_flux_binned, args.tic_id, tmag, args.bin)
             break  # Stop looping if tic_id is found
         else:
