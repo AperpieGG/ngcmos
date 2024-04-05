@@ -48,39 +48,21 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
-    master_fluxes_dict = {}
 
-    # Loop through each unique TIC ID within the specified magnitude range
-    for master_tic_id in np.unique(master_star_data['tic_id']):
-        # Get the fluxes and corresponding jd_mid for the current star
-        star_data = master_star_data[master_star_data['tic_id'] == master_tic_id]
-        star_fluxes = star_data['flux_6']
-        star_jd_mid = star_data['jd_mid']
+    # Calculate reference star flux
+    reference_fluxes = np.sum(master_star_data['flux_6'], axis=0)
+    reference_flux_mean = np.mean(reference_fluxes)
 
-        # Add the fluxes of the current star to the dictionary
-        for jd, flux in zip(star_jd_mid, star_fluxes):
-            if jd not in master_fluxes_dict:
-                master_fluxes_dict[jd] = []
-            master_fluxes_dict[jd].append(flux)
+    # Normalize reference star flux
+    reference_flux_normalized = reference_fluxes / reference_flux_mean
 
-    # Calculate the average flux for each time point to create the master reference flux
-    master_reference_fluxes = []
-    for jd in sorted(master_fluxes_dict.keys()):
-        average_flux = np.mean(master_fluxes_dict[jd])
-        master_reference_fluxes.append(average_flux)
+    # Normalize target star flux
+    target_flux_normalized = fluxes_clipped / reference_flux_mean
 
-    # Convert master reference fluxes to a numpy array
-    master_reference_flux = np.array(master_reference_fluxes)
-
-    # Normalize fluxes by the master reference flux
-    fluxes_clipped = fluxes_clipped / master_reference_flux
-    fluxerrs_clipped = fluxerrs_clipped / master_reference_flux
-
-    # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), fluxes_clipped, 2),
-                       time_clipped - int(time_clipped[0]))
-    dt_flux = fluxes_clipped / trend
-    dt_fluxerr = fluxerrs_clipped / trend
+    # Perform relative photometry
+    dt_flux = reference_flux_normalized / target_flux_normalized
+    dt_fluxerr = dt_flux * np.sqrt(
+        (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
     # Bin the time, flux, and error
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr, bin_size)
@@ -90,11 +72,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
     print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
 
-    return time_clipped, fluxes_clipped, fluxerrs_clipped, trend, dt_flux, dt_fluxerr, time_binned, dt_flux_binned, tmag
+    return time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
 
 
-def plot_relative_lc(time_clipped, fluxes_clipped, trend, dt_flux,
-                     dt_fluxerr, time_binned, dt_flux_binned, tic_id_to_plot, tmag, bin_size):
+def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
+                     dt_flux_binned, dt_fluxerr_binned, tic_id_to_plot, bin_size):
     """
     Plot the relative light curve for a specific TIC ID
 
@@ -126,7 +108,6 @@ def plot_relative_lc(time_clipped, fluxes_clipped, trend, dt_flux,
 
     # Plot raw flux with wotan model
     ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
-    ax1.plot(time_clipped, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Relative Flux [e-]')
