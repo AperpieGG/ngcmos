@@ -34,7 +34,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     table : astropy.table.Table
         Table containing the photometry data
     tic_id_to_plot : int
-        TIC ID of the star to plot
+        TIC ID of the target star to exclude
     bin_size : int
         Number of images to bin
 
@@ -46,14 +46,12 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
-    # Select stars for master reference star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11)]
+    # Select stars for master reference star, excluding the target star
+    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
     master_fluxes_dict = {}
-    stars_used = []
 
     # Loop through each unique TIC ID within the specified magnitude range
     for master_tic_id in np.unique(master_star_data['tic_id']):
-        stars_used.append(master_tic_id)
         # Get the fluxes and corresponding jd_mid for the current star
         star_data = master_star_data[master_star_data['tic_id'] == master_tic_id]
         star_fluxes = star_data['flux_6']
@@ -64,7 +62,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
             if jd not in master_fluxes_dict:
                 master_fluxes_dict[jd] = []
             master_fluxes_dict[jd].append(flux)
-    print(f"Stars used for master reference: {len(stars_used)}")
+
     # Calculate the average flux for each time point to create the master reference flux
     master_reference_fluxes = []
     for jd in sorted(master_fluxes_dict.keys()):
@@ -73,8 +71,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Convert master reference fluxes to a numpy array
     master_reference_flux = np.array(master_reference_fluxes)
-    print(len(master_reference_flux))
 
+    # Normalize fluxes by the master reference flux
     fluxes_clipped = fluxes_clipped / master_reference_flux
     fluxerrs_clipped = fluxerrs_clipped / master_reference_flux
 
