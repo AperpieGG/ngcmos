@@ -182,6 +182,7 @@ def main():
                 ref_frame_data, ref_header = load_fits(os.path.join(directory, filename))
                 print(f"The average pixel value for {filename} is {np.mean(ref_frame_data)}")
                 # Reduce the image
+                print(ref_frame_data.shape)
                 if ref_frame_data.shape == (2048, 2088):
                     ref_oscan = np.median(ref_frame_data[:, 2075:], axis=1)
                     ref_frame_data = ref_frame_data[:, 20:2068]
