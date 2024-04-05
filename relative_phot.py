@@ -61,7 +61,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Normalize target star flux
     target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
-    print(f"Target flux normalized = {target_flux_normalized}")
     print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
     # Perform relative photometry
