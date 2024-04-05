@@ -51,16 +51,20 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Calculate reference star flux
     reference_fluxes = np.sum(master_star_data['flux_6'], axis=0)
+    print(f"The number of reference stars is {len(master_star_data)}")
     reference_flux_mean = np.mean(reference_fluxes)
+    print(f"Reference flux mean = {reference_flux_mean:.2f}")
 
     # Normalize reference star flux
     reference_flux_normalized = reference_fluxes / reference_flux_mean
+    print(f"Reference flux normalized = {reference_flux_normalized}")
 
     # Normalize target star flux
     target_flux_normalized = fluxes_clipped / reference_flux_mean
+    print(f"Target flux normalized = {target_flux_normalized}")
 
     # Perform relative photometry
-    dt_flux = reference_flux_normalized / target_flux_normalized
+    dt_flux = target_flux_normalized / reference_flux_normalized
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
@@ -71,6 +75,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     RMS_binned = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
     print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
+    print(f"The tmag for TIC ID {tic_id_to_plot} is {tmag:.2f}")
 
     return time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
 
@@ -108,11 +113,11 @@ def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, ti
 
     # Plot raw flux with wotan model
     ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
-    ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
+    # ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Relative Flux [e-]')
     ax1.legend()
-    ax2.errorbar(time_clipped, dt_flux, yerr=dt_fluxerr, fmt='.', color='black', alpha=0.2)
+    ax2.errorbar(time_clipped, dt_flux, yerr=dt_fluxerr, fmt='.', color='black')
     if bin_size > 1:
         ax2.plot(time_binned, dt_flux_binned, 'o', markerfacecolor='red')
         # Set limits only for the binned data axis
