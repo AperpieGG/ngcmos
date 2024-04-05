@@ -128,8 +128,14 @@ def get_catalog(filename, ext=0):
     None
     """
     data, header = fits.getdata(filename, header=True, ext=ext)
-    data = data.astype(float)
-    
+
+    # Ensure data is converted to float if it's not already
+    if data.dtype.kind != 'f':
+        try:
+            data = data.astype(float)
+        except ValueError:
+            raise ValueError("Unable to convert data to float. Data may contain non-numeric values.")
+
     return data, header
 
 
