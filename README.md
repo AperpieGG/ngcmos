@@ -1,6 +1,6 @@
 # ngcmos
-Rep to do photometry from ngts rep 
-Rep to do simulations before real data
+Rep to do CMOS photometry from ngts rep 
+Rep to do CMOS simulations before real data
 
 ## Installation
 ```bash
@@ -9,7 +9,7 @@ cd ngcmos
 pip install -r requirements.txt
 ```
 
-## Description
+## CMOS Description
 
 The pipeline peforms photometry with a CMOS camera at NGTS
 
@@ -21,7 +21,7 @@ Info and utilities are taken from utils.py.
 
 Reduction of the images from calibration_images.py
 
-## Run the following
+## Run the following for CMOS
 The script ran as cronjobs in the nuc computer which is in Chile currently. The path will be found from the directories.json files that exist in to the directory where the data lies.
 
 
@@ -52,7 +52,35 @@ The script ran as cronjobs in the nuc computer which is in Chile currently. The 
          
 10) ```analyse_cmos.py```
    This script will do an inspection of the lightcurves using the gaia_id as an argument. It will plot fluc, sky-background and the ROI of the star from the first frame, with the aperture and annulus used.
-    
+
+
+## CCD Description
+
+The pipeline peforms photometry with a CCD camera at NGTS
+
+The scripts are running under the process_cmos.py. This is a modified code from process_leowasp.py (James McCormac all right reserved).
+
+Main rutines for files selection and management are running on that code.
+
+Info and utilities are taken from utils.py. 
+
+Reduction of the images has already been extracted from NGTS pipeline.
+
+## Run the following for CCD
+
+The ```Process_CCD.sh ``` script is used to run the pythons files. Additionally, its directory is called with the night of observation, and inside there are the actions that are the images of each field. The code will identify these actions and it will peform analysis for each sub-directory/ngts field. The main script contains the following: 
+
+1) ```unzip_fits.py ```
+   This script is used to unzip the images.
+2) ```simple_wrapper_ccd.py ```
+   This script is made of two individual scripts that will solve the images astrometrically from the tic8 catalog and also tweak the solution for the distortion effect. Finally, a master catalog and an input catalog for the stars on the field are created. The input catalog has specific filters that will cut the candidates down and will be used for photometry later. The script has been adjusted for the ccd. The condition to check for unblended is 24 pixels. 
+3) ```check_ccd.py ```
+   This script will check the autoguiding function and it will also move images that have not been solved in wcs or guiding is bad. 
+4) ```process_ccd.py ```
+   This script rujns from the data directory. It uses the config file to identify the base and out paths. It will also filter the filenames keeping only the .fits for TOI, excluding the zipped files and the catalogs. The main function uses the catalog file for each image after reduction and extracts the photometry for all stars on the field. It saves them a fits file.
+
+
+
 
 
 
