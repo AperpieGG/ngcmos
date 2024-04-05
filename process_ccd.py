@@ -186,10 +186,8 @@ def main():
                     ref_oscan = np.median(ref_frame_data[:, 2075:], axis=1)
                     ref_frame_data = ref_frame_data[:, 20:2068]
                     ref_frame_data_corr = ref_frame_data - ref_oscan
-                else:
-                    ref_frame_data_corr = ref_frame_data
 
-                print(f"The average pixel value for {filename} is {np.mean(ref_frame_data_corr)}")
+                print(f"After overscan subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
 
