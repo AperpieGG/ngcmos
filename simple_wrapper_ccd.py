@@ -80,7 +80,7 @@ if __name__ == "__main__":
             # Filter the FITS images based on criteria
             ref_images = []
             for fits_file in all_fits:
-                if fits_file.startswith("IMAGE") and fits_file.endswith(".fits"):
+                if fits_file.startswith("IMAGE") and fits_file.endswith(".fits") and not fits_file.endswith(".fits.bz2"):
                     header = fits.getheader(fits_file)
                     if header.get("IMGCLASS") == "SCIENCE":
                         ref_images.append(fits_file)
