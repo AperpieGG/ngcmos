@@ -223,6 +223,17 @@ def main():
             filenames = filter_filenames(directory)
             print(f"Number of files: {len(filenames)}")
 
+            # get a list of all FITS images
+            all_fits = sorted([f for f in os.listdir(directory) if f.endswith('.fits') and not f.endswith('.fits.bz2')])
+
+            # Print filenames with IMGCLASS = CAL in their headers
+            cal_filenames = []
+            for fits_file in all_fits:
+                header = fits.getheader(os.path.join(directory, fits_file))
+                if 'IMGCLASS' in header and header['IMGCLASS'] == 'CAL':
+                    cal_filenames.append(fits_file)
+            print(f"Filenames with IMGCLASS = CAL: {cal_filenames}")
+
             # Print filenames with IMGCLASS = CAL in their headers
             cal_filenames = [f for f in filenames if fits.getheader(os.path.join(directory, f)).get('IMGCLASS') == 'CAL']
             print(f"Filenames with IMGCLASS = CAL: {cal_filenames}")
