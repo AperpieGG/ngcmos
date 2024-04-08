@@ -12,8 +12,12 @@ def delete_images():
     # Exclude image files that end with ".fits.bz2"
     image_files = [f for f in image_files if not f.endswith(".fits.bz2")]
 
+    # Keep only the first image file
+    image_to_keep = image_files[0]
+    images_to_delete = image_files[1:]
+
     # Delete the selected image files
-    for file in image_files:
+    for file in images_to_delete:
         os.remove(os.path.join(image_directory, file))
 
     print("Deletion of images has been completed.")
