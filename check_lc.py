@@ -100,28 +100,13 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
     fig, axs = plt.subplots(3, 1, figsize=(10, 10))
 
     airmass = []
-    image_data = None
+    # take data for the first frame_id
+    image_data = get_image_data(tic_id_data['frame_id'][0], image_directory)
 
-    # Iterate over frame_ids
+    # Get airmass for each frame_id
     for frame_id in tic_id_data['frame_id']:
-        # Check if frame_id is found in the image directory
-        if frame_id in os.listdir(image_directory):
-            image_header = fits.getheader(os.path.join(image_directory, frame_id))
-            airmass.append(round(image_header['AIRMASS'], 2))
-            if image_data is None:
-                image_data = get_image_data(frame_id, image_directory)
-        else:
-            # If frame_id is not found, search for .fits.bz2 file
-            fits_bz2_file = frame_id.replace('.fits', '.fits.bz2')
-            if fits_bz2_file in os.listdir(image_directory):
-                frame_id = fits_bz2_file
-                image_header = fits.getheader(os.path.join(image_directory, frame_id))
-                airmass.append(round(image_header['AIRMASS'], 2))
-                if image_data is None:
-                    image_data = get_image_data(frame_id, image_directory)
-            else:
-                print(f"Frame ID {frame_id} not found in the image directory.")
-                continue
+        image_header = fits.getheader(os.path.join(image_directory, frame_id))
+        airmass.append(round(image_header['AIRMASS'], 2))
 
     print(f"The star has TIC id: {tic_id_to_plot}")
     print(len(airmass))
