@@ -223,6 +223,10 @@ def main():
             filenames = filter_filenames(directory)
             print(f"Number of files: {len(filenames)}")
 
+            # Print filenames with IMGCLASS = CAL in their headers
+            cal_filenames = [f for f in filenames if fits.getheader(os.path.join(directory, f)).get('IMGCLASS') == 'CAL']
+            print(f"Filenames with IMGCLASS = CAL: {cal_filenames}")
+
             # Check headers for CTYPE1 and CTYPE2
             check_headers(subdirectory, filenames)
 
