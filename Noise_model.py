@@ -260,7 +260,7 @@ def main(phot_file, bin_size):
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
-        "TIC_IDs": phot_table['tic_id'][:args.num_stars].tolist(),  # Adding TIC IDs
+        "TIC_IDs": phot_table['tic_id'].tolist(),
         "RMS_list": RMS_list,
         "mags_list": mags_list,
         "Tmag_list": Tmags_list,
