@@ -15,7 +15,6 @@ def delete_images():
     # Delete the selected image files
     for file in image_files:
         os.remove(os.path.join(image_directory, file))
-        print(f"Deleted: {file}")
 
     print("Deletion of images has been completed.")
 
