@@ -74,8 +74,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
     mags_list = []
     Tmags_list = []
 
-    for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
-        tic_id_data = table[(table['tic_id'] == tic_id)]
+    unique_tic_ids = np.unique(table['tic_id'])
+    for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
+        tic_id_data = table[table['tic_id'] == tic_id]
         jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
         flux_4 = tic_id_data['flux_6']
