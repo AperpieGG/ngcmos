@@ -236,9 +236,11 @@ def main(phot_file, bin_size):
 
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
+    max_num_stars = len(np.unique(phot_table['tic_id']))  # Maximum number of stars based on unique TIC IDs
+
     # Calculate mean and RMS for the noise model
     mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory, average_zp=np.mean(zp))
+        phot_table, bin_size=bin_size, num_stars=max_num_stars, directory=current_night_directory, average_zp=np.mean(zp))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
@@ -300,7 +302,6 @@ if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
     args = parser.parse_args()
     bin_size = args.bin
 
