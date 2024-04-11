@@ -136,11 +136,21 @@ if __name__ == '__main__':
             directory = subdirectory_path
             print(f"Directory: {directory}")
 
+            # unzip the files
+            os.system(f"bzip2 -d {directory}/*.bz2")
+
             # Get the list of filenames
             filenames = filter_filenames(directory)
             print(f"Number of files: {len(filenames)}")
 
             # Reduce the image
             master_bias = bias(directory)
+
+            # zip the files apart from master_bias
+            for filename in filenames:
+                if filename != 'master_bias.fits':
+                    os.system(f"bzip2 {directory}/*.fits")
+
+
 
 
