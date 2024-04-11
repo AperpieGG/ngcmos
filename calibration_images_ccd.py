@@ -61,12 +61,12 @@ def bias(directory):
         files = filter_filenames(directory)
 
         # Limit the number of files to the first 21
-        files = files[:21]
-        print(f'Found {len(files)} with shape {fits.open(files[0])[0].data.shape}')
+        files_filtered = files[:21]
+        print(f'Found {len(files_filtered)} with shape {fits.open(files_filtered[0])[0].data.shape}')
 
         # check if we have an overscan to remove
         print('Checking for overscan to remove')
-        for frame in fits.open(files[0]):
+        for frame in fits.open(files_filtered[0]):
             if frame.data.shape == (2088, 2048):
                 frame_data = frame.data[20:2068, :].astype(float)
                 print('The frame shape is:', frame_data.shape)
@@ -74,18 +74,18 @@ def bias(directory):
                 print(f"Invalid frame shape {frame.data.shape}")
                 return None
 
-        cube = np.zeros((2048, 2048, len(files)))
-        for i, f in enumerate(files):
+        cube = np.zeros((2048, 2048, len(files_filtered)))
+        for i, f in enumerate(files_filtered):
             cube[:, :, i] = fits.getdata(f)
         master_bias = np.median(cube, axis=2)
 
         # Copy header from one of the input files
-        header = fits.getheader(files[0])
+        header = fits.getheader(files_filtered[0])
 
         fits.PrimaryHDU(master_bias, header=header).writeto(master_bias_path, overwrite=True)
 
         # zip the files apart from master_bias
-        for filename in filenames:
+        for filename in files:
             if filename != 'master_bias.fits':
                 os.system(f"bzip2 {directory}/*.fits")
                 print(f"Zipped files in {directory}")
@@ -148,10 +148,6 @@ if __name__ == '__main__':
             # unzip the files
             os.system(f"bzip2 -d {directory}/*.bz2")
             print(f"Unzipped files in {directory}")
-
-            # Get the list of filenames
-            filenames = filter_filenames(directory)
-            print(f"Number of files: {len(filenames)}")
 
             # Reduce the image
             master_bias = bias(directory)
