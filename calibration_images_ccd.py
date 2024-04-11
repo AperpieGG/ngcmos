@@ -60,6 +60,8 @@ def bias(directory):
         # Find and read the bias for hdr mode
         files = filter_filenames(directory)
 
+        files = sorted(files)
+
         # Limit the number of files to the first 21
         files_filtered = files[:21]
         print(f'Found {len(files_filtered)} with shape {fits.open(files_filtered[0])[0].data.shape}')
