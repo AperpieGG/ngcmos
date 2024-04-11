@@ -31,6 +31,7 @@ def filter_filenames(directory):
                 header = hdul[0].header
                 if 'IMGTYPE' in header and header['IMGTYPE'] == 'BIAS':
                     filtered_filenames.append(filename)  # Append only the filename without the directory path
+                    print(f"Found bias file: {filename}")
     return sorted(filtered_filenames)
 
 
