@@ -34,7 +34,7 @@ def filter_filenames(directory):
     return sorted(filtered_filenames)
 
 
-def bias(directory):
+def trim_bias(directory):
     """
     Create the master bias from the bias files.
 
@@ -48,6 +48,33 @@ def bias(directory):
     numpy.ndarray
         Master bias.
     """
+
+    # Find and read the bias for hdr mode
+    files = filter_filenames(directory)
+
+    # join the directory path to the filenames
+    files_filtered = [os.path.join(directory, f) for f in files]
+    print(f'Found {len(files_filtered)} bias files in {directory}')
+
+    if fits.open(files_filtered[0])[0].data.shape == (2048, 2048):
+        print('The files are already trimmed')
+    else:
+        # check if we have an overscan to remove
+        for filename in files_filtered:
+            frame = fits.open(filename)
+            frame = frame[0]
+            print('Initial frame shape:', frame.data.shape)
+            if frame.data.shape == (2048, 2088):  # overscan present: x,y
+                frame_data = frame.data[:, 20:2068].astype(float)
+                print('Final frame shape:', frame_data.shape)
+                frame = fits.PrimaryHDU(frame_data.astype(np.uint16), header=frame.header)
+                frame.writeto(filename, overwrite=True)
+
+        print('Trimmed bias files to shape:', frame_data.shape)
+
+
+def bias(directory):
+
     master_bias_path = os.path.join(directory, 'master_bias.fits')
 
     if os.path.exists(master_bias_path):
@@ -66,34 +93,29 @@ def bias(directory):
         files_filtered = [os.path.join(directory, f) for f in files_filtered]
         print(f'Found {len(files_filtered)} bias files in {directory}')
 
-        # check if we have an overscan to remove
-        for filename in files_filtered:
-            frame = fits.open(filename)
-            frame = frame[0]
-            if frame.data.shape == (2048, 2088):  # overscan present: x,y
-                frame_data = frame.data[:, 20:2068].astype(float)
-                print('The frame shape is:', frame_data.shape)
-            else:
-                print(f"Invalid frame shape {frame.data.shape}")
-                return None
-        #
-        # cube = np.zeros((2048, 2048, len(files_filtered)))
-        # for i, f in enumerate(files_filtered):
-        #     cube[:, :, i] = fits.getdata(f)
-        # master_bias = np.median(cube, axis=2)
-        #
-        # # Copy header from one of the input files
-        # header = fits.getheader(files_filtered[0])
-        #
-        # fits.PrimaryHDU(master_bias, header=header).writeto(master_bias_path, overwrite=True)
-        #
-        # # zip the files apart from master_bias
-        # for filename in files:
-        #     if filename != 'master_bias.fits':
-        #         os.system(f"bzip2 {directory}/*.fits")
-        #         print(f"Zipped files in {directory}")
-        #
-        # return master_bias
+        try:
+            # create a 3D cube of the bias files
+            cube = np.zeros((2048, 2048, len(files_filtered)))
+            for i, f in enumerate(files_filtered):
+                cube[:, :, i] = fits.getdata(f)
+
+            master_bias = np.median(cube, axis=2)
+
+            header = fits.getheader(files_filtered[0])
+            fits.PrimaryHDU(master_bias, header=header).writeto(master_bias_path, overwrite=True)
+
+        except Exception as e:
+            print(f'Failed to create master bias. Exception: {str(e)}')
+            return None
+
+        # zip the files apart from master_bias
+        for filename in files:
+            if filename != 'master_bias.fits':
+                os.system(f"bzip2 {os.path.join(directory, filename)}")
+                print(f"Zipped file: {filename}")
+
+        print('Master bias created and stored in:', master_bias_path)
+        return master_bias
 
 
 def reduce_image(directory, filenames):
@@ -151,6 +173,9 @@ if __name__ == '__main__':
             # unzip the files
             os.system(f"bzip2 -d {directory}/*.bz2")
             print(f"Unzipped files in {directory}")
+
+            # trim the bias images (2048, 2088) to (2048, 2048)
+            trim_bias(directory)
 
             # Reduce the image
             bias(directory)
