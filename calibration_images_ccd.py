@@ -125,7 +125,7 @@ if __name__ == '__main__':
     subdirectories = [name for name in os.listdir(parent_directory) if
                       os.path.isdir(os.path.join(parent_directory, name))]
 
-    print('The subdirectories are:', subdirectories)
+    print('Action found:', subdirectories)
 
     for subdirectory in subdirectories:
         if subdirectory.startswith("action") and subdirectory.endswith("_biasFrames"):
@@ -143,4 +143,4 @@ if __name__ == '__main__':
             # Reduce the image
             master_bias = bias(directory)
 
-            
+
