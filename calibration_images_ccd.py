@@ -54,7 +54,7 @@ def bias(directory):
         print('Found master bias')
         return fits.getdata(master_bias_path)
     else:
-        print('Creating master bias')
+        print('Did not find master bias, creating....')
 
         # Find and read the bias for hdr mode
         files = filter_filenames(directory)
@@ -64,6 +64,7 @@ def bias(directory):
         print(f'Found {len(files)} with shape {fits.open(files[0])[0].data.shape}')
 
         # check if we have an overscan to remove
+        print('Checking for overscan to remove')
         for frame in fits.open(files[0]):
             if frame.data.shape == (2088, 2048):
                 frame_data = frame.data[20:2068, :].astype(float)
@@ -138,6 +139,7 @@ if __name__ == '__main__':
 
             # unzip the files
             os.system(f"bzip2 -d {directory}/*.bz2")
+            print(f"Unzipped files in {directory}")
 
             # Get the list of filenames
             filenames = filter_filenames(directory)
@@ -150,6 +152,7 @@ if __name__ == '__main__':
             for filename in filenames:
                 if filename != 'master_bias.fits':
                     os.system(f"bzip2 {directory}/*.fits")
+                    print(f"Zipped files in {directory}")
 
 
 
