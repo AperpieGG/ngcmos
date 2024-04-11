@@ -60,15 +60,13 @@ def bias(directory):
         # Find and read the bias for hdr mode
         files = filter_filenames(directory)
 
-        files = sorted(files)
-
         # Limit the number of files to the first 21
         files_filtered = files[:21]
-        print(f'Found {len(files_filtered)} with shape {fits.open(files_filtered[0])[0].data.shape}')
+        print(f'Found {len(files_filtered)} with shape {fits.getdata(files_filtered[0]).shape}')
 
         # check if we have an overscan to remove
         print('Checking for overscan to remove')
-        for frame in fits.open(files_filtered[0]):
+        for frame in fits.getdata(files_filtered[0], header=True):
             if frame.data.shape == (2088, 2048):
                 frame_data = frame.data[20:2068, :].astype(float)
                 print('The frame shape is:', frame_data.shape)
