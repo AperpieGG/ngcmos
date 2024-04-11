@@ -61,36 +61,39 @@ def bias(directory):
 
         # Limit the number of files to the first 21
         files_filtered = files[:21]
-        print(f'Filtering {len(files_filtered)} bias files')
-        # print(f'Found {len(files_filtered)} with shape {fits.getdata(files_filtered[0]).shape} in {directory}')
+
+        # join the directory path to the filenames
+        files_filtered = [os.path.join(directory, f) for f in files_filtered]
+        print(f'Found {len(files_filtered)} bias files in {directory}')
 
         # check if we have an overscan to remove
-        print('Checking for overscan to remove')
-        for frame in fits.getdata(files_filtered[0], header=True):
-            if frame.data.shape == (2088, 2048):
-                frame_data = frame.data[20:2068, :].astype(float)
+        for filename in files_filtered:
+            frame = fits.open(filename)
+            frame = frame[0]
+            if frame.data.shape == (2048, 2088):  # overscan present: x,y
+                frame_data = frame.data[:, 20:2068].astype(float)
                 print('The frame shape is:', frame_data.shape)
             else:
                 print(f"Invalid frame shape {frame.data.shape}")
                 return None
-
-        cube = np.zeros((2048, 2048, len(files_filtered)))
-        for i, f in enumerate(files_filtered):
-            cube[:, :, i] = fits.getdata(f)
-        master_bias = np.median(cube, axis=2)
-
-        # Copy header from one of the input files
-        header = fits.getheader(files_filtered[0])
-
-        fits.PrimaryHDU(master_bias, header=header).writeto(master_bias_path, overwrite=True)
-
-        # zip the files apart from master_bias
-        for filename in files:
-            if filename != 'master_bias.fits':
-                os.system(f"bzip2 {directory}/*.fits")
-                print(f"Zipped files in {directory}")
-
-        return master_bias
+        #
+        # cube = np.zeros((2048, 2048, len(files_filtered)))
+        # for i, f in enumerate(files_filtered):
+        #     cube[:, :, i] = fits.getdata(f)
+        # master_bias = np.median(cube, axis=2)
+        #
+        # # Copy header from one of the input files
+        # header = fits.getheader(files_filtered[0])
+        #
+        # fits.PrimaryHDU(master_bias, header=header).writeto(master_bias_path, overwrite=True)
+        #
+        # # zip the files apart from master_bias
+        # for filename in files:
+        #     if filename != 'master_bias.fits':
+        #         os.system(f"bzip2 {directory}/*.fits")
+        #         print(f"Zipped files in {directory}")
+        #
+        # return master_bias
 
 
 def reduce_image(directory, filenames):
@@ -150,7 +153,7 @@ if __name__ == '__main__':
             print(f"Unzipped files in {directory}")
 
             # Reduce the image
-            master_bias = bias(directory)
+            bias(directory)
 
 
 
