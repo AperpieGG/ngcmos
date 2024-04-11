@@ -82,6 +82,13 @@ def bias(directory):
         header = fits.getheader(files[0])
 
         fits.PrimaryHDU(master_bias, header=header).writeto(master_bias_path, overwrite=True)
+
+        # zip the files apart from master_bias
+        for filename in filenames:
+            if filename != 'master_bias.fits':
+                os.system(f"bzip2 {directory}/*.fits")
+                print(f"Zipped files in {directory}")
+
         return master_bias
 
 
@@ -148,11 +155,6 @@ if __name__ == '__main__':
             # Reduce the image
             master_bias = bias(directory)
 
-            # zip the files apart from master_bias
-            for filename in filenames:
-                if filename != 'master_bias.fits':
-                    os.system(f"bzip2 {directory}/*.fits")
-                    print(f"Zipped files in {directory}")
 
 
 
