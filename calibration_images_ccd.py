@@ -119,10 +119,28 @@ def reduce_image(directory, filenames):
 
 if __name__ == '__main__':
     # Set the directory containing the bias files
-    directory = os.getcwd()
+    parent_directory = os.getcwd()
 
-    # Get the list of filenames
-    filenames = filter_filenames(directory)
+    # get a list of subdirectories inside the parent directory
+    subdirectories = [name for name in os.listdir(parent_directory) if
+                      os.path.isdir(os.path.join(parent_directory, name))]
 
-    # Reduce the image
-    master_bias = bias(directory)
+    print('The subdirectories are:', subdirectories)
+
+    for subdirectory in subdirectories:
+        if subdirectory.startswith("action") and subdirectory.endswith("_biasFrames"):
+            # form the full path to the subdirectory
+            subdirectory_path = os.path.join(parent_directory, subdirectory)
+
+            # set directory for the current subdirectory
+            directory = subdirectory_path
+            print(f"Directory: {directory}")
+
+            # Get the list of filenames
+            filenames = filter_filenames(directory)
+            print(f"Number of files: {len(filenames)}")
+
+            # Reduce the image
+            master_bias = bias(directory)
+
+            
