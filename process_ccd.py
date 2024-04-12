@@ -182,17 +182,23 @@ def main():
                 ref_frame_data, ref_header = load_fits(os.path.join(directory, filename))
                 print(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
 
-                # check if there is a master_bias in the parent directory
                 if os.path.exists(os.path.join(parent_directory, 'master_bias.fits')):
                     master_bias = fits.getdata(os.path.join(parent_directory, 'master_bias.fits'))
 
-                # Subtract the master bias from the image
-                if ref_frame_data.shape == master_bias.shape:
-                    ref_frame_data_corr = ref_frame_data - master_bias
-                    print(f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
+                # Check if master_bias is assigned before using it
+                if master_bias is not None:
+                    if ref_frame_data.shape == master_bias.shape:
+                        ref_frame_data_corr = ref_frame_data - master_bias
+                        print(
+                            f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
+                    else:
+                        print(
+                            f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!\n")
+                        continue
                 else:
-                    print(f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!\n")
-                    continue
+                    # Handle the case where master_bias is not assigned
+                    print("Master bias not found, skipping bias subtraction.")
+                    ref_frame_data_corr = ref_frame_data  # No bias subtraction
 
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
