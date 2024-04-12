@@ -186,13 +186,13 @@ def main():
                 if os.path.exists(os.path.join(parent_directory, 'master_bias.fits')):
                     master_bias = fits.getdata(os.path.join(parent_directory, 'master_bias.fits'))
 
-                    # Subtract the master bias from the image
-                    if ref_frame_data.shape == master_bias.shape:
-                        ref_frame_data_corr = ref_frame_data - master_bias
-                        print(f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
-                    else:
-                        print(f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!\n")
-                        continue
+                # Subtract the master bias from the image
+                if ref_frame_data.shape == master_bias.shape:
+                    ref_frame_data_corr = ref_frame_data - master_bias
+                    print(f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
+                else:
+                    print(f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!\n")
+                    continue
 
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
