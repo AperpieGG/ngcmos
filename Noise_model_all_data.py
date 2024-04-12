@@ -27,6 +27,10 @@ def process_json_files(directory):
     json_files = [f for f in files if f.endswith('.json')]
     print(f"Found {len(json_files)} JSON files in {directory}")
 
+    # Lists to store data from all JSON files
+    all_RMS_lists = []
+    all_mags_lists = []
+
     # Iterate over each JSON file
     for json_file in json_files:
         # Form the full path to the JSON file
@@ -36,29 +40,26 @@ def process_json_files(directory):
         data = load_rms_mags_data(json_path)
 
         # Extract information from the data
-        # Example:
         RMS_list = data['RMS_list']
         mags_list = data['mags_list']
 
-        # Do something with the extracted information
-        # Example:
-        print(f"RMS values: {RMS_list}")
-        print(f"Magnitude values: {mags_list}")
+        # Append the data to the lists
+        all_RMS_lists.append(RMS_list)
+        all_mags_lists.append(mags_list)
 
-        # Optionally, plot the data
-        fig, ax = plt.subplots(figsize=(10, 8))
-
-        ax.plot(mags_list, RMS_list, 'o', color='c', label='total data', alpha=0.5)
-
-        ax.set_xlabel('TESS Magnitude')
-        ax.set_ylabel('RMS (ppm)')
-        ax.set_yscale('log')
-        ax.set_xlim(7.5, 14)
-        ax.set_ylim(1000, 100000)
-        ax.invert_xaxis()
-        plt.legend(loc='best')
-        plt.tight_layout()
-        plt.show()
+    # Plot all data on the same figure
+    fig, ax = plt.subplots(figsize=(10, 8))
+    for i in range(len(all_RMS_lists)):
+        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=f'Data from file {i}', alpha=0.5)
+    ax.set_xlabel('TESS Magnitude')
+    ax.set_ylabel('RMS (ppm)')
+    ax.set_yscale('log')
+    ax.set_xlim(7.5, 14)
+    ax.set_ylim(1000, 100000)
+    ax.invert_xaxis()
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
 
 
 def main():
