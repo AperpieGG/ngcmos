@@ -147,6 +147,10 @@ if __name__ == '__main__':
             # Reduce the image
             bias(directory)
 
+            # move master_bias to parent directory
+            os.system(f"mv {directory}/master_bias.fits {parent_directory}")
+            print(f"Moved master_bias to {parent_directory}")
+
 
 
 
