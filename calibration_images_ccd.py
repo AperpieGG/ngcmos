@@ -118,39 +118,6 @@ def bias(directory):
         return master_bias
 
 
-def reduce_image(directory, filenames):
-    """
-
-    Reduce the image by subtracting the master bias.
-
-    """
-
-    master_bias = bias(directory)
-
-    if master_bias is None:
-        return print('Master bias not found')
-
-    # Find and read the image
-    reduced_data = []
-
-    for filename in filenames:
-        try:
-            fd, hdr = fits.getdata(filename, header=True)
-
-            # Additional calculations based on header information
-
-            # Reduce image
-            fd = (fd - master_bias)
-            reduced_data.append(fd)  # Append the reduced image to the list
-
-            # Append the filename to the filenames list
-            filenames.append(os.path.basename(filename))
-
-        except Exception as e:
-            print(f'Failed to process {filename}. Exception: {str(e)}')
-            continue
-
-
 if __name__ == '__main__':
     # Set the directory containing the bias files
     parent_directory = os.getcwd()
