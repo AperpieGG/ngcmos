@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from calibration_images import reduce_images
+from calibration_images_ccd import bias
 from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog
 import json
 import warnings
@@ -180,19 +180,20 @@ def main():
                 print(f"Processing filename {filename}......")
                 # Calibrate image and get FITS file
                 ref_frame_data, ref_header = load_fits(os.path.join(directory, filename))
-                # TODO: grab master bias and reduce images (remove load_fits function)
                 print(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
 
-                # Reduce the image
-                print(ref_frame_data.shape)
-                if ref_frame_data.shape == (2048, 2088):
-                    ref_oscan = np.median(ref_frame_data[:, 2075:], axis=1)
-                    ref_frame_data = ref_frame_data[:, 20:2068]
-                    ref_frame_data_corr = ref_frame_data - ref_oscan
-                else:
-                    ref_frame_data_corr = ref_frame_data
+                # check if there is a master_bias in the parent directory
+                if os.path.exists(os.path.join(parent_directory, 'master_bias.fits')):
+                    master_bias = fits.getdata(os.path.join(parent_directory, 'master_bias.fits'))
 
-                print(f"After overscan subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
+                    # Subtract the master bias from the image
+                    if ref_frame_data.shape == master_bias.shape:
+                        ref_frame_data_corr = ref_frame_data - master_bias
+                        print(f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
+                    else:
+                        print(f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!\n")
+                        continue
+
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
 
