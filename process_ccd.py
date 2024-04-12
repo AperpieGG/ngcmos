@@ -185,16 +185,25 @@ def main():
                 if os.path.exists(os.path.join(parent_directory, 'master_bias.fits')):
                     master_bias = fits.getdata(os.path.join(parent_directory, 'master_bias.fits'))
 
-                # Check if master_bias is assigned before using it
                 if master_bias is not None:
+                    # Check if master_bias has the same dimensions as ref_frame_data
                     if ref_frame_data.shape == master_bias.shape:
                         ref_frame_data_corr = ref_frame_data - master_bias
                         print(
                             f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
                     else:
                         print(
-                            f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!\n")
-                        continue
+                            f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!")
+                        # Trim ref_frame_data to match the dimensions of master_bias
+                        if master_bias.shape == (2048, 2048):
+                            ref_frame_data = ref_frame_data[:, 20:2068]
+                            print(f"Trimmed ref_frame_data shape to match master_bias shape: {ref_frame_data.shape}")
+                            ref_frame_data_corr = ref_frame_data - master_bias
+                            print(
+                                f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
+                        else:
+                            print("Unable to trim ref_frame_data: master_bias shape is not (2048, 2088)")
+                            continue
                 else:
                     # Handle the case where master_bias is not assigned
                     print("Master bias not found, skipping bias subtraction.")
