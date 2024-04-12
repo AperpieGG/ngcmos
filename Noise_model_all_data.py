@@ -62,6 +62,7 @@ def process_json_files(directory):
 
 
 def main():
+    plot_images()
     parser = argparse.ArgumentParser(description="Process JSON files")
     parser.add_argument("directory", help="Directory containing JSON files")
     args = parser.parse_args()
