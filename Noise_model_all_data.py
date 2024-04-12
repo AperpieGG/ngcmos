@@ -25,6 +25,7 @@ def process_json_files(directory):
 
     # Filter out only the JSON files
     json_files = [f for f in files if f.endswith('.json')]
+    print(f"Found {len(json_files)} JSON files in {directory}")
 
     # Iterate over each JSON file
     for json_file in json_files:
