@@ -62,10 +62,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
         # measure rms
         rms = np.std(fluxes_poly)
+        rms_list.append(rms)
+
         print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
         # make a list of the rms values
-        rms_list.append(rms)
-        print(f"comp star with minimum rms is {tic_id} with rms value of {np.min(rms_list)}")
+    print(f"comp star with minimum rms is {tic_id} with rms value of {np.min(rms_list)}")
 
 
 
