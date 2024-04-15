@@ -41,21 +41,32 @@ def get_image_data(frame_id, image_directory):
         numpy.ndarray or None: The image data if the image exists, otherwise None.
     """
     # Construct the path to the image file using the frame_id
-    image_path = os.path.join(image_directory, frame_id)
-    if not image_path.endswith('.fits'):
-        image_path += '.bz2'
+    image_path_fits = os.path.join(image_directory, frame_id + '.fits')
+    image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
 
-    # Check if the image file exists
-    if os.path.exists(image_path):
-        # Open the image file
+    # Check if the image file with .fits extension exists
+    if os.path.exists(image_path_fits):
         try:
-            image_data = fits.getdata(image_path)
+            # Open the image file
+            image_data = fits.getdata(image_path_fits)
             return image_data
         except Exception as e:
-            print(f"Error opening image file {image_path}: {e}")
+            print(f"Error opening image file {image_path_fits}: {e}")
             return None
+
+    # Check if the image file with .bz2 extension exists
+    elif os.path.exists(image_path_bz2):
+        try:
+            # Open the image file
+            image_data = fits.getdata(image_path_bz2)
+            return image_data
+        except Exception as e:
+            print(f"Error opening image file {image_path_bz2}: {e}")
+            return None
+
+    # If neither .fits nor .bz2 file exists
     else:
-        print(f"Image file {image_path} not found.")
+        print(f"Image file {frame_id} not found.")
         return None
 
 
@@ -107,9 +118,28 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
 
     # Get airmass for each frame_id
     for frame_id in tic_id_data['frame_id']:
-        image_header = fits.getheader(os.path.join(image_directory, frame_id))
-        if not frame_id.endswith('.fits'):
-            frame_id += '.bz2'
+        # Construct the full path to the image file
+        image_path_fits = os.path.join(image_directory, frame_id + '.fits')
+        image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
+
+        # Check if the image file with .fits extension exists
+        if os.path.exists(image_path_fits):
+            image_path = image_path_fits
+        # Check if the image file with .bz2 extension exists
+        elif os.path.exists(image_path_bz2):
+            image_path = image_path_bz2
+        else:
+            print(f"Image file {frame_id} not found.")
+            continue
+
+        # Get the header information from the image file
+        try:
+            image_header = fits.getheader(image_path)
+        except Exception as e:
+            print(f"Error reading header from image file {image_path}: {e}")
+            continue
+
+        # Extract the airmass from the header
         airmass.append(round(image_header['AIRMASS'], 2))
 
     print(f"The star has TIC id: {tic_id_to_plot}")
