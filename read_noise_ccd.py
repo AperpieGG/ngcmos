@@ -12,14 +12,14 @@ from utils import plot_images
 
 
 def read_bias_data():
-    path = '/Users/u5500483/Downloads/DATA_MAC/CCD/20231213/action367675_biasFrames/'
+    path = os.getcwd()
 
     list_images = glob.glob(path + '*.fits.bz2')
     bias_values = []
 
     for image_path in list_images:
         hdulist = fits.open(image_path)
-        image_data = hdulist[0].data[1000:1500, 1000:1500]
+        image_data = hdulist[0].data
         hdulist.close()
         bias_values.append(image_data)
 
@@ -49,8 +49,6 @@ def plot_read_noise(value_mean, value_std):
     ax2 = plt.subplot(gs[1])
     ax2.hist(value_std, bins=100, orientation='horizontal', color='b', histtype='step')
     ax2.set_xlabel('Number of pixels')
-    ax2.set_xticks([1e0, 1e3, 1e5])
-    ax2.set_xticks([1e1, 1e2, 1e4, 1e5, 1e7], minor=True)
     ax2.set_xticklabels([], minor=True)
     ax2.set_xscale('log')
 
