@@ -14,16 +14,19 @@ from utils import plot_images
 def read_bias_data():
     path = os.getcwd()
 
-    list_images = glob.glob(path + '*.fits.bz2')
+    list_images = glob.glob(path + '/*.fits.bz2')
+    if len(list_images) == 0:
+        list_images = glob.glob(path + '/*.fits')
     bias_values = []
 
     for image_path in list_images:
         hdulist = fits.open(image_path)
-        image_data = hdulist[0].data
+        image_data = hdulist[0].data[0:2048, 0:2048]
         hdulist.close()
         bias_values.append(image_data)
 
     bias_values = np.array(bias_values)
+    print('The shape of the bias_values is ', bias_values.shape)
 
     value_mean = np.mean(bias_values, axis=0).flatten()
     value_std = np.std(bias_values, axis=0).flatten()
@@ -41,10 +44,6 @@ def plot_read_noise(value_mean, value_std):
     hb = ax1.hist2d(value_mean, value_std, bins=100, cmap='cividis', norm=LogNorm())
     ax1.set_xlabel('Mean (ADU)')
     ax1.set_ylabel('RMS (ADU)')
-    ax1.legend(loc='best')
-    # ax1.set_ylim(-1, 14)
-    legend_elements = [Patch(facecolor='none', edgecolor='darkblue', label='FFR Mode')]
-    ax1.legend(handles=legend_elements, loc='upper left')
 
     ax2 = plt.subplot(gs[1])
     ax2.hist(value_std, bins=100, orientation='horizontal', color='b', histtype='step')
@@ -60,7 +59,6 @@ def plot_read_noise(value_mean, value_std):
     print('RMS = ', RMS)
     ax2.axhline(value_median_hist, color='g', linestyle=':')
     ax2.yaxis.set_ticklabels([])
-    # ax2.legend(['Median FFR = ' + str(round(np.median(value_std), 3)) + ' ADU'], loc='upper right')
 
     y_min, y_max = ax1.get_ylim()
     ax2.set_ylim(y_min, y_max)
