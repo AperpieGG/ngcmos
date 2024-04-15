@@ -271,7 +271,7 @@ def main(phot_file, bin_size):
         "N": N_list,
         "RNS": RNS_list
     }
-    file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
+    file_name = f"rms_mags_{phot_file.replace('.fits', '')}_ccd_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
         json.dump(output_data, json_file, indent=4)
