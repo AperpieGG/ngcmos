@@ -63,10 +63,9 @@ def process_json_files(directory):
     common_mags_lists = []
 
     # Find the RMS and mags for the common TIC_IDs
-    for i, TIC_IDs in enumerate(TIC_IDs):
-        if TIC_IDs in common_indices:
-            common_RMS_lists.append(all_RMS_lists[i])
-            common_mags_lists.append(all_mags_lists[i])
+    if TIC_IDs in common_indices:
+        common_RMS_lists.append(all_RMS_lists)
+        common_mags_lists.append(all_mags_lists)
 
     print(f"Found {len(common_RMS_lists)} common TIC_IDs in all JSON files")
 
