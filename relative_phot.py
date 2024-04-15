@@ -50,10 +50,12 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
 
-    # Iterate over each star in master_star_data
-    for fluxes, times, fluxerrs, tic_id in zip(master_star_data['flux_6'], master_star_data['jd_mid'],
-                                               master_star_data['fluxerr_6'], master_star_data['tic_id']):
-        print(len(fluxes), len(times), len(fluxerrs), tic_id)
+    for row in master_star_data:
+        fluxes = row['flux_6']
+        times = row['jd_mid']
+        fluxerrs = row['fluxerr_6']
+        tic_id = row['tic_id']
+
         # Perform polynomial detrending
         trend = np.polyval(np.polyfit(times - int(times[0]), fluxes, 2), times - int(times[0]))
         dt_flux_poly = fluxes / trend
