@@ -53,6 +53,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Iterate over each star in master_star_data
     for fluxes, times, fluxerrs, tic_id in zip(master_star_data['flux_6'], master_star_data['jd_mid'],
                                                master_star_data['fluxerr_6'], master_star_data['tic_id']):
+        print(len(fluxes), len(times), len(fluxerrs), tic_id)
         # Perform polynomial detrending
         trend = np.polyval(np.polyfit(times - int(times[0]), fluxes, 2), times - int(times[0]))
         dt_flux_poly = fluxes / trend
