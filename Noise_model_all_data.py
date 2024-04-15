@@ -19,18 +19,32 @@ def load_rms_mags_data(filename):
     return data
 
 
+def filter_data(mags_list, RMS_list):
+    """
+    Filter data points based on magnitude and RMS criteria
+    """
+    filtered_indices_bright = []
+    filtered_indices_bright = \
+        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 9000))[0]
+
+    filtered_indices_dim = []
+    filtered_indices_dim = np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 20000))[0]
+
+    return filtered_indices_bright, filtered_indices_dim
+
+
 def process_json_files(directory):
     # Get a list of all files in the directory
     files = os.listdir(directory)
 
     # Filter out only the JSON files
-    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and
-                  f.endswith('.json')]
+    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and f.endswith('.json')]
     print(f"Found {len(json_files)} JSON files in {directory}")
 
     # Lists to store data from all JSON files
     all_RMS_lists = []
     all_mags_lists = []
+
     # Iterate over each JSON file
     for json_file in json_files:
         # Form the full path to the JSON file
@@ -40,9 +54,16 @@ def process_json_files(directory):
         # Extract information from the data
         RMS_list = data['RMS_list']
         mags_list = data['mags_list']
-        # Append the data to the lists
-        all_RMS_lists.append(RMS_list)
-        all_mags_lists.append(mags_list)
+
+        # Filter the data
+        bright_indices, dim_indices = filter_data(mags_list, RMS_list)
+        filtered_RMS_list = [RMS_list[i] for i in bright_indices + dim_indices]
+        filtered_mags_list = [mags_list[i] for i in bright_indices + dim_indices]
+
+        # Append the filtered data to the lists
+        all_RMS_lists.append(filtered_RMS_list)
+        all_mags_lists.append(filtered_mags_list)
+
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
     for i, json_file in enumerate(json_files):
@@ -62,6 +83,7 @@ def process_json_files(directory):
     plt.tight_layout()
     plt.legend(loc='best')
     plt.show()
+
 
 
 def main():
