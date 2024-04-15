@@ -64,6 +64,11 @@ def process_json_files(directory):
         RMS_list = data['RMS_list']
         mags_list = data['mags_list']
 
+        print(f"Common indices for {json_file}: {common_indices}")
+        print(f"Length of RMS_list: {len(RMS_list)}")
+        print(f"Length of mags_list: {len(mags_list)}")
+        print(f"Length of TIC_IDs: {len(TIC_IDs)}")
+
         # Filter the data for common TIC_IDs
         common_indices = [i for i, tic_id in enumerate(TIC_IDs) if tic_id in common_TIC_IDs]
         common_RMS_list = [RMS_list[i] for i in common_indices]
