@@ -64,7 +64,7 @@ def plot_noise_model(data):
     photon_shot_noise = data['photon_shot_noise']
     read_noise = data['read_noise']
     dc_noise = data['dc_noise']
-    sky_noise = data['sky_noise'] / 2
+    sky_noise = data['sky_noise'] / np.array(2)
     N = data['N']
 
     # Filter data points based on magnitude and RMS
