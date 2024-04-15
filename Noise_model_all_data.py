@@ -24,11 +24,14 @@ def process_json_files(directory):
     files = os.listdir(directory)
 
     # Filter out only the JSON files
-    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and f.endswith('.json')]
+    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and
+                  f.endswith('.json')]
     print(f"Found {len(json_files)} JSON files in {directory}")
 
-    # Lists to store TIC_IDs from all JSON files
-    all_TIC_IDs = []
+    # Lists to store data from all JSON files
+    all_RMS_lists = []
+    all_mags_lists = []
+    common_indices = None  # Initialize common_indices outside the loop
 
     # Iterate over each JSON file
     for json_file in json_files:
@@ -38,45 +41,32 @@ def process_json_files(directory):
         # Load data from the JSON file
         data = load_rms_mags_data(json_path)
 
-        # Extract TIC_IDs from the data
-        TIC_IDs = data['TIC_IDs']
-
-        # Append the TIC_IDs to the list
-        all_TIC_IDs.append(set(TIC_IDs))
-
-    # Find the common TIC_IDs between all JSON files
-    common_TIC_IDs = set.intersection(*all_TIC_IDs)
-
-    # Print the number of common TIC_IDs
-    print(f"Number of common TIC_IDs: {len(common_TIC_IDs)}")
-
-    # Plot all data on the same figure for stars with common TIC_IDs
-    fig, ax = plt.subplots(figsize=(10, 8))
-    for json_file in json_files:
-        # Form the full path to the JSON file
-        json_path = os.path.join(directory, json_file)
-
-        # Load data from the JSON file
-        data = load_rms_mags_data(json_path)
-
         # Extract information from the data
-        TIC_IDs = data['TIC_IDs']
         RMS_list = data['RMS_list']
         mags_list = data['mags_list']
+        TIC_IDs = data['TIC_IDs']
 
-        print(f"Common indices for {json_file}: {common_indices}")
-        print(f"Length of RMS_list: {len(RMS_list)}")
-        print(f"Length of mags_list: {len(mags_list)}")
-        print(f"Length of TIC_IDs: {len(TIC_IDs)}")
+        if common_indices is None:
+            # Initialize common indices with indices from the first JSON file
+            common_indices = set(range(len(TIC_IDs)))
+        else:
+            # Update common indices with the intersection of indices from subsequent JSON files
+            common_indices.intersection_update(range(len(TIC_IDs)))
 
-        # Filter the data for common TIC_IDs
-        common_indices = [i for i, tic_id in enumerate(TIC_IDs) if tic_id in common_TIC_IDs]
-        common_RMS_list = [RMS_list[i] for i in common_indices]
-        common_mags_list = [mags_list[i] for i in common_indices]
+        # Append the data to the lists
+        all_RMS_lists.append(RMS_list)
+        all_mags_lists.append(mags_list)
 
-        # Plot the filtered data
-        ax.plot(common_mags_list, common_RMS_list, 'o', label=json_file)
+    if common_indices is None:
+        print("No common TIC_IDs found in the JSON files.")
+        return
 
+    print(f"Number of common TIC_IDs: {len(common_indices)}")
+
+    # Plot all data on the same figure
+    fig, ax = plt.subplots(figsize=(10, 8))
+    for i in range(len(all_RMS_lists)):
+        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=f'File {i+1}')
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
@@ -84,8 +74,8 @@ def process_json_files(directory):
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.tight_layout()
-    plt.legend()
     plt.show()
+
 
 
 def main():
