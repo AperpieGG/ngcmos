@@ -66,6 +66,8 @@ def process_json_files(directory):
             common_RMS_lists.append(all_RMS_lists[i])
             common_mags_lists.append(all_mags_lists[i])
 
+            print(len(common_RMS_lists), len(common_mags_lists))
+
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
     for i, json_file in enumerate(json_files):
