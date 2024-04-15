@@ -78,9 +78,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
         tic_id_data = table[(table['tic_id'] == tic_id)]
         jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
-        flux_4 = tic_id_data['flux_3']
-        fluxerr_4 = tic_id_data['fluxerr_3']
-        sky_4 = tic_id_data['flux_w_sky_3'] - tic_id_data['flux_3']
+        flux_4 = tic_id_data['flux_6']
+        fluxerr_4 = tic_id_data['fluxerr_6']
+        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
         if Tmag > 14:
             continue
 
