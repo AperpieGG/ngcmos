@@ -201,7 +201,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
 
     # set read noise from cmos characterisation
-    read_noise_pix = 6.6
+    read_noise_pix = 6.42
     read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     read_signal = npix * (read_noise_pix ** 2)
 
