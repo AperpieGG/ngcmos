@@ -108,6 +108,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
     # Get airmass for each frame_id
     for frame_id in tic_id_data['frame_id']:
         image_header = fits.getheader(os.path.join(image_directory, frame_id))
+        if not frame_id.endswith('.fits'):
+            frame_id += '.bz2'
         airmass.append(round(image_header['AIRMASS'], 2))
 
     print(f"The star has TIC id: {tic_id_to_plot}")
