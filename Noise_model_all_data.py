@@ -29,9 +29,7 @@ def process_json_files(directory):
     print(f"Found {len(json_files)} JSON files in {directory}")
 
     # Lists to store data from all JSON files
-    all_RMS_lists = []
-    all_mags_lists = []
-    common_indices = None  # Initialize common_indices outside the loop
+    all_data = []
 
     # Iterate over each JSON file
     for json_file in json_files:
@@ -40,63 +38,28 @@ def process_json_files(directory):
 
         # Load data from the JSON file
         data = load_rms_mags_data(json_path)
+        all_data.append(data)
 
-        # Extract information from the data
-        RMS_list = data['RMS_list']
-        mags_list = data['mags_list']
-        TIC_IDs = data['TIC_IDs']
+    # Find the common TIC_IDs between the two JSON files
+    common_tic_ids = set(all_data[0]['TIC_IDs']).intersection(all_data[1]['TIC_IDs'])
 
-        # check which TIC_IDs are common to all JSON files
-        if common_indices is None:
-            common_indices = set(TIC_IDs)
-        else:
-            common_indices = common_indices.intersection(TIC_IDs)
-            print(f"The common TIC_IDs are: {common_indices} and the number of common TIC_IDs is {len(common_indices)}")
+    # Extract RMS and magnitude values for the common TIC_IDs
+    common_rms = [[] for _ in range(len(all_data))]
+    common_mags = [[] for _ in range(len(all_data))]
+    for idx, data in enumerate(all_data):
+        for tic_id, rms, mag in zip(data['TIC_IDs'], data['RMS_list'], data['mags_list']):
+            if tic_id in common_tic_ids:
+                common_rms[idx].append(rms)
+                common_mags[idx].append(mag)
 
-        # Append the data to the lists
-        all_RMS_lists.append(RMS_list)
-        all_mags_lists.append(mags_list)
-
-    common_indices = list(common_indices)
-
-    if len(common_indices) == 0:
-        print("No common TIC_IDs found in the JSON files")
-        return
-
-    common_RMS_lists = []
-    common_mags_lists = []
-
-    # now we have the common indices, we can extract the common data
-    # now we have the common indices, we can extract the common data
-    for i, json_file in enumerate(json_files):
-        # Extract information from the data
-        RMS_list = all_RMS_lists[i]
-        mags_list = all_mags_lists[i]
-        TIC_IDs = data['TIC_IDs']
-
-        # Find the common indices
-        common_indices = [i for i, tic_id in enumerate(TIC_IDs) if tic_id in common_indices]
-
-        # Ensure common indices exist before appending data
-        if common_indices:
-            # Append the common data to the lists
-            common_RMS_lists.append([RMS_list[i] for i in common_indices])
-            common_mags_lists.append([mags_list[i] for i in common_indices])
-            print(f'The common_rms_list is {common_RMS_lists} and the common_mags_list is {common_mags_lists}')
-        else:
-            print("No common TIC_IDs found in this file:", json_file)
-
-    # Plot the data from the first JSON file against the data from the second JSON file
-    fig, ax = plt.subplots(figsize=(10, 8))
-    for i in range(len(common_RMS_lists)):
-        ax.plot(common_mags_lists[0], common_RMS_lists[i], 'o', label=f'File {i + 1}')
-    ax.set_xlabel('TESS Magnitude')
-    ax.set_ylabel('RMS (ppm)')
-    ax.set_yscale('log')
-    ax.set_xlim(7.5, 14)
-    ax.set_ylim(1000, 100000)
-    ax.invert_xaxis()
-    ax.legend()
+    # Plot common RMS values against magnitude lists for each JSON file
+    fig, axs = plt.subplots(1, len(all_data), figsize=(15, 6), sharex=True, sharey=True)
+    for i, ax in enumerate(axs):
+        ax.plot(common_mags[i], common_rms[i], 'o', label=f'JSON File {i + 1}')
+        ax.set_xlabel('Magnitude')
+        ax.set_ylabel('RMS (ppm)')
+        ax.set_title(f'RMS vs Magnitude (JSON File {i + 1})')
+        ax.set_yscale('log')
     plt.tight_layout()
     plt.show()
 
