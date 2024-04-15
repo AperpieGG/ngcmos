@@ -50,6 +50,21 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
 
+    # Iterate over each star in master_star_data
+    for star_data in master_star_data:
+        star_fluxes = np.sum(star_data['flux_6'], axis=0)  # Get fluxes for the current star
+        reference_flux_mean = np.mean(star_fluxes)  # Calculate mean flux
+        reference_flux_normalized = star_fluxes / reference_flux_mean  # Normalize flux
+
+        # Perform polynomial detrending
+        trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), reference_flux_normalized, 2),
+                           time_clipped - int(time_clipped[0]))
+        dt_flux_poly = reference_flux_normalized / trend
+        star_rms = np.std(dt_flux_poly)  # Calculate standard deviation of detrended flux
+        print(f"RMS for TIC ID {star_data['tic_id']} = {star_rms:.4f}")
+    # TODO: do some stats in the comparison stars, take only those which have good rms
+
+    # TODO: Grab fluxes, detrend them and check the RMS
     # Check if tic_id_to_plot is included in the master_star_data
     if tic_id_to_plot in np.unique(master_star_data['tic_id']):
         print(f"TIC ID {tic_id_to_plot} is included.")
