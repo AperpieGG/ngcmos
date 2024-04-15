@@ -65,14 +65,21 @@ def process_json_files(directory):
 
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
-    for i in range(len(all_RMS_lists)):
-        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=f'File {i+1}')
+    for i, json_file in enumerate(json_files):
+        if "CCD" in json_file:
+            label = "RMS CCD"
+        elif "CMOS" in json_file:
+            label = "RMS CMOS"
+        else:
+            label = json_file
+        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=label)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
     ax.set_xlim(7.5, 14)
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
+    ax.legend()
     plt.tight_layout()
     plt.show()
 
