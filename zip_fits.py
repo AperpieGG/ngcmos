@@ -39,7 +39,7 @@ def main():
 
     # Iterate over each subdirectory
     for subdirectory in subdirectories:
-        if subdirectory.startswith("action") and subdirectory.endswith("_biasFrames"):
+        if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
             # Form the full path to the subdirectory
             subdirectory_path = os.path.join(parent_directory, subdirectory)
 
