@@ -74,7 +74,8 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
     mags_list = []
     Tmags_list = []
 
-    for tic_id in table['tic_id'][:num_stars]:  # Selecting the first num_stars stars
+    unique_tic_ids = np.unique(table['tic_id'])
+    for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[(table['tic_id'] == tic_id)]
         jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
@@ -237,9 +238,12 @@ def main(phot_file, bin_size):
 
     airmass_list, zp = extract_header(phot_table, current_night_directory)
 
+    max_num_stars = len(np.unique(phot_table['tic_id']))  # Maximum number of stars based on unique TIC IDs
+
     # Calculate mean and RMS for the noise model
     mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory, average_zp=np.mean(zp))
+        phot_table, bin_size=bin_size, num_stars=max_num_stars, directory=current_night_directory,
+        average_zp=np.mean(zp))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
@@ -258,7 +262,7 @@ def main(phot_file, bin_size):
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
-        "TIC_IDs": phot_table['tic_id'][:args.num_stars].tolist(),  # Adding TIC IDs
+        "TIC_IDs": phot_table['tic_id'].tolist(),
         "RMS_list": RMS_list,
         "mags_list": mags_list,
         "Tmag_list": Tmags_list,
@@ -278,7 +282,7 @@ def main(phot_file, bin_size):
 
 def main_loop(phot_files, bin_size):
     for phot_file in phot_files:
-        output_file = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
+        output_file = f"rms_mags_{phot_file.replace('.fits', '')}_ccd_{bin_size}.json"
         output_path = os.path.join(os.getcwd(), output_file)
 
         # Check if the output file already exists
@@ -301,7 +305,6 @@ if __name__ == "__main__":
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    parser.add_argument('--num_stars', type=int, default=100, help='Number of stars to plot')
     args = parser.parse_args()
     bin_size = args.bin
 
