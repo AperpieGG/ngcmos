@@ -5,11 +5,8 @@ import json
 import numpy as np
 from utils import plot_images
 import os
-
 # dark background
 # plt.style.use('dark_background')
-
-
 def load_rms_mags_data(filename):
     """
     Load RMS and magnitude data from JSON file
@@ -17,78 +14,52 @@ def load_rms_mags_data(filename):
     with open(filename, 'r') as file:
         data = json.load(file)
     return data
-
-
-def filter_data(mags_list, RMS_list):
-    """
-    Filter data points based on magnitude and RMS criteria
-    """
-    filtered_indices_bright = []
-    filtered_indices_bright = \
-        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 6000))[0]
-
-    filtered_indices_dim = []
-    filtered_indices_dim = np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 20000))[0]
-
-    return filtered_indices_bright, filtered_indices_dim
-
-
 def process_json_files(directory):
     # Get a list of all files in the directory
     files = os.listdir(directory)
-
     # Filter out only the JSON files
-    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and f.endswith('.json')]
+    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and
+                  f.endswith('.json')]
     print(f"Found {len(json_files)} JSON files in {directory}")
-
     # Lists to store data from all JSON files
-    all_RMS_lists = []
-    all_mags_lists = []
-
+    all_data = []
     # Iterate over each JSON file
     for json_file in json_files:
         # Form the full path to the JSON file
         json_path = os.path.join(directory, json_file)
         # Load data from the JSON file
         data = load_rms_mags_data(json_path)
-        # Extract information from the data
-        RMS_list = data['RMS_list']
-        mags_list = data['mags_list']
+        all_data.append(data)
 
-        # Filter the data
-        bright_indices, dim_indices = filter_data(mags_list, RMS_list)
+    # Find the common TIC_IDs between the two JSON files
+    common_tic_ids = set(all_data[0]['TIC_IDs']).intersection(all_data[1]['TIC_IDs'])
+    print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
 
-        filtered_indices = np.append(bright_indices, dim_indices)
-
-        filtered_RMS_list = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
-        filtered_mags_list = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
-
-        # Append the filtered data to the lists
-        all_RMS_lists.append(filtered_RMS_list)
-        all_mags_lists.append(filtered_mags_list)
-
-    # Plot all data on the same figure
-    fig, ax = plt.subplots(figsize=(10, 8))
-    for i, json_file in enumerate(json_files):
-        if "rms_mags_phot_NG1109-2807_ccd_1.json" in json_file:
-            label = "RMS CCD"
-        elif "rms_mags_phot_NG1109-2807_1.json" in json_file:
-            label = "RMS CMOS"
-        else:
-            label = json_file
-        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=label, alpha=0.5)
-    ax.set_xlabel('TESS Magnitude')
-    ax.set_ylabel('RMS (ppm)')
-    ax.set_yscale('log')
-    ax.set_xlim(7.5, 14)
-    ax.set_ylim(1000, 100000)
-    ax.invert_xaxis()
+    # Extract RMS and magnitude values for the common TIC_IDs
+    common_rms = [[] for _ in range(len(all_data))]
+    common_mags = [[] for _ in range(len(all_data))]
+    for idx, data in enumerate(all_data):
+        for tic_id, rms, mag in zip(data['TIC_IDs'], data['RMS_list'], data['mags_list']):
+            if tic_id in common_tic_ids:
+                common_rms[idx].append(rms)
+                common_mags[idx].append(mag)
+    print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
+    print(f'The tic_ids are: {common_tic_ids} with cmos rms values: {common_rms[0]} and ccd rms values: {common_rms[1]}')
+    # Plot common RMS values against magnitude lists for both JSON files on the same plot
+    plt.figure(figsize=(10, 8))
+    for i in range(len(all_data)):
+        file_name = json_files[i]
+        label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
+        plt.plot(common_mags[i], common_rms[i], 'o', label=label)
+    plt.xlabel('TESS Magnitude')
+    plt.ylabel('RMS (ppm)')
+    plt.yscale('log')
+    plt.xlim(7.5, 14)
+    plt.ylim(1000, 100000)
+    plt.gca().invert_xaxis()
+    plt.legend()
     plt.tight_layout()
-    plt.legend(loc='best')
     plt.show()
-
-
-
 def main():
     plot_images()
     parser = argparse.ArgumentParser(description="Process JSON files")
@@ -100,7 +71,5 @@ def main():
         return
     # Process JSON files in the specified directory
     process_json_files(args.directory)
-
-
 if __name__ == "__main__":
     main()
