@@ -65,7 +65,9 @@ def process_json_files(directory):
 
     # Filter out the common data
     all_RMS_lists = [np.array(RMS_list)[list(common_indices)] for RMS_list in all_RMS_lists]
+    print(len(all_RMS_lists))
     all_mags_lists = [np.array(mags_list)[list(common_indices)] for mags_list in all_mags_lists]
+    print(len(all_mags_lists))
 
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
