@@ -78,9 +78,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
         tic_id_data = table[(table['tic_id'] == tic_id)]
         jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
-        flux_4 = tic_id_data['flux_6']
-        fluxerr_4 = tic_id_data['fluxerr_6']
-        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
+        flux_4 = tic_id_data['flux_3']
+        fluxerr_4 = tic_id_data['fluxerr_3']
+        sky_4 = tic_id_data['flux_w_sky_3'] - tic_id_data['flux_3']
         if Tmag > 14:
             continue
 
@@ -120,7 +120,6 @@ def extract_header(table, image_directory):
         # Get the path to the FITS file
         fits_file_path = os.path.join(image_directory, frame_id)
         # fits_file_path = os.path.join(image_directory, frame_id + '.bz2')
-
 
         # Read FITS file header to extract airmass
         with fits.open(fits_file_path) as hdul:
@@ -186,7 +185,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     """
 
     # set aperture radius
-    aperture_radius = 6
+    aperture_radius = 3
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
@@ -240,7 +239,8 @@ def main(phot_file, bin_size):
 
     # Calculate mean and RMS for the noise model
     mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory, average_zp=np.mean(zp))
+        phot_table, bin_size=bin_size, num_stars=args.num_stars, directory=current_night_directory,
+        average_zp=np.mean(zp))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
