@@ -46,12 +46,12 @@ def process_json_files(directory):
         mags_list = data['mags_list']
         TIC_IDs = data['TIC_IDs']
 
+        # check which TIC_IDs are common to all JSON files
         if common_indices is None:
-            # Initialize common indices with indices from the first JSON file
-            common_indices = set(range(len(TIC_IDs)))
+            common_indices = set(TIC_IDs)
         else:
-            # Update common indices with the intersection of indices from subsequent JSON files
-            common_indices.intersection_update(range(len(TIC_IDs)))
+            common_indices = common_indices.intersection(TIC_IDs)
+            print(f"The common TIC_IDs are: {common_indices}")
 
         # Append the data to the lists
         all_RMS_lists.append(RMS_list)
@@ -62,8 +62,6 @@ def process_json_files(directory):
         return
 
     print(f"Number of common TIC_IDs: {len(common_indices)}")
-
-    print('The common_indices are, the common TIC_IDs are:', common_indices)
 
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
