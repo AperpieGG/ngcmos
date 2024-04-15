@@ -59,6 +59,10 @@ def process_json_files(directory):
 
     common_indices = list(common_indices)
 
+    if len(common_indices) == 0:
+        print("No common TIC_IDs found in the JSON files")
+        return
+
     common_RMS_lists = []
     common_mags_lists = []
 
@@ -75,6 +79,7 @@ def process_json_files(directory):
         # Append the common data to the lists
         common_RMS_lists.append([RMS_list[i] for i in common_indices])
         common_mags_lists.append([mags_list[i] for i in common_indices])
+        print(f'The common_rms_list is {common_RMS_lists} and the common_mags_list is {common_mags_lists}')
 
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
