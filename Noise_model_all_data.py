@@ -66,9 +66,9 @@ def process_json_files(directory):
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
     for i, json_file in enumerate(json_files):
-        if "CCD" in json_file:
+        if "rms_mags_phot_NG1109-2807_ccd_1.json" in json_file:
             label = "RMS CCD"
-        elif "CMOS" in json_file:
+        elif "rms_mags_phot_NG1109-2807_1.json" in json_file:
             label = "RMS CMOS"
         else:
             label = json_file
