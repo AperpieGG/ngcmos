@@ -60,6 +60,7 @@ def process_json_files(directory):
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.tight_layout()
+    plt.legend(loc='best')
     plt.show()
 
 
