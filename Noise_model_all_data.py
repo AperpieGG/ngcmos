@@ -7,7 +7,7 @@ from utils import plot_images
 import os
 
 # dark background
-plt.style.use('dark_background')
+# plt.style.use('dark_background')
 
 
 def load_rms_mags_data(filename):
