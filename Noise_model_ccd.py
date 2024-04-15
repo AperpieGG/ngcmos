@@ -205,7 +205,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     read_signal = npix * (read_noise_pix ** 2)
 
     # set random sky background
-    sky_flux = np.mean(sky_list) /2
+    sky_flux = np.mean(sky_list)
     sky_noise = np.sqrt(sky_flux) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     print('Average sky flux: ', sky_flux)
 
