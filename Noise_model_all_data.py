@@ -54,8 +54,7 @@ def process_json_files(directory):
                 common_mags[idx].append(mag)
 
     print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
-    print(f'Found rms for the cmos: {(common_rms[0])} and ccd: {(common_rms[1])} common TIC_IDs')
-    print(f'Found mags for cmos: {(common_mags[0])} and ccd: {(common_mags[1])} common TIC_IDs')
+    print(f'The tic_ids are: {common_tic_ids} with cmos rms values: {common_rms[0]} and ccd rms values: {common_rms[1]}')
     # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
     for i in range(len(all_data)):
