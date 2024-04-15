@@ -54,7 +54,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-
+        rms_list = []
         # apply a polynomial fit to the light curve
         trend = np.polyval(np.polyfit(time - int(time[0]), fluxes, 2), time - int(time[0]))
         fluxes_poly = fluxes / trend
@@ -63,7 +63,12 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         # measure rms
         rms = np.std(fluxes_poly)
         print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
-        
+        # make a list of the rms values
+        rms_list.append(rms)
+        print(f"comp star with minimum rms is {tic_id} with rms value of {np.min(rms_list)}")
+
+
+
     # TODO: do some stats in the comparison stars, take only those which have good rms
 
     # TODO: Grab fluxes, detrend them and check the RMS
