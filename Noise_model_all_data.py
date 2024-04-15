@@ -52,14 +52,17 @@ def process_json_files(directory):
                 common_rms[idx].append(rms)
                 common_mags[idx].append(mag)
 
-    # Plot common RMS values against magnitude lists for each JSON file
-    fig, axs = plt.subplots(1, len(all_data), figsize=(15, 6), sharex=True, sharey=True)
-    for i, ax in enumerate(axs):
-        ax.plot(common_mags[i], common_rms[i], 'o', label=f'JSON File {i + 1}')
-        ax.set_xlabel('Magnitude')
-        ax.set_ylabel('RMS (ppm)')
-        ax.set_title(f'RMS vs Magnitude (JSON File {i + 1})')
-        ax.set_yscale('log')
+    # Plot common RMS values against magnitude lists for both JSON files on the same plot
+    plt.figure(figsize=(10, 6))
+    for i in range(len(all_data)):
+        file_name = json_files[i]
+        label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
+        plt.plot(common_mags[i], common_rms[i], 'o', label=label)
+    plt.xlabel('Magnitude')
+    plt.ylabel('RMS (ppm)')
+    plt.title('Common RMS vs Magnitude')
+    plt.yscale('log')
+    plt.legend()
     plt.tight_layout()
     plt.show()
 
