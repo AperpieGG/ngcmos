@@ -107,8 +107,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     else:
         print(f"TIC ID {tic_id_to_plot} is not included.")
 
-    # Calculate reference star flux
-    reference_fluxes = np.sum(master_star_data['flux_6'], axis=0)
+    filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
+
+    # Calculate reference star flux using only the filtered comparison stars
+    reference_fluxes = np.sum(filtered_master_star_data['flux_6'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
     print(f"Reference flux mean = {reference_flux_mean:.2f}")
 
