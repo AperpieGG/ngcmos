@@ -24,22 +24,16 @@ def process_json_files(directory):
     files = os.listdir(directory)
 
     # Filter out only the JSON files
-    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and f.endswith('.json')]
+    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and
+                  f.endswith('.json')]
     print(f"Found {len(json_files)} JSON files in {directory}")
 
     # Lists to store data from all JSON files
     all_RMS_lists = []
     all_mags_lists = []
 
-    # Load data from the first JSON file
-    first_json_path = os.path.join(directory, json_files[0])
-    first_data = load_rms_mags_data(first_json_path)
-    first_TIC_IDs = first_data['TIC_IDs']
-    first_RMS_list = first_data['RMS_list']
-    first_mags_list = first_data['mags_list']
-
-    # Iterate over each remaining JSON file
-    for json_file in json_files[1:]:
+    # Iterate over each JSON file
+    for json_file in json_files:
         # Form the full path to the JSON file
         json_path = os.path.join(directory, json_file)
 
@@ -47,25 +41,17 @@ def process_json_files(directory):
         data = load_rms_mags_data(json_path)
 
         # Extract information from the data
-        TIC_IDs = data['TIC_IDs']
         RMS_list = data['RMS_list']
         mags_list = data['mags_list']
 
-        # Find the common TIC_IDs between the first and current JSON files
-        common_TIC_IDs = set(first_TIC_IDs).intersection(TIC_IDs)
-
-        # Filter the RMS and magnitude data for the common TIC_IDs
-        common_RMS_list = [RMS_list[TIC_IDs.index(tic_id)] for tic_id in common_TIC_IDs]
-        common_mags_list = [mags_list[TIC_IDs.index(tic_id)] for tic_id in common_TIC_IDs]
-
-        # Append the filtered data to the lists
-        all_RMS_lists.append(common_RMS_list)
-        all_mags_lists.append(common_mags_list)
+        # Append the data to the lists
+        all_RMS_lists.append(RMS_list)
+        all_mags_lists.append(mags_list)
 
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
     for i in range(len(all_RMS_lists)):
-        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=f'File {i + 1}')
+        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=f'File {i+1}')
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
@@ -73,9 +59,7 @@ def process_json_files(directory):
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.tight_layout()
-    plt.legend()
     plt.show()
-
 
 
 def main():
