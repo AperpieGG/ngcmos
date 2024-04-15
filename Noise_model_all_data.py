@@ -65,7 +65,7 @@ def process_json_files(directory):
     plt.ylabel('RMS (ppm)')
     plt.title('Common RMS vs Magnitude')
     plt.yscale('log')
-    plt.gca().invert_yaxis()
+    plt.gca().invert_xaxis()
     plt.legend()
     plt.tight_layout()
     plt.show()
