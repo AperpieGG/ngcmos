@@ -6,7 +6,7 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, SymLogNorm
 from matplotlib.patches import Patch
 from utils import plot_images
 
@@ -17,11 +17,12 @@ def read_bias_data():
     list_images = glob.glob(path + '/*.fits.bz2')
     if len(list_images) == 0:
         list_images = glob.glob(path + '/*.fits')
+    list_images = list_images[:101]
     bias_values = []
 
     for image_path in list_images:
         hdulist = fits.open(image_path)
-        image_data = hdulist[0].data[0:2048, 0:2048]
+        image_data = hdulist[0].data
         hdulist.close()
         bias_values.append(image_data)
 
@@ -41,15 +42,18 @@ def plot_read_noise(value_mean, value_std):
     ax1 = plt.subplot(gs[0])
     print(f'Type of value_mean is {type(value_mean)}, shape is {value_mean.shape}')
     print(f'Type of value_std is {type(value_std)}, shape is {value_std.shape}')
-    hb = ax1.hist2d(value_mean, value_std, bins=100, cmap='cividis', norm=LogNorm())
+    ax1.hist2d(value_mean, value_std, bins=3000, cmap='cividis', norm=LogNorm())
     ax1.set_xlabel('Mean (ADU)')
     ax1.set_ylabel('RMS (ADU)')
+    ax1.set_ylim(0, 30)
+    ax1.set_xlim(1780, 1840)
 
     ax2 = plt.subplot(gs[1])
-    ax2.hist(value_std, bins=100, orientation='horizontal', color='b', histtype='step')
+    ax2.hist(value_std, bins=3000, orientation='horizontal', color='b', histtype='step')
     ax2.set_xlabel('Number of pixels')
     ax2.set_xticklabels([], minor=True)
     ax2.set_xscale('log')
+    ax2.set_ylim(0, 20)
 
     value_median_hist = np.median(value_std)
     print('Value Median = ', value_median_hist)
