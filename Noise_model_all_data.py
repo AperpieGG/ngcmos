@@ -85,7 +85,7 @@ def process_json_files(directory):
 
             # Plot the data from the first JSON file against the data from the second JSON file
             fig, ax = plt.subplots(figsize=(10, 8))
-            ax.plot(common_mags_lists[i], common_RMS_lists[i], 'o', label=label)
+            ax.plot(common_mags_lists[i], common_RMS_lists[i], 'o')
             ax.set_xlabel('TESS Magnitude')
             ax.set_ylabel('RMS (ppm)')
             ax.set_yscale('log')
