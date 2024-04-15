@@ -24,7 +24,8 @@ def process_json_files(directory):
     files = os.listdir(directory)
 
     # Filter out only the JSON files
-    json_files = [f for f in files if f.endswith('.json')]
+    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and
+                  f.endswith('.json')]
     print(f"Found {len(json_files)} JSON files in {directory}")
 
     # Lists to store data from all JSON files
@@ -50,7 +51,7 @@ def process_json_files(directory):
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
     for i in range(len(all_RMS_lists)):
-        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', color='blue')
+        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=f'File {i + 1}')
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
