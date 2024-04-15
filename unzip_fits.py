@@ -44,11 +44,14 @@ def unzip_fits_bz2_files():
                 target.write(uncompressed_content)
         print(f"{fits_bz2_file} unzipped to {output_path}")
 
+        # Delete the .fits.bz2 file
+        os.remove(fits_bz2_path)
+        print(f"{fits_bz2_file} deleted.")
+
     print("Unzipping complete.")
 
 
 def main():
-
     # Get the current working directory
     parent_directory = os.getcwd()
 
