@@ -76,7 +76,7 @@ def process_json_files(directory):
             label = "RMS CMOS"
         else:
             label = json_file
-        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=label)
+        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o', label=label, alpha=0.5)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
