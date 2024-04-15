@@ -57,8 +57,11 @@ def process_json_files(directory):
 
         # Filter the data
         bright_indices, dim_indices = filter_data(mags_list, RMS_list)
-        filtered_RMS_list = [RMS_list[i] for i in bright_indices + dim_indices]
-        filtered_mags_list = [mags_list[i] for i in bright_indices + dim_indices]
+
+        filtered_indices = np.append(bright_indices, dim_indices)
+
+        filtered_RMS_list = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
+        filtered_mags_list = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
 
         # Append the filtered data to the lists
         all_RMS_lists.append(filtered_RMS_list)
