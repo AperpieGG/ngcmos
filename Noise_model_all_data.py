@@ -66,6 +66,7 @@ def process_json_files(directory):
     common_RMS_lists = []
     common_mags_lists = []
 
+    # now we have the common indices, we can extract the common data
     for i, json_file in enumerate(json_files):
         # Extract information from the data
         RMS_list = all_RMS_lists[i]
@@ -81,28 +82,21 @@ def process_json_files(directory):
             common_RMS_lists.append([RMS_list[i] for i in common_indices])
             common_mags_lists.append([mags_list[i] for i in common_indices])
             print(f'The common_rms_list is {common_RMS_lists} and the common_mags_list is {common_mags_lists}')
+
+            # Plot the data from the first JSON file against the data from the second JSON file
+            fig, ax = plt.subplots(figsize=(10, 8))
+            ax.plot(common_mags_lists[i], common_RMS_lists[i], 'o', label=label)
+            ax.set_xlabel('TESS Magnitude')
+            ax.set_ylabel('RMS (ppm)')
+            ax.set_yscale('log')
+            ax.set_xlim(7.5, 14)
+            ax.set_ylim(1000, 100000)
+            ax.invert_xaxis()
+            ax.legend()
+            plt.tight_layout()
+            plt.show()
         else:
             print("No common TIC_IDs found in this file:", json_file)
-
-    # Plot all data on the same figure
-    fig, ax = plt.subplots(figsize=(10, 8))
-    for i, json_file in enumerate(json_files):
-        if "rms_mags_phot_NG1109-2807_ccd_1.json" in json_file:
-            label = "RMS CCD"
-        elif "rms_mags_phot_NG1109-2807_1.json" in json_file:
-            label = "RMS CMOS"
-        else:
-            label = json_file
-        ax.plot(common_mags_lists, common_RMS_lists, 'o', label=label)
-    ax.set_xlabel('TESS Magnitude')
-    ax.set_ylabel('RMS (ppm)')
-    ax.set_yscale('log')
-    ax.set_xlim(7.5, 14)
-    ax.set_ylim(1000, 100000)
-    ax.invert_xaxis()
-    # ax.legend()
-    plt.tight_layout()
-    plt.show()
 
 
 
