@@ -57,6 +57,9 @@ def process_json_files(directory):
         all_RMS_lists.append(RMS_list)
         all_mags_lists.append(mags_list)
 
+    common_indices = list(common_indices)
+    print(common_indices)
+    
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
     for i, json_file in enumerate(json_files):
