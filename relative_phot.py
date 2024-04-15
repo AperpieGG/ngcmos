@@ -51,14 +51,14 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
 
     # # Iterate over each star in master_star_data
-    # for star_data in master_star_data:
-    #     star_fluxes = star_data['flux_6']
-    #     # Perform polynomial detrending
-    #     trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), star_fluxes, 2),
-    #                        time_clipped - int(time_clipped[0]))
-    #     dt_flux_poly = star_fluxes / trend
-    #     star_rms = np.std(dt_flux_poly)  # Calculate standard deviation of detrended flux
-    #     print(f"RMS for TIC ID {star_data['tic_id']} = {star_rms:.4f}")
+    for star_data in master_star_data:
+        star_fluxes = star_data['flux_6']
+        # Perform polynomial detrending
+        trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), star_fluxes, 2),
+                           time_clipped - int(time_clipped[0]))
+        dt_flux_poly = star_fluxes / trend
+        star_rms = np.std(dt_flux_poly)  # Calculate standard deviation of detrended flux
+        print(f"RMS for TIC ID {star_data['tic_id']} = {star_rms:.4f}")
     # TODO: do some stats in the comparison stars, take only those which have good rms
 
     # TODO: Grab fluxes, detrend them and check the RMS
