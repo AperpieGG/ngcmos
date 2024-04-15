@@ -73,7 +73,28 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Print the tic_id with the minimum rms value
     print(f"Comparison star with minimum rms is {min_rms_tic_id} with rms value of {np.min(rms_comp_list):.4f}")
 
+    # Calculate mean and standard deviation of rms_list
+    rms_mean = np.mean(rms_comp_list)
+    rms_std = np.std(rms_comp_list)
 
+    # Define the threshold for two sigma clipping
+    threshold = 2 * rms_std
+
+    # Get the minimum rms value and its corresponding tic_id
+    min_rms_index = np.argmin(rms_comp_list)
+    min_rms_tic_id = np.unique(master_star_data['tic_id'])[min_rms_index]
+    min_rms_value = rms_comp_list[min_rms_index]
+
+    # Filter out comparison stars outside of two sigma clipping from the minimum rms star
+    filtered_tic_ids = []
+    for tic_id, rms_value in zip(np.unique(master_star_data['tic_id']), rms_comp_list):
+        if np.abs(rms_value - min_rms_value) <= threshold:
+            filtered_tic_ids.append(tic_id)
+
+    # Print the filtered list of comparison stars
+    print("Comparison stars within two sigma clipping from the minimum rms star:")
+    for tic_id in filtered_tic_ids:
+        print(f"TIC ID {tic_id}")
 
     # TODO: do some stats in the comparison stars, take only those which have good rms
 
