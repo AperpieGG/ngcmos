@@ -100,9 +100,7 @@ def process_json_files(directory):
     ax.set_xlim(7.5, 14)
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
-    ax.legend()
-    plt.tight_layout()
-    plt.show()
+    # ax.legend()
     plt.tight_layout()
     plt.show()
 
