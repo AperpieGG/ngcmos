@@ -66,6 +66,7 @@ def process_json_files(directory):
     for i, TIC_IDs in enumerate(TIC_IDs):
         if TIC_IDs in common_indices:
             common_RMS_lists.append(all_RMS_lists[i])
+            print(len(common_RMS_lists))
             common_mags_lists.append(all_mags_lists[i])
 
     # Plot all data on the same figure
