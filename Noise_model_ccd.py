@@ -121,8 +121,6 @@ def extract_header(table, image_directory):
         # Get the path to the FITS file
         fits_file_path = os.path.join(image_directory, frame_id + '.bz2')
 
-
-
         # Read FITS file header to extract airmass
         with fits.open(fits_file_path) as hdul:
             image_header = hdul[0].header
