@@ -47,7 +47,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     # Select stars for master reference star, excluding the target star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 10.5) & (table['tic_id'] != tic_id_to_plot)]
+    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) & (table['tic_id'] != tic_id_to_plot)]
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
 
     # Check if tic_id_to_plot is included in the master_star_data
