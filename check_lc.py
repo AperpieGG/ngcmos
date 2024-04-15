@@ -41,7 +41,7 @@ def get_image_data(frame_id, image_directory):
         numpy.ndarray or None: The image data if the image exists, otherwise None.
     """
     # Construct the path to the image file using the frame_id
-    image_path_fits = os.path.join(image_directory, frame_id + '.fits')
+    image_path_fits = os.path.join(image_directory, frame_id)
     image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
 
     # Check if the image file with .fits extension exists
@@ -119,7 +119,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
     # Get airmass for each frame_id
     for frame_id in tic_id_data['frame_id']:
         # Construct the full path to the image file
-        image_path_fits = os.path.join(image_directory, frame_id + '.fits')
+        image_path_fits = os.path.join(image_directory, frame_id)
         image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
 
         # Check if the image file with .fits extension exists
