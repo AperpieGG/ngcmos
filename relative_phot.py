@@ -79,7 +79,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
                        time_clipped - int(time_clipped[0]))
     dt_flux_poly = dt_flux / trend
     dt_fluxerr_poly = dt_fluxerr / trend
-    
+
     # Bin the time, flux, and error
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly, dt_fluxerr_poly, bin_size)
 
@@ -89,7 +89,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
     print(f"The tmag is {tmag:.2f}")
 
-    return time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
+    return time_clipped, fluxes_clipped, dt_flux_poly, dt_fluxerr_poly, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
 
 
 def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
