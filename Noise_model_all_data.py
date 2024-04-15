@@ -61,11 +61,12 @@ def process_json_files(directory):
 
     common_RMS_lists = []
     common_mags_lists = []
-    for i, TIC_IDs in enumerate(common_indices):
-        for j, TIC_ID in enumerate(TIC_IDs):
-            if TIC_ID in TIC_IDs:
-                common_RMS_lists.append(all_RMS_lists[j])
-                common_mags_lists.append(all_mags_lists[j])
+
+    # Filter out the common data based on common_indices
+    for i, TIC_IDs in enumerate(TIC_IDs):
+        if TIC_IDs in common_indices:
+            common_RMS_lists.append(all_RMS_lists[i])
+            common_mags_lists.append(all_mags_lists[i])
 
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -76,8 +77,6 @@ def process_json_files(directory):
             label = "RMS CMOS"
         else:
             label = json_file
-        # Plot the filtered common data on the same figure
-    for i in range(len(common_RMS_lists)):
         ax.plot(common_mags_lists[i], common_RMS_lists[i], 'o', label=label)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
@@ -86,6 +85,8 @@ def process_json_files(directory):
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     ax.legend()
+    plt.tight_layout()
+    plt.show()
     plt.tight_layout()
     plt.show()
 
