@@ -7,7 +7,7 @@ from utils import plot_images
 import os
 
 # dark background
-# plt.style.use('dark_background')
+plt.style.use('dark_background')
 
 
 def load_rms_mags_data(filename):
@@ -29,45 +29,30 @@ def process_json_files(directory):
     print(f"Found {len(json_files)} JSON files in {directory}")
 
     # Lists to store data from all JSON files
-    all_data = []
-
+    all_RMS_lists = []
+    all_mags_lists = []
     # Iterate over each JSON file
     for json_file in json_files:
         # Form the full path to the JSON file
         json_path = os.path.join(directory, json_file)
-
         # Load data from the JSON file
         data = load_rms_mags_data(json_path)
-        all_data.append(data)
-
-    # Find the common TIC_IDs between the two JSON files
-    common_tic_ids = set(all_data[1]['TIC_IDs']).intersection(all_data[0]['TIC_IDs'])
-    print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
-
-    # Extract RMS and magnitude values for the common TIC_IDs
-    common_rms = [[] for _ in range(len(all_data))]
-    common_mags = [[] for _ in range(len(all_data))]
-    for idx, data in enumerate(all_data):
-        for tic_id, rms, mag in zip(data['TIC_IDs'], data['RMS_list'], data['mags_list']):
-            if tic_id in common_tic_ids:
-                common_rms[idx].append(rms)
-                common_mags[idx].append(mag)
-
-    print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
-    print(f'The tic_ids are: {common_tic_ids} with cmos rms values: {common_rms[0]} and ccd rms values: {common_rms[1]}')
-    # Plot common RMS values against magnitude lists for both JSON files on the same plot
-    plt.figure(figsize=(10, 8))
-    for i in range(len(all_data)):
-        file_name = json_files[i]
-        label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
-        plt.plot(common_mags[i], common_rms[i], 'o', label=label)
-    plt.xlabel('TESS Magnitude')
-    plt.ylabel('RMS (ppm)')
-    plt.yscale('log')
-    plt.xlim(7.5, 14)
-    plt.ylim(1000, 100000)
-    plt.gca().invert_xaxis()
-    plt.legend()
+        # Extract information from the data
+        RMS_list = data['RMS_list']
+        mags_list = data['mags_list']
+        # Append the data to the lists
+        all_RMS_lists.append(RMS_list)
+        all_mags_lists.append(mags_list)
+    # Plot all data on the same figure
+    fig, ax = plt.subplots(figsize=(10, 8))
+    for i in range(len(all_RMS_lists)):
+        ax.plot(all_mags_lists[i], all_RMS_lists[i], 'o')
+    ax.set_xlabel('TESS Magnitude')
+    ax.set_ylabel('RMS (ppm)')
+    ax.set_yscale('log')
+    ax.set_xlim(7.5, 14)
+    ax.set_ylim(1000, 100000)
+    ax.invert_xaxis()
     plt.tight_layout()
     plt.show()
 
@@ -77,7 +62,6 @@ def main():
     parser = argparse.ArgumentParser(description="Process JSON files")
     parser.add_argument("directory", help="Directory containing JSON files")
     args = parser.parse_args()
-
     if not os.path.isdir(args.directory):
         print("Error: Directory not found, will use the current directory")
         args.directory = os.getcwd()
