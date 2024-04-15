@@ -42,6 +42,8 @@ def get_image_data(frame_id, image_directory):
     """
     # Construct the path to the image file using the frame_id
     image_path = os.path.join(image_directory, frame_id)
+    if not image_path.endswith('.fits'):
+        image_path += '.bz2'
 
     # Check if the image file exists
     if os.path.exists(image_path):
