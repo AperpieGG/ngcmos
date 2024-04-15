@@ -78,7 +78,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     rms_std = np.std(rms_comp_list)
 
     # Define the threshold for two sigma clipping
-    threshold = 1 * rms_std
+    threshold = 0.5 * rms_std
     print(f"Threshold for two sigma clipping = {threshold:.4f}")
 
     # Get the minimum rms value and its corresponding tic_id
