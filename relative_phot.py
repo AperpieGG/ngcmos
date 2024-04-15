@@ -49,12 +49,12 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
+    rms_comp_list = []
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-        rms_list = []
         # apply a polynomial fit to the light curve
         trend = np.polyval(np.polyfit(time - int(time[0]), fluxes, 2), time - int(time[0]))
         fluxes_poly = fluxes / trend
@@ -62,11 +62,16 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
         # measure rms
         rms = np.std(fluxes_poly)
-        rms_list.append(rms)
+        rms_comp_list.append(rms)
 
         print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
         # make a list of the rms values
-    print(f"comp star with minimum rms is {tic_id} with rms value of {np.min(rms_list)}")
+    # Find the index of the minimum rms value
+    min_rms_index = np.argmin(rms_comp_list)
+    # Get the corresponding tic_id
+    min_rms_tic_id = np.unique(master_star_data['tic_id'])[min_rms_index]
+    # Print the tic_id with the minimum rms value
+    print(f"Comparison star with minimum rms is {min_rms_tic_id} with rms value of {np.min(rms_comp_list):.4f}")
 
 
 
