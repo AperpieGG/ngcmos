@@ -61,12 +61,11 @@ def process_json_files(directory):
 
     common_RMS_lists = []
     common_mags_lists = []
-    for i, TIC_IDs in enumerate(TIC_IDs):
-        if TIC_IDs in common_indices:
-            common_RMS_lists.append(all_RMS_lists[i])
-            common_mags_lists.append(all_mags_lists[i])
-
-            print(len(common_RMS_lists), len(common_mags_lists))
+    for i, TIC_IDs in enumerate(common_indices):
+        for j, TIC_ID in enumerate(TIC_IDs):
+            if TIC_ID in TIC_IDs:
+                common_RMS_lists.append(all_RMS_lists[j])
+                common_mags_lists.append(all_mags_lists[j])
 
     # Plot all data on the same figure
     fig, ax = plt.subplots(figsize=(10, 8))
