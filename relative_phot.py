@@ -74,8 +74,14 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
+    # use polynomial to detrend the light curve
+    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), dt_flux, 2),
+                       time_clipped - int(time_clipped[0]))
+    dt_flux_poly = dt_flux / trend
+    dt_fluxerr_poly = dt_fluxerr / trend
+    
     # Bin the time, flux, and error
-    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr, bin_size)
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly, dt_fluxerr_poly, bin_size)
 
     RMS = np.std(dt_flux)
     RMS_binned = np.std(dt_flux_binned)
