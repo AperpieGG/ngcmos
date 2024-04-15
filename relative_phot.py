@@ -94,7 +94,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Print the filtered list of comparison stars
     print("Comparison stars within two sigma clipping from the minimum rms star:")
     for tic_id in filtered_tic_ids:
-        print(f"TIC ID {tic_id}")
+        print(f"TIC ID {tic_id} with RMS = {rms_comp_list[np.where(np.unique(master_star_data['tic_id']) == tic_id)[0][0]]:.4f}")
+    print(f"Number of comp stars within two sigma = {len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
 
     # TODO: do some stats in the comparison stars, take only those which have good rms
 
