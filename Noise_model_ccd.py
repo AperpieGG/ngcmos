@@ -117,6 +117,10 @@ def extract_header(table, image_directory):
     zp_list = []
 
     for frame_id in unique_frame_ids:
+        # Adjust the file extension if needed
+        if not frame_id.endswith('.fits'):
+            frame_id += '.fits.bz2'  # Assume .fits.bz2 if not .fits
+
         # Get the path to the FITS file
         fits_file_path = os.path.join(image_directory, frame_id)
 
