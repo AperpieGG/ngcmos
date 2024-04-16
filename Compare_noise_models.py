@@ -59,7 +59,7 @@ def process_json_files(directory, field):
     for i in range(len(all_data)):
         file_name = json_files[i]
         label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
-        plt.plot(common_mags[i], common_rms[i], 'o', label=label)
+        plt.plot(common_mags[i], common_rms[i], 'o', label=label, alpha=0.3)
 
         # # Plot lines connecting corresponding data points with the same tmag
         # for tmag, rms in zip(common_mags[i], common_rms[i]):
