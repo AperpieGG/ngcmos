@@ -39,24 +39,21 @@ def process_json_files(directory):
     common_tmag = set(all_data[0]['Tmag_list']).intersection(all_data[1]['Tmag_list'])
     common_tic_ids = set(all_data[0]['TIC_IDs']).intersection(all_data[1]['TIC_IDs'])
     print(f"Found {len(common_tmag)} common Tmag values between the two JSON files")
+    print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
 
-    # match common tic_ids with common_tmag
-    common_tmag = []
-    for tic_id in common_tic_ids:
-        for data in all_data:
-            if tic_id in data['TIC_IDs']:
-                common_tmag.append(data['Tmag_list'][data['TIC_IDs'].index(tic_id)])
-                break
-    print(f"Found {len(common_tmag)} common Tmag values between the two JSON files")
     # Extract RMS and magnitude values for the common TIC_IDs
     common_rms = [[] for _ in range(len(all_data))]
     common_mags = [[] for _ in range(len(all_data))]
+
+    # Extract RMS and magnitude values for the common TIC_IDs and Tmag values
     for idx, data in enumerate(all_data):
-        for tic_mag, rms, mag in zip(data['Tmag_list'], data['RMS_list'], data['mags_list']):
-            if tic_mag in common_tmag:
+        for tic_id, mag, rms in zip(data['TIC_IDs'], data['mags_list'], data['RMS_list']):
+            if tic_id in common_tic_ids and mag in common_tmag:
                 common_rms[idx].append(rms)
                 common_mags[idx].append(mag)
-    print(f"Found {len(common_tmag)} common TIC_IDs between the two JSON files")
+
+    print(
+        f"Found {len(common_tic_ids)} common TIC_IDs and {len(common_tmag)} common Tmag values between JSON files")
 
     # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
