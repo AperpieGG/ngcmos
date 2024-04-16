@@ -43,8 +43,8 @@ def process_json_files(directory):
     common_rms = [[] for _ in range(len(all_data))]
     common_mags = [[] for _ in range(len(all_data))]
     for idx, data in enumerate(all_data):
-        for tic_id, rms, mag in zip(data['TIC_IDs'], data['RMS_list'], data['Tmag_list']):
-            if tic_id in common_tmag:
+        for tic_mag, rms, mag in zip(data['Tmag_list'], data['RMS_list'], data['mags_list']):
+            if tic_mag in common_tmag:
                 common_rms[idx].append(rms)
                 common_mags[idx].append(mag)
     print(f"Found {len(common_tmag)} common TIC_IDs between the two JSON files")
