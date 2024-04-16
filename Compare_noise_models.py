@@ -29,6 +29,8 @@ def process_json_files(directory, field):
     # Filter out only the JSON files
     cmos_json_file = [f for f in files if f.startswith(f'rms_mags_phot_{field}_1') and f.endswith('.json')]
     ccd_json_file = [f for f in files if f.startswith(f'rms_mags_phot_{field}_ccd_1') and f.endswith('.json')]
+    if len(ccd_json_file) == 0:
+        return
     json_files = cmos_json_file + ccd_json_file
 
     print(f"Found {len(json_files)} JSON files in {directory}")
