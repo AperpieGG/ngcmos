@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+"""
+Plot the noise model between same tic_ids of CCD and CMOS, expecting same NG field and same night
+"""
 import argparse
-from matplotlib import pyplot as plt, ticker
+from matplotlib import pyplot as plt
 import json
-import numpy as np
 from utils import plot_images
 import os
 
@@ -18,12 +20,17 @@ def load_rms_mags_data(filename):
     return data
 
 
-def process_json_files(directory):
+def process_json_files(directory, field):
+    """
+    Process JSON files in the specified directory
+    """
     # Get a list of all files in the directory
     files = os.listdir(directory)
     # Filter out only the JSON files
-    json_files = [f for f in files if f.startswith('rms_mags_phot_NG1109') and
-                  f.endswith('.json')]
+    cmos_json_file = [f for f in files if f.startswith(f'rms_mags_phot_{field}_1') and f.endswith('.json')]
+    ccd_json_file = [f for f in files if f.startswith(f'rms_mags_phot_{field}_ccd_1') and f.endswith('.json')]
+    json_files = cmos_json_file + ccd_json_file
+
     print(f"Found {len(json_files)} JSON files in {directory}")
     # Lists to store data from all JSON files
     all_data = []
@@ -71,16 +78,20 @@ def process_json_files(directory):
 
 
 def main():
+    # Set plot parameters
     plot_images()
-    parser = argparse.ArgumentParser(description="Process JSON files")
-    parser.add_argument("--directory", help="Directory containing JSON files")
+    # Get the current working directory
+    directory = os.getcwd()
+    # add the field name by argument
+
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot noise model for CCD and CMOS data')
+    parser.add_argument('field', type=str, help='The NG field name')
     args = parser.parse_args()
-    if not os.path.isdir(args.directory):
-        print("Error: Directory not found, will use the current directory")
-        args.directory = os.getcwd()
-        return
+    field = args.field
+
     # Process JSON files in the specified directory
-    process_json_files(args.directory)
+    process_json_files(directory, field)
 
 
 if __name__ == "__main__":
