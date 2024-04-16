@@ -45,21 +45,20 @@ def process_json_files(directory):
 
     print(f"Found {len(common_tic_tmag)} common TIC_IDs and Tmag values between the two JSON files")
 
+    # Filter RMS and magnitude values based on common_tic_tmag
+    common_rms_data = [rms for tic_id, tmag, rms, mag in
+                       zip(data['TIC_IDs'], data['Tmag_list'], data['RMS_list'], data['mags_list']) if
+                       (tic_id, tmag) in common_tic_tmag]
+    common_mag_data = [mag for tic_id, tmag, rms, mag in
+                       zip(data['TIC_IDs'], data['Tmag_list'], data['RMS_list'], data['mags_list']) if
+                       (tic_id, tmag) in common_tic_tmag]
+
+    # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
-
-    # Plot for each JSON file
-    for idx, data in enumerate(all_data):
-        file_name = json_files[idx]
+    for i in range(len(all_data)):
+        file_name = json_files[i]
         label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
-
-        for tic_id, tmag in common_tic_tmag:
-            # Find the index of the TIC ID in the data
-            idx = data['TIC_IDs'].index(tic_id)
-            # Extract RMS and magnitude values
-            rms = data['RMS_list'][idx]
-            mag = data['mags_list'][idx]
-            plt.plot(mag, rms, 'o', label=label)
-
+        plt.plot(common_mag_data[i], common_rms_data[i], 'o', label=label)
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
     plt.yscale('log')
