@@ -50,6 +50,7 @@ def process_json_files(directory):
     # Plot for each JSON file
     for idx, data in enumerate(all_data):
         file_name = json_files[idx]
+        print(f"Processing file: {file_name}")
         label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
 
         # Filter RMS and magnitude values based on common_tic_tmag
