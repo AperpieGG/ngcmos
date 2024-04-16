@@ -68,7 +68,7 @@ def process_json_files(directory, field):
         for tmag in common_tmag:
             idx1 = common_mags[0].index(tmag)
             idx2 = common_mags[1].index(tmag)
-            plt.plot([common_mags[0][idx1], common_mags[1][idx2]], [common_rms[0][idx1], common_rms[1][idx2]], 'b-',
+            plt.plot([common_mags[0][idx1], common_mags[1][idx2]], [common_rms[0][idx1], common_rms[1][idx2]], 'k-',
                      alpha=0.2)
 
     plt.xlabel('TESS Magnitude')
