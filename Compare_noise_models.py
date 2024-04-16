@@ -48,6 +48,7 @@ def process_json_files(directory, field):
 
     # Dictionary to store additional rms and mag values for each common tmag
     additional_data = {tmag: {'rms': [], 'mag': []} for tmag in common_tmag}
+    print(f"Additional data dictionary: {additional_data}")
 
     # Iterate over each JSON file
     for data in all_data:
