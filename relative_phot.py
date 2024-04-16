@@ -75,7 +75,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"Comparison star with minimum rms is {min_rms_tic_id} with rms value of {np.min(rms_comp_list):.4f}")
 
     # Calculate mean and standard deviation of rms_list
-    rms_mean = np.mean(rms_comp_list)
     rms_std = np.std(rms_comp_list)
 
     # Define the threshold for two sigma clipping
@@ -84,7 +83,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Get the minimum rms value and its corresponding tic_id
     min_rms_index = np.argmin(rms_comp_list)
-    min_rms_tic_id = np.unique(master_star_data['tic_id'])[min_rms_index]
     min_rms_value = rms_comp_list[min_rms_index]
 
     # Filter out comparison stars outside of two sigma clipping from the minimum rms star
@@ -135,7 +133,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly, dt_fluxerr_poly,
                                                                          bin_size)
 
-    RMS = np.std(dt_flux)
+    RMS = np.std(dt_flux_binned)
     RMS_binned = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
     print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
@@ -174,12 +172,12 @@ def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, ti
     """
     # Create subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-
+    exposure_time = 10 / 60  # 10 seconds in minutes
     # Plot raw flux with wotan model
     ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
     ax1.set_title(f'TIC ID {tic_id_to_plot}, Tmag = {tmag:.2f}, binned {bin_size}')
     ax1.set_xlabel('MJD [days]')
-    ax1.set_ylabel('Relative Flux [e-]')
+    ax1.set_ylabel('Raw Flux [e-]')
     ax1.legend()
     ax2.errorbar(time_clipped, dt_flux, yerr=dt_fluxerr, fmt='.', color='black')
     if bin_size > 1:
@@ -187,7 +185,7 @@ def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, ti
         # Set limits only for the binned data axis
         ax2.set_ylim([np.min(dt_flux_binned) * np.abs(np.min(dt_flux_binned)),
                       np.max(dt_flux_binned) * np.abs(np.max(dt_flux_binned))])
-    ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
+    ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size * exposure_time) + ' min')
     ax2.set_xlabel('MJD [days]')
 
     plt.tight_layout()
