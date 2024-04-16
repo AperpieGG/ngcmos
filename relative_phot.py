@@ -42,14 +42,14 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         None
 
     """
-    jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot)
-
-    time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
-
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 11) & (table['tic_id'] != tic_id_to_plot)]
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
     rms_comp_list = []
+
+    jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot)
+
+    time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
@@ -98,9 +98,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         print(f"TIC ID {tic_id} with RMS = {rms_comp_list[np.where(np.unique(master_star_data['tic_id']) == tic_id)[0][0]]:.4f}")
     print(f"Number of comp stars within a sigma = {len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
 
-    # TODO: do some stats in the comparison stars, take only those which have good rms
-
-    # TODO: Grab fluxes, detrend them and check the RMS
     # Check if tic_id_to_plot is included in the master_star_data
     if tic_id_to_plot in np.unique(master_star_data['tic_id']):
         print(f"TIC ID {tic_id_to_plot} is included.")
