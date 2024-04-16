@@ -42,7 +42,7 @@ def process_json_files(directory, field):
         data = load_rms_mags_data(json_path)
         all_data.append(data)
     # Find the common TIC_IDs between the two JSON files
-    common_tmag = set(all_data[1]['Tmag_list']).intersection(all_data[0]['Tmag_list'])
+    common_tmag = set(all_data[1]['TIC_IDs']).intersection(all_data[0]['TIC_IDs'])
     print(f"Found {len(common_tmag)} common Tmags between the two JSON files")
     # Extract RMS and magnitude values for the common TIC_IDs
     # Extract RMS and magnitude values for the common Tmag values
