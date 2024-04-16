@@ -168,7 +168,7 @@ def create_blink_animation(science_image_names, x_shifts, y_shifts, prefix, save
         timestamp_yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
 
         # Construct the directory path based on the current date
-        base_file_name = f"donuts_{prefix}_{timestamp_yesterday}"
+        base_file_name = f"Bad_Donuts_{prefix}_{timestamp_yesterday}"
 
         # Construct the full file path within the "shifts_plots" directory
         gif_file_path = os.path.join(save_path, f"{base_file_name}.mp4")
@@ -260,7 +260,7 @@ def acquire_header_info(directory, prefix):
 
 def plot_shifts(x_shifts, y_shifts, save_path, prefix, time):
     # Plot the shifts with colorbar
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(8, 8))
     scatter = ax.scatter(x_shifts, y_shifts, c=time, cmap='viridis', label='Shifts for field: {}'.format(prefix), marker='o')
     plt.xlabel('X Shift (pixels)')
     plt.ylabel('Y Shift (pixels)')
