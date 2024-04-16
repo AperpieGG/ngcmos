@@ -61,8 +61,10 @@ def process_json_files(directory, field):
 
     # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
-    for tmag in common_tmag:
-        plt.plot(additional_data[tmag]['mag'], additional_data[tmag]['rms'], 'o', label=f'Tmag: {tmag}')
+    for i in range(len(all_data)):
+        file_name = json_files[i]
+        label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
+        plt.plot(additional_data[tmag]['mag'], additional_data[tmag]['rms'], 'o', label=label)
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
     plt.yscale('log')
