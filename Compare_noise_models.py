@@ -42,30 +42,27 @@ def process_json_files(directory, field):
         data = load_rms_mags_data(json_path)
         all_data.append(data)
 
-    # Find the common TIC_IDs between the two JSON files
+    # Find the common tmags between the two JSON files
     common_tmag = set(all_data[0]['Tmag_list']).intersection(all_data[1]['Tmag_list'])
     print(f"Found {len(common_tmag)} common Tmag values between the two JSON files")
 
-    # Lists to store common magnitude and RMS values
-    common_mag_data = []
-    common_rms_data = []
+    # Dictionary to store additional rms and mag values for each common tmag
+    additional_data = {tmag: {'rms': [], 'mag': []} for tmag in common_tmag}
 
     # Iterate over each JSON file
     for data in all_data:
-        # Get the common TIC_IDs and their corresponding RMS values
-        mag_data = [mags for mags in zip(data['mags_list']) if mags in common_tmag]
-        rms_data = [rms for rms in zip(data['RMS_list']) if rms in common_tmag]
-        common_mag_data.append(mag_data)
-        common_rms_data.append(rms_data)
-    print(f"Found {len(common_mag_data)} common Tmag values between the two JSON files")
-    print(f"Found {len(common_rms_data)} common RMS values between the two JSON files")
+        # Iterate over each entry
+        for tmag, rms, mag in zip(data['Tmag_list'], data['RMS_list'], data['mags_list']):
+            # Check if tmag is in common tmags
+            if tmag in common_tmag:
+                # Append rms and mag values to the dictionary
+                additional_data[tmag]['rms'].append(rms)
+                additional_data[tmag]['mag'].append(mag)
 
     # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
-    for i in range(len(all_data)):
-        file_name = json_files[i]
-        label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
-        plt.plot(common_mag_data[i], common_rms_data[i], 'o', label=label)
+    for tmag in common_tmag:
+        plt.plot(additional_data[tmag]['mag'], additional_data[tmag]['rms'], 'o', label=f'Tmag: {tmag}')
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
     plt.yscale('log')
