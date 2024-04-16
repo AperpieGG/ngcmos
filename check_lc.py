@@ -6,7 +6,7 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
 from utils import (plot_images, find_current_night_directory, get_phot_files, read_phot_file,
-                   bin_time_flux_error)
+                   bin_time_flux_error, remove_outliers)
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
 
@@ -104,8 +104,10 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
     sky = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
     skyerrs = np.sqrt(tic_id_data['fluxerr_6'] ** 2 + tic_id_data['fluxerr_w_sky_6'] ** 2)
 
+    time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
+
     # Bin flux data
-    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
+    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(time_clipped, fluxes_clipped, fluxerrs_clipped, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
     _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
 
