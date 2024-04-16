@@ -42,17 +42,17 @@ def process_json_files(directory, field):
         data = load_rms_mags_data(json_path)
         all_data.append(data)
     # Find the common TIC_IDs between the two JSON files
-    common_tmag = set(all_data[0]['Tmag_list']).intersection(all_data[1]['Tmag_list'])
-    print(f"Found {len(common_tmag)} common TIC_IDs between the two JSON files")
+    common_tic = set(all_data[1]['TIC_IDs']).intersection(all_data[0]['TIC_IDs'])
+    print(f"Found {len(common_tic)} common TIC_IDs between the two JSON files")
     # Extract RMS and magnitude values for the common TIC_IDs
     # Extract RMS and magnitude values for the common Tmag values
     common_rms = [[] for _ in range(len(all_data))]
     common_mags = [[] for _ in range(len(all_data))]
     for idx, data in enumerate(all_data):
-        for tmag, rms, mag in zip(data['Tmag_list'], data['RMS_list'], data['mags_list']):
-            if tmag in common_tmag:
+        for tmag, rms in zip(data['Tmag_list'], data['RMS_list']):
+            if tmag in common_tic:
                 common_rms[idx].append(rms)
-                common_mags[idx].append(mag)
+                common_mags[idx].append(tmag)
 
     # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
@@ -62,7 +62,7 @@ def process_json_files(directory, field):
         plt.plot(common_mags[i], common_rms[i], 'o', label=label)
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
-    # plt.yscale('log')
+    plt.yscale('log')
     plt.xlim(7.5, 14)
     plt.ylim(1000, 100000)
     plt.gca().invert_xaxis()
