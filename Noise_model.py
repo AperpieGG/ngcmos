@@ -260,7 +260,7 @@ def main(phot_file, bin_size):
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
-        "TIC_IDs": phot_table['tic_id'].tolist(),
+        "TIC_IDs": np.unique(phot_table['tic_id']).tolist(),  # [int(x) for x in TIC_IDs
         "RMS_list": RMS_list,
         "mags_list": mags_list,
         "Tmag_list": Tmags_list,
