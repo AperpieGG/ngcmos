@@ -29,8 +29,6 @@ def process_json_files(directory, field):
     # Filter out only the JSON files
     cmos_json_file = [f for f in files if f.startswith(f'rms_mags_phot_{field}_1') and f.endswith('.json')]
     ccd_json_file = [f for f in files if f.startswith(f'rms_mags_phot_{field}_ccd_1') and f.endswith('.json')]
-    if len(ccd_json_file) == 0:
-        return
     json_files = cmos_json_file + ccd_json_file
 
     print(f"Found {len(json_files)} JSON files in {directory}")
@@ -55,7 +53,7 @@ def process_json_files(directory, field):
     # Iterate over each JSON file
     for data in all_data:
         # Get the common TIC_IDs and their corresponding RMS values
-        mag_data = [tmag for tmag in zip(data['Tmag_list']) if tmag in common_tmag]
+        mag_data = [mags for mags in zip(data['mags_list']) if mags in common_tmag]
         rms_data = [rms for rms in zip(data['RMS_list']) if rms in common_tmag]
         common_mag_data.append(mag_data)
         common_rms_data.append(rms_data)
