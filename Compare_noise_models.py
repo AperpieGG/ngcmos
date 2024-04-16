@@ -41,31 +41,24 @@ def process_json_files(directory, field):
         # Load data from the JSON file
         data = load_rms_mags_data(json_path)
         all_data.append(data)
-
-    # Find the common tmags between the two JSON files
-    common_tmag = set(all_data[0]['Tmag_list']).intersection(all_data[1]['Tmag_list'])
-    print(f"Found {len(common_tmag)} common Tmag values between the two JSON files")
-
-    # Dictionary to store additional rms and mag values for each common tmag
-    additional_data = {tmag: {'rms': [], 'mag': []} for tmag in common_tmag}
-    print(f"Additional data dictionary: {additional_data}")
-
-    # Iterate over each JSON file
-    for data in all_data:
-        # Iterate over each entry
-        for tmag, rms, mag in zip(data['Tmag_list'], data['RMS_list'], data['mags_list']):
-            # Check if tmag is in common tmags
-            if tmag in common_tmag:
-                # Append rms and mag values to the dictionary
-                additional_data[tmag]['rms'].append(rms)
-                additional_data[tmag]['mag'].append(mag)
-
+    # Find the common TIC_IDs between the two JSON files
+    common_tic_ids = set(all_data[0]['TIC_IDs']).intersection(all_data[1]['TIC_IDs'])
+    print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
+    # Extract RMS and magnitude values for the common TIC_IDs
+    common_rms = [[] for _ in range(len(all_data))]
+    common_mags = [[] for _ in range(len(all_data))]
+    for idx, data in enumerate(all_data):
+        for tic_id, rms, mag in zip(data['TIC_IDs'], data['RMS_list'], data['Tmag_list']):
+            if tic_id in common_tic_ids:
+                common_rms[idx].append(rms)
+                common_mags[idx].append(mag)
+    print(f"Found {len(common_tic_ids)} common TIC_IDs between the two JSON files")
     # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
     for i in range(len(all_data)):
         file_name = json_files[i]
         label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
-        plt.plot(additional_data[tmag]['mag'], additional_data[tmag]['rms'], 'o', label=label)
+        plt.plot(common_mags[i], common_rms[i], 'o', label=label)
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
     plt.yscale('log')
