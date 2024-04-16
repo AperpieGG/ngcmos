@@ -106,6 +106,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
+    time_clipped, sky_clipped, skyerrs_clipped = remove_outliers(jd_mid, sky, skyerrs)
+
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(time_clipped, fluxes_clipped, fluxerrs_clipped, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
