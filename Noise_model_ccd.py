@@ -195,12 +195,12 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
 
     # set dark current rate from cmos characterisation
-    dark_current_rate = 0.006
+    dark_current_rate = 0.00515
     dark_current = dark_current_rate * exposure_time * npix
     dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
 
     # set read noise from cmos characterisation
-    read_noise_pix = 6.42
+    read_noise_pix = 12.6
     read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     read_signal = npix * (read_noise_pix ** 2)
 
@@ -261,7 +261,7 @@ def main(phot_file, bin_size):
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
-        "TIC_IDs": phot_table['tic_id'].tolist(),
+        "TIC_IDs": np.unique(phot_table['tic_id']).tolist(),  # [int(x) for x in TIC_IDs
         "RMS_list": RMS_list,
         "mags_list": mags_list,
         "Tmag_list": Tmags_list,
