@@ -49,8 +49,8 @@ def process_json_files(directory, field):
     common_rms = [[] for _ in range(len(all_data))]
     common_mags = [[] for _ in range(len(all_data))]
     for idx, data in enumerate(all_data):
-        for tmag, rms, tic_id in zip(data['Tmag_list'], data['RMS_list'], data['TIC_IDs']):
-            if tic_id in common_tmag:
+        for tmag, rms in zip(data['Tmag_list'], data['RMS_list']):
+            if tmag in common_tmag:
                 common_rms[idx].append(rms)
                 common_mags[idx].append(tmag)
 
