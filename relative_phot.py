@@ -49,7 +49,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot)
 
+    print(f"Number of fluxes data points = {len(fluxes)}")
+
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
+
+    print(f"Number of fluxes data points after clipping = {len(fluxes_clipped)}")
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
