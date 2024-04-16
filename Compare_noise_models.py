@@ -59,7 +59,7 @@ def process_json_files(directory, field):
             if tic_id in common_tic_ids:
                 for j in range(len(all_data)):
                     filename = json_files[j]
-                    print(f"TIC ID: {tic_id}, RMS: {rms}, Tmag: {mag} for {filename}")
+                    print(f"TIC ID: {tic_id[j]}, RMS: {rms[j]}, Mag: {mag[j]}, Filename: {filename}")
 
     # Plot common RMS values against magnitude lists for both JSON files on the same plot
     plt.figure(figsize=(10, 8))
