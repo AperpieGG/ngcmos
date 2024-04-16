@@ -62,7 +62,7 @@ def process_json_files(directory, field):
         plt.plot(common_mags[i], common_rms[i], 'o', label=label)
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
-    plt.yscale('log')
+    # plt.yscale('log')
     plt.xlim(7.5, 14)
     plt.ylim(1000, 100000)
     plt.gca().invert_xaxis()
