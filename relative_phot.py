@@ -185,7 +185,7 @@ def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, ti
         # Set limits only for the binned data axis
         ax2.set_ylim([np.min(dt_flux_binned) * np.abs(np.min(dt_flux_binned)),
                       np.max(dt_flux_binned) * np.abs(np.max(dt_flux_binned))])
-    ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size * exposure_time) + ' min')
+    ax2.set_ylabel('Relative Flux [e-], binned {:.2f} min'.format(bin_size * exposure_time))
     ax2.set_xlabel('MJD [days]')
 
     plt.tight_layout()
