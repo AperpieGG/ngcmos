@@ -52,15 +52,13 @@ def process_json_files(directory):
         file_name = json_files[idx]
         label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
 
-        # Filter RMS and magnitude values based on common_tic_tmag
-        common_rms_data = [rms for tic_id, tmag, rms, mag in
-                           zip(data['TIC_IDs'], data['Tmag_list'], data['RMS_list'], data['mags_list']) if
-                           (tic_id, tmag) in common_tic_tmag]
-        common_mag_data = [mag for tic_id, tmag, rms, mag in
-                           zip(data['TIC_IDs'], data['Tmag_list'], data['RMS_list'], data['mags_list']) if
-                           (tic_id, tmag) in common_tic_tmag]
-
-        plt.plot(common_mag_data[idx], common_rms_data[idx], 'o', label=label)
+        for tic_id, tmag in common_tic_tmag:
+            # Find the index of the TIC ID in the data
+            idx = data['TIC_IDs'].index(tic_id)
+            # Extract RMS and magnitude values
+            rms = data['RMS_list'][idx]
+            mag = data['mags_list'][idx]
+            plt.plot(mag, rms, 'o', label=label)
 
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
