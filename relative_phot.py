@@ -54,20 +54,15 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     print(f"Number of fluxes data points after clipping = {len(fluxes_clipped)}")
-    # TODO: measure rms for all comparison stars before you detrend them. 
+
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time, fluxes, fluxerrs = remove_outliers(time, fluxes, fluxerrs)
 
-        # apply a polynomial fit to the light curve
-        trend = np.polyval(np.polyfit(time - int(time[0]), fluxes, 2), time - int(time[0]))
-        fluxes_poly = fluxes / trend
-        fluxerrs_poly = fluxerrs / trend
-
         # measure rms
-        rms = np.std(fluxes_poly)
+        rms = np.std(fluxes)
         rms_comp_list.append(rms)
 
         print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
