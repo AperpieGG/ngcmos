@@ -96,12 +96,12 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
 
         # Calculate mean flux and RMS
         mean_flux_list.append(np.mean(flux_4_clipped))
-        RMS_list.append(np.std(dt_flux_binned) * 1000000)  # Convert to ppm
+        RMS_list.append(np.nanstd(dt_flux_binned) * 1000000)  # Convert to ppm
         sky_list.append(np.median(sky_4))
 
         # Calculate magnitudes using the average zp
         mags = -2.5 * np.log10(flux_4_clipped / 10) + average_zp
-        mags_list.append(np.mean(mags))
+        mags_list.append(np.nanmean(mags))
         Tmags_list.append(round(Tmag, 2))
 
         print(f"Running for star {tic_id} with Tmag = {Tmag:.2f} and mag = {np.mean(mags):.2f} "
