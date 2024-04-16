@@ -5,6 +5,8 @@ import json
 import numpy as np
 from utils import plot_images
 import os
+
+
 # dark background
 # plt.style.use('dark_background')
 def load_rms_mags_data(filename):
@@ -14,6 +16,8 @@ def load_rms_mags_data(filename):
     with open(filename, 'r') as file:
         data = json.load(file)
     return data
+
+
 def process_json_files(directory):
     # Get a list of all files in the directory
     files = os.listdir(directory)
@@ -39,7 +43,7 @@ def process_json_files(directory):
     common_rms = [[] for _ in range(len(all_data))]
     common_mags = [[] for _ in range(len(all_data))]
     for idx, data in enumerate(all_data):
-        for tic_id, rms, mag in zip(data['TIC_IDs'], data['RMS_list'], data['mags_list']):
+        for tic_id, rms, mag in zip(data['TIC_IDs'], data['RMS_list'], data['Tmag_list']):
             if tic_id in common_tic_ids:
                 common_rms[idx].append(rms)
                 common_mags[idx].append(mag)
@@ -60,6 +64,8 @@ def process_json_files(directory):
     plt.legend()
     plt.tight_layout()
     plt.show()
+
+
 def main():
     plot_images()
     parser = argparse.ArgumentParser(description="Process JSON files")
@@ -71,5 +77,7 @@ def main():
         return
     # Process JSON files in the specified directory
     process_json_files(args.directory)
+
+
 if __name__ == "__main__":
     main()
