@@ -65,8 +65,11 @@ def process_json_files(directory, field):
         # for tmag, rms in zip(common_mags[i], common_rms[i]):
         #     plt.plot([tmag, tmag], [0, rms], 'k--', alpha=0.5)
 
-        # now plot lines connecting corresponding data point with same tmag from the first tmag to the last tmag
-        plt.plot([common_mags[i][0], common_mags[i][-1]], [common_rms[i][0], common_rms[i][-1]], 'k--', alpha=0.5)
+        for tmag in common_tmag:
+            idx1 = common_mags[0].index(tmag)
+            idx2 = common_mags[1].index(tmag)
+            plt.plot([common_mags[0][idx1], common_mags[1][idx2]], [common_rms[0][idx1], common_rms[1][idx2]], 'r--',
+                     alpha=0.5)
 
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
