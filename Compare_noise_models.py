@@ -61,9 +61,12 @@ def process_json_files(directory, field):
         label = "CMOS" if "rms_mags_phot_NG1109-2807_1.json" in file_name else "CCD"
         plt.plot(common_mags[i], common_rms[i], 'o', label=label)
 
-        # Plot lines connecting corresponding data points with the same tmag
-        for tmag, rms in zip(common_mags[i], common_rms[i]):
-            plt.plot([tmag, tmag], [0, rms], 'k--', alpha=0.5)
+        # # Plot lines connecting corresponding data points with the same tmag
+        # for tmag, rms in zip(common_mags[i], common_rms[i]):
+        #     plt.plot([tmag, tmag], [0, rms], 'k--', alpha=0.5)
+
+        # now plot lines connecting corresponding data point with same tmag from the first tmag to the last tmag
+        plt.plot([common_mags[i][0], common_mags[i][-1]], [common_rms[i][0], common_rms[i][-1]], 'k--', alpha=0.5)
 
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS (ppm)')
