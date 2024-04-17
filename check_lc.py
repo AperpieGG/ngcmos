@@ -232,6 +232,8 @@ def main():
     # Get the current night directory
     current_night_directory = find_current_night_directory(base_path)
 
+    print(f"Current night directory: {current_night_directory}")
+
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
