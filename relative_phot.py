@@ -65,7 +65,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         rms = np.std(fluxes)
         rms_comp_list.append(rms)
 
-        print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
+        # print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
         # make a list of the rms values
     # Find the index of the minimum rms value
     min_rms_index = np.argmin(rms_comp_list)
@@ -120,6 +120,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
     print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
+    # target_flux_normalized = fluxes_clipped / reference_fluxes
+
+    # target_flux_normalized = target_flux_normalized / np.mean(target_flux_normalized)
+
     # Perform relative photometry
     dt_flux = target_flux_normalized / reference_flux_normalized
     dt_fluxerr = dt_flux * np.sqrt(
@@ -138,8 +142,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     RMS = np.std(dt_flux_binned)
     RMS_binned = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
-    print(f"RMS for TIC ID {tic_id_to_plot} binned = {RMS_binned:.4f}")
-    print(f"The tmag is {tmag:.2f}")
 
     return time_clipped, fluxes_clipped, dt_flux_poly, dt_fluxerr_poly, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
 
