@@ -211,6 +211,14 @@ def main():
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
         print(f"Photometry file: {phot_file}")
+
+        # Check if the output file already exists
+        base_filename = phot_file.split('.')[0]  # Remove the file extension
+        fits_filename = f"rel_{base_filename}.fits"  # Add 'rel_' prefix
+        if os.path.exists(fits_filename):
+            print(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
+            continue
+
         # Create an empty list to store data for all TIC IDs
         data_list = []
 
@@ -235,8 +243,6 @@ def main():
         data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS'))
 
         # Write the table to a FITS file with the desired name
-        base_filename = phot_file.split('.')[0]  # Remove the file extension
-        fits_filename = f"rel_{base_filename}.fits"  # Add 'rel_' prefix
         data_table.write(fits_filename, format='fits', overwrite=True)
 
         print(f"Data for {phot_file} saved to {fits_filename}.")
@@ -244,3 +250,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
