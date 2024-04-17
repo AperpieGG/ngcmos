@@ -207,6 +207,7 @@ def main():
     # Loop through photometry files
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+        print(f"Photometry file: {phot_file}")
 
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
