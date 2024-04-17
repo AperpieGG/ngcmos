@@ -208,6 +208,8 @@ def main():
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
         print(f"Photometry file: {phot_file}")
+        # Create an empty list to store data for all TIC IDs
+        data_list = []
 
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
@@ -215,12 +217,16 @@ def main():
             if np.any(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 print(f"Performing relative photometry for TIC ID {tic_id}")
                 (time_clipped, fluxes_clipped, dt_flux, dt_fluxerr,
-                 tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id,
-                                                                                       bin_size=1)
-                plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
-                                 dt_flux_binned, tic_id, bin_size=1)
+                 tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id, bin_size=1)
+
+                # Calculate RMS
+                rms = np.std(dt_flux_binned)
+                print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
+
+                # Append data to the list
+                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms))
             else:
-                print(f"TIC ID {tic_id} is brighter than 14 magnitudes. Skipping.")
+                print(f"TIC ID {tic_id} is not included in the analysis.")
 
 
 if __name__ == "__main__":
