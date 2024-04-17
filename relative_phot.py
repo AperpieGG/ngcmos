@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 import json
 import os
 import numpy as np
@@ -94,8 +93,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Print the filtered list of comparison stars
     print("Comparison stars within two sigma clipping from the minimum rms star:")
     for tic_id in filtered_tic_ids:
-        print(f"TIC ID {tic_id} with RMS = {rms_comp_list[np.where(np.unique(master_star_data['tic_id']) == tic_id)[0][0]]:.4f}")
-    print(f"Number of comp stars within a sigma = {len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
+        print(
+            f"TIC ID {tic_id} with RMS = {rms_comp_list[np.where(np.unique(master_star_data['tic_id']) == tic_id)[0][0]]:.4f}")
+    print(
+        f"Number of comp stars within a sigma = {len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
 
     # Check if tic_id_to_plot is included in the master_star_data
     if tic_id_to_plot in np.unique(master_star_data['tic_id']):
@@ -193,12 +194,6 @@ def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, ti
 
 
 def main():
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
-    parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
-    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    args = parser.parse_args()
-
     # Set plot parameters
     plot_images()
 
@@ -213,19 +208,13 @@ def main():
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-        # Check if tic_id exists in the current photometry file
-        if args.tic_id in phot_table['tic_id']:
-            print('Found star in photometry file:', phot_file)
+        # Loop through all tic_ids in the photometry file
+        for tic_id in np.unique(phot_table['tic_id']):
+            print(f"Performing relative photometry for TIC ID {tic_id}")
             (time_clipped, fluxes_clipped, dt_flux, dt_fluxerr,
-             tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, args.tic_id, args.bin)
+             tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id, bin_size=1)
             plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
-                             dt_flux_binned, args.tic_id, args.bin)
-            break  # Stop looping if tic_id is found
-        else:
-            print(f"TIC ID {args.tic_id} not found in {phot_file}")
-
-    else:
-        print(f"TIC ID {args.tic_id} not found in any photometry file.")
+                             dt_flux_binned, tic_id, bin_size=1)
 
 
 if __name__ == "__main__":
