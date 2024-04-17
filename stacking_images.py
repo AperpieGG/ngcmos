@@ -3,6 +3,7 @@ import os
 import glob
 import numpy as np
 from astropy.io import fits
+from utils import utc_to_jd
 
 
 TODO = """
@@ -27,8 +28,11 @@ image_splits = np.array_split(images, n_splits)
 
 # stack the images
 for i, image_split in enumerate(image_splits):
+    # convert DATE-OBS to JD
+    jd_start = utc_to_jd(fits.getheader(image_split[0])['DATE-OBS'])
+    jd_end = utc_to_jd(fits.getheader(image_split[-1])['DATE-OBS'])
     # take the jd_mid from the first image and the last image and average them to get the mid point of the observation
-    jd_mid = (float(fits.getheader(image_split[0])['JD-MID']) + float(fits.getheader(image_split[-1])['JD-MID'])) / 2
+    jd_mid = (float(jd_start) + float(jd_end)) / 2
     # save the stacked image in the out directory with the name of the first image stacked_{first_image}.fits
     stacked_image = fits.HDUList()
     for j, image in enumerate(image_split):
