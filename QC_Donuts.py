@@ -264,7 +264,7 @@ def plot_shifts(x_shifts, y_shifts, save_path, prefix, time):
     scatter = ax.scatter(x_shifts, y_shifts, c=time, cmap='viridis', label='Shifts for field: {}'.format(prefix), marker='o')
     plt.xlabel('X Shift (pixels)')
     plt.ylabel('Y Shift (pixels)')
-    plt.title('Shifts with respect to the ref image')
+    plt.title('Shifts to ref image')
     plt.axhline(0, color='black', linestyle='-', linewidth=1)  # Add horizontal line at y=0
     plt.axvline(0, color='black', linestyle='-', linewidth=1)  # Add vertical line at x=0
     plt.legend()
