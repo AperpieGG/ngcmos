@@ -295,7 +295,7 @@ def main_loop(phot_files, bin_size):
 
 if __name__ == "__main__":
     # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
+    current_night_directory = os.getcwd()
 
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
