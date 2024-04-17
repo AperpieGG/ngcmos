@@ -39,7 +39,8 @@ for i, image_split in enumerate(image_splits):
         if j == 0:
             stacked_image = fits.open(image)
         else:
-            stacked_image[0].data += fits.open(image)[0].data
+            # convert the data to float32 to avoid overflow
+            stacked_image[0].data = stacked_image[0].data.astype(np.float32)
     stacked_image_filename = f"stacked_{image_split[0]}"
     stacked_image[0].header['JD-MID'] = jd_mid
     stacked_image.writeto(stacked_image_filename)
