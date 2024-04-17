@@ -229,7 +229,7 @@ def main(phot_file, bin_size):
     plot_images()
 
     # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
+    current_night_directory = os.getcwd()
 
     # Plot the current photometry file
     print(f"Plotting the photometry file {phot_file}...")
