@@ -38,6 +38,7 @@ for i, image_split in enumerate(image_splits):
     for j, image in enumerate(image_split):
         if j == 0:
             stacked_image = fits.open(image)
+            stacked_image[0].data = stacked_image[0].data.astype(np.float32)  # Convert to float32
         else:
             # convert the data to float32 to avoid overflow
             stacked_image[0].data += fits.open(image)[0].data.astype(np.float32)
