@@ -22,7 +22,7 @@ images.sort()
 
 # create an array to split depending on the number of images 422 images to be stacked (1 min binned)
 n_images = len(images)
-n_images_to_stack = 422
+n_images_to_stack = 100
 n_splits = n_images // n_images_to_stack
 image_splits = np.array_split(images, n_splits)
 
@@ -40,7 +40,7 @@ for i, image_split in enumerate(image_splits):
             stacked_image = fits.open(image)
         else:
             stacked_image[0].data += fits.open(image)[0].data
-    stacked_image_filename = f"stacked_{image_split[0]}"        
+    stacked_image_filename = f"stacked_{image_split[0]}"
     stacked_image[0].header['JD-MID'] = jd_mid
     stacked_image.writeto(stacked_image_filename)
     stacked_image.close()
