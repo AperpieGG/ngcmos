@@ -211,11 +211,16 @@ def main():
 
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
-            print(f"Performing relative photometry for TIC ID {tic_id}")
-            (time_clipped, fluxes_clipped, dt_flux, dt_fluxerr,
-             tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id, bin_size=1)
-            plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
-                             dt_flux_binned, tic_id, bin_size=1)
+            # Check if the Tmag is brighter than 14
+            if np.any(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
+                print(f"Performing relative photometry for TIC ID {tic_id}")
+                (time_clipped, fluxes_clipped, dt_flux, dt_fluxerr,
+                 tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id,
+                                                                                       bin_size=1)
+                plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
+                                 dt_flux_binned, tic_id, bin_size=1)
+            else:
+                print(f"TIC ID {tic_id} is brighter than 14 magnitudes. Skipping.")
 
 
 if __name__ == "__main__":
