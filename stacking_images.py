@@ -40,7 +40,8 @@ for i, image_split in enumerate(image_splits):
             stacked_image = fits.open(image)
         else:
             stacked_image[0].data += fits.open(image)[0].data
-    stacked_image_filename = f"stacked_{image_split[0]}"
+    stacked_image_filename = f"stacked_{image_split[0]}"        
+    stacked_image[0].header['JD-MID'] = jd_mid
     stacked_image.writeto(stacked_image_filename)
     stacked_image.close()
     print(f"Stacked image saved as {stacked_image_filename} with JD-MID = {jd_mid}")
