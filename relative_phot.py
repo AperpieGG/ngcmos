@@ -229,6 +229,7 @@ def main():
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms))
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis.")
+                print()
 
         # Create an Astropy table from the data list
         data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS'))
