@@ -3,6 +3,7 @@ import json
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+from astropy.table import Table
 from utils import (plot_images, find_current_night_directory,
                    get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file)
 
@@ -221,12 +222,21 @@ def main():
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
-                print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms))
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis.")
+
+        # Create an Astropy table from the data list
+        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS'))
+
+        # Write the table to a FITS file with the desired name
+        base_filename = phot_file.split('.')[0]  # Remove the file extension
+        fits_filename = f"rel_{base_filename}.fits"  # Add 'rel_' prefix
+        data_table.write(fits_filename, format='fits', overwrite=True)
+
+        print(f"Data for {phot_file} saved to {fits_filename}.")
 
 
 if __name__ == "__main__":
