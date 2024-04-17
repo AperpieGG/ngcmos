@@ -5,7 +5,7 @@ from utils import plot_images
 
 plot_images()
 # Load the FITS file containing the relative photometry data
-fits_filename = 'rel_phot_NG0625+0058.fits'  # Replace 'XXXX-XXXX' with the appropriate filename
+fits_filename = 'rel_phot_NG1109-2807.fits'  # Replace 'XXXX-XXXX' with the appropriate filename
 data_table = fits.getdata(fits_filename)
 
 # Extract time and flux for the first star
