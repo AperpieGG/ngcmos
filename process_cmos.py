@@ -92,7 +92,7 @@ def filter_filenames(directory):
     filtered_filenames = []
     for filename in os.listdir(directory):
         if filename.endswith('.fits'):
-            exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog", "phot", "catalog_input", "TIC-270577175"]
+            exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog", "phot", "catalog_input"]
             if any(word in filename.lower() for word in exclude_words):
                 continue
             filtered_filenames.append(filename)  # Append only the filename without the directory path
