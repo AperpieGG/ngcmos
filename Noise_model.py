@@ -100,7 +100,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
         sky_list.append(np.median(sky_4))
 
         # Calculate magnitudes using the average zp
-        mags = -2.5 * np.log10(flux_4_clipped / 0.1) + average_zp
+        mags = -2.5 * np.log10(flux_4_clipped / 10) + average_zp
         mags_list.append(np.nanmean(mags))
         Tmags_list.append(round(Tmag, 2))
 
@@ -189,7 +189,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
-    exposure_time = 0.1
+    exposure_time = 10
 
     synthetic_flux = np.arange(100, 1e7, 1000)
     synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
