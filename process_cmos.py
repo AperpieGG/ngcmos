@@ -148,14 +148,16 @@ def main():
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
             print(f"Processing filename {filename}......")
+            # Calibrate image and get FITS file
             print(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
+            reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
+            print(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
+            # Convert reduced_data to a dictionary with filenames as keys
+            reduced_data_dict = {filename: (data, header) for data, header in zip(reduced_data, reduced_header)}
 
-            # Access the filename directly without reducing the images
-            # convert data to astype(float) to avoid integer division
-            frame_data = fits.getdata(os.path.join(directory, filename)).astype(float)
-            frame_hdr = fits.getheader(os.path.join(directory, filename))
-
-            print(f"The average pixel value for {filename} is {frame_data.mean()}")
+            # Access the reduced data and header corresponding to the filename
+            frame_data, frame_hdr = reduced_data_dict[filename]
+            print(f"Extracting photometry for {filename}\n")
 
             wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
             wcs_header = {}
