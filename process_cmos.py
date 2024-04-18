@@ -151,7 +151,8 @@ def main():
             print(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
 
             # Access the filename directly without reducing the images
-            frame_data = fits.getdata(os.path.join(directory, filename))
+            # convert data to astype(float) to avoid integer division
+            frame_data = fits.getdata(os.path.join(directory, filename)).astype(float)
             frame_hdr = fits.getheader(os.path.join(directory, filename))
 
             print(f"The average pixel value for {filename} is {frame_data.mean()}")
