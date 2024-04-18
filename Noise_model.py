@@ -191,7 +191,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     # set exposure time and and random flux
     exposure_time = 10
 
-    synthetic_flux = np.arange(100, 1e8, 1000)
+    synthetic_flux = np.arange(100, 1e7, 1000)
     synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
 
     # set dark current rate from cmos characterisation
@@ -200,7 +200,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
 
     # set read noise from cmos characterisation
-    read_noise_pix = 1.56 * 10
+    read_noise_pix = 1.56
     read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     read_signal = npix * (read_noise_pix ** 2)
 
