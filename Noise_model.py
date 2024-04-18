@@ -100,7 +100,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
         sky_list.append(np.median(sky_4))
 
         # Calculate magnitudes using the average zp
-        mags = -2.5 * np.log10(flux_4_clipped / 10) + average_zp
+        mags = -2.5 * np.log10(flux_4_clipped / 0.1) + average_zp
         mags_list.append(np.nanmean(mags))
         Tmags_list.append(round(Tmag, 2))
 
@@ -138,7 +138,7 @@ def extract_header(table, image_directory):
 
 
 def scintilation_noise(airmass_list):
-    t = 10  # exposure time
+    t = 0.1  # exposure time
     D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
     H = 8000  # height of atmospheric scale
