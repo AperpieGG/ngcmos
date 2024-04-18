@@ -79,7 +79,7 @@ def plot_noise_model(data):
     # total_mags = [Tmag_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
 
     total_RMS = RMS_list
-    total_mags = Tmag_list
+    total_mags = mags_list
 
     ax.plot(total_mags, total_RMS, 'o', color='c', label='total data', alpha=0.5)
 
