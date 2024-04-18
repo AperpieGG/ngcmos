@@ -138,7 +138,7 @@ def extract_header(table, image_directory):
 
 
 def scintilation_noise(airmass_list):
-    t = 0.1  # exposure time
+    t = 10  # exposure time
     D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
     H = 8000  # height of atmospheric scale
