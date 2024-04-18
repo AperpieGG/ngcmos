@@ -35,6 +35,18 @@ def identify_saturated_images(directory):
     return saturated_images
 
 
+def delete_images(image_list):
+    """
+    Delete the images from the filesystem.
+
+    Parameters:
+    image_list (list): List of image filenames to be deleted.
+    """
+    for image in image_list:
+        os.remove(image)
+        print(f"Deleted image: {image}")
+
+
 if __name__ == "__main__":
     directory = "."  # Set the directory to the current working directory
     saturated_images = identify_saturated_images(directory)
@@ -43,5 +55,7 @@ if __name__ == "__main__":
         print("Images with saturated pixels:")
         for image in saturated_images:
             print(image)
+
+        delete_images(saturated_images)  # Delete the saturated images
     else:
         print("No images with saturated pixels found.")
