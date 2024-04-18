@@ -62,10 +62,10 @@ def plot_noise_model(data):
     Tmag_list = data['Tmag_list']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
-    photon_shot_noise = data['photon_shot_noise']
-    read_noise = data['read_noise']
-    dc_noise = data['dc_noise']
-    sky_noise = data['sky_noise'] 
+    photon_shot_noise = data['photon_shot_noise'] * np.ones(100)
+    read_noise = data['read_noise'] * np.ones(100)
+    dc_noise = data['dc_noise'] * np.ones(100)
+    sky_noise = data['sky_noise'] * np.ones(100)
     N = data['N']
 
     # Filter data points based on magnitude and RMS
