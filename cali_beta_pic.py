@@ -82,6 +82,10 @@ def reduce_images(out_path, prefix_filenames):
 
             # Reduce image
             fd = (fd - master_bias) / master_flat
+
+            # Convert to np.float32
+            fd = fd.astype(np.float32)
+
             reduced_data.append(fd)  # Append the reduced image to the list
             reduced_header_info.append(hdr)
 
