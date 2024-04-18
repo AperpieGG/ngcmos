@@ -2,21 +2,48 @@
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from utils import plot_images
+import argparse
 
-plot_images()
-# Load the FITS file containing the relative photometry data
-fits_filename = 'rel_phot_NG1109-2807.fits'  # Replace 'XXXX-XXXX' with the appropriate filename
-data_table = fits.getdata(fits_filename)
 
-# Extract time and flux for the first star
-TIC_ID = data_table['TIC_ID'][2]  # TIC ID for the first star
-first_star_time = data_table['Time_JD'][2]  # Time for the first star
-first_star_flux = data_table['Relative_Flux'][2]  # Flux for the first star
+def search_and_extract_info(filename, tic_id):
+    # Load the FITS file containing the relative photometry data
+    data_table = fits.getdata(filename)
 
-# Plot flux versus time for the first star
-plt.figure(figsize=(8, 6))
-plt.plot(first_star_time, first_star_flux, 'o')
-plt.xlabel('Time (JD)')
-plt.ylabel('Relative Flux')
-plt.title('Relative Photometry for TIC ID ' + str(TIC_ID))
-plt.show()
+    # Search for the index of the provided TIC ID in the data table
+    index = None
+    for i, id in enumerate(data_table['TIC_ID']):
+        if id == tic_id:
+            index = i
+            break
+
+    if index is None:
+        print(f"TIC ID {tic_id} not found in the data.")
+        return
+
+    # Extract information for the provided TIC ID
+    star_time = data_table['Time_JD'][index]  # Time for the star
+    star_flux = data_table['Relative_Flux'][index]  # Flux for the star
+
+    # Plot flux versus time for the star
+    plt.figure(figsize=(8, 6))
+    plt.plot(star_time, star_flux, 'o')
+    plt.xlabel('Time (JD)')
+    plt.ylabel('Relative Flux')
+    plt.title(f'Relative Photometry for TIC ID {tic_id}')
+    plt.show()
+
+
+def main():
+    plot_images()
+
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
+    parser.add_argument('tic_id', type=int, help='TIC ID of the star')
+    args = parser.parse_args()
+
+    search_and_extract_info(args.filename, args.tic_id)
+
+
+if __name__ == "__main__":
+    main()
