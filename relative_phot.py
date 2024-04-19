@@ -115,9 +115,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly, dt_fluxerr_poly,
                                                                          bin_size)
 
-    RMS = np.std(dt_flux_binned)
-    print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
-
     return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
 
 
@@ -155,7 +152,8 @@ def main():
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id, bin_size=1)
 
                 # Calculate RMS
-                rms = np.std(dt_flux_binned)
+                RMS = np.std(dt_flux_binned)
+                print(f"RMS for TIC ID {tic_id} = {RMS:.4f}")
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms))
