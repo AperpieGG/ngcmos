@@ -11,6 +11,7 @@
 - Perform relative photometry by dividing the normalized_target_flux with the normalized_reference_flux (dt_flux)
 - Apply a second order polynomial to correct from color (dt_flux_poly)
 """
+import argparse
 import os
 import numpy as np
 from astropy.table import Table
@@ -124,6 +125,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
+    parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
+    args = parser.parse_args()
+
     # Set plot parameters
     plot_images()
 
@@ -155,7 +160,7 @@ def main():
             if np.any(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 print(f"Performing relative photometry for TIC ID {tic_id}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median) = (
-                    relative_phot(phot_table, tic_id, bin_size=1))
+                    relative_phot(phot_table, tic_id, args.bin_size))
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
