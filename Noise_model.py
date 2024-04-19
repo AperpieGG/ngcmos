@@ -100,9 +100,7 @@ def main():
     args = parser.parse_args()
     bin_size = args.bin
     filename = args.filename
-
-    # Run the main function for each photometry file
-    main(args.filename, bin_size)
+    
     # Get the current night directory
     current_night_directory = os.getcwd()
 
