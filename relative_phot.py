@@ -162,7 +162,7 @@ def main():
                 print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
                 # Append data to the list
-                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms))
+                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms, sky_median))
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis.")
                 print()
