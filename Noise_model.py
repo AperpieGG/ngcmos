@@ -135,7 +135,7 @@ def main(phot_file, bin_size):
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_list, zp, aper=6, read_noise=1.56, dark_curent=1.6))
+        noise_sources(sky_list, bin_size, airmass_list, zp, aper=6, read_noise=1.56, dark_current=1.6))
 
     # Plot the noise model
 
