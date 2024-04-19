@@ -100,7 +100,7 @@ def main():
     args = parser.parse_args()
     bin_size = args.bin
     filename = args.filename
-    
+
     # Get the current night directory
     current_night_directory = os.getcwd()
 
