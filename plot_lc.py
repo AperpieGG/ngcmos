@@ -30,7 +30,7 @@ def search_and_extract_info(filename, tic_id):
     plt.plot(star_time, star_flux, 'o')
     plt.xlabel('Time (JD)')
     plt.ylabel('Relative Flux')
-    plt.title(f'Relative Photometry for TIC ID {tic_id} (Tmag = {tmag})')
+    plt.title(f'Relative Photometry for TIC ID {tic_id} (Tmag = {tmag:.2f})')
     plt.show()
 
 
