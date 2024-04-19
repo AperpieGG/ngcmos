@@ -18,6 +18,7 @@ from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_er
                    calculate_trend_and_flux)
 
 SIGMA = 2
+APERTURE = 6
 
 
 def relative_phot(table, tic_id_to_plot, bin_size):
@@ -41,7 +42,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
     rms_comp_list = []
 
-    jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot)
+    jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot, aper=APERTURE)
+
+    # Calculate the median sky value for our star
+    sky_median = np.median(sky)
+    print('The sky median for the TIC ID {} is {}'.format(tic_id_to_plot, sky_median))
 
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
@@ -115,7 +120,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly, dt_fluxerr_poly,
                                                                          bin_size)
 
-    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
+    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median
 
 
 def main():
@@ -149,11 +154,12 @@ def main():
             # Check if the Tmag is brighter than 14
             if np.any(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 print(f"Performing relative photometry for TIC ID {tic_id}")
-                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id, bin_size=1)
+                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median) = (
+                    relative_phot(phot_table, tic_id, bin_size=1))
 
                 # Calculate RMS
-                RMS = np.std(dt_flux_binned)
-                print(f"RMS for TIC ID {tic_id} = {RMS:.4f}")
+                rms = np.std(dt_flux_binned)
+                print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms))
@@ -162,7 +168,7 @@ def main():
                 print()
 
         # Create an Astropy table from the data list
-        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS'))
+        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS', 'Sky'))
 
         # Write the table to a FITS file with the desired name
         data_table.write(fits_filename, format='fits', overwrite=True)
