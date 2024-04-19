@@ -92,16 +92,23 @@ def rms_vs_mags(table, bin_size, num_stars, average_zp):
     return mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list
 
 
-def main(phot_file, bin_size):
-    # Set plot parameters
-    plot_images()
+def main():
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
+    parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
+    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    args = parser.parse_args()
+    bin_size = args.bin
+    filename = args.filename
 
+    # Run the main function for each photometry file
+    main(args.filename, bin_size)
     # Get the current night directory
     current_night_directory = os.getcwd()
 
     # Plot the current photometry file
-    print(f"Plotting the photometry file {phot_file}...")
-    phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+    print(f"Plotting the photometry file {filename}...")
+    phot_table = read_phot_file(os.path.join(current_night_directory, filename))
 
     # Extract airmass and zero point values from the images
     airmass_list, zp = extract_airmass_zp(phot_table, current_night_directory)
@@ -117,8 +124,6 @@ def main(phot_file, bin_size):
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
         noise_sources(sky_list, bin_size, airmass_list, zp, aper=APERTURE, read_noise=READ_NOISE,
                       dark_current=DARK_CURRENT))
-
-    # Plot the noise model
 
     synthetic_mag_list = synthetic_mag.tolist()
     photon_shot_noise_list = photon_shot_noise.tolist()
@@ -143,26 +148,13 @@ def main(phot_file, bin_size):
         "N": N_list,
         "RNS": RNS_list
     }
-    file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
+    file_name = f"rms_mags_{filename.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
         json.dump(output_data, json_file, indent=4)
 
 
 if __name__ == "__main__":
-    # Get the current night directory
-    current_night_directory = os.getcwd()
+    main()
 
-    # Get photometry files with the pattern 'phot_*.fits'
-    phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
 
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
-    parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
-    parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
-    args = parser.parse_args()
-    bin_size = args.bin
-
-    # Run the main function for each photometry file
-    main(args.filename, bin_size)
