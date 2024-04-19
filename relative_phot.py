@@ -14,7 +14,8 @@
 import os
 import numpy as np
 from astropy.table import Table
-from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file)
+from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file,
+                   calculate_trend_and_flux)
 
 
 def relative_phot(table, tic_id_to_plot, bin_size):
@@ -119,11 +120,13 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
-    # use polynomial to detrend for color
-    trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), dt_flux, 2),
-                       time_clipped - int(time_clipped[0]))
-    dt_flux_poly = dt_flux / trend
-    dt_fluxerr_poly = dt_fluxerr / trend
+    # # use polynomial to detrend for color
+    # trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), dt_flux, 2),
+    #                    time_clipped - int(time_clipped[0]))
+    # dt_flux_poly = dt_flux / trend
+    # dt_fluxerr_poly = dt_fluxerr / trend
+
+    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
 
     # Bin the time, flux, and error
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly, dt_fluxerr_poly,
