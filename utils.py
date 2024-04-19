@@ -515,7 +515,7 @@ def utc_to_jd(utc_time_str):
     return jd
 
 
-def extract_phot_file(table, tic_id_to_plot):
+def extract_phot_file(table, tic_id_to_plot, aper):
     """
     Extract data for a specific TIC ID from the table.
 
@@ -524,25 +524,29 @@ def extract_phot_file(table, tic_id_to_plot):
         Table containing the photometry data
     tic_id_to_plot : int
         TIC ID of the star
+    aper : int
+        Aperture size for flux extraction
 
     Returns:
     jd_mid : array
-        values of JD midpoints
+        Values of JD midpoints
     tmag : float
         Tmag value for the specified TIC ID
     fluxes : array
-        vales of flux
+        Values of flux
     fluxerrs : array
-        values of flux error
+        Values of flux error
+    sky : array
+        Values of sky flux
     """
     # Select rows with the specified TIC ID
     tic_id_data = table[table['tic_id'] == tic_id_to_plot]
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = tic_id_data['jd_mid']
     tmag = tic_id_data['Tmag'][0]
-    fluxes = tic_id_data['flux_6']
-    fluxerrs = tic_id_data['fluxerr_6']
-    sky = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
+    fluxes = tic_id_data[f'flux_{aper}']
+    fluxerrs = tic_id_data[f'fluxerr_{aper}']
+    sky = tic_id_data[f'flux_w_sky_{aper}'] - tic_id_data[f'flux_{aper}']
 
     return jd_mid, tmag, fluxes, fluxerrs, sky
 
