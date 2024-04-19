@@ -136,57 +136,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     return time_clipped, fluxes_clipped, dt_flux_poly, dt_fluxerr_poly, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
 
-
-def plot_relative_lc(time_clipped, fluxes_clipped, dt_flux, dt_fluxerr, tmag, time_binned,
-                     dt_flux_binned, tic_id_to_plot, bin_size):
-    """
-    Plot the relative light curve for a specific TIC ID
-
-    Parameters:
-    time_clipped : numpy.ndarray
-        Clipped time values
-    fluxes_clipped : numpy.ndarray
-        Clipped flux values
-    trend : numpy.ndarray
-        Trend values
-    dt_flux : numpy.ndarray
-        Detrended flux values
-    dt_fluxerr : numpy.ndarray
-        Detrended flux error values
-    time_binned : numpy.ndarray
-        Binned time values
-    dt_flux_binned : numpy.ndarray
-        Binned detrended flux values
-    tic_id_to_plot : int
-        TIC ID of the star to plot
-    tmag : float
-        Tmag value of the star
-    bin_size : int
-        Number of images to bin
-
-    """
-    # Create subplots
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-    exposure_time = 10 / 60  # 10 seconds in minutes
-    # Plot raw flux with wotan model
-    ax1.plot(time_clipped, fluxes_clipped, '.', color='black', label='Raw Flux')
-    ax1.set_title(f'TIC ID {tic_id_to_plot}, Tmag = {tmag:.2f}, binned {bin_size}')
-    ax1.set_xlabel('MJD [days]')
-    ax1.set_ylabel('Raw Flux [e-]')
-    ax1.legend()
-    ax2.errorbar(time_clipped, dt_flux, yerr=dt_fluxerr, fmt='.', color='black')
-    if bin_size > 1:
-        ax2.plot(time_binned, dt_flux_binned, 'o', markerfacecolor='red')
-        # Set limits only for the binned data axis
-        ax2.set_ylim([np.min(dt_flux_binned) * np.abs(np.min(dt_flux_binned)),
-                      np.max(dt_flux_binned) * np.abs(np.max(dt_flux_binned))])
-    ax2.set_ylabel('Relative Flux [e-], binned {:.2f} min'.format(bin_size * exposure_time))
-    ax2.set_xlabel('MJD [days]')
-
-    plt.tight_layout()
-    plt.show()
-
-
 def main():
     # Set plot parameters
     plot_images()
