@@ -134,7 +134,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     RMS = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
-    return time_clipped, fluxes_clipped, dt_flux_poly, dt_fluxerr_poly, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
+    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
+
 
 def main():
     # Set plot parameters
@@ -167,8 +168,7 @@ def main():
             # Check if the Tmag is brighter than 14
             if np.any(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 print(f"Performing relative photometry for TIC ID {tic_id}")
-                (time_clipped, fluxes_clipped, dt_flux, dt_fluxerr,
-                 tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id, bin_size=1)
+                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned) = relative_phot(phot_table, tic_id, bin_size=1)
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
