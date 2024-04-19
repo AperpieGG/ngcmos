@@ -131,8 +131,7 @@ def main(phot_file, bin_size):
 
     # Calculate mean and RMS for the noise model
     RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=max_num_stars, directory=current_night_directory,
-        average_zp=np.mean(zp))
+        phot_table, bin_size=bin_size, num_stars=max_num_stars, average_zp=np.mean(zp))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
