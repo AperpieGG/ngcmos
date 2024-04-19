@@ -581,4 +581,97 @@ def calculate_trend_and_flux(time, flux, fluxerr, degree=2):
     return trend, dt_flux, dt_fluxerr
 
 
+def scintilation_noise(airmass_list):
+    t = 10  # exposure time
+    D = 0.2  # telescope diameter
+    h = 2433  # height of Paranal
+    H = 8000  # height of atmospheric scale
+    airmass = np.mean(airmass_list)  # airmass
+    C_y = 1.54  # constant
+    N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
+    print('Scintilation noise: ', N)
+    return N
+
+
+def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_current):
+    """
+    Returns the noise sources for a given flux
+
+    returns arrays of noise and signal for a given flux
+
+    Parameters
+    ----------
+    sky_list : list
+        values of sky fluxes
+    bin_size : int
+        number of images to bin
+    airmass_list : list
+        values of airmass
+    zp : list
+        values of zero points
+    aper : int
+        aperture size
+    read_noise : float
+        value of read noise
+    dark_current : float
+        value of dark current
+
+    Returns
+    -------
+    synthetic_mag : array
+        values of synthetic magnitudes
+    photon_shot_noise : array
+        values of photon shot noise
+    sky_noise : array
+        values of sky noise
+    read_noise : array
+        values of read noise
+    dc_noise : array
+        values of dark current noise
+    N : array
+        values of scintilation noise
+    RNS : array
+        values of read noise squared
+    """
+
+    # set aperture radius
+    aperture_radius = aper
+    npix = np.pi * aperture_radius ** 2
+
+    # set exposure time and and random flux
+    exposure_time = 10
+
+    synthetic_flux = np.arange(100, 1e7, 1000)
+    synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
+
+    # set dark current rate from cmos characterisation
+    dark_current_rate = dark_current
+    dark_current = dark_current_rate * exposure_time * npix
+    dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
+
+    # set read noise from cmos characterisation
+    read_noise_pix = read_noise
+    read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
+    read_signal = npix * (read_noise_pix ** 2)
+
+    # set random sky background
+    sky_flux = np.mean(sky_list)
+    sky_noise = np.sqrt(sky_flux) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
+    print('Average sky flux: ', sky_flux)
+
+    # set random photon shot noise from the flux
+    photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
+
+    N = scintilation_noise(airmass_list)
+
+    N_sc = (N * synthetic_flux) ** 2
+    N = N / np.sqrt(bin_size) * 1000000  # Convert to ppm
+
+    total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
+    RNS = total_noise / synthetic_flux / np.sqrt(bin_size)
+    RNS = RNS * 1000000  # Convert to ppm
+
+    return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
+
+
 
