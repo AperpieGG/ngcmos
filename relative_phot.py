@@ -37,7 +37,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     """
     # Select stars for master reference star, excluding the target star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) & (table['tic_id'] != tic_id_to_plot)]
+    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 14) & (table['tic_id'] != tic_id_to_plot)]
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
     rms_comp_list = []
 
