@@ -13,11 +13,15 @@ import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt, ticker
 import json
-from utils import (find_current_night_directory, read_phot_file, get_phot_files, bin_time_flux_error, plot_images,
-                   remove_outliers, calculate_trend_and_flux, noise_sources)
+from utils import (read_phot_file, get_phot_files, bin_time_flux_error, plot_images,
+                   remove_outliers, calculate_trend_and_flux, noise_sources, extract_airmass_zp)
+
+APERTURE = 6
+READ_NOISE = 1.56
+DARK_CURRENT = 1.6
 
 
-def calculate_mean_rms_flux(table, bin_size, num_stars, average_zp):
+def rms_vs_mags(table, bin_size, num_stars, average_zp):
     """
     Calculate the mean flux and RMS for a given number of stars
 
@@ -88,32 +92,6 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, average_zp):
     return mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list
 
 
-def extract_header(table, image_directory):
-    unique_frame_ids = np.unique(table['frame_id'])
-
-    airmass_list = []
-    zp_list = []
-
-    for frame_id in unique_frame_ids:
-        # Get the path to the FITS file
-        fits_file_path = os.path.join(image_directory, frame_id)
-
-        # Read FITS file header to extract airmass
-        with fits.open(fits_file_path) as hdul:
-            image_header = hdul[0].header
-            airmass = round(image_header['AIRMASS'], 3)
-            zp = image_header['MAGZP_T']
-
-        # Append airmass value and frame ID to the list
-        airmass_list.append(airmass)
-        zp_list.append(zp)
-
-    print(f"Average airmass: {np.mean(airmass_list)}")
-    print(f"Average ZP: {np.mean(zp_list)}")
-
-    return airmass_list, zp_list
-
-
 def main(phot_file, bin_size):
     # Set plot parameters
     plot_images()
@@ -125,17 +103,20 @@ def main(phot_file, bin_size):
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-    airmass_list, zp = extract_header(phot_table, current_night_directory)
+    # Extract airmass and zero point values from the images
+    airmass_list, zp = extract_airmass_zp(phot_table, current_night_directory)
 
-    max_num_stars = len(np.unique(phot_table['tic_id']))  # Maximum number of stars based on unique TIC IDs
+    # Get the maximum number of stars based on unique TIC IDs
+    max_num_stars = len(np.unique(phot_table['tic_id']))
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
+    mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = rms_vs_mags(
         phot_table, bin_size=bin_size, num_stars=max_num_stars, average_zp=np.mean(zp))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_list, zp, aper=6, read_noise=1.56, dark_current=1.6))
+        noise_sources(sky_list, bin_size, airmass_list, zp, aperture=APERTURE, read_noise=READ_NOISE,
+                      dark_current=DARK_CURRENT))
 
     # Plot the noise model
 
@@ -168,20 +149,6 @@ def main(phot_file, bin_size):
         json.dump(output_data, json_file, indent=4)
 
 
-def main_loop(phot_files, bin_size):
-    for phot_file in phot_files:
-        output_file = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
-        output_path = os.path.join(os.getcwd(), output_file)
-
-        # Check if the output file already exists
-        if os.path.exists(output_path):
-            print(f"Output file '{output_file}' already exists. Skipping '{phot_file}'.")
-            continue
-
-        # If the output file doesn't exist, run the main function
-        main(phot_file, bin_size)
-
-
 if __name__ == "__main__":
     # Get the current night directory
     current_night_directory = os.getcwd()
@@ -192,9 +159,10 @@ if __name__ == "__main__":
 
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
+    parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
 
     # Run the main function for each photometry file
-    main_loop(phot_files, bin_size)
+    main(args.filename, bin_size)
