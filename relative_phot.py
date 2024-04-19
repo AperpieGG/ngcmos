@@ -49,6 +49,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     sky_median = np.median(sky)
     print('The sky median for the TIC ID {} is {}'.format(tic_id_to_plot, sky_median))
 
+    # Remove outliers from the target star
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     for tic_id in np.unique(master_star_data['tic_id']):
@@ -102,19 +103,18 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"Reference flux mean = {reference_flux_mean:.2f}")
 
     # Normalize reference star flux
-    reference_flux_normalized = reference_fluxes / reference_flux_mean
-    print(f"Reference flux normalized = {reference_flux_normalized}")
-
-    # Normalize target star flux
-    target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
-    print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
+    # reference_flux_normalized = reference_fluxes / reference_flux_mean
+    # print(f"Reference flux normalized = {reference_flux_normalized}")
+    #
+    # # Normalize target star flux
+    # target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
 
     flux_ratio = fluxes_clipped / reference_fluxes
     flux_ratio_mean = np.mean(flux_ratio)
+    print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
     # Perform relative photometry
-    # dt_flux = flux_ratio / flux_ratio_mean
-    dt_flux = target_flux_normalized / reference_flux_normalized
+    dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
