@@ -30,14 +30,16 @@ def search_and_extract_info(filename, tic_id):
     star_time = data_table['Time_JD'][index]  # Time for the star
     star_flux = data_table['Relative_Flux'][index]  # Flux for the star
     tmag = data_table['Tmag'][index]  # Tmag for the star
+    rms = data_table['RMS'][index]  # RMS for the star
 
     # Plot flux versus time for the star
     plt.figure(figsize=(8, 6))
-    plt.plot(star_time, star_flux, 'o')
+    plt.plot(star_time, star_flux, 'o', label=f'RMS = {rms:.4f}')
     plt.xlabel('Time (JD)')
     plt.ylabel('Relative Flux (e-)')
     plt.title(f'Relative Photometry for TIC ID {tic_id} (Tmag = {tmag:.2f})')
     plt.ylim(0.95, 1.05)
+    plt.legend()
     plt.show()
 
 
