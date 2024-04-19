@@ -7,7 +7,7 @@ from utils import plot_images
 
 
 # dark background
-plt.style.use('dark_background')
+# plt.style.use('dark_background')
 
 
 def load_rms_mags_data(filename):
@@ -75,11 +75,8 @@ def plot_noise_model(data):
     filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
     
     # # Exclude outliers from the total data
-    # total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
-    # total_mags = [Tmag_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
-
-    total_RMS = RMS_list
-    total_mags = mags_list
+    total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
+    total_mags = [Tmag_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
 
     ax.plot(total_mags, total_RMS, 'o', color='c', label='total data', alpha=0.5)
 
@@ -93,7 +90,7 @@ def plot_noise_model(data):
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
-    ax.set_xlim(3, 14)
+    ax.set_xlim(7.5, 14)
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
@@ -122,8 +119,18 @@ def plot_tmag_vs_mag(data):
     print('The length of mags_list is:', len(mags_list))
     tmag_list = data['Tmag_list']
     print('The length of tmag_list is:', len(tmag_list))
+    RMS_list = data['RMS_list']
 
-    ax.plot(tmag_list, mags_list, 'o', color='red', label='data', alpha=0.5)
+    # Filter data points based on magnitude and RMS
+    filtered_indices_bright, filtered_indices_dim = filter_data(mags_list, RMS_list)
+
+    filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
+
+    # # Exclude outliers from the total data
+    tmag_list = [tmag_list[i] for i in range(len(tmag_list)) if i not in filtered_indices]
+    mags_list = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
+
+    ax.plot(tmag_list, mags_list, 'o', color='red', alpha=0.5)
     ax.set_xlabel('Tmag')
     ax.set_ylabel('Mean Magnitude')
     ax.set_xlim(7.5, 16)
