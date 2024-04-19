@@ -76,7 +76,7 @@ def plot_noise_model(data):
     
     # # Exclude outliers from the total data
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
-    total_mags = [Tmag_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
+    total_mags = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
 
     ax.plot(total_mags, total_RMS, 'o', color='c', label='total data', alpha=0.5)
 
@@ -132,10 +132,9 @@ def plot_tmag_vs_mag(data):
 
     ax.plot(tmag_list, mags_list, 'o', color='red', alpha=0.5)
     ax.set_xlabel('Tmag')
-    ax.set_ylabel('Mean Magnitude')
+    ax.set_ylabel('Apparent Magnitude')
     ax.set_xlim(7.5, 16)
     ax.set_ylim(7.5, 16)
-    plt.legend(loc='best')
     plt.tight_layout()
     plt.gca().invert_xaxis()
     plt.gca().invert_yaxis()
