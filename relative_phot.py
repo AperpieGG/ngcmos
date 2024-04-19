@@ -109,8 +109,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
     print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
+    flux_ratio = fluxes_clipped / reference_fluxes
+    flux_ratio_mean = np.mean(flux_ratio)
+
     # Perform relative photometry
-    dt_flux = target_flux_normalized / reference_flux_normalized
+    dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
