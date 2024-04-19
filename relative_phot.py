@@ -1,29 +1,22 @@
 #!/usr/bin/env python
-import json
+"""
+- First, cut the table for stars 9-11 mags, these will be used as reference stars
+- Exclude the tic_id you want to perform relative photometry (target_flux)
+- Measure the rms for each raw lightcurve for your reference stars
+- Find the references stars with the lowest rms (2 sigma clipping threshold)
+- Use this stars and sum their fluxes (sum_fluxes)
+- find the mean of the reference master flux (mean_ref_flux)
+- Normalize the sum_fluxes by dividing with the mean_ref_flux (normalized_reference_flux)
+- Normalize the target_flux by dividing with the mean of the target_flux (normalized_target_flux)
+- Perform relative photometry by dividing the normalized_target_flux with the normalized_reference_flux (dt_flux)
+- Apply a second order polynomial to correct from color (dt_flux_poly)
+- Plot the target star raw lightcurve and the detrended_normalized_target_flux = finish here
+"""
 import os
 import numpy as np
 from matplotlib import pyplot as plt
 from astropy.table import Table
-from utils import (plot_images, find_current_night_directory,
-                   get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file)
-
-
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
+from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file)
 
 
 def relative_phot(table, tic_id_to_plot, bin_size):
@@ -66,7 +59,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         rms_comp_list.append(rms)
 
         # print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
-        # make a list of the rms values
     # Find the index of the minimum rms value
     min_rms_index = np.argmin(rms_comp_list)
     # Get the corresponding tic_id
@@ -140,7 +132,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
                                                                          bin_size)
 
     RMS = np.std(dt_flux_binned)
-    RMS_binned = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
     return time_clipped, fluxes_clipped, dt_flux_poly, dt_fluxerr_poly, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned
