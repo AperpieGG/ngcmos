@@ -130,7 +130,7 @@ def main(phot_file, bin_size):
     max_num_stars = len(np.unique(phot_table['tic_id']))  # Maximum number of stars based on unique TIC IDs
 
     # Calculate mean and RMS for the noise model
-    RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
+    mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
         phot_table, bin_size=bin_size, num_stars=max_num_stars, average_zp=np.mean(zp))
 
     # Get noise sources
