@@ -10,11 +10,9 @@
 - Normalize the target_flux by dividing with the mean of the target_flux (normalized_target_flux)
 - Perform relative photometry by dividing the normalized_target_flux with the normalized_reference_flux (dt_flux)
 - Apply a second order polynomial to correct from color (dt_flux_poly)
-- Plot the target star raw lightcurve and the detrended_normalized_target_flux = finish here
 """
 import os
 import numpy as np
-from matplotlib import pyplot as plt
 from astropy.table import Table
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file)
 
@@ -121,7 +119,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
-    # use polynomial to detrend the light curve
+    # use polynomial to detrend for color
     trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), dt_flux, 2),
                        time_clipped - int(time_clipped[0]))
     dt_flux_poly = dt_flux / trend
