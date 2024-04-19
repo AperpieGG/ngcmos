@@ -17,6 +17,8 @@ from astropy.table import Table
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file,
                    calculate_trend_and_flux)
 
+SIGMA = 2
+
 
 def relative_phot(table, tic_id_to_plot, bin_size):
     """
@@ -41,11 +43,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot)
 
-    print(f"Number of fluxes data points = {len(fluxes)}")
-
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
-
-    print(f"Number of fluxes data points after clipping = {len(fluxes_clipped)}")
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
@@ -55,13 +53,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
         # detrend the lc and measure rms
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
-
         # measure rms
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
-        # print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
-    # Find the index of the minimum rms value
     min_rms_index = np.argmin(rms_comp_list)
     # Get the corresponding tic_id
     min_rms_tic_id = np.unique(master_star_data['tic_id'])[min_rms_index]
@@ -72,7 +67,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     rms_std = np.std(rms_comp_list)
 
     # Define the threshold for two sigma clipping
-    threshold = 2 * rms_std
+    threshold = SIGMA * rms_std
     print(f"Threshold for two sigma clipping = {threshold:.4f}")
 
     # Get the minimum rms value and its corresponding tic_id
@@ -93,12 +88,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(
         f"Number of comp stars within a sigma = {len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
 
-    # Check if tic_id_to_plot is included in the master_star_data
-    if tic_id_to_plot in np.unique(master_star_data['tic_id']):
-        print(f"TIC ID {tic_id_to_plot} is included.")
-    else:
-        print(f"TIC ID {tic_id_to_plot} is not included.")
-
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
 
     # Calculate reference star flux using only the filtered comparison stars
@@ -114,15 +103,12 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
     print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
-    # target_flux_normalized = fluxes_clipped / reference_fluxes
-
-    # target_flux_normalized = target_flux_normalized / np.mean(target_flux_normalized)
-
     # Perform relative photometry
     dt_flux = target_flux_normalized / reference_flux_normalized
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
+    # Correct for color using a second order polynomial
     trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
 
     # Bin the time, flux, and error
