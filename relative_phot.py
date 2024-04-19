@@ -53,8 +53,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time, fluxes, fluxerrs = remove_outliers(time, fluxes, fluxerrs)
 
+        # detrend the lc and measure rms
+        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
+
         # measure rms
-        rms = np.std(fluxes)
+        rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
         # print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
@@ -119,12 +122,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     dt_flux = target_flux_normalized / reference_flux_normalized
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
-
-    # # use polynomial to detrend for color
-    # trend = np.polyval(np.polyfit(time_clipped - int(time_clipped[0]), dt_flux, 2),
-    #                    time_clipped - int(time_clipped[0]))
-    # dt_flux_poly = dt_flux / trend
-    # dt_fluxerr_poly = dt_fluxerr / trend
 
     trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
 
