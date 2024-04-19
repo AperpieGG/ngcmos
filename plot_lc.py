@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""
+Plot light curve for a given TIC ID from a FITS file containing photometry data
+The data is taken from the rel_phot_NGFIELD.fits file that is created from relative_phot.py
+"""
+
+
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from utils import plot_images
@@ -29,8 +35,9 @@ def search_and_extract_info(filename, tic_id):
     plt.figure(figsize=(8, 6))
     plt.plot(star_time, star_flux, 'o')
     plt.xlabel('Time (JD)')
-    plt.ylabel('Relative Flux')
+    plt.ylabel('Relative Flux (e-)')
     plt.title(f'Relative Photometry for TIC ID {tic_id} (Tmag = {tmag:.2f})')
+    plt.ylim(0.95, 1.05)
     plt.show()
 
 
