@@ -10,10 +10,8 @@ The fluxes are converted to magnitudes using zero points. The final plot is RMS 
 import argparse
 import os
 import numpy as np
-from astropy.io import fits
-from matplotlib import pyplot as plt, ticker
 import json
-from utils import (read_phot_file, get_phot_files, bin_time_flux_error, plot_images,
+from utils import (read_phot_file, bin_time_flux_error,
                    remove_outliers, calculate_trend_and_flux, noise_sources, extract_airmass_zp)
 
 APERTURE = 6
@@ -54,6 +52,8 @@ def rms_vs_mags(table, bin_size, num_stars, average_zp):
     sky_list = []
     mags_list = []
     Tmags_list = []
+
+    # TODO: instead of phot_files pass the rel_phot_NGFIELD.fits file
 
     unique_tic_ids = np.unique(table['tic_id'])
     for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
