@@ -53,7 +53,7 @@ def rms_vs_mags(table, bin_size, num_stars, average_zp):
     mags_list = []
     Tmags_list = []
 
-    # TODO: instead of phot_files pass the rel_phot_NGFIELD.fits file
+    # TODO: instead of phot_files pass the rel_phot_NGFIELD.fits file, the info is Tmag, Flux, RMS, sky
 
     unique_tic_ids = np.unique(table['tic_id'])
     for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
