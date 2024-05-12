@@ -146,7 +146,8 @@ def main():
         "N": N_list,
         "RNS": RNS_list
     }
-    file_name = f"rms_mags_{filename.replace('.fits', '')}_{bin_size}.json"
+    cwd_last_four = os.getcwd()[-4:]
+    file_name = f"rms_mags_{filename.replace('.fits', '')}_{bin_size}_{cwd_last_four}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
         json.dump(output_data, json_file, indent=4)
