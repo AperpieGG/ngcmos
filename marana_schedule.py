@@ -33,9 +33,9 @@ def arg_parse():
                    help='camera_id to follow',
                    type=int,
                    choices=np.arange(801, 814))
-    p.add_argument('night',
-                   help="Night to query from (e.g. 20231008)",
-                   type=str)
+    # p.add_argument('night',
+    #                help="Night to query from (e.g. 20231008)",
+    #                type=str)
     return p.parse_args()
 
 
