@@ -72,7 +72,7 @@ twist_min_alts = np.array(
 
 twist = Observatory("Twenty Inch Survey Telescope", 28.760255 * u.deg, -17.879284 * u.deg, 2348 * u.m, twist_min_alts,
                     6 * u.hourangle, -12 * u.deg)
-ngts = Observatory("Next Generation Transit Survey", -24.615752 * u.deg, -70.391029 * u.deg, 2433 * u.m, 30 * u.deg,
+ngts = Observatory("Next Generation Transit Survey", -24.615662 * u.deg, -70.391809 * u.deg, 2433 * u.m, 30 * u.deg,
                    5.3 * u.hourangle, -15 * u.deg)
 tmo = Observatory("Tom Marsh Observatory", 52.376876 * u.deg, -1.567203 * u.deg, 93 * u.m, 30 * u.deg,
                   4.5 * u.hourangle, -12 * u.deg)
