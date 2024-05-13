@@ -99,12 +99,12 @@ def main(args):
         obs = tmo
 
     try:
-        observing_date = datetime.datetime.strptime(observing_date, "%Y%m%d").strftime("%Y%m%d")
-    except ValueError:
-        print(f"Invalid observing date: {observing_date} (usage: --date YYYYMMDD)")
+        observing_date = f"{observing_date.split('/')[0].zfill(2)}/{observing_date.split('/')[1].zfill(2)}/{observing_date.split('/')[2] if len(observing_date.split('/')[2]) == 4 else '20' + observing_date.split('/')[2]}"
+    except IndexError:
+        print(f"Invalid observing date: {observing_date} (usage: --date dd/mm/yyyy)")
         exit()
-    formatted_date = observing_date
-    reverse_date = observing_date
+    formatted_date = f"{observing_date.split('/')[2]}-{observing_date.split('/')[1]}-{observing_date.split('/')[0]}"  # YYYY-MM-DD for the date lookup
+    reverse_date = formatted_date.replace('-', '')  # YYYYMMDD for the json file name
 
     obs_site = EarthLocation(lat=obs.lat, lon=obs.lon, height=obs.height)
 
