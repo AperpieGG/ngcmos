@@ -372,7 +372,7 @@ def main(args):
         if np.any([isinstance(sky_coordinate.dec.value, np.ndarray) for sky_coordinate in sky_coordinates]):
             print("Solar system objects present - cannot create json file")
             exit()
-        out_path = Path(args.json) / f'{reverse_date}.json'
+        out_path = f'{reverse_date}.json'
         dome_open = flat_start - 2 * u.min
         dome_close = flat_end + 2 * u.min
 
