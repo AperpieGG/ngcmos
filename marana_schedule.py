@@ -100,7 +100,8 @@ if __name__ == "__main__":
     args = arg_parse()
 
     # fetch all actions for camera we are following
-    args.night = datetime.strptime(args.night, "%Y%m%d").strftime("%Y-%m-%d")
+    night = datetime.now().strftime("%Y%m%d")
+    args.night = night
     action_info = get_action_info(args.camera_id, args.night)
 
     # create empty dict to populate
