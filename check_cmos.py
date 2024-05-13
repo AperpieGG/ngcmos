@@ -170,8 +170,8 @@ def check_donuts(file_groups, filenames):
 
 
 def main():
-    # set directory for the current night or use the current working directory
-    directory = find_current_night_directory(base_path)
+    # set directory for working
+    directory = os.getcwd()
     print(f"Directory: {directory}")
 
     # filter filenames only for .fits data files
