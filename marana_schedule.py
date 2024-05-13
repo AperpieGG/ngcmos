@@ -99,16 +99,14 @@ def get_field_coords(field):
 if __name__ == "__main__":
     args = arg_parse()
 
-    # fetch all actions for camera we are following
-    action_info = get_action_info(args.camera_id, args.night)
+    # Fetch all actions for the specified camera
+    action_info = get_action_info(args.camera_id, datetime.now().strftime("%Y%m%d"))
 
-    # create empty dict to populate
-    OB = {}
-    OB['night'] = datetime.strptime(args.night, "%Y%m%d").strftime("%Y-%m-%d")
-    OB['actions'] = []
+    # Create an empty dictionary to populate
+    OB = {'night': datetime.now().strftime("%Y-%m-%d"), 'actions': []}
     OB['actions'].append(evening_flats)
 
-    # loop over actions and add to schedule
+    # Loop over actions and add them to the schedule
     for action in action_info:
         action_id, action_type, start, end = action
 
@@ -121,13 +119,13 @@ if __name__ == "__main__":
 
         elif action_type == "observeField":
             act_args = get_action_args(action_id)
-            # build some inputs
+            # Build some inputs
             field = act_args['field']
             prefix = f"{act_args['field']}_{act_args['campaign']}"
             exposure = round(float(act_args['exposureTime']), 2)
-            # get field coords
+            # Get field coords
             ra_centre_deg, dec_centre_deg = get_field_coords(field)
-            # make a science block
+            # Make a science block
             science = {"type": "ObserveTimeSeries",
                        "start": start.strftime("%Y-%m-%dT%H:%M:%S") + "Z",
                        "end": end.strftime("%Y-%m-%dT%H:%M:%S") + "Z",
@@ -138,14 +136,14 @@ if __name__ == "__main__":
                        "camera": {"exposure": exposure}
                        }
 
-            # finally plonk the action into the schedule
+            # Finally add the action into the schedule
             OB['actions'].append(science)
 
-    # schedule morning flats
+    # Schedule morning flats
     OB['actions'].append(morning_flats)
 
-    # save the json file
-    with open(f'{args.night}.json', 'w') as fp:
+    # Save the json file
+    with open(f'{datetime.now().strftime("%Y%m%d")}.json', 'w') as fp:
         json.dump(OB, fp, indent=4)
 
-    print(f"Saved observing plan to {args.night}.json")
+    print(f"Saved observing plan to {datetime.now().strftime('%Y%m%d')}.json")
