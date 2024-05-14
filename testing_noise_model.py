@@ -54,7 +54,7 @@ def rms_vs_mags(table, num_stars):
         airmass = tic_id_data['Airmass']
 
         # Calculate mean flux and RMS
-        RMS_list.append(np.nanstd(rms) * 1000000)  # Convert to ppm
+        RMS_list.append(rms * 1000000)  # Convert to ppm
         sky_list.append(np.median(sky))
         Tmags_list.append(Tmag)
 
