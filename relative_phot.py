@@ -40,6 +40,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     """
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) & (table['tic_id'] != tic_id_to_plot)]
+    print(f"The star with TIC ID {tic_id_to_plot} will be used as the target star.")
     print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
     rms_comp_list = []
 
@@ -173,7 +174,8 @@ def main():
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms, sky_median))
             else:
-                print(f"TIC ID {tic_id} is not included in the analysis.")
+                print(f"TIC ID {tic_id} is not included in the analysis because "
+                      f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id]} and is greater than 14.")
                 print()
 
         # Create an Astropy table from the data list
