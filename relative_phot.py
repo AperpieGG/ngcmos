@@ -176,7 +176,8 @@ def main():
                 print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
                 # Append data to the list
-                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms, sky_median, airmass_list, zp))
+                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
+                                  rms, sky_median, airmass_list, zp))
                 print()
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis because "
@@ -184,8 +185,8 @@ def main():
                 print()
 
         # Create an Astropy table from the data list
-        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS', 'Sky',
-                                                  'Airmass', 'ZP'))
+        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
+                                                  'RMS', 'Sky', 'Airmass', 'ZP'))
 
         # Write the table to a FITS file with the desired name
         data_table.write(fits_filename, format='fits', overwrite=True)
