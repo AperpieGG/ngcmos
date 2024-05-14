@@ -16,7 +16,7 @@ import os
 import numpy as np
 from astropy.table import Table
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file,
-                   calculate_trend_and_flux)
+                   calculate_trend_and_flux, extract_airmass_zp)
 
 SIGMA = 2
 APERTURE = 6
@@ -146,6 +146,10 @@ def main():
     # Loop through photometry files
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+
+        # Extract airmass and zero point from the photometry file
+        airmass_list, zp = extract_airmass_zp(phot_table, current_night_directory)
+
         print(f"Photometry file: {phot_file}")
 
         # Check if the output file already exists
@@ -160,8 +164,8 @@ def main():
 
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
-            # Check if the Tmag is brighter than 14
-            if np.any(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
+            # Check if all the Tmag values for the tic_id are less than 14
+            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                       f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median) = (
@@ -172,7 +176,7 @@ def main():
                 print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
                 # Append data to the list
-                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms, sky_median))
+                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms, sky_median, airmass_list, zp))
                 print()
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis because "
@@ -180,7 +184,8 @@ def main():
                 print()
 
         # Create an Astropy table from the data list
-        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS', 'Sky'))
+        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'RMS', 'Sky',
+                                                  'Airmass', 'ZP'))
 
         # Write the table to a FITS file with the desired name
         data_table.write(fits_filename, format='fits', overwrite=True)
