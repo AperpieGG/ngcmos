@@ -25,7 +25,7 @@ from path import Path
 
 import matplotlib
 
-matplotlib.use('Qt5Agg')
+# matplotlib.use('Qt5Agg')
 
 
 class Observatory:
