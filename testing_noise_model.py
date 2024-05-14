@@ -40,7 +40,6 @@ def rms_vs_mags(table, num_stars):
     Tmags_list : list
         values of Tmag
     """
-    mean_fluxes_list = []
     RMS_list = []
     sky_list = []
     Tmags_list = []
@@ -49,19 +48,17 @@ def rms_vs_mags(table, num_stars):
     for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
         Tmag = tic_id_data['Tmag']
-        relative_flux = tic_id_data['Relative_Flux']
         sky = tic_id_data['Sky']
         rms = tic_id_data['RMS']
         zero_point = tic_id_data['Zero_Point']
         airmass = tic_id_data['Airmass']
 
         # Calculate mean flux and RMS
-        mean_fluxes_list.append(np.mean(relative_flux))
         RMS_list.append(np.nanstd(rms) * 1000000)  # Convert to ppm
         sky_list.append(np.median(sky))
         Tmags_list.append(Tmag)
 
-    return mean_fluxes_list, RMS_list, sky_list, Tmags_list, zero_point, airmass
+    return RMS_list, sky_list, Tmags_list, zero_point, airmass
 
 
 def main():
@@ -84,7 +81,7 @@ def main():
     max_num_stars = len(np.unique(phot_table['TIC_ID']))
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, Tmags_list, zero_point, airmass = rms_vs_mags(
+    RMS_list, sky_list, Tmags_list, zero_point, airmass = rms_vs_mags(
         phot_table, num_stars=max_num_stars)
 
     # Get noise sources
