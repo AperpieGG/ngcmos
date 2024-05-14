@@ -96,6 +96,7 @@ def main():
     dc_noise_list = dc_noise.tolist()
     N_list = N.tolist()
     RNS_list = RNS.tolist()
+    RMS_list = [float(x) for x in RMS_list]
     Tmags_list = [float(x) for x in Tmags_list]
 
     # Save RMS_list, and other lists to a JSON file
