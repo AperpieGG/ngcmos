@@ -154,7 +154,9 @@ def main():
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
         # Extract airmass and zero point from the photometry file
-        airmass_list, zero_point = extract_airmass_zp(phot_table, current_night_directory)
+        airmass_list, zero_point_list = extract_airmass_zp(phot_table, current_night_directory)
+        airmass = np.mean(airmass_list)
+        zero_point = np.mean(zero_point_list)
 
         print(f"Photometry file: {phot_file}")
 
@@ -183,7 +185,7 @@ def main():
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  rms, sky_median, airmass_list, zero_point))
+                                  rms, sky_median, airmass, zero_point))
                 print()
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis because "
