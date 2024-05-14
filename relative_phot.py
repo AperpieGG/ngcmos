@@ -8,15 +8,16 @@
 - find the mean of the reference master flux (mean_ref_flux)
 - Normalize the sum_fluxes by dividing with the mean_ref_flux (normalized_reference_flux)
 - Normalize the target_flux by dividing with the mean of the target_flux (normalized_target_flux)
-- Perform relative photometry by dividing the normalized_target_flux with the normalized_reference_flux (dt_flux)
+- Perform relative photometry by dividing the normalized_target_flux with the
+normalized_reference_flux (dt_flux)
 - Apply a second order polynomial to correct from color (dt_flux_poly)
 """
 import argparse
 import os
 import numpy as np
 from astropy.table import Table
-from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers, extract_phot_file,
-                   calculate_trend_and_flux, extract_airmass_zp)
+from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
+                   remove_outliers, extract_phot_file, calculate_trend_and_flux, extract_airmass_zp)
 
 SIGMA = 2
 APERTURE = 6
@@ -39,8 +40,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     """
     # Select stars for master reference star, excluding the target star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) & (table['tic_id'] != tic_id_to_plot)]
-    print(f"Found {len(np.unique(master_star_data['tic_id']))} comparison stars for the target star {tic_id_to_plot}")
+    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) &
+                             (table['tic_id'] != tic_id_to_plot)]
+    print(f"Found {len(np.unique(master_star_data['tic_id']))} "
+          f"comparison stars for the target star {tic_id_to_plot}")
     rms_comp_list = []
 
     jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot, aper=APERTURE)
@@ -68,7 +71,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Get the corresponding tic_id
     min_rms_tic_id = np.unique(master_star_data['tic_id'])[min_rms_index]
     # Print the tic_id with the minimum rms value
-    print(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {np.min(rms_comp_list):.4f}")
+    print(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} "
+          f"and RMS = {np.min(rms_comp_list):.4f}")
 
     # Calculate mean and standard deviation of rms_list
     rms_std = np.std(rms_comp_list)
@@ -91,9 +95,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print("Comparison stars within two sigma clipping from the minimum rms star:")
     for tic_id in filtered_tic_ids:
         print(
-            f"TIC ID {tic_id} with RMS = {rms_comp_list[np.where(np.unique(master_star_data['tic_id']) == tic_id)[0][0]]:.4f}")
+            f"TIC ID {tic_id} with RMS = "
+            f"{rms_comp_list[np.where(np.unique(master_star_data['tic_id']) == tic_id)[0][0]]:.4f}")
     print(
-        f"Number of comp stars within a sigma = {len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
+        f"Number of comp stars within a sigma = "
+        f"{len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
 
@@ -122,8 +128,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
 
     # Bin the time, flux, and error
-    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly, dt_fluxerr_poly,
-                                                                         bin_size)
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
+                                                                         dt_fluxerr_poly, bin_size)
 
     return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median
 
@@ -148,7 +154,7 @@ def main():
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
         # Extract airmass and zero point from the photometry file
-        airmass_list, zp = extract_airmass_zp(phot_table, current_night_directory)
+        airmass_list, zero_point = extract_airmass_zp(phot_table, current_night_directory)
 
         print(f"Photometry file: {phot_file}")
 
@@ -177,7 +183,7 @@ def main():
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  rms, sky_median, airmass_list, zp))
+                                  rms, sky_median, airmass_list, zero_point))
                 print()
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis because "
