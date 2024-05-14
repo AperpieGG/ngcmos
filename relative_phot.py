@@ -40,15 +40,14 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     """
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) & (table['tic_id'] != tic_id_to_plot)]
-    print(f"The star with TIC ID {tic_id_to_plot} will be used as the target star.")
-    print(f"the number of stars with tic_ids are {len(np.unique(master_star_data['tic_id']))}")
+    print(f"Found {len(np.unique(master_star_data['tic_id']))} comparison stars for the target star {tic_id_to_plot}")
     rms_comp_list = []
 
     jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot, aper=APERTURE)
 
     # Calculate the median sky value for our star
     sky_median = np.median(sky)
-    print('The sky median for the TIC ID {} is {}'.format(tic_id_to_plot, sky_median))
+    # print('The sky median for the TIC ID {} is {}'.format(tic_id_to_plot, sky_median))
 
     # Remove outliers from the target star
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
@@ -69,14 +68,14 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Get the corresponding tic_id
     min_rms_tic_id = np.unique(master_star_data['tic_id'])[min_rms_index]
     # Print the tic_id with the minimum rms value
-    print(f"Comparison star with minimum rms is {min_rms_tic_id} with rms value of {np.min(rms_comp_list):.4f}")
+    print(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {np.min(rms_comp_list):.4f}")
 
     # Calculate mean and standard deviation of rms_list
     rms_std = np.std(rms_comp_list)
 
     # Define the threshold for two sigma clipping
     threshold = SIGMA * rms_std
-    print(f"Threshold for two sigma clipping = {threshold:.4f}")
+    print(f"Threshold for 2 sigma clipping = {threshold:.4f}")
 
     # Get the minimum rms value and its corresponding tic_id
     min_rms_index = np.argmin(rms_comp_list)
@@ -163,7 +162,8 @@ def main():
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if the Tmag is brighter than 14
             if np.any(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
-                print(f"Performing relative photometry for TIC ID {tic_id}")
+                print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
+                      f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median) = (
                     relative_phot(phot_table, tic_id, args.bin_size))
 
@@ -173,6 +173,7 @@ def main():
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, rms, sky_median))
+                print()
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis because "
                       f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id]} and is greater than 14.")
