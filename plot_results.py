@@ -35,7 +35,7 @@ def filter_data(mags_list, RMS_list):
 
 def identify_outliers(data, deviation_threshold):
     tmag_list = data['Tmag_list']
-    mags_list = data['mags_list']
+    mags_list = data['Tmags_list']
     tic_ids = data['TIC_IDs']
     RMS_list = data['RMS_list']  # Assuming RMS data is available in 'data'
 
@@ -58,7 +58,7 @@ def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
     tic_ids = data['TIC_IDs']
-    mags_list = data['mags_list']
+    mags_list = data['Tmags_list']
     Tmag_list = data['Tmag_list']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
@@ -115,7 +115,7 @@ def linear_model(x, m, b):
 def plot_tmag_vs_mag(data):
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    mags_list = data['mags_list']
+    mags_list = data['Tmags_list']
     print('The length of mags_list is:', len(mags_list))
     tmag_list = data['Tmag_list']
     print('The length of tmag_list is:', len(tmag_list))
