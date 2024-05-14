@@ -88,7 +88,7 @@ def main():
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
         noise_sources(sky_list, bin_size, airmass, zero_point, aper=APERTURE, read_noise=READ_NOISE,
                       dark_current=DARK_CURRENT))
-
+    print(f"The rms values are: {RMS_list}")
     synthetic_mag_list = synthetic_mag.tolist()
     photon_shot_noise_list = photon_shot_noise.tolist()
     sky_noise_list = sky_noise.tolist()
