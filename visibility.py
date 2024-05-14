@@ -373,14 +373,8 @@ def main(args):
             print("Solar system objects present - cannot create json file")
             exit()
         out_path = Path(args.json).parent / f'{reverse_date}.json'
-        dome_open = flat_start - 2 * u.min
-        dome_close = flat_end + 2 * u.min
 
         night = formatted_date
-        dome = {
-            "open": str(dome_open.iso).replace(" ", "T").split(".")[0] + "Z",
-            "close": str(dome_close.iso).replace(" ", "T").split(".")[0] + "Z",
-        }
         actions = [
             {
                 "type": "SkyFlats",
@@ -405,14 +399,12 @@ def main(args):
                     "end": str(target_end.iso).replace(" ", "T").split(".")[0] + "Z",
                     "ra": round(sky_coordinate.ra.value, 5),
                     "dec": round(sky_coordinate.dec.value, 5),
-                    "blind_offset_dra": 1,
                     "pipeline": {
-                        "object": target,
-                        "prefix": target
+                        "object": target.replace(" ", "-"),  # Replace spaces with hyphens
+                        "prefix": target.replace(" ", "-"),  # Replace spaces with hyphens
                     },
                     "camera": {
                         "exposure": 10,
-                        "stream": True,
                     },
                 }
             ]
@@ -425,25 +417,18 @@ def main(args):
                 },
             }
         ]
-        actions += [
-            {
-                "type": "ShutdownCamera",
-                "start": str(dome_close.iso).replace(" ", "T").split(".")[0] + "Z",
-            }
-        ]
         json_dict = {
             "night": night,
-            "dome": dome,
             "actions": actions
         }
-        out_path.write_text(json.dumps(json_dict, indent=2))
+        out_path.write_text(json.dumps(json_dict, indent=4))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Calculate visibility of targets from TWIST, NGTS or TMO.')
 
     parser.add_argument('observatory', type=str, choices=['twist', 'ngts', 'tmo'],
-                        help='Observatory to calculate visibility for')
+                        help='(e.g. ngts --date 13/05/2024 TIC 324010229 --json 20240513)')
     parser.add_argument('targets', type=str, nargs='+', help='List of targets to check visibility for')
     parser.add_argument('--plot', action='store_true', help='Plot visibility')
     parser.add_argument('--date', type=str, default=None, metavar='dd/mm/yyyy', help='Observing date (default: today)')
