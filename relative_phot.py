@@ -59,6 +59,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, zero_point):
     # TODO: Calculate magnitudes using the zeropoint
 
     magnitude = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
+    print(f"The target star has TESS magnitude = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
+    print(f"The target star has Magnitude for TIC ID {tic_id_to_plot} = {magnitude:.2f}")
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
@@ -122,7 +124,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, zero_point):
 
     flux_ratio = fluxes_clipped / reference_fluxes
     flux_ratio_mean = np.mean(flux_ratio)
-    print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
+    # print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
     # Perform relative photometry
     dt_flux = flux_ratio / flux_ratio_mean
