@@ -24,7 +24,7 @@ APERTURE = 6
 EXPOSURE = 10
 
 
-def relative_phot(table, tic_id_to_plot, bin_size):
+def relative_phot(table, tic_id_to_plot, bin_size, zero_point):
     """
     Create a relative light curve for a specific TIC ID
 
@@ -57,8 +57,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     # TODO: Calculate magnitudes using the zeropoint
-    
-    # mags = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
+
+    magnitude = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
@@ -136,7 +136,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
-    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median
+    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude
 
 
 def main():
@@ -181,7 +181,7 @@ def main():
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                       f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
-                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median) = (
+                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude) = (
                     relative_phot(phot_table, tic_id, args.bin_size))
 
                 # Calculate RMS
@@ -190,7 +190,7 @@ def main():
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  rms, sky_median, airmass, zero_point))
+                                  rms, sky_median, airmass, zero_point, magnitude))
                 print()
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis because "
@@ -199,7 +199,7 @@ def main():
 
         # Create an Astropy table from the data list
         data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
-                                                  'RMS', 'Sky', 'Airmass', 'ZP'))
+                                                  'RMS', 'Sky', 'Airmass', 'ZP', 'Magnitude'))
 
         # Write the table to a FITS file with the desired name
         data_table.write(fits_filename, format='fits', overwrite=True)
