@@ -21,6 +21,7 @@ from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_er
 
 SIGMA = 2
 APERTURE = 6
+EXPOSURE = 10
 
 
 def relative_phot(table, tic_id_to_plot, bin_size):
@@ -54,6 +55,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Remove outliers from the target star
     time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
+
+    # TODO: Calculate magnitudes using the zeropoint
+    
+    # mags = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
@@ -204,6 +209,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
