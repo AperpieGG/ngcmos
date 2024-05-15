@@ -182,7 +182,7 @@ def main():
                 print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                       f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude) = (
-                    relative_phot(phot_table, tic_id, args.bin_size))
+                    relative_phot(phot_table, tic_id, args.bin_size, zero_point))
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
