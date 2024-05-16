@@ -26,8 +26,8 @@ def calculate_pixel_scale(pixel_size, focal_length, sensor_resolution):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Calculate pixel scale from focal length, f/ratio, and angular resolution")
-    parser.add_argument("pixel_size", type=float, help="Pixel size in microns")
-    parser.add_argument("focal_length", type=float, help="Focal length of the camera in mm")
+    parser.add_argument("pixel_size", type=float, help="Pixel size in microns (i.e. 11 for Marana)")
+    parser.add_argument("focal_length", type=float, help="Focal length of the camera in mm (i.e. 560 for NGTS)")
     parser.add_argument("sensor_resolution", type=int, nargs=2, help="Sensor resolution in pixels (width height)")
     args = parser.parse_args()
 
