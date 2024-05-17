@@ -2,7 +2,8 @@
 import os
 from datetime import datetime, timedelta
 from calibration_images import reduce_images
-from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog
+from utils import (get_location, wcs_phot, _detect_objects_sep, get_catalog,
+                   extract_airmass_and_zp)
 import json
 import warnings
 from astropy.io import fits
@@ -116,13 +117,6 @@ def get_prefix(filenames):
         prefix = filename[:11]
         prefixes.add(prefix)
     return prefixes
-
-
-def extract_airmass_and_zp(header):
-    """Extract airmass and zero point from the FITS header."""
-    airmass = header.get('AIRMASS', None)
-    zp = header.get('MAGZP_T', None)
-    return airmass, zp
 
 
 def main():
