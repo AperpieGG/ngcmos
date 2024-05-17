@@ -144,6 +144,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         ax2.set_xticks(tick_locations)  # Use the same tick positions as the primary x-axis
         ax2.set_xticklabels(
             [f'{am:.2f}' for am in binned_airmass])  # Set the tick labels to the interpolated airmass values
+        # set log scale for airmass
+        ax2.set_xscale('log')
         ax2.set_xlabel('Airmass')
 
         # Plot jd_mid vs sky
