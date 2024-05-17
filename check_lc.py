@@ -5,8 +5,7 @@ import argparse
 import numpy as np
 from astropy.io import fits
 from matplotlib import pyplot as plt
-from utils import (plot_images, find_current_night_directory, get_phot_files, read_phot_file,
-                   bin_time_flux_error, remove_outliers)
+from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
 
