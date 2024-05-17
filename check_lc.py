@@ -82,8 +82,6 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
     print(f"The star has TIC id: {tic_id_to_plot}")
     print(f"Using the frame_id: {tic_id_data['frame_id'][0]}")
-    print(len(airmass))
-    print(len(jd_mid_binned))
 
     # Plot the image data
     if image_data is not None:
@@ -125,17 +123,16 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
-        axs[0].set_title(f'LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
+        axs[0].set_title(f'Raw lightcurve for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
+        # Create secondary x-axis for airmass
         ax2 = axs[0].twiny()
-        ax2.set_xlim(min(airmass), max(airmass))  # Set the limits based on airmass values
-        # ax2.invert_yaxis()
+        ax2.set_xlim(axs[0].get_xlim())  # Align the secondary x-axis with the primary x-axis
+        ax2.set_xticks(axs[0].get_xticks())  # Use the same tick positions as the primary x-axis
+        ax2.set_xticklabels([f'{am:.2f}' for am in airmass])  # Set the tick labels to the binned airmass values
         ax2.set_xlabel('Airmass')
-
-        ax2.xaxis.set_major_locator(plt.MaxNLocator(nbins=len(axs[0].get_xticks()), prune='both'))
-        # ax2.plot(jd_mid_binned, airmass, 'o', color='red', label='Airmass')
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
