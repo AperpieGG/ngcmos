@@ -24,7 +24,7 @@ APERTURE = 6
 EXPOSURE = 10
 
 
-def relative_phot(table, tic_id_to_plot, bin_size, zero_point):
+def relative_phot(table, tic_id_to_plot, bin_size):
     """
     Create a relative light curve for a specific TIC ID
 
@@ -48,6 +48,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, zero_point):
     rms_comp_list = []
 
     jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot, aper=APERTURE)
+    airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
+    zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
+    zero_point = np.mean(zero_point_list)
 
     # Calculate the median sky value for our star
     sky_median = np.median(sky)
@@ -136,7 +139,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, zero_point):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
-    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude
+    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude, airmass_list, zero_point_list
 
 
 def main():
@@ -158,10 +161,6 @@ def main():
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-        # Extract airmass and zero point from the photometry file
-        airmass_list, zero_point_list = extract_airmass_zp(phot_table, current_night_directory)
-        zero_point = np.mean(zero_point_list)
-
         print(f"Photometry file: {phot_file}")
 
         # Check if the output file already exists
@@ -180,8 +179,8 @@ def main():
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                       f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
-                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude) = (
-                    relative_phot(phot_table, tic_id, args.bin_size, zero_point))
+                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size)
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
