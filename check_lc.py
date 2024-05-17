@@ -129,22 +129,19 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         axs[0].set_ylabel('Flux [e-]')
         axs[0].legend()
 
-        # Create secondary x-axis for airmass
         ax2 = axs[0].twiny()
-        ax2.set_xlim(axs[0].get_xlim())  # Align the secondary x-axis with the primary x-axis
+        ax2.set_xlim(axs[0].get_xlim())
 
-        # Interpolate airmass values to match the tick locations
         unique_jd_mid = np.unique(jd_mid)
         unique_airmass = [airmass[np.where(jd_mid == jd)[0][0]] for jd in unique_jd_mid]
         airmass_interp = interp1d(unique_jd_mid, unique_airmass, fill_value="extrapolate")
         tick_locations = axs[0].get_xticks()
-        binned_airmass = airmass_interp(jd_mid_binned)
-        # Clamp the interpolated airmass values to the range of the original data
+        binned_airmass = airmass_interp(tick_locations)
+
         binned_airmass = np.clip(binned_airmass, min(unique_airmass), max(unique_airmass))
 
-        # Set the tick labels on the secondary x-axis
-        ax2.set_xticks(tick_locations)  # Use the same tick positions as the primary x-axis
-        ax2.set_xticklabels([f'{am:.2f}' for am in binned_airmass])  # Set the tick labels to the clamped interpolated airmass values
+        ax2.set_xticks(tick_locations)
+        ax2.set_xticklabels([f'{am:.2f}' for am in binned_airmass])
         ax2.set_xlabel('Airmass')
 
         # Plot jd_mid vs sky
