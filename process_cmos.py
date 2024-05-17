@@ -14,11 +14,9 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.utils.exceptions import AstropyWarning
 
-
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
-
 
 GAIN = 1.12
 MAX_ALLOWED_PIXEL_SHIFT = 50
@@ -119,11 +117,13 @@ def get_prefix(filenames):
         prefixes.add(prefix)
     return prefixes
 
+
 def extract_airmass_and_zp(header):
     """Extract airmass and zero point from the FITS header."""
     airmass = header.get('AIRMASS', None)
     zp = header.get('MAGZP_T', None)
     return airmass, zp
+
 
 def main():
     # set directory for the current working directory
