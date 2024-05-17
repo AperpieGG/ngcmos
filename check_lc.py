@@ -11,24 +11,6 @@ from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
 
 
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# # Load paths from the configuration file
-# config = load_config('directories.json')
-# calibration_paths = config["calibration_paths"]
-# base_paths = config["base_paths"]
-# out_paths = config["out_paths"]
-#
-# # Select directory based on existence
-# for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-#     if os.path.exists(base_path):
-#         break
-
-
 def get_image_data(frame_id, image_directory):
     """
     Get the image data corresponding to the given frame_id.
