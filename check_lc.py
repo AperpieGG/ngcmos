@@ -130,8 +130,15 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         # Create secondary x-axis for airmass
         ax2 = axs[0].twiny()
         ax2.set_xlim(axs[0].get_xlim())  # Align the secondary x-axis with the primary x-axis
+
+        # Create a mapping from jd_mid_binned to airmass
+        unique_jd_mid = np.unique(jd_mid)
+        unique_airmass = [airmass[np.where(jd_mid == jd)[0][0]] for jd in unique_jd_mid]
+        binned_airmass = [unique_airmass[np.argmin(np.abs(unique_jd_mid - jd))] for jd in jd_mid_binned]
+
+        # Set the tick labels on the secondary x-axis
         ax2.set_xticks(axs[0].get_xticks())  # Use the same tick positions as the primary x-axis
-        ax2.set_xticklabels([f'{am:.2f}' for am in airmass])  # Set the tick labels to the binned airmass values
+        ax2.set_xticklabels([f'{am:.2f}' for am in binned_airmass])  # Set the tick labels to the binned airmass values
         ax2.set_xlabel('Airmass')
 
         # Plot jd_mid vs sky
