@@ -698,3 +698,10 @@ def extract_airmass_zp(table, image_directory):
     print(f"Average ZP: {np.mean(zp_list)}")
 
     return airmass_list, zp_list
+
+
+def extract_airmass_and_zp(header):
+    """Extract airmass and zero point from the FITS header."""
+    airmass = header.get('AIRMASS', None)
+    zp = header.get('MAGZP_T', None)
+    return airmass, zp
