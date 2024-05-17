@@ -4,7 +4,7 @@ import os
 import argparse
 import numpy as np
 from astropy.io import fits
-from matplotlib import pyplot as plt, ticker
+from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
 from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error
@@ -140,7 +140,6 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         binned_airmass = np.clip(binned_airmass, min(unique_airmass), max(unique_airmass))
 
-        ax2.set_xscale('log')  # Set log scale for secondary x-axis
         ax2.set_xticks(tick_locations)
         ax2.set_xticklabels([f'{am:.2f}' for am in binned_airmass])
         ax2.set_xlabel('Airmass')
@@ -150,12 +149,6 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         axs[1].set_ylabel('Flux [e-]')
         axs[1].set_xlabel('MJD [days]')
         axs[1].legend()
-
-        axs[0].set_yscale('log')
-        axs[0].yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-        axs[0].yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-        axs[0].tick_params(axis='y', which='minor', length=4)
-
         plt.tight_layout()
         plt.show()
 
