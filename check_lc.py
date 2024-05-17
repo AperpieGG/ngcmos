@@ -17,16 +17,16 @@ def load_config(filename):
     return config
 
 
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
+# # Load paths from the configuration file
+# config = load_config('directories.json')
+# calibration_paths = config["calibration_paths"]
+# base_paths = config["base_paths"]
+# out_paths = config["out_paths"]
+#
+# # Select directory based on existence
+# for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
+#     if os.path.exists(base_path):
+#         break
 
 
 def get_image_data(frame_id, image_directory):
@@ -70,7 +70,7 @@ def get_image_data(frame_id, image_directory):
         return None
 
 
-def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
+def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     # Select rows with the specified TIC ID
     tic_id_data = table[table['tic_id'] == tic_id_to_plot]
 
@@ -82,27 +82,11 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
     x = tic_id_data['x'][0]
     y = tic_id_data['y'][0]
 
-    # # Extract fluxes and errors based on Tmag
-    # if tmag < 11:
-    #     fluxes = tic_id_data['flux_5']
-    #     fluxerrs = tic_id_data['fluxerr_5']
-    #     sky = tic_id_data['flux_w_sky_5'] - tic_id_data['flux_5']
-    #     skyerrs = np.sqrt(tic_id_data['fluxerr_5'] ** 2 + tic_id_data['fluxerr_w_sky_5'] ** 2)
-    # elif 12 > tmag >= 11:
-    #     fluxes = tic_id_data['flux_4']
-    #     fluxerrs = tic_id_data['fluxerr_4']
-    #     sky = tic_id_data['flux_w_sky_4'] - tic_id_data['flux_4']
-    #     skyerrs = np.sqrt(tic_id_data['fluxerr_4'] ** 2 + tic_id_data['fluxerr_w_sky_4'] ** 2)
-    # else:
-    #     fluxes = tic_id_data['flux_3']
-    #     fluxerrs = tic_id_data['fluxerr_3']
-    #     sky = tic_id_data['flux_w_sky_3'] - tic_id_data['flux_3']
-    #     skyerrs = np.sqrt(tic_id_data['fluxerr_3'] ** 2 + tic_id_data['fluxerr_w_sky_3'] ** 2)
-
-    fluxes = tic_id_data['flux_6']
-    fluxerrs = tic_id_data['fluxerr_6']
-    sky = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
-    skyerrs = np.sqrt(tic_id_data['fluxerr_6'] ** 2 + tic_id_data['fluxerr_w_sky_6'] ** 2)
+    fluxes = tic_id_data[f'flux_{aperture}']
+    fluxerrs = tic_id_data[f'fluxerr_{aperture}']
+    sky = tic_id_data[f'flux_w_sky_{aperture}'] - tic_id_data[f'flux_{aperture}']
+    skyerrs = np.sqrt(tic_id_data[f'fluxerr_{aperture}'] ** 2 + tic_id_data[f'fluxerr_w_sky_{aperture}'] ** 2)
+    airmass = tic_id_data['airmass']
 
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
@@ -112,35 +96,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
     # Define the size of the figure
     fig, axs = plt.subplots(3, 1, figsize=(10, 10))
 
-    airmass = []
     # take data for the first frame_id
     image_data = get_image_data(tic_id_data['frame_id'][0], image_directory)
-
-    # Get airmass for each frame_id
-    for frame_id in tic_id_data['frame_id']:
-        # Construct the full path to the image file
-        image_path_fits = os.path.join(image_directory, frame_id)
-        image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
-
-        # Check if the image file with .fits extension exists
-        if os.path.exists(image_path_fits):
-            image_path = image_path_fits
-        # Check if the image file with .bz2 extension exists
-        elif os.path.exists(image_path_bz2):
-            image_path = image_path_bz2
-        else:
-            print(f"Image file {frame_id} not found.")
-            continue
-
-        # Get the header information from the image file
-        try:
-            image_header = fits.getheader(image_path)
-        except Exception as e:
-            print(f"Error reading header from image file {image_path}: {e}")
-            continue
-
-        # Extract the airmass from the header
-        airmass.append(round(image_header['AIRMASS'], 2))
 
     print(f"The star has TIC id: {tic_id_to_plot}")
     print(f"Using the frame_id: {tic_id_data['frame_id'][0]}")
@@ -170,17 +127,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, image_directory=""):
         axs[2].set_xlabel('X')
         axs[2].set_ylabel('Y')
 
-        # Draw a circle around the target star
-        # if tmag < 10.5:
-        #     circle_radii = [6]
-        # elif 10.5 <= tmag < 11:
-        #     circle_radii = [5]
-        # elif 12 > tmag >= 11:
-        #     circle_radii = [4]
-        # else:
-        #     circle_radii = [3]
-
-        circle_radii = [6]
+        circle_radii = [aperture]
 
         for radius in circle_radii:
             circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
@@ -222,15 +169,18 @@ def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
+    parser.add_argument('aperture', type=int,
+                        help='The aperture size for photometry (i.e. 1-6)')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
+    aperture = args.aperture
 
     # Set plot parameters
     plot_images()
 
     # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
+    current_night_directory = '.'
 
     print(f"Current night directory: {current_night_directory}")
 
@@ -245,7 +195,7 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc(phot_table, args.tic_id, bin_size, image_directory=current_night_directory)
+            plot_lc(phot_table, args.tic_id, bin_size, aperture, image_directory=current_night_directory)
             break  # Stop looping if tic_id is found
         else:
             print(f"TIC ID {args.tic_id} not found in {phot_file}")
