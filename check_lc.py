@@ -140,6 +140,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         binned_airmass = np.clip(binned_airmass, min(unique_airmass), max(unique_airmass))
 
+        ax2.set_xscale('log')  # Set log scale for secondary x-axis
         ax2.set_xticks(tick_locations)
         ax2.set_xticklabels([f'{am:.2f}' for am in binned_airmass])
         ax2.set_xlabel('Airmass')
