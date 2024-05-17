@@ -119,6 +119,11 @@ def get_prefix(filenames):
         prefixes.add(prefix)
     return prefixes
 
+def extract_airmass_and_zp(header):
+    """Extract airmass and zero point from the FITS header."""
+    airmass = header.get('AIRMASS', None)
+    zp = header.get('MAGZP_T', None)
+    return airmass, zp
 
 def main():
     # set directory for the current working directory
@@ -158,6 +163,9 @@ def main():
             # Access the reduced data and header corresponding to the filename
             frame_data, frame_hdr = reduced_data_dict[filename]
             print(f"Extracting photometry for {filename}\n")
+
+            # Extract airmass and zero point from the header
+            airmass, zp = extract_airmass_and_zp(frame_hdr)
 
             wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
             wcs_header = {}
@@ -200,8 +208,10 @@ def main():
             print(f"Found {len(frame_ids)} sources")
 
             frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
-                                    phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, phot_x, phot_y],
-                                   names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid", "x", "y"))
+                                    phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, phot_x, phot_y,
+                                    [airmass] * len(phot_x), [zp] * len(phot_x)],
+                                   names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
+                                          "x", "y", "airmass", "zp"))
 
             # Extract photometry at locations
             frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
