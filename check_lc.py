@@ -67,7 +67,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     fluxerrs = tic_id_data[f'fluxerr_{aperture}']
     sky = tic_id_data[f'flux_w_sky_{aperture}'] - tic_id_data[f'flux_{aperture}']
     skyerrs = np.sqrt(tic_id_data[f'fluxerr_{aperture}'] ** 2 + tic_id_data[f'fluxerr_w_sky_{aperture}'] ** 2)
-    airmass = tic_id_data['airmass'][0]
+    airmass = tic_id_data['airmass']
 
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
