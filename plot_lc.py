@@ -33,6 +33,10 @@ def search_and_extract_info(filename, tic_id):
     rms = data_table['RMS'][index]  # RMS for the star
     airmass = data_table['Airmass'][index]  # Airmass for the star
 
+    print(len(star_time))
+    print(len(star_flux))
+    print(len(airmass))
+
     # Create the main plot
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
