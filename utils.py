@@ -451,7 +451,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     return time_b, flux_b, error_b
 
 
-def remove_outliers(time, flux, flux_err):
+def remove_outliers(time, flux, flux_err, air_mass=None, zero_point=None):
     """
     Remove massive outliers in 3 rounds of clipping
 
@@ -476,6 +476,15 @@ def remove_outliers(time, flux, flux_err):
     n_time = np.copy(time)
     n_flux = np.copy(flux)
     n_flux_err = np.copy(flux_err)
+    # TODO: Add this condition to the remove_outliers function (if airmass/zeropoint then do)
+    if air_mass:
+        n_air_mass = np.copy(air_mass)
+    else:
+        n_air_mass = None
+    if zero_point:
+        n_zero_point = np.copy(zero_point)
+    else:
+        n_zero_point = None
 
     for _ in range(3):
         mad = median_abs_deviation(n_flux)
@@ -485,12 +494,16 @@ def remove_outliers(time, flux, flux_err):
         n_time = n_time[loc]
         n_flux = n_flux[loc]
         n_flux_err = n_flux_err[loc]
+        if n_air_mass is not None:
+            n_air_mass = n_air_mass[loc]
+        if n_zero_point is not None:
+            n_zero_point = n_zero_point[loc]
 
         # If no outliers were removed in this round, return the filtered arrays
         if len(n_time) == len(time):
-            return n_time, n_flux, n_flux_err
+            return n_time, n_flux, n_flux_err, n_air_mass, n_zero_point
 
-    return n_time, n_flux, n_flux_err
+    return n_time, n_flux, n_flux_err, n_air_mass, n_zero_point
 
 
 def utc_to_jd(utc_time_str):
