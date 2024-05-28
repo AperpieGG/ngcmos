@@ -50,7 +50,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot, aper=APERTURE)
     airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
     zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
-    zero_point = np.mean(zero_point_list)
 
     # Calculate the median sky value for our star
     sky_median = np.median(sky)
@@ -59,8 +58,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Remove outliers from the target star
     # TODO: When removing outliers remember to remove the airmass, zeropoint data point
     # TODO: Add this condition to the remove_outliers function (if airmass/zeropoint then do)
-    time_clipped, fluxes_clipped, fluxerrs_clipped = remove_outliers(jd_mid, fluxes, fluxerrs)
+    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped \
+        = remove_outliers(jd_mid, fluxes, fluxerrs,
+                          airmass_list=airmass_list, zero_point_list=zero_point_list)
 
+    zero_point = np.mean(zero_point_list)
     magnitude = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
     print(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
           f"and magnitude = {np.mean(magnitude):.2f}")
@@ -141,7 +143,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
-    return tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude, airmass_list, zero_point_list
+    return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+            magnitude, airmass_clipped, zero_point_clipped)
 
 
 def main():
