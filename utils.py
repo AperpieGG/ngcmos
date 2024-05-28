@@ -452,6 +452,7 @@ def bin_time_flux_error(time, flux, error, bin_fact):
 
 
 def remove_outliers(time, flux, flux_err, air_mass=None, zero_point=None):
+    # TODO: check if i have to pass False instead of None if want to use the function
     """
     Remove massive outliers in 3 rounds of clipping
 
@@ -476,7 +477,6 @@ def remove_outliers(time, flux, flux_err, air_mass=None, zero_point=None):
     n_time = np.copy(time)
     n_flux = np.copy(flux)
     n_flux_err = np.copy(flux_err)
-    # TODO: Add this condition to the remove_outliers function (if airmass/zeropoint then do)
     if air_mass:
         n_air_mass = np.copy(air_mass)
     else:
