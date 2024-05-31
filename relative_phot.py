@@ -56,11 +56,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # print('The sky median for the TIC ID {} is {}'.format(tic_id_to_plot, sky_median))
 
     # Remove outliers from the target star
-    # TODO: When removing outliers remember to remove the airmass, zeropoint data point
-    # TODO: Add this condition to the remove_outliers function (if airmass/zeropoint then do)
     time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped \
-        = remove_outliers(jd_mid, fluxes, fluxerrs,
-                          airmass_list=airmass_list, zero_point_list=zero_point_list)
+        = remove_outliers(jd_mid, fluxes, fluxerrs, airmass=airmass_list, zero_point=zero_point_list)
 
     zero_point = np.mean(zero_point_list)
     magnitude = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
