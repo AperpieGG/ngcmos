@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 """
-This script calculates the noise model for the TESS data.
-The light curves are detrended using a second order polynomial to correct for the airmass.
-The noise is calculated from the detrended and normalized light curves.
-The fluxes are converted to magnitudes using zero points. The final plot is RMS vs magnitudes.
+This script was created to run the noise model from the file of rel_phot.fits
+It will create a json file ready to be plotted (it includes the word rel_phot in the name)
 """
 
 import argparse
