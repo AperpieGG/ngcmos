@@ -8,5 +8,7 @@ python /home/ops/ngcmos/check_cmos.py
 python /home/ops/ngcmos/adding_headers.py
 python /home/ops/ngcmos/create_flats.py
 python /home/ops/ngcmos/process_cmos.py
+python /home/ops/ngcmos/relative_phot.py
+python /home/ops/ngcmos/remove_fits_files.py
 
 echo "Finishing processing!"
