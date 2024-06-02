@@ -148,6 +148,7 @@ def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
+    bin_size = args.bin_size
 
     # Set plot parameters
     plot_images()
@@ -167,7 +168,7 @@ def main():
 
         # Check if the output file already exists
         base_filename = phot_file.split('.')[0]  # Remove the file extension
-        fits_filename = f"rel_{base_filename}.fits"  # Add 'rel_' prefix
+        fits_filename = f"rel_{base_filename}_{bin_size}.fits"
         if os.path.exists(fits_filename):
             print(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
             continue
