@@ -3,6 +3,7 @@ import os
 import glob
 from astropy.io import fits
 
+
 def get_fits_filenames(directory):
     """
     Get a list of all .fits files in the specified directory.
@@ -18,6 +19,7 @@ def get_fits_filenames(directory):
         List of .fits filenames.
     """
     return glob.glob(os.path.join(directory, "*.fits"))
+
 
 def get_prefix(filenames):
     """
@@ -39,7 +41,8 @@ def get_prefix(filenames):
         prefixes.add(prefix)
     return prefixes
 
-def filter_by_shape(filenames, shape=(2048, 2048)):
+
+def filter_files(filenames):
     """
     Filter filenames by the shape of the data in the .fits files and ignore specific words.
 
@@ -47,9 +50,6 @@ def filter_by_shape(filenames, shape=(2048, 2048)):
     ----------
     filenames : list of str
         List of .fits filenames.
-    shape : tuple
-        Desired shape of the data in the .fits files.
-
     Returns
     -------
     list of str
@@ -60,14 +60,8 @@ def filter_by_shape(filenames, shape=(2048, 2048)):
         # Check if the filename contains any of the ignored words
         if any(word in filename.lower() for word in ['master', 'flat', 'catalog', 'phot']):
             continue
-
-        try:
-            with fits.open(filename) as hdul:
-                if hdul[0].data.shape == shape:
-                    filtered_filenames.append(filename)
-        except Exception as e:
-            print(f"Error processing file {filename}: {e}")
     return filtered_filenames
+
 
 def delete_files(filenames):
     """
@@ -98,6 +92,7 @@ def delete_flat_files(filenames):
             os.remove(filename)
             print(f"Deleted file: {filename}")
 
+
 def main(directory):
     # Step 1: Get all .fits filenames
     filenames = get_fits_filenames(directory)
@@ -105,19 +100,22 @@ def main(directory):
         print("No .fits files found in the specified directory.")
         return
 
+    delete_flat_files(filenames)
     # Step 2: Extract unique prefixes
     prefixes = get_prefix(filenames)
 
     # Step 3: For each prefix, filter by shape and delete files
     for prefix in prefixes:
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
-        filtered_filenames = filter_by_shape(prefix_filenames)
+        filtered_filenames = filter_files(prefix_filenames)
         if filtered_filenames:
             filtered_filenames.sort()  # Sort the filenames
             delete_files(filtered_filenames)
         else:
-            print(f"No files with shape (2048, 2048) for prefix {prefix}")
-    delete_flat_files(filenames)
+            print(f"No files to delete for prefix: {prefix}")
+
+    print("All files have been deleted successfully.")
+
 
 if __name__ == "__main__":
     directory = '.'
