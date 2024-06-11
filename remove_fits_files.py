@@ -93,15 +93,32 @@ def delete_flat_files(filenames):
             print(f"Deleted file: {filename}")
 
 
+def delete_png_files(filenames):
+    """
+    Delete files starting with 'evening' or 'morning'.
+
+    Parameters
+    ----------
+    filenames : list of str
+        List of filenames to check and delete if they start with 'evening' or 'morning'.
+    """
+    for filename in filenames:
+        basename = os.path.basename(filename)
+        if basename.endswith('.png'):
+            os.remove(filename)
+            print(f"Deleted file: {filename}")
+
+
 def main(directory):
-    # Step 1: Get all .fits filenames
     filenames = get_fits_filenames(directory)
     if not filenames:
         print("No .fits files found in the specified directory.")
         return
 
     delete_flat_files(filenames)
-    # Step 2: Extract unique prefixes
+
+    delete_png_files(filenames)
+
     filtered_filenames = filter_files(filenames)
     if not filtered_filenames:
         print("No files to delete.")
@@ -109,7 +126,6 @@ def main(directory):
 
     prefixes = get_prefix(filtered_filenames)
 
-    # Step 3: For each prefix, filter by shape and delete files
     for prefix in prefixes:
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         filtered_filenames_prefixes = filter_files(prefix_filenames)
