@@ -102,15 +102,20 @@ def main(directory):
 
     delete_flat_files(filenames)
     # Step 2: Extract unique prefixes
-    prefixes = get_prefix(filenames)
+    filtered_filenames = filter_files(filenames)
+    if not filtered_filenames:
+        print("No files to delete.")
+        return
+
+    prefixes = get_prefix(filtered_filenames)
 
     # Step 3: For each prefix, filter by shape and delete files
     for prefix in prefixes:
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
-        filtered_filenames = filter_files(prefix_filenames)
-        if filtered_filenames:
-            filtered_filenames.sort()  # Sort the filenames
-            delete_files(filtered_filenames)
+        filtered_filenames_prefixes = filter_files(prefix_filenames)
+        if filtered_filenames_prefixes:
+            filtered_filenames_prefixes.sort()  # Sort the filenames
+            delete_files(filtered_filenames_prefixes)
         else:
             print(f"No files to delete for prefix: {prefix}")
 
