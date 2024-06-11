@@ -43,7 +43,7 @@ def get_prefix(filenames):
     return prefixes
 
 
-def filter_files(filenames):
+def filter_fits_files(filenames):
     """
     Filter filenames by the shape of the data in the .fits files and ignore specific words.
 
@@ -64,7 +64,7 @@ def filter_files(filenames):
     return filtered_filenames
 
 
-def delete_files(filenames):
+def delete_fits_files(filenames):
     """
     Delete all files in the list except the first one.
 
@@ -78,7 +78,7 @@ def delete_files(filenames):
         print(f"Deleted file: {filename}")
 
 
-def delete_flat_files(filenames):
+def delete_flat_fits_files(filenames):
     """
     Delete files starting with 'evening' or 'morning'.
 
@@ -94,33 +94,31 @@ def delete_flat_files(filenames):
             print(f"Deleted file: {filename}")
 
 
-def delete_png_files(filenames):
+def delete_png_files(directory):
     """
-    Delete files starting with 'evening' or 'morning'.
+    List and delete all .png files in the specified directory.
 
     Parameters
     ----------
-    filenames : list of str
-        List of filenames to check and delete if they start with 'evening' or 'morning'.
+    directory : str
+        Directory to search for .png files to delete.
     """
-    for filename in filenames:
-        basename = os.path.basename(filename)
-        if basename.endswith('.png'):
-            os.remove(filename)
-            print(f"Deleted file: {filename}")
+    png_files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.png') and os.path.isfile(os.path.join(directory, f))]
+    for filename in png_files:
+        os.remove(filename)
 
 
 def main(directory):
+    delete_png_files(directory)
+
     filenames = get_fits_filenames(directory)
     if not filenames:
         print("No .fits files found in the specified directory.")
         return
 
-    delete_flat_files(filenames)
+    delete_flat_fits_files(filenames)
 
-    delete_png_files(filenames)
-
-    filtered_filenames = filter_files(filenames)
+    filtered_filenames = filter_fits_files(filenames)
     if not filtered_filenames:
         print("No files to delete.")
         return
@@ -130,10 +128,10 @@ def main(directory):
 
     for prefix in prefixes:
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
-        filtered_filenames_prefixes = filter_files(prefix_filenames)
+        filtered_filenames_prefixes = filter_fits_files(prefix_filenames)
         if filtered_filenames_prefixes:
             filtered_filenames_prefixes.sort()  # Sort the filenames
-            delete_files(filtered_filenames_prefixes)
+            delete_fits_files(filtered_filenames_prefixes)
         else:
             print(f"No files to delete for prefix: {prefix}")
 
