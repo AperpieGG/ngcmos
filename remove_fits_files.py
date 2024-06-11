@@ -66,7 +66,6 @@ def filter_fits_files(filenames):
     return filtered_filenames
 
 
-
 def delete_fits_files(filenames):
     """
     Delete all files in the list except the first one.
@@ -130,7 +129,7 @@ def main(directory):
     print('The prefixes are:', prefixes)
 
     for prefix in prefixes:
-        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
+        prefix_filenames = [filename for filename in filtered_filenames if os.path.basename(filename).startswith(prefix)]
         filtered_filenames_prefixes = filter_fits_files(prefix_filenames)
         if filtered_filenames_prefixes:
             filtered_filenames_prefixes.sort()  # Sort the filenames
