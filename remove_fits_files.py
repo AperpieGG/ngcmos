@@ -39,34 +39,28 @@ def get_prefix(filenames):
         prefixes.add(prefix)
     return prefixes
 
-def filter_by_shape(filenames, shape=(2048, 2048)):
+def filter_filenames(filenames):
     """
-    Filter filenames by the shape of the data in the .fits files and ignore specific words.
+    Filter filenames to exclude those containing specific words.
 
     Parameters
     ----------
     filenames : list of str
         List of .fits filenames.
-    shape : tuple
-        Desired shape of the data in the .fits files.
 
     Returns
     -------
     list of str
-        List of filenames with data of the specified shape, excluding files with specific words.
+        List of filenames excluding those with specific words.
     """
     filtered_filenames = []
     for filename in filenames:
         # Check if the filename contains any of the ignored words
-        if any(word in filename.lower() for word in ['master', 'flat', 'catalog', 'phot']):
+        if any(word in filename.lower() for word in ['catalog', 'phot', 'rel', 'master', 'morning', 'evening']):
             continue
 
-        try:
-            with fits.open(filename) as hdul:
-                if hdul[0].data.shape == shape:
-                    filtered_filenames.append(filename)
-        except Exception as e:
-            print(f"Error processing file {filename}: {e}")
+        filtered_filenames.append(filename)
+
     return filtered_filenames
 
 def delete_files(filenames):
@@ -98,6 +92,22 @@ def delete_flat_files(filenames):
             os.remove(filename)
             print(f"Deleted file: {filename}")
 
+
+def delete_png_files(directory):
+    """
+    Delete all .png files in the specified directory.
+
+    Parameters
+    ----------
+    directory : str
+        Directory to search for .png files.
+    """
+    png_files = glob.glob(os.path.join(directory, "*.png"))
+    for filename in png_files:
+        os.remove(filename)
+        print(f"Deleted file: {filename}")
+
+
 def main(directory):
     # Step 1: Get all .fits filenames
     filenames = get_fits_filenames(directory)
@@ -105,19 +115,27 @@ def main(directory):
         print("No .fits files found in the specified directory.")
         return
 
-    # Step 2: Extract unique prefixes
-    prefixes = get_prefix(filenames)
+    # Step 2: Filter filenames
+    filtered_filenames = filter_filenames(filenames)
 
-    # Step 3: For each prefix, filter by shape and delete files
+    # Step 3: Extract unique prefixes from filtered filenames
+    prefixes = get_prefix(filtered_filenames)
+    print(f'found the following prefixes: {prefixes}')
+
+    # Step 4: For each prefix, delete files
     for prefix in prefixes:
-        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
-        filtered_filenames = filter_by_shape(prefix_filenames)
-        if filtered_filenames:
-            filtered_filenames.sort()  # Sort the filenames
-            delete_files(filtered_filenames)
+        prefix_filenames = [filename for filename in filtered_filenames if filename.startswith(prefix)]
+        if prefix_filenames:
+            prefix_filenames.sort()  # Sort the filenames
+            delete_files(prefix_filenames)
         else:
-            print(f"No files with shape (2048, 2048) for prefix {prefix}")
+            print(f"No files to remove for prefix {prefix}")
+
+    # Delete files starting with 'evening' or 'morning'
     delete_flat_files(filenames)
+
+    # Delete all .png files
+    delete_png_files(directory)
 
 if __name__ == "__main__":
     directory = '.'
