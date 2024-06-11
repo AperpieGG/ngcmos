@@ -37,7 +37,8 @@ def get_prefix(filenames):
     """
     prefixes = set()
     for filename in filenames:
-        prefix = filename[:11]
+        basename = os.path.basename(filename)
+        prefix = basename[:11]
         prefixes.add(prefix)
     return prefixes
 
@@ -125,6 +126,7 @@ def main(directory):
         return
 
     prefixes = get_prefix(filtered_filenames)
+    print('The prefixes are:', prefixes)
 
     for prefix in prefixes:
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
