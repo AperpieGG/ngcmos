@@ -58,7 +58,7 @@ def filter_files(filenames):
     filtered_filenames = []
     for filename in filenames:
         # Check if the filename contains any of the ignored words
-        if any(word in filename.lower() for word in ['master', 'flat', 'catalog', 'phot']):
+        if any(word in filename.lower() for word in ['master', 'flat', 'catalog', 'phot', 'morning', 'evening']):
             continue
     return filtered_filenames
 
