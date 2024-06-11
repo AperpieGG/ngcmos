@@ -47,15 +47,7 @@ def search_and_extract_info(filename, tic_id):
     ax1.set_ylim(0.95, 1.05)
     ax1.set_title(f'Relative Photometry for TIC ID {tic_id} (Tmag = {tmag:.2f})')
 
-    # Create the second x-axis for airmass
-    ax2 = ax1.twiny()
-    ax2.plot(star_time, airmass, 'r-')
-    ax2.set_xlabel('Airmass')
-
-    # Align the twinned axes
-    ax1.legend()
     plt.show()
-
 
 def main():
     plot_images()
