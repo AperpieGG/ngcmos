@@ -57,7 +57,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Remove outliers from the target star
     time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped \
-        = remove_outliers(jd_mid, fluxes, fluxerrs, airmass=airmass_list, zero_point=zero_point_list)
+        = remove_outliers(jd_mid, fluxes, fluxerrs, air_mass=airmass_list, zero_point=zero_point_list)
 
     zero_point = np.mean(zero_point_list)
     magnitude = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
