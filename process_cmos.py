@@ -19,7 +19,7 @@ from astropy.utils.exceptions import AstropyWarning
 warnings.simplefilter('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 
-GAIN = 1.12
+GAIN = 1.131
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
 APERTURE_RADII = [2, 3, 4, 5, 6]
