@@ -46,25 +46,28 @@ def rms_vs_mags(table, num_stars):
     for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
 
-        # Check if fields are present and print their types
-        for field in ['Tmag', 'Sky', 'RMS', 'ZP', 'Airmass']:
-            if field in tic_id_data.dtype.names:
-                print(f"{field}: {tic_id_data[field].dtype}")
-            else:
-                raise KeyError(f"Field {field} not found in the FITS file.")
+        # Check if fields are present and extract data
+        try:
+            Tmag = tic_id_data['Tmag'][0]
+            sky = tic_id_data['Sky'][0]
+            rms = tic_id_data['RMS'][0]
+            zp_array = tic_id_data['ZP']
+            airmass_array = tic_id_data['Airmass']
 
-        # Extract the first element for each required field
-        Tmag = tic_id_data['Tmag'][0]
-        sky = tic_id_data['Sky'][0]
-        rms = tic_id_data['RMS'][0]
-        zero_point = tic_id_data['ZP'][0]
-        airmass = tic_id_data['Airmass'][0]
+            print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
+            print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
 
-        print(len(Tmag), len(sky), len(rms), len(zero_point), len(airmass))
-        # Calculate mean flux and RMS
-        RMS_list.append(rms * 1000000)  # Convert to ppm
-        sky_list.append(np.median(sky))
-        Tmags_list.append(Tmag)
+            # Calculate statistics for zero point and airmass
+            zero_point = np.mean(zp_array)
+            airmass = np.mean(airmass_array)
+
+            # Calculate mean flux and RMS
+            RMS_list.append(rms * 1000000)  # Convert to ppm
+            sky_list.append(np.median(sky))
+            Tmags_list.append(Tmag)
+
+        except ValueError as e:
+            print(f"Value error: {e}")
 
     return RMS_list, sky_list, Tmags_list, zero_point, airmass
 
