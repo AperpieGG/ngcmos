@@ -51,6 +51,7 @@ def rms_vs_mags(table, num_stars):
         zero_point = tic_id_data['ZP']
         airmass = tic_id_data['Airmass']
 
+        print(len(Tmag), len(sky), len(rms), len(zero_point), len(airmass))
         # Calculate mean flux and RMS
         RMS_list.append(rms * 1000000)  # Convert to ppm
         sky_list.append(np.median(sky))
