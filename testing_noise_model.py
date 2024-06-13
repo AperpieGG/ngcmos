@@ -46,7 +46,7 @@ def rms_vs_mags(table, num_stars):
     for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
         Tmag = tic_id_data['Tmag'][0]
-        sky = tic_id_data['Sky']
+        sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
         zero_point = tic_id_data['ZP']
         airmass = tic_id_data['Airmass']
