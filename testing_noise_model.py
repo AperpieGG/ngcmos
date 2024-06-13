@@ -45,6 +45,15 @@ def rms_vs_mags(table, num_stars):
     unique_tic_ids = np.unique(table['TIC_ID'])
     for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
+
+        # Check if fields are present and print their types
+        for field in ['Tmag', 'Sky', 'RMS', 'ZP', 'Airmass']:
+            if field in tic_id_data.colnames:
+                print(f"{field}: {tic_id_data[field].dtype}")
+            else:
+                raise KeyError(f"Field {field} not found in the FITS file.")
+
+        # Extract the first element for each required field
         Tmag = tic_id_data['Tmag'][0]
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
