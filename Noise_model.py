@@ -19,7 +19,7 @@ READ_NOISE = 1.56
 DARK_CURRENT = 1.6
 
 
-def rms_vs_mags(table, bin_size, num_stars, average_zp):
+def rms_vs_mags(table, bin_size, num_stars):
     """
     Calculate the mean flux and RMS for a given number of stars
 
@@ -31,8 +31,6 @@ def rms_vs_mags(table, bin_size, num_stars, average_zp):
         Number of images to bin
     num_stars : int
         Number of stars to plot
-    average_zp : float
-        Average zero point value
 
     Returns
     -------
@@ -63,6 +61,8 @@ def rms_vs_mags(table, bin_size, num_stars, average_zp):
         flux_4 = tic_id_data['flux_6']
         fluxerr_4 = tic_id_data['fluxerr_6']
         sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
+        airmass_list = tic_id_data['airmass']
+        zp_list = tic_id_data['zp']
         if Tmag > 14:
             continue
 
@@ -81,7 +81,7 @@ def rms_vs_mags(table, bin_size, num_stars, average_zp):
         sky_list.append(np.median(sky_4))
 
         # Calculate magnitudes using the average zp
-        mags = -2.5 * np.log10(flux_4_clipped / 10) + average_zp
+        mags = -2.5 * np.log10(flux_4_clipped / 10) + np.mean(zp_list)
         mags_list.append(np.nanmean(mags))
         Tmags_list.append(round(Tmag, 2))
 
@@ -89,7 +89,7 @@ def rms_vs_mags(table, bin_size, num_stars, average_zp):
               f"and RMS = {np.std(dt_flux_binned) * 1000000:.2f}")
     print('The max number of stars is: ', len(np.unique(table['tic_id'])))
 
-    return mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list
+    return mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list, airmass_list, zp_list
 
 
 def main():
@@ -108,19 +108,16 @@ def main():
     print(f"Plotting the photometry file {filename}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, filename))
 
-    # Extract airmass and zero point values from the images
-    airmass_list, zp = extract_airmass_zp(phot_table, current_night_directory)
-
     # Get the maximum number of stars based on unique TIC IDs
     max_num_stars = len(np.unique(phot_table['tic_id']))
 
     # Calculate mean and RMS for the noise model
-    mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = rms_vs_mags(
-        phot_table, bin_size=bin_size, num_stars=max_num_stars, average_zp=np.mean(zp))
+    mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list, airmass_list, zp_list = rms_vs_mags(
+        phot_table, bin_size=bin_size, num_stars=max_num_stars)
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_list, zp, aper=APERTURE, read_noise=READ_NOISE,
+        noise_sources(sky_list, bin_size, airmass_list, zp_list, aper=APERTURE, read_noise=READ_NOISE,
                       dark_current=DARK_CURRENT))
 
     synthetic_mag_list = synthetic_mag.tolist()
