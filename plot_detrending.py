@@ -55,7 +55,8 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     #                    jd_mid - int(jd_mid[0]))
 
     # use wotan to detrend the light curve
-    trend = flatten(jd_mid[0], fluxes, window_length=0.75, method='biweight', return_trend=True)
+    print(len(jd_mid), len(fluxes))
+    flatten_flux, trend = flatten(jd_mid, fluxes, window_length=0.75, method='biweight', return_trend=True)
 
     dt_flux = fluxes / trend
     dt_fluxerr = fluxerrs / trend
