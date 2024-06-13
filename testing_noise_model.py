@@ -52,7 +52,9 @@ def rms_vs_mags(table, num_stars):
             sky = tic_id_data['Sky'][0]
             rms = tic_id_data['RMS'][0]
             zp_array = tic_id_data['ZP']
+            zp_array = np.mean(zp_array)
             airmass_array = tic_id_data['Airmass']
+            airmass_array = np.mean(airmass_array)
 
             print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
             print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
