@@ -48,7 +48,7 @@ def rms_vs_mags(table, num_stars):
 
         # Check if fields are present and print their types
         for field in ['Tmag', 'Sky', 'RMS', 'ZP', 'Airmass']:
-            if field in tic_id_data.colnames:
+            if field in tic_id_data.dtype.names:
                 print(f"{field}: {tic_id_data[field].dtype}")
             else:
                 raise KeyError(f"Field {field} not found in the FITS file.")
