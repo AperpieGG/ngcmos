@@ -61,9 +61,9 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     dt_fluxerr = fluxerrs / trend
 
     # Bin the time, flux, and error
-    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+    # time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
-    RMS = np.std(dt_flux_binned)
+    RMS = np.std(dt_flux)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
     # Create subplots
