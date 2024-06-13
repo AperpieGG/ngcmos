@@ -46,28 +46,23 @@ def rms_vs_mags(table, num_stars):
     for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
 
-        # Check if fields are present and extract data
-        try:
-            Tmag = tic_id_data['Tmag'][0]
-            sky = tic_id_data['Sky'][0]
-            rms = tic_id_data['RMS'][0]
-            zp_array = tic_id_data['ZP'][0][0]
-            airmass_array = tic_id_data['Airmass'][0][0]
+        Tmag = tic_id_data['Tmag'][0]
+        sky = tic_id_data['Sky'][0]
+        rms = tic_id_data['RMS'][0]
+        zp_array = tic_id_data['ZP'][0][0]
+        airmass_array = tic_id_data['Airmass'][0][0]
 
-            print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
-            print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
+        print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
+        print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
 
-            # Calculate statistics for zero point and airmass
-            zero_point = np.mean(zp_array)
-            airmass = np.mean(airmass_array)
+        # Calculate statistics for zero point and airmass
+        zero_point = np.mean(zp_array)
+        airmass = np.mean(airmass_array)
 
-            # Calculate mean flux and RMS
-            RMS_list.append(rms * 1000000)  # Convert to ppm
-            sky_list.append(np.median(sky))
-            Tmags_list.append(Tmag)
-
-        except ValueError as e:
-            print(f"Value error: {e}")
+        # Calculate mean flux and RMS
+        RMS_list.append(rms * 1000000)  # Convert to ppm
+        sky_list.append(np.median(sky))
+        Tmags_list.append(Tmag)
 
     return RMS_list, sky_list, Tmags_list, zero_point, airmass
 
