@@ -55,15 +55,15 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     #                    jd_mid - int(jd_mid[0]))
 
     # use wotan to detrend the light curve
-    trend = flatten(jd_mid, fluxes, window_length=0.75, method='biweight', return_trend=True)
+    trend = flatten(jd_mid[0], fluxes, window_length=0.75, method='biweight', return_trend=True)
 
     dt_flux = fluxes / trend
     dt_fluxerr = fluxerrs / trend
 
     # Bin the time, flux, and error
-    # time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
 
-    RMS = np.std(dt_flux)
+    RMS = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
 
     # Create subplots
