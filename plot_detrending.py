@@ -5,6 +5,7 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 from utils import plot_images, find_current_night_directory, get_phot_files, read_phot_file, bin_time_flux_error
+from wotan import flatten
 
 
 def load_config(filename):
@@ -49,23 +50,13 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     fluxes = tic_id_data['flux_6']
     fluxerrs = tic_id_data['fluxerr_6']
 
-    # Extract fluxes and errors based on Tmag
-    # if tmag < 10.5:
-    #     fluxes = tic_id_data['flux_6']
-    #     fluxerrs = tic_id_data['fluxerr_6']
-    # elif 10.5 <= tmag < 11:
-    #     fluxes = tic_id_data['flux_5']
-    #     fluxerrs = tic_id_data['fluxerr_5']
-    # elif 12 > tmag >= 11:
-    #     fluxes = tic_id_data['flux_4']
-    #     fluxerrs = tic_id_data['fluxerr_4']
-    # else:
-    #     fluxes = tic_id_data['flux_3']
-    #     fluxerrs = tic_id_data['fluxerr_3']
+    # # use polyfit to detrend the light curve
+    # trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, 2),
+    #                    jd_mid - int(jd_mid[0]))
 
-    # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, 2),
-                       jd_mid - int(jd_mid[0]))
+    # use wotan to detrend the light curve
+    trend = flatten(jd_mid, fluxes, window_length=0.75, method='biweight', return_trend=True)
+
     dt_flux = fluxes / trend
     dt_fluxerr = fluxerrs / trend
 
