@@ -48,8 +48,8 @@ def rms_vs_mags(table, num_stars):
         Tmag = tic_id_data['Tmag'][0]
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
-        zero_point = tic_id_data['ZP']
-        airmass = tic_id_data['Airmass']
+        zero_point = tic_id_data['ZP'][0]
+        airmass = tic_id_data['Airmass'][0]
 
         print(len(Tmag), len(sky), len(rms), len(zero_point), len(airmass))
         # Calculate mean flux and RMS
