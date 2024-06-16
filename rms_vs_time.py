@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 import argparse
-import json
 import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
@@ -9,24 +8,6 @@ from utils import (plot_images, find_current_night_directory, get_phot_files,
 
 # use dark background for plots
 # plt.style.use('dark_background')
-
-
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
@@ -134,7 +115,7 @@ def run_for_more(phot_file, num_stars):
 
 if __name__ == "__main__":
     # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
+    current_night_directory = '.'
 
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
