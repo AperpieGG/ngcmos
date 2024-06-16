@@ -35,7 +35,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
         if tic_id is not None and current_tic_id != tic_id:
             continue
 
-        time_clipped, flux_5_clipped, fluxerr_5_clipped = remove_outliers(jd_mid, flux_5, fluxerr_5)
+        time_clipped, flux_5_clipped, fluxerr_5_clipped, _, _ = remove_outliers(jd_mid, flux_5, fluxerr_5)
 
         trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_5_clipped, fluxerr_5_clipped)
 
