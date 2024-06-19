@@ -16,10 +16,14 @@ def print_column_info(table, column_name):
     print(f"--- Column: {column_name} ---")
     column_data = table[column_name]
     for i, cell in enumerate(column_data):
-        if i >= np.isnan(cell):  # Limit to first 5 entries for brevity
+        if i >= 5:  # Limit to first 5 entries for brevity
             break
-        cell_array = np.array(cell)
-        print(f"Row {i}: length = {len(cell_array)}, first 5 values = {cell_array[:np.isnan(cell_array)]}")
+        if isinstance(cell, np.ndarray):
+            cell_array = np.array(cell)
+            nan_mask = np.isnan(cell_array)
+            print(f"Row {i}: length = {len(cell_array)}, first 5 values = {cell_array[~nan_mask][:5]}")
+        else:
+            print(f"Row {i}: Single value = {cell}")
     print(f"Total rows: {len(column_data)}")
     print()
 
