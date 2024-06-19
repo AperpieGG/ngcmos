@@ -25,11 +25,11 @@ def extract_phot_data(table):
         print(f'The tic_id_data is: {tic_id_data}')
 
         Tmag = tic_id_data['Tmag'][0]
-        mags = tic_id_data['Magnitude'][0]
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
-        zp_array = tic_id_data['ZP'][0]
-        airmass_array = tic_id_data['Airmass'][0]
+        zp_array = np.array(tic_id_data['ZP'][0])
+        airmass_array = np.array(tic_id_data['Airmass'][0])
+        mags_array = np.array(tic_id_data['Magnitude'][0])
 
         print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
         print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
@@ -37,7 +37,7 @@ def extract_phot_data(table):
         # Calculate statistics for zero point and airmass
         zero_point = np.mean(zp_array)
         airmass = np.mean(airmass_array)
-        mags = np.mean(mags)
+        mags = np.mean(mags_array)
         # Calculate mean flux and RMS
         RMS_list.append(rms * 1000000)  # Convert to ppm
         sky_list.append(np.median(sky))
