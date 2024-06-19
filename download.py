@@ -1,4 +1,4 @@
-#!/Users/u5500483/anaconda3/bin/python
+#!/usr/bin/env python
 # script to rsync from serves staging archive
 import argparse
 import os
