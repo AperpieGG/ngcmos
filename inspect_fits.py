@@ -16,7 +16,7 @@ def print_column_info(table, column_name):
     print(f"--- Column: {column_name} ---")
     column_data = table[column_name]
     for i, cell in enumerate(column_data):
-        if i >= 5:  # Limit to first 5 entries for brevity
+        if i >= np.isnan(cell):  # Limit to first 5 entries for brevity
             break
         cell_array = np.array(cell)
         print(f"Row {i}: length = {len(cell_array)}, first 5 values = {cell_array[:5]}")
