@@ -20,7 +20,7 @@ def sync(args, source, destination):
     flags = "-avz"
     if args.dryrun:
         flags = flags + "n"
-    comm = "rsync {} --ignore-existing -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' {} {}".format(flags, source, destination)
+    comm = "rsync {} -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' {} {}".format(flags, source, destination)
     print(comm)
     os.system(comm)
 
