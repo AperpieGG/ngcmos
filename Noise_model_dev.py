@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-"""
-This script was created to run the noise model from the file of rel_phot.fits
-It will create a json file ready to be plotted (it includes the word rel_phot in the name)
-"""
-
 import argparse
 import os
 import numpy as np
@@ -15,42 +10,26 @@ APERTURE = 6
 READ_NOISE = 1.56
 DARK_CURRENT = 1.6
 
+# we want to extract data from the rel file for each start filtering with respect the id.
 
-def rms_vs_mags(table, num_stars):
-    """
-    Calculate the mean flux and RMS for a given number of stars
 
-    Parameters
-    ----------
-    table : astropy.table.Table
-        Table containing the photometry data
-    num_stars : int
-        Number of stars to plot
-
-    Returns
-    -------
-    mean_flux_list : list
-        values of mean fluxes
-    RMS_list : list
-        values of RMS values
-    sky_list : list
-        values of sky values
-    Tmags_list : list
-        values of Tmag
-    """
+def extract_phot_data(table):
     RMS_list = []
     sky_list = []
     Tmags_list = []
+    mags_list = []
 
     unique_tic_ids = np.unique(table['TIC_ID'])
-    for tic_id in unique_tic_ids[:num_stars]:  # Selecting the first num_stars unique TIC IDs
+    for tic_id in unique_tic_ids:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
+        print(f'The tic_id_data is: {tic_id_data}')
 
         Tmag = tic_id_data['Tmag'][0]
+        mags = tic_id_data['Magnitude'][0]
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
-        zp_array = tic_id_data['ZP'][0][0]
-        airmass_array = tic_id_data['Airmass'][0][0]
+        zp_array = tic_id_data['ZP'][0]
+        airmass_array = tic_id_data['Airmass'][0]
 
         print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
         print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
@@ -58,13 +37,14 @@ def rms_vs_mags(table, num_stars):
         # Calculate statistics for zero point and airmass
         zero_point = np.mean(zp_array)
         airmass = np.mean(airmass_array)
-
+        mags = np.mean(mags)
         # Calculate mean flux and RMS
         RMS_list.append(rms * 1000000)  # Convert to ppm
         sky_list.append(np.median(sky))
         Tmags_list.append(Tmag)
+        mags_list.append(mags)
 
-    return RMS_list, sky_list, Tmags_list, zero_point, airmass
+    return RMS_list, sky_list, Tmags_list, zero_point, airmass, mags_list
 
 
 def main():
@@ -83,12 +63,9 @@ def main():
     print(f"Plotting the photometry file {filename}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, filename))
 
-    # Get the maximum number of stars based on unique TIC IDs
-    max_num_stars = len(np.unique(phot_table['TIC_ID']))
-
     # Calculate mean and RMS for the noise model
-    RMS_list, sky_list, Tmags_list, zero_point, airmass = rms_vs_mags(
-        phot_table, num_stars=max_num_stars)
+    RMS_list, sky_list, Tmags_list, zero_point, airmass, mags_list = extract_phot_data(
+        phot_table)
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
