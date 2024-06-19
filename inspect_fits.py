@@ -19,7 +19,7 @@ def print_column_info(table, column_name):
         if i >= np.isnan(cell):  # Limit to first 5 entries for brevity
             break
         cell_array = np.array(cell)
-        print(f"Row {i}: length = {len(cell_array)}, first 5 values = {cell_array[:5]}")
+        print(f"Row {i}: length = {len(cell_array)}, first 5 values = {cell_array[:np.isnan(cell_array)]}")
     print(f"Total rows: {len(column_data)}")
     print()
 
