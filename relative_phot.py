@@ -61,9 +61,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     zero_point = np.mean(zero_point_list)
     magnitude = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
-    mags = np.nanmean(magnitude)
     print(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
-          f"and magnitude = {np.nanmean(magnitude):.2f}")
+          f"and magnitude = {np.mean(magnitude):.2f}")
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
@@ -142,7 +141,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
                                                                          dt_fluxerr_poly, bin_size)
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-            mags, airmass_clipped, zero_point_clipped)
+            magnitude, airmass_clipped, zero_point_clipped)
 
 
 def main():
@@ -184,7 +183,7 @@ def main():
                 print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                       f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-                 mags, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size)
+                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size)
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
@@ -192,7 +191,7 @@ def main():
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  rms, sky_median, airmass_list, zero_point_list, mags))
+                                  rms, sky_median, airmass_list, zero_point_list, magnitude))
                 print()
             else:
                 print(f"TIC ID {tic_id} is not included in the analysis because "
