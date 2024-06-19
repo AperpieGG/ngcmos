@@ -20,10 +20,17 @@ def print_column_info(table, column_name):
             break
         if isinstance(cell, np.ndarray):
             cell_array = np.array(cell)
-            nan_mask = np.isnan(cell_array)
-            print(f"Row {i}: length = {len(cell_array)}, first 5 values = {cell_array[~nan_mask][:5]}")
+            nan_indices = np.where(np.isnan(cell_array))[0]
+            if len(nan_indices) > 0:
+                print(f"Row {i}: NaN values at indices: {nan_indices}")
+            else:
+                print(f"Row {i}: No NaN values")
+            print(f"Row {i}: length = {len(cell_array)}, first 5 values = {cell_array[:5]}")
         else:
-            print(f"Row {i}: Single value = {cell}")
+            if np.isnan(cell):
+                print(f"Row {i}: Value is NaN")
+            else:
+                print(f"Row {i}: Single value = {cell}")
     print(f"Total rows: {len(column_data)}")
     print()
 
