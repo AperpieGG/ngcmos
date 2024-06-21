@@ -8,6 +8,7 @@ def argument_parser():
     p.add_argument('file_list', type=str, help='Path to the file containing list of files to download')
     p.add_argument('destination', type=str, help='Destination to download to')
     p.add_argument('--dryrun', help='dry-run only', action='store_true')
+    p.add_argument('--site', choices=['warwick', 'ngtshead'], default='ngtshead', help='Specify the site (default: ngtshead)')
     return p.parse_args()
 
 
@@ -15,6 +16,12 @@ def sync(args, file_list, destination):
     flags = "-avz"
     if args.dryrun:
         flags = flags + "n"
+
+    site = args.site
+    if site == 'warwick':
+        hostname = 'u5500483@ngtshead.warwick.ac.uk'
+    else:  # default to ngtshead
+        hostname = 'ops@10.2.5.115'
 
     with open(file_list, "r") as f:
         files = f.readlines()
@@ -27,7 +34,7 @@ def sync(args, file_list, destination):
         if file:
             downloaded_files += 1
             print(f"Downloading {file} ({downloaded_files}/{total_files})...")
-            comm = f"rsync {flags} -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' ops@10.2.5.115:{file} {destination}"
+            comm = f"rsync {flags} -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' {hostname}:{file} {destination}"
             os.system(comm)
 
 
