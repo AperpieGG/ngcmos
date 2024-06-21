@@ -23,7 +23,7 @@ def find_last_night():
 def get_files(path, night):
     files = os.listdir(path)
     if files:
-        files = [f for f in files if f.endswith(f'{night}.mp4') or f.endswith(f'{night}.pdf')]
+        files = [f for f in files if f.endswith(night + '.mp4') or f.endswith(night + '.pdf')]
     return files
 
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     if os.path.exists(primary_path):
         path = primary_path
     else:
-        print(f"Primary path '{primary_path}' does not exist. You are at ngtshead so use that path.")
+        print(f"Primary path '{primary_path}' does not exist. Using ngtshead path.")
         path = fallback_path
 
     last_night = find_last_night()
