@@ -30,7 +30,7 @@ def get_files(path, night):
 def save_file_list(file_list, output_path):
     with open(output_path, "w") as f:
         for file in file_list:
-            f.write(f"{file}\n")
+            f.write("{}\n".format(file))
 
 
 if __name__ == "__main__":
