@@ -6,7 +6,7 @@ REMOTE_SCRIPT="/home/ops/ngcmos/send_diagnostics.py"
 REMOTE_FILE_LIST="/home/ops/ngcmos/files_to_download.txt"
 LOCAL_FILE_LIST="/home/u5500483/ngcmos/files_to_download.txt"
 LOCAL_DOWNLOAD_SCRIPT="/home/u5500483/ngcmos/download.py"
-LOCAL_DEST_DIR="/path/to/local/destination"
+LOCAL_DEST_DIR="/home/u5500483/shifts_plots_cmos"
 
 # Step 1: Run the file identification script on the remote machine
 ssh $REMOTE_USER@$REMOTE_HOST "python3 $REMOTE_SCRIPT"
