@@ -38,21 +38,21 @@ if __name__ == "__main__":
     if os.path.exists(primary_path):
         path = primary_path
     else:
-        print(f"Primary path '{primary_path}' does not exist. Using ngtshead path.")
+        print("Primary path '{}' does not exist. Using ngtshead path.".format(primary_path))
         path = fallback_path
 
     last_night = find_last_night()
     files = get_files(path, last_night)
-    print(f"Current night directory: {last_night}")
+    print("Current night directory: {}".format(last_night))
 
     # Print files without the path
-    print(f"Files: {[os.path.basename(f) for f in files]}")
+    print("Files: {}".format([os.path.basename(f) for f in files]))
 
     # Get the absolute paths for saving to the file list
     files_with_paths = [os.path.join(path, f) for f in files]
 
     if files_with_paths:
         save_file_list(files_with_paths, output_file_path)
-        print(f"File list saved to: {output_file_path}")
+        print("File list saved to: {}".format(output_file_path))
     else:
         print("No files found for the previous night.")
