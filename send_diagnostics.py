@@ -35,8 +35,15 @@ if __name__ == "__main__":
     last_night = find_last_night()
     files = get_files(path, last_night)
     print(f"Current night directory: {last_night}")
-    print(f"Files: {files}")
-    files = [os.path.join(path, f) for f in files]
 
-    # Save the file list to a text file
-    save_file_list(files, output_file_path)
+    # Print files without the path
+    print(f"Files: {[os.path.basename(f) for f in files]}")
+
+    # Get the absolute paths for saving to the file list
+    files_with_paths = [os.path.join(path, f) for f in files]
+
+    if files_with_paths:
+        save_file_list(files_with_paths, output_file_path)
+        print(f"File list saved to: {output_file_path}")
+    else:
+        print("No files found for the previous night.")
