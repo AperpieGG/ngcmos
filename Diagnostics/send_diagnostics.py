@@ -8,7 +8,9 @@ from the previous night.
 import os
 from datetime import datetime, timedelta
 
-path = '/home/ops/data/shifts_plots'
+# Define the primary and fallback paths
+primary_path = '/home/ops/data/shifts_plots'
+fallback_path = '/home/u5500483/shifts_plots_cmos'
 output_file_path = '/home/ops/ngcmos/files_to_download.txt'
 
 
@@ -32,6 +34,13 @@ def save_file_list(file_list, output_path):
 
 
 if __name__ == "__main__":
+    # Check if primary path exists, otherwise use fallback path
+    if os.path.exists(primary_path):
+        path = primary_path
+    else:
+        print(f"Primary path '{primary_path}' does not exist. You are at ngtshead so use that path.")
+        path = fallback_path
+
     last_night = find_last_night()
     files = get_files(path, last_night)
     print(f"Current night directory: {last_night}")
