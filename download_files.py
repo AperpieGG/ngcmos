@@ -2,6 +2,7 @@
 import argparse
 import os
 import time
+from tqdm import tqdm
 
 
 def argument_parser():
@@ -20,11 +21,11 @@ def sync(args, file_list, destination):
     with open(file_list, "r") as f:
         files = f.readlines()
 
-    for file in files:
+    # Use tqdm to wrap around files list for progress bar
+    for file in tqdm(files, desc="Downloading", unit="file"):
         file = file.strip()
         if file:
             comm = f"rsync {flags} -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' ops@10.2.5.115:{file} {destination}"
-            print(comm)
             os.system(comm)
 
 
