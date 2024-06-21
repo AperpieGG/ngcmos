@@ -1,8 +1,6 @@
-#!/usr/bin/env python
 import argparse
 import os
 import time
-from tqdm import tqdm
 
 
 def argument_parser():
@@ -21,10 +19,14 @@ def sync(args, file_list, destination):
     with open(file_list, "r") as f:
         files = f.readlines()
 
-    # Use tqdm to wrap around files list for progress bar
-    for file in tqdm(files, desc="Downloading", unit="file"):
+    total_files = len(files)
+    downloaded_files = 0
+
+    for file in files:
         file = file.strip()
         if file:
+            downloaded_files += 1
+            print(f"Downloading {file} ({downloaded_files}/{total_files})...")
             comm = f"rsync {flags} -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' ops@10.2.5.115:{file} {destination}"
             os.system(comm)
 
