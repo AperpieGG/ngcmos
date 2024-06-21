@@ -23,7 +23,7 @@ def sync(args, file_list, destination):
     for file in files:
         file = file.strip()
         if file:
-            comm = f"rsync {flags} -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' user@remote_machine:{file} {destination}"
+            comm = f"rsync {flags} -e 'ssh -oHostKeyAlgorithms=+ssh-rsa' ops@10.2.5.115:{file} {destination}"
             print(comm)
             os.system(comm)
 
