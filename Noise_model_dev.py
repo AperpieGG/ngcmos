@@ -4,13 +4,12 @@ import argparse
 import os
 import numpy as np
 import json
+from astropy.io import fits
 from utils import (read_phot_file, noise_sources, extract_airmass_zp)
 
 APERTURE = 6
 READ_NOISE = 1.56
 DARK_CURRENT = 1.6
-
-# we want to extract data from the rel file for each start filtering with respect the id.
 
 
 def extract_phot_data(table):
@@ -27,10 +26,11 @@ def extract_phot_data(table):
         Tmag = tic_id_data['Tmag'][0]
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
+
         # Ensure columns with multiple values are properly handled
-        zp_array = np.array(tic_id_data['ZP']).flatten()
-        airmass_array = np.array(tic_id_data['Airmass']).flatten()
-        mags_array = np.array(tic_id_data['Magnitude']).flatten()
+        zp_array = np.array(tic_id_data['ZP'][0]).flatten()
+        airmass_array = np.array(tic_id_data['Airmass'][0]).flatten()
+        mags_array = np.array(tic_id_data['Magnitude'][0]).flatten()
 
         print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
         print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
@@ -65,8 +65,7 @@ def main():
     phot_table = read_phot_file(os.path.join(current_night_directory, filename))
 
     # Calculate mean and RMS for the noise model
-    RMS_list, sky_list, Tmags_list, zero_point, airmass, mags_list = extract_phot_data(
-        phot_table)
+    RMS_list, sky_list, Tmags_list, zero_point, airmass, mags_list = extract_phot_data(phot_table)
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
@@ -105,5 +104,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
