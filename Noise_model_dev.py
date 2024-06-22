@@ -19,11 +19,13 @@ def extract_phot_data(table):
     mags_list = []
 
     unique_tic_ids = np.unique(table['TIC_ID'])
+    print(f'The unique_tic_ids are: {unique_tic_ids}')
     for tic_id in unique_tic_ids:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
         print(f'The tic_id_data is: {tic_id_data}')
 
         Tmag = tic_id_data['Tmag'][0]
+        print(f'the length of Tmag is: {len(Tmag)}')
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
         zero_point = tic_id_data['ZP'][0]
@@ -45,7 +47,7 @@ def extract_phot_data(table):
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot noise models with rel photometry files')
-    parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
+    parser.add_argument('filename', type=str, help='Name of the FITS table containing photometry data')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
