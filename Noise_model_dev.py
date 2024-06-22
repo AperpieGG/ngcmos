@@ -49,7 +49,7 @@ def extract_phot_data(table):
 
 def main():
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC_ID')
+    parser = argparse.ArgumentParser(description='Plot noise models with rel photometry files')
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
