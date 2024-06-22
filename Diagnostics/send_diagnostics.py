@@ -23,7 +23,7 @@ def find_last_night():
 def get_files(path, night):
     files = os.listdir(path)
     if files:
-        files = [f for f in files if f.endswith(night + '.mp4') or f.endswith(night + '.pdf')]
+        files = [f for f in files if f.endswith(night + '.pdf')]
     return files
 
 
