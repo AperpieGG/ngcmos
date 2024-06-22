@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import os
 import json
@@ -11,6 +13,7 @@ APERTURE = 6
 READ_NOISE = 1.56
 DARK_CURRENT = 1.6
 
+
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -21,6 +24,7 @@ class NumpyEncoder(json.JSONEncoder):
             return obj.tolist()
         else:
             return super(NumpyEncoder, self).default(obj)
+
 
 def read_data(filename):
     data_dict = defaultdict(list)
