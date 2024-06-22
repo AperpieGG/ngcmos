@@ -23,14 +23,13 @@ def extract_phot_data(table):
     for tic_id in unique_tic_ids:  # Selecting the first num_stars unique TIC IDs
         tic_id_data = table[table['TIC_ID'] == tic_id]
         print(f'The tic_id_data is: {tic_id_data}')
-
         Tmag = tic_id_data['Tmag'][0]
         print(f'the length of Tmag is: {len(Tmag)}')
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
-        zero_point = tic_id_data['ZP'][0]
-        airmass = tic_id_data['Airmass'][0]
-        mags = tic_id_data['Magnitude'][0]
+        zero_point = None
+        airmass = None
+        mags = None
 
         print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
         print(f"Average zero point: {zero_point}, Airmass: {airmass}")
