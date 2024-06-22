@@ -8,7 +8,8 @@ def argument_parser():
     p.add_argument('file_list', type=str, help='Path to the file containing list of files to download')
     p.add_argument('destination', type=str, help='Destination to download to')
     p.add_argument('--dryrun', help='dry-run only', action='store_true')
-    p.add_argument('--site', choices=['warwick', 'ngtshead'], default='ngtshead', help='Specify the site (default: ngtshead)')
+    p.add_argument('--site', choices=['warwick', 'ngtshead'], default='ngtshead',
+                   help='Specify the site (default: ngtshead)')
     return p.parse_args()
 
 
