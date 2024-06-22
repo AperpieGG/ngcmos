@@ -33,10 +33,6 @@ def search_and_extract_info(filename, tic_id):
     rms = data_table['RMS'][index]  # RMS for the star
     airmass = data_table['Airmass'][index]  # Airmass for the star
 
-    print(len(star_time))
-    print(len(star_flux))
-    print(len(airmass))
-
     # Create the main plot
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
@@ -48,9 +44,9 @@ def search_and_extract_info(filename, tic_id):
     ax1.set_title(f'Relative Photometry for TIC ID {tic_id} (Tmag = {tmag:.2f})')
 
     # Create the second x-axis for airmass
-    ax2 = ax1.twiny()
-    ax2.plot(star_time, airmass, 'r-')
-    ax2.set_xlabel('Airmass')
+    # ax2 = ax1.twiny()
+    # ax2.plot(star_time, airmass, 'r-')
+    # ax2.set_xlabel('Airmass')
 
     # Align the twinned axes
     ax1.legend()
