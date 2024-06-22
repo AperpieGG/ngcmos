@@ -55,7 +55,7 @@ if __name__ == "__main__":
         if not os.path.exists(os.path.dirname(output_file_path)):
             print("Output directory '{}' does not exist. Using ngtshead output path."
                   .format(os.path.dirname(output_file_path)))
-            output_file_path = '/home/u5500483/ngcmos/files_to_download.txt'
+            output_file_path = '/home/u5500483/ngcmos/Diagnostics/files_to_download.txt'
 
         save_file_list(files_with_paths, output_file_path)
         print("File list saved to: {}".format(output_file_path))
