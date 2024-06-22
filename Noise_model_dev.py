@@ -4,8 +4,8 @@ import argparse
 import os
 import numpy as np
 import json
-from astropy.io import fits
-from utils import (read_phot_file, noise_sources, extract_airmass_zp)
+from utils import read_phot_file, noise_sources
+
 
 APERTURE = 6
 READ_NOISE = 1.56
