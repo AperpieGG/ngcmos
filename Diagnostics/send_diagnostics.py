@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 # Define the primary and fallback paths
 primary_path = '/home/ops/data/shifts_plots'
 fallback_path = '/home/u5500483/shifts_plots_cmos'
-output_file_path = '/home/ops/ngcmos/files_to_download.txt'
+output_file_path = '/home/ops/ngcmos/Diagnostics/files_to_download.txt'
 
 
 def find_last_night():
