@@ -27,9 +27,9 @@ def extract_phot_data(table):
         print(f'the length of Tmag is: {len(Tmag)}')
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
-        zero_point = None
-        airmass = None
-        mags = None
+        zero_point = 1
+        airmass = 1
+        mags = 1
 
         print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
         print(f"Average zero point: {zero_point}, Airmass: {airmass}")
