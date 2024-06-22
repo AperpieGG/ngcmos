@@ -25,3 +25,6 @@ python3 $LOCAL_DOWNLOAD_SCRIPT $LOCAL_FILE_LIST $LOCAL_DEST_DIR --site warwick
 
 # Step 5: Delete the file list after transfer
 rm $LOCAL_FILE_LIST
+
+# Step 6: Delete the remote file list
+ssh $REMOTE_USER@$REMOTE_HOST "rm $REMOTE_FILE_LIST"
