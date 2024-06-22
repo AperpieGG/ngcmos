@@ -27,9 +27,9 @@ def extract_phot_data(table):
         Tmag = tic_id_data['Tmag'][0]
         sky = tic_id_data['Sky'][0]
         rms = tic_id_data['RMS'][0]
-        zp_array = np.array(tic_id_data['ZP'][0])
-        airmass_array = np.array(tic_id_data['Airmass'][0])
-        mags_array = np.array(tic_id_data['Magnitude'][0])
+        zp_array = np.array(tic_id_data['ZP'])
+        airmass_array = np.array(tic_id_data['Airmass'])
+        mags_array = np.array(tic_id_data['Magnitude'])
 
         print(f"Tmag: {Tmag}, Sky: {sky}, RMS: {rms}")
         print(f"ZP array length: {len(zp_array)}, Airmass array length: {len(airmass_array)}")
