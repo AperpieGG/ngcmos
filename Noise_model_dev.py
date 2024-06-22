@@ -1,20 +1,26 @@
-#!/usr/bin/env python
-
 import argparse
 import os
-
-import numpy as np
-
-from utils import noise_sources
 import json
-from astropy.io import fits
 from collections import defaultdict
+import numpy as np
+from astropy.io import fits
+from utils import noise_sources  # Assuming you have a noise_sources function in utils
 
 # Constants for noise calculations
 APERTURE = 6
 READ_NOISE = 1.56
 DARK_CURRENT = 1.6
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NumpyEncoder, self).default(obj)
 
 def read_data(filename):
     data_dict = defaultdict(list)
@@ -86,7 +92,6 @@ def main():
         noise_sources(sky_list, bin_size, airmass_list, zp, APERTURE, READ_NOISE, DARK_CURRENT))
 
     # Convert lists to JSON serializable lists
-
     synthetic_mag_list = synthetic_mag.tolist()
     photon_shot_noise_list = photon_shot_noise.tolist()
     sky_noise_list = sky_noise.tolist()
@@ -117,14 +122,9 @@ def main():
     file_name = f"rms_mags_{filename.replace('.fits', '')}_{bin_size}_{cwd_last_four}.json"
     output_path = os.path.join(current_dir, file_name)
 
-    # Convert numpy.int64 to int in output_data
-    for key, value in output_data.items():
-        if isinstance(value, np.int64):
-            output_data[key] = int(value)  # Convert numpy.int64 to int
-
-    # Save JSON file
+    # Save JSON file using custom encoder
     with open(output_path, 'w') as json_file:
-        json.dump(output_data, json_file, indent=4)
+        json.dump(output_data, json_file, indent=4, cls=NumpyEncoder)
 
     print(f"Results saved to {output_path}")
 
