@@ -2,6 +2,9 @@
 
 import argparse
 import os
+
+import numpy as np
+
 from utils import noise_sources
 import json
 from astropy.io import fits
@@ -114,9 +117,15 @@ def main():
     file_name = f"rms_mags_{filename.replace('.fits', '')}_{bin_size}_{cwd_last_four}.json"
     output_path = os.path.join(current_dir, file_name)
 
+    # Convert numpy.int64 to int in output_data
+    for key, value in output_data.items():
+        if isinstance(value, np.int64):
+            output_data[key] = int(value)  # Convert numpy.int64 to int
+
     # Save JSON file
     with open(output_path, 'w') as json_file:
         json.dump(output_data, json_file, indent=4)
+
     print(f"Results saved to {output_path}")
 
 
