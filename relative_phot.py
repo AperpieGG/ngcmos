@@ -59,10 +59,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped \
         = remove_outliers(jd_mid, fluxes, fluxerrs, air_mass=airmass_list, zero_point=zero_point_list)
 
-    zero_point = np.mean(zero_point_list)
-    magnitude = -2.5 * np.log10(fluxes_clipped / EXPOSURE) + zero_point
+    avg_zero_point = np.mean(zero_point_clipped)
+    avg_airmass = np.mean(airmass_clipped)
+    avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
     print(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
-          f"and magnitude = {np.mean(magnitude):.2f}")
+          f"and magnitude = {avg_magnitude:.2f}")
 
     for tic_id in np.unique(master_star_data['tic_id']):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
@@ -141,7 +142,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
                                                                          dt_fluxerr_poly, bin_size)
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-            magnitude, airmass_clipped, zero_point_clipped)
+            avg_magnitude, avg_airmass, avg_zero_point)
 
 
 def main():
