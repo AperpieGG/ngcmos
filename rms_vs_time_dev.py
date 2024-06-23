@@ -3,8 +3,7 @@ import argparse
 import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
-from utils import (plot_images, get_rel_phot_files,
-                   read_phot_file, bin_time_flux_error, calculate_trend_and_flux, remove_outliers)
+from utils import plot_images, get_rel_phot_files, read_phot_file, bin_time_flux_error
 
 # Need to take the relative photometry file and extract the data from there.
 
@@ -31,10 +30,10 @@ def plot_rms_time(table, num_stars, tic_id=None):
         all_fluxerr = []
 
         for row in Tmag_data:
-            jd_mid = row['Time_JD']
-            flux = row['Relative_Flux']
-            fluxerr = row['Relative_Flux_err']
-            current_tic_id = row['TIC_ID']  # Assuming Tmag is the same for all jd_mid values of a star
+            jd_mid = row['Time_JD'][0]
+            flux = row['Relative_Flux'][0]
+            fluxerr = row['Relative_Flux_err'][0]
+            current_tic_id = row['TIC_ID'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
             # Check if tic_id is specified and matches current_tic_id
             if tic_id is not None and current_tic_id != tic_id:
