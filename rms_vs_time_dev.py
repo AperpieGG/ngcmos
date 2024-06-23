@@ -24,36 +24,47 @@ def plot_rms_time(table, num_stars, tic_id=None):
     for Tmag in unique_tmags:
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
-        print('Found Tmag = {:.2f}'.format(Tmag))
-        # Extract relevant data
-        jd_mid = Tmag_data['Time_JD'][0]
-        flux = Tmag_data['Relative_Flux'][0]
-        fluxerr = Tmag_data['Relative_Flux_err'][0]
-        current_tic_id = Tmag_data['TIC_ID'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
-        # Check if tic_id is specified and matches current_tic_id
-        if tic_id is not None and current_tic_id != tic_id:
-            continue
+        # Initialize lists to store binned values
+        all_jd_mid = []
+        all_flux = []
+        all_fluxerr = []
 
-        RMS_values = []
-        time_seconds = []
-        for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux, fluxerr, i)
-            exposure_time_seconds = i * 10  # 10 seconds per binning
-            RMS = np.std(dt_flux_binned)
-            RMS_values.append(RMS)
-            time_seconds.append(exposure_time_seconds)
-        else:
-            print('Using star with tic_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
-                  format(current_tic_id, Tmag, RMS_values[0]))
+        for row in Tmag_data:
+            jd_mid = row['Time_JD']
+            flux = row['Relative_Flux']
+            fluxerr = row['Relative_Flux_err']
+            current_tic_id = row['TIC_ID']  # Assuming Tmag is the same for all jd_mid values of a star
 
-        num_stars_used += 1
-        average_rms_values.append(RMS_values)
-        times_binned.append(time_seconds)
+            # Check if tic_id is specified and matches current_tic_id
+            if tic_id is not None and current_tic_id != tic_id:
+                continue
 
-        # Stop if the number of stars used reaches the specified number
-        if num_stars_used >= num_stars:
-            break
+            all_jd_mid.append(jd_mid)
+            all_flux.append(flux)
+            all_fluxerr.append(fluxerr)
+
+        # Process each set of data for this Tmag
+        for jd_mid, flux, fluxerr in zip(all_jd_mid, all_flux, all_fluxerr):
+            RMS_values = []
+            time_seconds = []
+            for i in range(1, max_binning):
+                time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux, fluxerr, i)
+                exposure_time_seconds = i * 10  # 10 seconds per binning
+                RMS = np.std(dt_flux_binned)
+                RMS_values.append(RMS)
+                time_seconds.append(exposure_time_seconds)
+            else:
+                print('Using star with tic_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
+                      format(current_tic_id, Tmag, RMS_values[0]))
+
+            num_stars_used += 1
+            average_rms_values.append(RMS_values)
+            times_binned.append(time_seconds)
+
+            # Stop if the number of stars used reaches the specified number
+            if num_stars_used >= num_stars:
+                break
 
     if not average_rms_values:
         print("No stars found. Skipping this photometry file.")
