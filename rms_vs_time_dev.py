@@ -11,23 +11,23 @@ SIGMA = 2
 APERTURE = 6
 EXPOSURE = 10
 
-
 def expand_and_stack_table(phot_table):
     expanded_rows = []
 
     for row in phot_table:
-        jd_mid_values = row['jd_mid']
-        relative_flux_values = row['relative_flux']
+        jd_mid_values = row['Time_JD']
+        relative_flux_values = row['Relative_Flux']
+        relative_flux_err_values = row['Relative_Flux_err']
 
-        # Expand jd_mid and relative_flux columns into individual columns
+        # Expand jd_mid, relative_flux, and relative_flux_err columns into individual columns
         for i in range(len(jd_mid_values)):
             expanded_row = list(row)
-            expanded_row.extend([jd_mid_values[i], relative_flux_values[i]])
+            expanded_row.extend([jd_mid_values[i], relative_flux_values[i], relative_flux_err_values[i]])
             expanded_rows.append(expanded_row)
 
     # Define new column names
     column_names = list(phot_table.colnames)
-    column_names.extend(['jd_mid_expanded', 'relative_flux_expanded'])
+    column_names.extend(['jd_mid_expanded', 'relative_flux_expanded', 'relative_flux_err_expanded'])
 
     # Create a new table with expanded columns
     expanded_table = Table(rows=expanded_rows, names=column_names)
