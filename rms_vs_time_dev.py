@@ -8,20 +8,7 @@ from utils import plot_images, get_rel_phot_files, read_phot_file, bin_time_flux
 
 
 def search_and_extract_info(filename, tic_id):
-    """
-    Function to search for a specific TIC ID in a FITS file and extract relevant information.
-
-    Parameters:
-    - filename (str): Path to the FITS file.
-    - tic_id (int): TIC ID to search for.
-
-    Returns:
-    - star_time (numpy.ndarray): Array of time values for the star.
-    - star_flux (numpy.ndarray): Array of flux values for the star.
-    - tmag (float): Tmag value for the star.
-    - rms (float): RMS value for the star.
-    - airmass (float): Airmass value for the star.
-    """
+    print(f"Searching for TIC ID {tic_id} in file: {filename}")
     data_table = fits.getdata(filename)
 
     index = None
@@ -31,7 +18,7 @@ def search_and_extract_info(filename, tic_id):
             break
 
     if index is None:
-        print(f"TIC ID {tic_id} not found in the data.")
+        print(f"TIC ID {tic_id} not found in the data of file: {filename}")
         return None, None, None, None, None
 
     star_time = data_table['Time_JD'][index]
@@ -40,10 +27,14 @@ def search_and_extract_info(filename, tic_id):
     rms = data_table['RMS'][index]
     airmass = data_table['Airmass'][index]
 
+    print(f"Found TIC ID {tic_id} with Tmag={tmag}, RMS={rms}, Airmass={airmass} in file: {filename}")
+
     return star_time, star_flux, tmag, rms, airmass
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
+    print("Plotting RMS time")
+
     filtered_table = table[(table['Tmag'] >= 9.2) & (table['Tmag'] <= 9.6)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
@@ -131,6 +122,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
 
 
 def run_for_one(phot_file, tic_id=None):
+    print(f"Running for TIC ID: {tic_id} on file: {phot_file}")
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
@@ -138,6 +130,7 @@ def run_for_one(phot_file, tic_id=None):
 
 
 def run_for_more(phot_file, num_stars):
+    print(f"Running for {num_stars} stars on file: {phot_file}")
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
@@ -159,6 +152,7 @@ if __name__ == "__main__":
         for phot_file in phot_files:
             star_time, star_flux, tmag, rms, airmass = search_and_extract_info(phot_file, args.tic_id)
             if star_time is not None:
+                print(f"Found TIC ID {args.tic_id} in file {phot_file}")
                 plt.figure(figsize=(8, 6))
                 plt.plot(star_time, star_flux, 'o', label=f'RMS = {rms:.4f}')
                 plt.xlabel('Time (JD)')
