@@ -24,6 +24,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
     for Tmag in unique_tmags:
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
+        print('Found Tmag = {:.2f}'.format(Tmag))
         # Extract relevant data
         jd_mid = Tmag_data['Time_JD']
         flux = Tmag_data['Relative_Flux']
