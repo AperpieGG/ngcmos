@@ -24,6 +24,28 @@ APERTURE = 6
 EXPOSURE = 10
 
 
+def expand_and_rename_table(phot_table):
+    expanded_rows = []
+
+    for row in phot_table:
+        jd_mid_values = row['Time_JD']
+        relative_flux_values = row['Relative_Flux']
+        relative_flux_err_values = row['Relative_Flux_err']
+
+        # Expand jd_mid, relative_flux, and relative_flux_err columns into individual columns
+        for i in range(len(jd_mid_values)):
+            expanded_row = list(row)
+            expanded_row[row.colnames.index('Time_JD')] = jd_mid_values[i]
+            expanded_row[row.colnames.index('Relative_Flux')] = relative_flux_values[i]
+            expanded_row[row.colnames.index('Relative_Flux_err')] = relative_flux_err_values[i]
+            expanded_rows.append(expanded_row)
+
+    # Create a new table with expanded columns
+    expanded_table = Table(rows=expanded_rows, names=phot_table.colnames)
+
+    return expanded_table
+
+
 def relative_phot(table, tic_id_to_plot, bin_size):
     """
     Create a relative light curve for a specific TIC ID
@@ -203,8 +225,9 @@ def main():
         data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
                                                   'RMS', 'Sky', 'Airmass', 'ZP', 'Magnitude'))
 
-        # Write the table to a FITS file with the desired name
-        data_table.write(fits_filename, format='fits', overwrite=True)
+        expanded_data_table = expand_and_rename_table(data_table)
+
+        expanded_data_table.write(fits_filename, format='fits', overwrite=True)
 
         print(f"Data for {phot_file} saved to {fits_filename}.")
 
