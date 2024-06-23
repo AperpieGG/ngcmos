@@ -60,8 +60,10 @@ def main():
     parser = argparse.ArgumentParser(
         description='Read and organize TIC IDs with associated RMS, Sky, Airmass, ZP, and Magnitude from FITS table')
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
+    parser.add_argument('--bin_size', type=int, default=1, help='Bin size for noise calculations')
     args = parser.parse_args()
     filename = args.filename
+    bin_size = args.bin_size
 
     # Get the current working directory
     current_dir = os.getcwd()
@@ -91,7 +93,6 @@ def main():
             mags_list.append(entry['Magnitude'])
 
     # Get noise sources
-    bin_size = 1  # Example bin size, adjust as needed
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
         noise_sources(sky_list, bin_size, airmass_list, zp, APERTURE, READ_NOISE, DARK_CURRENT))
 
