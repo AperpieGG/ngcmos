@@ -260,7 +260,7 @@ def acquire_header_info(directory, prefix):
 
 def plot_shifts(x_shifts, y_shifts, save_path, prefix, time):
     # Plot the shifts with colorbar
-    fig, ax = plt.subplots(figsize=(6, 8))
+    fig, ax = plt.subplots(figsize=(8, 6))
     scatter = ax.scatter(x_shifts, y_shifts, c=time, cmap='viridis',
                          label='Shifts for field: {}'.format(prefix), marker='o')
     plt.xlabel('X Shift (pixels)')
