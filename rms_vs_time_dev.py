@@ -47,11 +47,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
 
     sky_median = np.median(sky)
-    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = remove_outliers(jd_mid,
-                                                                                                          fluxes,
-                                                                                                          fluxerrs,
-                                                                                                          air_mass=airmass_list,
-                                                                                                          zero_point=zero_point_list)
+    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
+        remove_outliers(jd_mid, fluxes, fluxerrs, air_mass=airmass_list, zero_point=zero_point_list))
 
     avg_zero_point = np.mean(zero_point_clipped)
     avg_airmass = np.mean(airmass_clipped)
