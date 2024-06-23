@@ -26,9 +26,9 @@ def plot_rms_time(table, num_stars, tic_id=None):
         Tmag_data = table[table['Tmag'] == Tmag]
         print('Found Tmag = {:.2f}'.format(Tmag))
         # Extract relevant data
-        jd_mid = Tmag_data['Time_JD']
-        flux = Tmag_data['Relative_Flux']
-        fluxerr = Tmag_data['Relative_Flux_err']
+        jd_mid = Tmag_data['Time_JD'][0]
+        flux = Tmag_data['Relative_Flux'][0]
+        fluxerr = Tmag_data['Relative_Flux_err'][0]
         current_tic_id = Tmag_data['TIC_ID'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # Check if tic_id is specified and matches current_tic_id
