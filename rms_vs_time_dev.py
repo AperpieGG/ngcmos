@@ -1,11 +1,45 @@
-#! /usr/bin/env python
 import argparse
 import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
+from astropy.io import fits
 from utils import plot_images, get_rel_phot_files, read_phot_file, bin_time_flux_error
 
-# Need to take the relative photometry file and extract the data from there.
+
+def search_and_extract_info(filename, tic_id):
+    """
+    Function to search for a specific TIC ID in a FITS file and extract relevant information.
+
+    Parameters:
+    - filename (str): Path to the FITS file.
+    - tic_id (int): TIC ID to search for.
+
+    Returns:
+    - star_time (numpy.ndarray): Array of time values for the star.
+    - star_flux (numpy.ndarray): Array of flux values for the star.
+    - tmag (float): Tmag value for the star.
+    - rms (float): RMS value for the star.
+    - airmass (float): Airmass value for the star.
+    """
+    data_table = fits.getdata(filename)
+
+    index = None
+    for i, id in enumerate(data_table['TIC_ID']):
+        if id == tic_id:
+            index = i
+            break
+
+    if index is None:
+        print(f"TIC ID {tic_id} not found in the data.")
+        return None, None, None, None, None
+
+    star_time = data_table['Time_JD'][index]
+    star_flux = data_table['Relative_Flux'][index]
+    tmag = data_table['Tmag'][index]
+    rms = data_table['RMS'][index]
+    airmass = data_table['Airmass'][index]
+
+    return star_time, star_flux, tmag, rms, airmass
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
@@ -24,20 +58,18 @@ def plot_rms_time(table, num_stars, tic_id=None):
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
 
-        # Initialize lists to store binned values
         all_jd_mid = []
         all_flux = []
         all_fluxerr = []
 
         for row in Tmag_data:
+            tic_id_row = row['TIC_ID']
+            if tic_id is not None and tic_id_row != tic_id:
+                continue
+
             jd_mid = row['Time_JD']
             flux = row['Relative_Flux']
             fluxerr = row['Relative_Flux_err']
-            current_tic_id = row['TIC_ID']  # Assuming Tmag is the same for all jd_mid values of a star
-
-            # Check if tic_id is specified and matches current_tic_id
-            if tic_id is not None and current_tic_id != tic_id:
-                continue
 
             # Ensure jd_mid, flux, and fluxerr are handled as arrays
             jd_mid = np.asarray(jd_mid)
@@ -48,7 +80,6 @@ def plot_rms_time(table, num_stars, tic_id=None):
             all_flux.append(flux)
             all_fluxerr.append(fluxerr)
 
-        # Process each set of data for this Tmag
         for jd_mid, flux, fluxerr in zip(all_jd_mid, all_flux, all_fluxerr):
             RMS_values = []
             time_seconds = []
@@ -66,7 +97,6 @@ def plot_rms_time(table, num_stars, tic_id=None):
             average_rms_values.append(RMS_values)
             times_binned.append(time_seconds)
 
-            # Stop if the number of stars used reaches the specified number
             if num_stars_used >= num_stars:
                 break
 
@@ -77,16 +107,11 @@ def plot_rms_time(table, num_stars, tic_id=None):
     print('The bright stars are: {}, Stars used: {}, Stars excluded: {}'.format(
         len(unique_tmags), num_stars_used, num_stars_excluded))
 
-    # Calculate the average RMS across all stars for each bin
     average_rms_values = np.mean(average_rms_values, axis=0) * 1000000  # Convert to ppm
 
-    # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
-
-    # Calculate the expected decrease in RMS
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
-    # Plot RMS as a function of exposure time along with the expected decrease in RMS
     plt.figure(figsize=(6, 10))
     plt.plot(times_binned[0], average_rms_values, 'o', color='blue', label='Actual RMS')
     plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
@@ -103,6 +128,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
     plt.tight_layout()
     plt.show()
 
+
 def run_for_one(phot_file, tic_id=None):
     plot_images()
     current_night_directory = '.'
@@ -118,25 +144,30 @@ def run_for_more(phot_file, num_stars):
 
 
 if __name__ == "__main__":
-    # Get the current night directory
     current_night_directory = '.'
 
-    # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_rel_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('--num_stars', type=int, default=0, help='Number of stars to plot')
-    parser.add_argument('--tic_id', type=int, help='plot the time vs. binned RMS for a particular star')
+    parser.add_argument('--tic_id', type=int, help='Plot the time vs. binned RMS for a particular star')
     args = parser.parse_args()
 
-    # Run the main function for each photometry file
     if args.tic_id is not None:
         for phot_file in phot_files:
-            # main(phot_file, args.tic_id)
-            run_for_one(phot_file, args.tic_id)
+            star_time, star_flux, tmag, rms, airmass = search_and_extract_info(phot_file, args.tic_id)
+            if star_time is not None:
+                plt.figure(figsize=(8, 6))
+                plt.plot(star_time, star_flux, 'o', label=f'RMS = {rms:.4f}')
+                plt.xlabel('Time (JD)')
+                plt.ylabel('Relative Flux (e-)')
+                plt.ylim(0.95, 1.05)
+                plt.title(f'Relative Photometry for TIC ID {args.tic_id} (Tmag = {tmag:.2f})')
+                plt.legend()
+                plt.tight_layout()
+                plt.show()
+                break  # Stop after finding the first matching TIC ID
     else:
         for phot_file in phot_files:
-            # main(phot_file, args.num_stars)
             run_for_more(phot_file, args.num_stars)
