@@ -3,7 +3,7 @@ import argparse
 import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
-from utils import (plot_images, get_phot_files,
+from utils import (plot_images, get_rel_phot_files,
                    read_phot_file, bin_time_flux_error, calculate_trend_and_flux, remove_outliers)
 
 # Need to take the relative photometry file and extract the data from there.
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     current_night_directory = '.'
 
     # Get photometry files with the pattern 'phot_*.fits'
-    phot_files = get_phot_files(current_night_directory)
+    phot_files = get_rel_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
     # Parse command-line arguments
