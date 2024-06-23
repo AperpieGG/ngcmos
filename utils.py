@@ -399,7 +399,7 @@ def get_rel_phot_files(directory):
     """
     phot_files = []
     for filename in os.listdir(directory):
-        if fnmatch.fnmatch(filename, 'rel_phot_*.fits'):
+        if fnmatch.fnmatch(filename, 'rel_phot_*_1.fits'):
             phot_files.append(filename)
     return phot_files
 
