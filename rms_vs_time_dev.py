@@ -30,14 +30,19 @@ def plot_rms_time(table, num_stars, tic_id=None):
         all_fluxerr = []
 
         for row in Tmag_data:
-            jd_mid = row['Time_JD'][0]
-            flux = row['Relative_Flux'][0]
-            fluxerr = row['Relative_Flux_err'][0]
-            current_tic_id = row['TIC_ID'][0]  # Assuming Tmag is the same for all jd_mid values of a star
+            jd_mid = row['Time_JD']
+            flux = row['Relative_Flux']
+            fluxerr = row['Relative_Flux_err']
+            current_tic_id = row['TIC_ID']  # Assuming Tmag is the same for all jd_mid values of a star
 
             # Check if tic_id is specified and matches current_tic_id
             if tic_id is not None and current_tic_id != tic_id:
                 continue
+
+            # Ensure jd_mid, flux, and fluxerr are handled as arrays
+            jd_mid = np.asarray(jd_mid)
+            flux = np.asarray(flux)
+            fluxerr = np.asarray(fluxerr)
 
             all_jd_mid.append(jd_mid)
             all_flux.append(flux)
@@ -54,8 +59,8 @@ def plot_rms_time(table, num_stars, tic_id=None):
                 RMS_values.append(RMS)
                 time_seconds.append(exposure_time_seconds)
             else:
-                print('Using star with tic_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
-                      format(current_tic_id, Tmag, RMS_values[0]))
+                print('Using star with Tmag = {:.2f} and RMS = {:.4f}'.
+                      format(Tmag, RMS_values[0]))
 
             num_stars_used += 1
             average_rms_values.append(RMS_values)
@@ -97,7 +102,6 @@ def plot_rms_time(table, num_stars, tic_id=None):
     plt.legend()
     plt.tight_layout()
     plt.show()
-
 
 def run_for_one(phot_file, tic_id=None):
     plot_images()
