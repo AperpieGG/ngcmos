@@ -25,22 +25,19 @@ def plot_rms_time(table, num_stars, tic_id=None):
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
-        jd_mid = Tmag_data['jd_mid']
-        flux = Tmag_data['flux_6']
-        fluxerr = Tmag_data['fluxerr_6']
-        current_tic_id = Tmag_data['tic_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
+        jd_mid = Tmag_data['Time_JD']
+        flux = Tmag_data['Relative_Flux']
+        fluxerr = Tmag_data['Relative_Flux_err']
+        current_tic_id = Tmag_data['TIC_ID'][0]  # Assuming Tmag is the same for all jd_mid values of a star
 
         # Check if tic_id is specified and matches current_tic_id
         if tic_id is not None and current_tic_id != tic_id:
             continue
 
-        time_clipped, flux_clipped, fluxerr_clipped, _, _ = remove_outliers(jd_mid, flux, fluxerr)
-        trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_clipped, fluxerr_clipped)
-
         RMS_values = []
         time_seconds = []
         for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr, i)
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, flux, fluxerr, i)
             exposure_time_seconds = i * 10  # 10 seconds per binning
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
