@@ -4,7 +4,7 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
 from utils import (plot_images, get_phot_files,
-                   read_phot_file, bin_time_flux_error)
+                   read_phot_file, bin_time_flux_error, calculate_trend_and_flux, remove_outliers)
 
 # Need to take the relative photometry file and extract the data from there.
 
@@ -34,7 +34,8 @@ def plot_rms_time(table, num_stars, tic_id=None):
         if tic_id is not None and current_tic_id != tic_id:
             continue
 
-        trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(jd_mid, flux, fluxerr)
+        time_clipped, flux_clipped, fluxerr_clipped, _, _ = remove_outliers(jd_mid, flux, fluxerr)
+        trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_clipped, fluxerr_clipped)
 
         RMS_values = []
         time_seconds = []
@@ -44,12 +45,6 @@ def plot_rms_time(table, num_stars, tic_id=None):
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
-
-        # Check if the first RMS value is greater than 0.0065
-        # if RMS_values[0] > 0.006:
-        #     print('Excluding tic_id = {} and Tmag = {:.2f} due to RMS > 6000 ppm'.format(current_tic_id, Tmag))
-        #     num_stars_excluded += 1
-        #     continue
         else:
             print('Using star with tic_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
                   format(current_tic_id, Tmag, RMS_values[0]))
