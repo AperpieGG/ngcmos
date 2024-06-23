@@ -383,6 +383,27 @@ def get_phot_files(directory):
     return phot_files
 
 
+def get_rel_phot_files(directory):
+    """
+    Get photometry files with the pattern 'phot_*.fits' from the directory.
+
+    Parameters
+    ----------
+    directory : str
+        Directory containing the files.
+
+    Returns
+    -------
+    list of str
+        List of photometry files matching the pattern.
+    """
+    phot_files = []
+    for filename in os.listdir(directory):
+        if fnmatch.fnmatch(filename, 'rel_phot_*.fits'):
+            phot_files.append(filename)
+    return phot_files
+
+
 def read_phot_file(filename):
     """
     Read the photometry file.
