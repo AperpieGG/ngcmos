@@ -3,18 +3,20 @@
 import argparse
 import os
 import json
-from collections import defaultdict
 import numpy as np
+from collections import defaultdict
 from astropy.io import fits
 from utils import noise_sources  # Assuming you have a noise_sources function in utils
 
 # Constants for noise calculations
-APERTURE = 6
-READ_NOISE = 1.56
-DARK_CURRENT = 1.6
+APERTURE = 6  # Aperture size for the telescope
+READ_NOISE = 1.56  # Read noise in electrons
+DARK_CURRENT = 1.6  # Dark current in electrons per second
 
 
 class NumpyEncoder(json.JSONEncoder):
+    """ Custom JSON encoder for NumPy data types """
+
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -27,35 +29,27 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 def read_data(filename):
-    data_dict = defaultdict(list)
+    """
+    Read data from a FITS file and return it as a structured array.
 
+    Parameters:
+    - filename: str, path to the FITS file.
+
+    Returns:
+    - data: structured array from the FITS file.
+    """
     try:
         with fits.open(filename) as hdul:
             data = hdul[1].data  # Assuming data is in the first extension
-            for row in data:
-                tic_id = row['TIC_ID']
-                rms = row['RMS'] * 1000000  # Multiply RMS by 1000000 to convert to ppm
-                sky = row['Sky']
-                Tmag = row['Tmag']
-                airmass = row['Airmass']
-                zp = row['ZP']
-                mag = row['Magnitude']
-
-                data_dict[tic_id].append({
-                    'RMS': rms,
-                    'Sky': sky,
-                    'Tmag': Tmag,
-                    'Airmass': airmass,
-                    'ZP': zp,
-                    'Magnitude': mag
-                })
     except Exception as e:
         print(f"Error reading FITS file: {e}")
+        return None
 
-    return data_dict
+    return data
 
 
 def main():
+    """ Main function to parse arguments, read data, calculate noise sources, and save results to a JSON file """
     # Parse command-line arguments
     parser = argparse.ArgumentParser(
         description='Read and organize TIC IDs with associated RMS, Sky, Airmass, ZP, and Magnitude from FITS table')
@@ -71,56 +65,53 @@ def main():
     # Construct full path to the FITS file
     file_path = os.path.join(current_dir, filename)
 
-    # Read and organize data by TIC ID
-    data_dict = read_data(file_path)
+    # Read data from the FITS file
+    data = read_data(file_path)
+    if data is None:
+        return
 
-    # Prepare lists for noise_sources function
-    sky_list = []
-    airmass_list = []
-    zp = []
+    # Extract unique TIC IDs
+    unique_tic_ids = np.unique(data['TIC_ID'])
 
-    # Calculate RMS_list, sky_list, Tmags_list, and other lists
-    RMS_list = []
-    mags_list = []
-    Tmags_list = []
-    for tic_id, data_list in data_dict.items():
-        for entry in data_list:
-            RMS_list.append(entry['RMS'])
-            sky_list.append(entry['Sky'])
-            Tmags_list.append(entry['Tmag'])
-            airmass_list.append(entry['Airmass'])
-            zp.append(entry['ZP'])
-            mags_list.append(entry['Magnitude'])
+    results = {}
 
-    # Get noise sources
-    synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_list, zp, APERTURE, READ_NOISE, DARK_CURRENT))
+    # Iterate over each unique TIC ID
+    for tic_id in unique_tic_ids:
+        tic_data = data[data['TIC_ID'] == tic_id]
 
-    # Convert lists to JSON serializable lists
-    synthetic_mag_list = synthetic_mag.tolist()
-    photon_shot_noise_list = photon_shot_noise.tolist()
-    sky_noise_list = sky_noise.tolist()
-    read_noise_list = read_noise.tolist()
-    dc_noise_list = dc_noise.tolist()
-    N_list = N.tolist()
-    RNS_list = RNS.tolist()
-    Tmags_list = [float(x) for x in Tmags_list]
-    mags_list = [float(x) for x in mags_list]
+        RMS_list = tic_data['RMS'] * 1000000  # Convert RMS to ppm
+        sky_list = tic_data['Sky']
+        Tmags_list = tic_data['Tmag']
+        airmass_list = tic_data['Airmass']
+        zp = tic_data['ZP']
+        mags_list = tic_data['Magnitude']
 
-    # Save results to JSON file
-    output_data = {
-        "TIC_IDs": list(data_dict.keys()),  # TIC IDs
-        "RMS_list": RMS_list,
-        "Tmag_list": Tmags_list,
-        "mags_list": mags_list,
-        "synthetic_mag": synthetic_mag_list,
-        "photon_shot_noise": photon_shot_noise_list,
-        "sky_noise": sky_noise_list,
-        "read_noise": read_noise_list,
-        "dc_noise": dc_noise_list,
-        "N": N_list,
-        "RNS": RNS_list
-    }
+        # Get noise sources
+        synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
+            noise_sources(sky_list, bin_size, airmass_list, zp, APERTURE, READ_NOISE, DARK_CURRENT))
+
+        # Convert lists to JSON serializable lists
+        synthetic_mag_list = synthetic_mag.tolist()
+        photon_shot_noise_list = photon_shot_noise.tolist()
+        sky_noise_list = sky_noise.tolist()
+        read_noise_list = read_noise.tolist()
+        dc_noise_list = dc_noise.tolist()
+        N_list = N.tolist()
+        RNS_list = RNS.tolist()
+
+        # Store results for the current TIC ID
+        results[tic_id] = {
+            "RMS_list": RMS_list.tolist(),
+            "Tmag_list": Tmags_list.tolist(),
+            "mags_list": mags_list.tolist(),
+            "synthetic_mag": synthetic_mag_list,
+            "photon_shot_noise": photon_shot_noise_list,
+            "sky_noise": sky_noise_list,
+            "read_noise": read_noise_list,
+            "dc_noise": dc_noise_list,
+            "N": N_list,
+            "RNS": RNS_list
+        }
 
     # Construct output file name
     cwd_last_four = os.getcwd()[-4:]
@@ -129,7 +120,7 @@ def main():
 
     # Save JSON file using custom encoder
     with open(output_path, 'w') as json_file:
-        json.dump(output_data, json_file, indent=4, cls=NumpyEncoder)
+        json.dump(results, json_file, indent=4, cls=NumpyEncoder)
 
     print(f"Results saved to {output_path}")
 
