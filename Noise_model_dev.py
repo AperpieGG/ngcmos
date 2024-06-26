@@ -99,8 +99,8 @@ def main():
         N_list = N.tolist()
         RNS_list = RNS.tolist()
 
-        # Store results for the current TIC ID
-        results[tic_id] = {
+        # Store results for the current TIC ID (convert tic_id to string)
+        results[str(tic_id)] = {
             "RMS_list": RMS_list.tolist(),
             "Tmag_list": Tmags_list.tolist(),
             "mags_list": mags_list.tolist(),
