@@ -4,7 +4,6 @@ import argparse
 import os
 import json
 import numpy as np
-from collections import defaultdict
 from astropy.io import fits
 from utils import noise_sources  # Assuming you have a noise_sources function in utils
 
@@ -73,45 +72,52 @@ def main():
     # Extract unique TIC IDs
     unique_tic_ids = np.unique(data['TIC_ID'])
 
-    results = {}
+    # Prepare lists for noise_sources function
+    sky_list = []
+    airmass_list = []
+    zp = []
+    RMS_list = []
+    mags_list = []
+    Tmags_list = []
 
     # Iterate over each unique TIC ID
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
+        RMS_list.extend(tic_data['RMS'] * 1000000)  # Convert RMS to ppm
+        sky_list.extend(tic_data['Sky'])
+        Tmags_list.extend(tic_data['Tmag'])
+        airmass_list.extend(tic_data['Airmass'])
+        zp.extend(tic_data['ZP'])
+        mags_list.extend(tic_data['Magnitude'])
 
-        RMS_list = tic_data['RMS'] * 1000000  # Convert RMS to ppm
-        sky_list = tic_data['Sky']
-        Tmags_list = tic_data['Tmag']
-        airmass_list = tic_data['Airmass']
-        zp = tic_data['ZP']
-        mags_list = tic_data['Magnitude']
+    # Get noise sources
+    synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
+        noise_sources(sky_list, bin_size, airmass_list, zp, APERTURE, READ_NOISE, DARK_CURRENT))
 
-        # Get noise sources
-        synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-            noise_sources(sky_list, bin_size, airmass_list, zp, APERTURE, READ_NOISE, DARK_CURRENT))
+    # Convert lists to JSON serializable lists
+    synthetic_mag_list = synthetic_mag.tolist()
+    photon_shot_noise_list = photon_shot_noise.tolist()
+    sky_noise_list = sky_noise.tolist()
+    read_noise_list = read_noise.tolist()
+    dc_noise_list = dc_noise.tolist()
+    N_list = N.tolist()
+    RNS_list = RNS.tolist()
+    Tmags_list = [float(x) for x in Tmags_list]
 
-        # Convert lists to JSON serializable lists
-        synthetic_mag_list = synthetic_mag.tolist()
-        photon_shot_noise_list = photon_shot_noise.tolist()
-        sky_noise_list = sky_noise.tolist()
-        read_noise_list = read_noise.tolist()
-        dc_noise_list = dc_noise.tolist()
-        N_list = N.tolist()
-        RNS_list = RNS.tolist()
-
-        # Store results for the current TIC ID (convert tic_id to string)
-        results[str(tic_id)] = {
-            "RMS_list": RMS_list.tolist(),
-            "Tmag_list": Tmags_list.tolist(),
-            "mags_list": mags_list.tolist(),
-            "synthetic_mag": synthetic_mag_list,
-            "photon_shot_noise": photon_shot_noise_list,
-            "sky_noise": sky_noise_list,
-            "read_noise": read_noise_list,
-            "dc_noise": dc_noise_list,
-            "N": N_list,
-            "RNS": RNS_list
-        }
+    # Save RMS_list, mags_list, and other lists to a JSON file
+    output_data = {
+        "TIC_IDs": unique_tic_ids.tolist(),
+        "RMS_list": RMS_list,
+        "mags_list": mags_list,
+        "Tmag_list": Tmags_list,
+        "synthetic_mag": synthetic_mag_list,
+        "photon_shot_noise": photon_shot_noise_list,
+        "sky_noise": sky_noise_list,
+        "read_noise": read_noise_list,
+        "dc_noise": dc_noise_list,
+        "N": N_list,
+        "RNS": RNS_list
+    }
 
     # Construct output file name
     cwd_last_four = os.getcwd()[-4:]
@@ -120,7 +126,7 @@ def main():
 
     # Save JSON file using custom encoder
     with open(output_path, 'w') as json_file:
-        json.dump(results, json_file, indent=4, cls=NumpyEncoder)
+        json.dump(output_data, json_file, indent=4, cls=NumpyEncoder)
 
     print(f"Results saved to {output_path}")
 
