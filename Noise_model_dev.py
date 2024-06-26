@@ -73,26 +73,26 @@ def main():
     unique_tic_ids = np.unique(data['TIC_ID'])
 
     # Prepare lists for noise_sources function
+    RMS_list = []
     sky_list = []
     airmass_list = []
-    zp = []
-    RMS_list = []
+    zp_list = []
     mags_list = []
     Tmags_list = []
 
     # Iterate over each unique TIC ID
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
-        RMS_list.extend(tic_data['RMS'] * 1000000)  # Convert RMS to ppm
-        sky_list.extend(tic_data['Sky'])
-        Tmags_list.extend(tic_data['Tmag'])
-        airmass_list.extend(tic_data['Airmass'])
-        zp.extend(tic_data['ZP'])
-        mags_list.extend(tic_data['Magnitude'])
+        RMS_list.extend((tic_data['RMS'] * 1000000).tolist())  # Convert RMS to ppm
+        sky_list.extend(tic_data['Sky'].tolist())
+        Tmags_list.extend(tic_data['Tmag'].tolist())
+        airmass_list.extend(tic_data['Airmass'].tolist())
+        zp_list.extend(tic_data['ZP'].tolist())
+        mags_list.extend(tic_data['Magnitude'].tolist())
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_list, zp, APERTURE, READ_NOISE, DARK_CURRENT))
+        noise_sources(sky_list, bin_size, airmass_list, zp_list, APERTURE, READ_NOISE, DARK_CURRENT))
 
     # Convert lists to JSON serializable lists
     synthetic_mag_list = synthetic_mag.tolist()
