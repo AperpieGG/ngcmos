@@ -83,7 +83,7 @@ def main():
     # Iterate over each unique TIC ID
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
-        RMS_list.append(tic_data['RMS'][0])
+        RMS_list.append(tic_data['RMS'][0]) * 1000000
         sky_list.append(tic_data['Sky'][0])
         airmass_list.append(tic_data['Airmass'][0])
         zp_list.append(tic_data['ZP'][0])
