@@ -617,7 +617,7 @@ def calculate_trend_and_flux(time, flux, fluxerr, degree=2):
 
 
 def scintilation_noise(airmass_list):
-    t = 10  # exposure time
+    t = 0.1  # exposure time
     D = 0.2  # telescope diameter
     h = 2433  # height of Paranal
     H = 8000  # height of atmospheric scale
@@ -674,7 +674,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_c
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
-    exposure_time = 10
+    exposure_time = 0.1
 
     synthetic_flux = np.arange(100, 1e7, 1000)
     synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
