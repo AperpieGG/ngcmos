@@ -74,13 +74,9 @@ def plot_noise_model(data):
     # append the indices of the outliers
     filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
     
-    # # # Exclude outliers from the total data
-    # total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
-    # total_mags = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
-
     # # Exclude outliers from the total data
-    total_RMS = [RMS_list[i] for i in range(len(RMS_list))]
-    total_mags = [mags_list[i] for i in range(len(mags_list))]
+    total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
+    total_mags = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
 
     ax.plot(total_mags, total_RMS, 'o', color='c', label='total data', alpha=0.5)
 
@@ -94,7 +90,7 @@ def plot_noise_model(data):
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
-    ax.set_xlim(3, 14)
+    ax.set_xlim(7.5, 14)
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.legend(loc='best')
