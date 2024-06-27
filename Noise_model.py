@@ -81,7 +81,7 @@ def rms_vs_mags(table, bin_size, num_stars):
         sky_list.append(np.median(sky_4))
 
         # Calculate magnitudes using the average zp
-        mags = -2.5 * np.log10(flux_4_clipped / 0.1) + np.mean(zp_list)
+        mags = -2.5 * np.log10(flux_4_clipped / 10) + np.mean(zp_list)
         mags_list.append(np.nanmean(mags))
         Tmags_list.append(round(Tmag, 2))
 
