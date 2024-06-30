@@ -91,6 +91,7 @@ def main():
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
         airmass_list.append(tic_data['Airmass'][0])
+        print(airmass_list)
         zp_list.append(tic_data['ZP'][0])
         mags_list.append(tic_data['Magnitude'][0])
 
