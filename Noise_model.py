@@ -90,9 +90,8 @@ def main():
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
-        airmass_list.append(tic_data['Airmass'][0])
-        print(airmass_list)
-        zp_list.append(tic_data['ZP'][0])
+        airmass_list.append(tic_data['Airmass'])
+        zp_list.append(tic_data['ZP'])
         mags_list.append(tic_data['Magnitude'][0])
 
     # Get noise sources
