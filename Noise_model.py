@@ -94,6 +94,7 @@ def main():
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
+    print(len(airmass_array))
     zp_array = np.array(zp_list)
 
     # Get noise sources
