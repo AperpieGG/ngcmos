@@ -7,8 +7,6 @@ import numpy as np
 from astropy.io import fits
 from utils import noise_sources  # Assuming you have a noise_sources function in utils
 
-# TODO: take bin_size from argument and use the number from the name of the rel fits file
-
 # Constants for noise calculations
 APERTURE = 6  # Aperture size for the telescope
 READ_NOISE = 1.56  # Read noise in electrons
@@ -85,8 +83,8 @@ def main():
     # Iterate over each unique TIC ID
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
-        airmass_list.append(tic_data['Airmass'])
-        zp_list.append(tic_data['ZP'])
+        airmass_list.extend(tic_data['Airmass'])
+        zp_list.extend(tic_data['ZP'])
 
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
@@ -94,9 +92,13 @@ def main():
         Tmags_list.append(tic_data['Tmag'][0])
         mags_list.append(tic_data['Magnitude'][0])
 
+    # Convert lists to numpy arrays for noise calculation
+    airmass_array = np.array(airmass_list)
+    zp_array = np.array(zp_list)
+
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_list, zp_list, APERTURE, READ_NOISE, DARK_CURRENT))
+        noise_sources(sky_list, bin_size, airmass_array, zp_array, APERTURE, READ_NOISE, DARK_CURRENT))
 
     # Convert lists to JSON serializable lists
     synthetic_mag_list = synthetic_mag.tolist()
