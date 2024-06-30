@@ -3,8 +3,7 @@
 Plot light curve for a given TIC ID from a FITS file containing photometry data
 The data is taken from the rel_phot_NGFIELD.fits file that is created from relative_phot.py
 """
-
-
+import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from utils import plot_images
@@ -41,9 +40,12 @@ def plot_lc(filename, tic_id_to_plot, directory):
     ax2.set_xlim(ax1.get_xlim())
     ax2.set_xlabel('Airmass')
 
-    # Set the airmass values on the upper x-axis
-    ax2.set_xticks(ax1.get_xticks())
-    airmass_ticks = [f'{a:.2f}' for a in airmass]
+    # Interpolate airmass values at the positions of the primary x-axis ticks
+    primary_xticks = ax1.get_xticks()
+    interpolated_airmass = np.interp(primary_xticks, time, airmass)
+    airmass_ticks = [f'{a:.2f}' for a in interpolated_airmass]
+
+    ax2.set_xticks(primary_xticks)
     ax2.set_xticklabels(airmass_ticks, rotation=45, ha='right')
 
     ax1.legend()
