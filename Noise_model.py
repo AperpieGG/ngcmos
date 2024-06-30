@@ -5,8 +5,7 @@ import os
 import json
 import numpy as np
 from astropy.io import fits
-from utils import noise_sources
-import re
+from utils import noise_sources  # Assuming you have a noise_sources function in utils
 
 # Constants for noise calculations
 APERTURE = 6  # Aperture size for the telescope
@@ -95,7 +94,6 @@ def main():
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
-    print(airmass_array)
     zp_array = np.array(zp_list)
 
     # Get noise sources
@@ -127,15 +125,9 @@ def main():
         "RNS": RNS_list
     }
 
-    match = re.search(r'_(\d+)\.fits$', filename)
-    if match:
-        number = match.group(1)
-    else:
-        number = bin_size
-
     # Construct output file name
     cwd_last_four = os.getcwd()[-4:]
-    file_name = f"rms_mags_{filename.replace('.fits', '')}_{number}_{cwd_last_four}.json"
+    file_name = f"rms_mags_{filename.replace('.fits', '')}_{cwd_last_four}.json"
     output_path = os.path.join(current_dir, file_name)
 
     # Save JSON file using custom encoder
