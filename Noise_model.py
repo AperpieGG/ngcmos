@@ -85,13 +85,13 @@ def main():
     # Iterate over each unique TIC ID
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
+        airmass_list.append(tic_data['Airmass'])
+        zp_list.append(tic_data['ZP'])
 
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
-        airmass_list.append(tic_data['Airmass'])
-        zp_list.append(tic_data['ZP'])
         mags_list.append(tic_data['Magnitude'][0])
 
     # Get noise sources
