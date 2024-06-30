@@ -164,7 +164,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
                                                                          dt_fluxerr_poly, bin_size)
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-            avg_magnitude, avg_airmass, avg_zero_point)
+            avg_magnitude, airmass_clipped, zero_point_clipped)
 
 
 def main():
