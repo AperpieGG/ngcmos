@@ -11,7 +11,11 @@ from utils import plot_images
 import argparse
 
 
-def plot_lc(table, tic_id_to_plot, image_directory=""):
+def plot_lc(filename, tic_id_to_plot, directory):
+    # Open the FITS file and read the data
+    with fits.open(filename) as hdul:
+        table = hdul[1].data  # Assuming data is in the first extension
+
     tic_id_data = table[table['TIC_ID'] == tic_id_to_plot]
 
     if len(tic_id_data) == 0:
@@ -34,23 +38,28 @@ def plot_lc(table, tic_id_to_plot, image_directory=""):
     ax1.set_title(f'Rel Phot for TIC ID {tic_id_to_plot} and rms = {rms:.4f}')
 
     ax2 = ax1.twiny()
-    ax2.plot(time, airmass, 'r-')
+    ax2.set_xlim(ax1.get_xlim())
     ax2.set_xlabel('Airmass')
+
+    # Set the airmass values on the upper x-axis
+    ax2.set_xticks(ax1.get_xticks())
+    airmass_ticks = [f'{a:.2f}' for a in airmass]
+    ax2.set_xticklabels(airmass_ticks, rotation=45, ha='right')
 
     ax1.legend()
     plt.show()
 
-    
+
 def main():
     plot_images()
-
+    directory = '.'
     # Parse command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('tic_id', type=int, help='TIC ID of the star')
     args = parser.parse_args()
 
-    plot_lc(args.filename, args.tic_id)
+    plot_lc(args.filename, args.tic_id, directory)
 
 
 if __name__ == "__main__":
