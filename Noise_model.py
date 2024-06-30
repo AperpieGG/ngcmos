@@ -7,6 +7,8 @@ import numpy as np
 from astropy.io import fits
 from utils import noise_sources  # Assuming you have a noise_sources function in utils
 
+# TODO: take bin_size from argument and use the number from the name of the rel fits file
+
 # Constants for noise calculations
 APERTURE = 6  # Aperture size for the telescope
 READ_NOISE = 1.56  # Read noise in electrons
