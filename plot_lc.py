@@ -11,48 +11,36 @@ from utils import plot_images
 import argparse
 
 
-def search_and_extract_info(filename, tic_id):
-    # Load the FITS file containing the relative photometry data
-    data_table = fits.getdata(filename)
+def plot_lc(table, tic_id_to_plot, image_directory=""):
+    tic_id_data = table[table['TIC_ID'] == tic_id_to_plot]
 
-    # Search for the index of the provided TIC ID in the data table
-    index = None
-    for i, id in enumerate(data_table['TIC_ID']):
-        if id == tic_id:
-            index = i
-            break
-
-    if index is None:
-        print(f"TIC ID {tic_id} not found in the data.")
+    if len(tic_id_data) == 0:
+        print(f"TIC ID {tic_id_to_plot} not found in the data.")
         return
 
-    # Extract information for the provided TIC ID
-    star_time = data_table['Time_JD'][index]  # Time for the star
-    star_flux = data_table['Relative_Flux'][index]  # Flux for the star
-    tmag = data_table['Tmag'][index]  # Tmag for the star
-    rms = data_table['RMS'][index]  # RMS for the star
-    airmass = data_table['Airmass'][index]  # Airmass for the star
+    tmag = tic_id_data['Tmag'][0]
+    time = tic_id_data['Time_JD']
+    flux = tic_id_data['Relative_Flux']
+    flux_err = tic_id_data['Relative_Flux_err']
+    airmass = tic_id_data['Airmass']
+    rms = tic_id_data['RMS'][0]
 
-    # Create the main plot
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
-    # Plot flux versus time for the star
-    ax1.plot(star_time, star_flux, 'o', label=f'RMS = {rms:.4f}')
+    ax1.errorbar(time, flux, yerr=flux_err, fmt='o', label=f'Tmag = {tmag:.2f}')
     ax1.set_xlabel('Time (JD)')
-    ax1.set_ylabel('Relative Flux (e-)')
+    ax1.set_ylabel('Relative Flux')
     ax1.set_ylim(0.95, 1.05)
-    ax1.set_title(f'Relative Photometry for TIC ID {tic_id} (Tmag = {tmag:.2f})')
+    ax1.set_title(f'Rel Phot for TIC ID {tic_id_to_plot} and rms = {rms:.4f}')
 
-    # Create the second x-axis for airmass
-    # ax2 = ax1.twiny()
-    # ax2.plot(star_time, airmass, 'r-')
-    # ax2.set_xlabel('Airmass')
+    ax2 = ax1.twiny()
+    ax2.plot(time, airmass, 'r-')
+    ax2.set_xlabel('Airmass')
 
-    # Align the twinned axes
     ax1.legend()
     plt.show()
 
-
+    
 def main():
     plot_images()
 
@@ -62,7 +50,7 @@ def main():
     parser.add_argument('tic_id', type=int, help='TIC ID of the star')
     args = parser.parse_args()
 
-    search_and_extract_info(args.filename, args.tic_id)
+    plot_lc(args.filename, args.tic_id)
 
 
 if __name__ == "__main__":
