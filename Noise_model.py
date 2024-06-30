@@ -94,8 +94,8 @@ def main():
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
-    print(len(airmass_array))
     zp_array = np.array(zp_list)
+    print('The average airmass and zero point are: ', np.mean(airmass_array), np.mean(zp_array))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
