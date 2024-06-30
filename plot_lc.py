@@ -30,23 +30,16 @@ def plot_lc(filename, tic_id_to_plot, directory):
 
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
-    ax1.plot(time, flux, label=f'Tmag = {tmag:.2f}')
+    ax1.plot(time, flux, label=f'RMS = {rms:.4f}')
     ax1.set_xlabel('Time (JD)')
     ax1.set_ylabel('Relative Flux')
     ax1.set_ylim(0.95, 1.05)
-    ax1.set_title(f'Rel Phot for TIC ID {tic_id_to_plot} and rms = {rms:.4f}')
+    ax1.set_title(f'Rel Phot for TIC ID {tic_id_to_plot} and Tmag = {tmag:.2f}')
 
+    # Create the second x-axis for airmass
     ax2 = ax1.twiny()
-    ax2.set_xlim(ax1.get_xlim())
+    ax2.plot(time, airmass, 'r-')
     ax2.set_xlabel('Airmass')
-
-    # Interpolate airmass values at the positions of the primary x-axis ticks
-    primary_xticks = ax1.get_xticks()
-    interpolated_airmass = np.interp(primary_xticks, time, airmass)
-    airmass_ticks = [f'{a:.2f}' for a in interpolated_airmass]
-
-    ax2.set_xticks(primary_xticks)
-    ax2.set_xticklabels(airmass_ticks, rotation=45, ha='right')
 
     ax1.legend()
     plt.tight_layout()
