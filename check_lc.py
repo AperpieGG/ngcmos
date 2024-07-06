@@ -75,9 +75,10 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     time_clipped, fluxes_clipped, fluxerrs_clipped, sky_clipped, skyerrs_clipped = (
         remove_outliers(jd_mid, fluxes, fluxerrs, sky, skyerrs))
     # Bin flux data
-    jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
+    jd_mid_binned, fluxes_binned, fluxerrs_binned = (
+        bin_time_flux_error(time_clipped, fluxes_clipped, fluxerrs_clipped, bin_size))
     # Bin sky data using the same binned jd_mid as the flux data
-    _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky, skyerrs, bin_size)
+    _, sky_binned, skyerrs_binned = bin_time_flux_error(jd_mid, sky_clipped, skyerrs_clipped, bin_size)
 
     # Define the size of the figure
     fig, axs = plt.subplots(3, 1, figsize=(10, 10))
