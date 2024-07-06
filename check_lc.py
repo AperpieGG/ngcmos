@@ -7,7 +7,7 @@ from astropy.io import fits
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
-from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error
+from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers
 from matplotlib.patches import Circle
 from astropy.visualization import ZScaleInterval
 
@@ -71,6 +71,9 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     skyerrs = np.sqrt(tic_id_data[f'fluxerr_{aperture}'] ** 2 + tic_id_data[f'fluxerr_w_sky_{aperture}'] ** 2)
     airmass = tic_id_data['airmass']
 
+    # remove outliers
+    time_clipped, fluxes_clipped, fluxerrs_clipped, sky_clipped, skyerrs_clipped = (
+        remove_outliers(jd_mid, fluxes, fluxerrs, sky, skyerrs))
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = bin_time_flux_error(jd_mid, fluxes, fluxerrs, bin_size)
     # Bin sky data using the same binned jd_mid as the flux data
