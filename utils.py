@@ -457,6 +457,9 @@ def bin_time_flux_error(time, flux, error, bin_fact):
     ------
     None
     """
+    if bin_fact == 1:
+        return time, flux, error
+    
     n_binned = int(len(time) / bin_fact)
     clip = n_binned * bin_fact
     time_b = np.average(time[:clip].reshape(n_binned, bin_fact), axis=1)
