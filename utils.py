@@ -525,8 +525,6 @@ def remove_outliers(time, flux, flux_err, air_mass=None, zero_point=None):
         if len(n_time) == len(time):
             return n_time, n_flux, n_flux_err, n_air_mass, n_zero_point
 
-        print('Number of outliers removed:', len(time) - len(n_time))
-
     return n_time, n_flux, n_flux_err, n_air_mass, n_zero_point
 
 
