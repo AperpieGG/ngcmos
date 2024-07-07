@@ -73,17 +73,19 @@ def relative_phot(table, tic_id_to_plot, bin_size):
           f"comparison stars for the target star {tic_id_to_plot}")
     rms_comp_list = []
 
-    jd_mid, tmag, fluxes, fluxerrs, sky = extract_phot_file(table, tic_id_to_plot, aper=APERTURE)
+    jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
+        extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
     airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
     zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
 
     # Calculate the median sky value for our star
-    sky_median = np.median(sky)
+    sky_median = np.median(sky_star)
     # print('The sky median for the TIC ID {} is {}'.format(tic_id_to_plot, sky_median))
 
     # Remove outliers from the target star
     time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped \
-        = remove_outliers(jd_mid, fluxes, fluxerrs, air_mass=airmass_list, zero_point=zero_point_list)
+        = remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star,
+                          air_mass=airmass_list, zero_point=zero_point_list)
 
     avg_zero_point = np.mean(zero_point_clipped)
     avg_airmass = np.mean(airmass_clipped)
