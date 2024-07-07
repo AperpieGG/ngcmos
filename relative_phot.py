@@ -98,8 +98,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
-        print('Number of outliers for TIC ID {} is {}'.format(tic_id, len(time) - len(time_stars)))
-        print('The data points removed are: ', np.setdiff1d(time, time_stars))
 
         # detrend the lc and measure rms
         trend, fluxes_dt_comp, fluxerrs_dt_comp = (
