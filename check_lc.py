@@ -72,7 +72,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     airmass = tic_id_data['airmass']
 
     # remove outliers
-    time_clipped, fluxes_clipped, fluxerrs_clipped, sky_clipped, skyerrs_clipped = ((jd_mid, fluxes, fluxerrs, sky, skyerrs))
+    time_clipped, fluxes_clipped, fluxerrs_clipped, sky_clipped, skyerrs_clipped = (
+        remove_outliers(jd_mid, fluxes, fluxerrs, sky, skyerrs))
     # Bin flux data
     jd_mid_binned, fluxes_binned, fluxerrs_binned = (
         bin_time_flux_error(time_clipped, fluxes_clipped, fluxerrs_clipped, bin_size))
