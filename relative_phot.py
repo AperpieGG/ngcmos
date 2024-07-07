@@ -97,10 +97,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-        time, fluxes, fluxerrs, _, _ = remove_outliers(time, fluxes, fluxerrs)
+        time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         # detrend the lc and measure rms
-        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
+        trend, fluxes_dt_comp, fluxerrs_dt_comp = (
+            calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars))
         # measure rms
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
