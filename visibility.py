@@ -427,7 +427,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Calculate visibility of targets from TWIST, NGTS or TMO.')
 
-    parser.add_argument('observatory', type=str, default='ngts',
+    parser.add_argument('observatory', type=str, choices=['twist', 'ngts', 'tmo'],
                         help='(e.g. ngts --date 13/05/2024 TIC 324010229 --json 20240513)')
     parser.add_argument('targets', type=str, nargs='+', help='List of targets to check visibility for')
     parser.add_argument('--plot', action='store_true', help='Plot visibility')
