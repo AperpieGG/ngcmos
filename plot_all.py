@@ -22,15 +22,14 @@ def plot_noise_model(all_data):
     for data in all_data:
         RMS_list = data['RMS_list']
         mags_list = data['mags_list']
-        ax.plot(mags_list, RMS_list, 'o', alpha=0.5)
+        ax.plot(mags_list, RMS_list, 'o', alpha=0.5, color='black')
 
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
-    ax.set_xlim(7.5, 14)
+    ax.set_xlim(7, 14)
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
-    plt.legend(loc='best')
     plt.tight_layout()
     plt.show()
 
