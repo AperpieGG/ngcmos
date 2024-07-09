@@ -80,10 +80,9 @@ def main(directory):
 
             # Load RMS and magnitude data from JSON file
             data = load_rms_mags_data(json_file)
-
-            # Plot RMS vs magnitudes
-            plot_noise_model(data)
-            plot_tmag_vs_mag(data)
+            for i in data:
+                plot_noise_model(data[i])
+                plot_tmag_vs_mag(data[i])
 
 
 if __name__ == "__main__":
