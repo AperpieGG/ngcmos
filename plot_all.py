@@ -87,9 +87,5 @@ def main(directory):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Plot RMS vs Magnitudes for multiple JSON files')
-    parser.add_argument('directory', type=str, default='.', help='Directory containing JSON files')
-    args = parser.parse_args()
-
-    # Run main function
-    main(args.directory)
+    directory = '.'
+    main(directory)
