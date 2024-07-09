@@ -27,7 +27,7 @@ def plot_noise_model(all_data):
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
-    ax.set_xlim(7, 14)
+    ax.set_xlim(8, 14)
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
     plt.tight_layout()
