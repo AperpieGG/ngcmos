@@ -3,7 +3,7 @@ import argparse
 import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
-from utils import (plot_images,  get_phot_files, read_phot_file, bin_time_flux_error, calculate_trend_and_flux)
+from utils import plot_images,  get_rel_phot_files, read_phot_file, bin_time_flux_error
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
@@ -22,33 +22,23 @@ def plot_rms_time(table, num_stars, tic_id=None):
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
-        jd_mid = Tmag_data['jd_mid']
-        flux_5 = Tmag_data['flux_6']
-        fluxerr_5 = Tmag_data['fluxerr_6']
-        current_tic_id = Tmag_data['tic_id'][0]  # Assuming Tmag is the same for all jd_mid values of a star
+        jd_mid = Tmag_data['Time_JD']
+        rel_flux = Tmag_data['Relative_Flux']
+        rel_fluxerr = Tmag_data['Relative_Flux_err']
+        current_tic_id = Tmag_data['TIC_ID'][0]
 
         # Check if tic_id is specified and matches current_tic_id
         if tic_id is not None and current_tic_id != tic_id:
             continue
 
-        time_clipped, flux_5_clipped, fluxerr_5_clipped, _, _ = remove_outliers(jd_mid, flux_5, fluxerr_5)
-
-        trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_5_clipped, fluxerr_5_clipped)
-
         RMS_values = []
         time_seconds = []
         for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux, dt_fluxerr, i)
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
             exposure_time_seconds = i * 10  # 10 seconds per binning
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
-
-        # Check if the first RMS value is greater than 0.0065
-        # if RMS_values[0] > 0.006:
-        #     print('Excluding tic_id = {} and Tmag = {:.2f} due to RMS > 6000 ppm'.format(current_tic_id, Tmag))
-        #     num_stars_excluded += 1
-        #     continue
         else:
             print('Using star with tic_id = {} and Tmag = {:.2f} and RMS = {:.4f}'.
                   format(current_tic_id, Tmag, RMS_values[0]))
@@ -81,7 +71,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
     plt.figure(figsize=(6, 10))
     plt.plot(times_binned[0], average_rms_values, 'o', color='blue', label='Actual RMS')
     plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
-    plt.title('Time binned for field: ' + phot_file[-16:-5])
+    plt.title('Time binned for field: ' + phot_file[10:-5])
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
@@ -115,7 +105,7 @@ if __name__ == "__main__":
     current_night_directory = '.'
 
     # Get photometry files with the pattern 'phot_*.fits'
-    phot_files = get_phot_files(current_night_directory)
+    phot_files = get_rel_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
     # Parse command-line arguments
