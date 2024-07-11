@@ -144,6 +144,8 @@ def find_current_night_directory(base_path):
 
 
 # lines 172-222 may be removed cause this script does not run automatically anymore
+# TODO: remove the conditions for the find current night directory and only use the flats
+#  from the create flats
 def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
     """
     Create the master flat from the flat files.
