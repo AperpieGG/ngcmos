@@ -31,11 +31,15 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
     rms = tic_id_data['RMS'][0]
 
     if bin_size > 1:
-        time, flux, flux_err = bin_time_flux_error(time, flux, flux_err, bin_size)
-
+        time_binned, flux_binned, flux_err_binned, _, _ = \
+            bin_time_flux_error(time, flux, flux_err, bin_size)
+        rms_binned = np.std(flux_binned)
+    else:
+        time_binned, flux_binned, flux_err_binned, rms_binned\
+            = time, flux, flux_err, rms
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
-    ax1.plot(time, flux, 'o', label=f'RMS = {rms:.4f}')
+    ax1.plot(time_binned, flux_binned, 'o', label=f'RMS = {rms_binned:.4f}')
     ax1.set_xlabel('Time (JD)')
     ax1.set_ylabel('Relative Flux')
     ax1.set_ylim(0.95, 1.05)
@@ -64,7 +68,7 @@ def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('tic_id', type=int, help='TIC ID of the star')
-    parser.add_argument('--bin_size', type=int, default=1, help='Bin size for time binning')
+    parser.add_argument('--bin', type=int, default=1, help='Bin size for time binning')
     args = parser.parse_args()
 
     filenames = get_rel_phot_files(directory)
@@ -76,7 +80,7 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc(phot_file, args.tic_id, args.bin_size)
+            plot_lc(phot_file, args.tic_id, args.bin)
             break  # Stop looping if tic_id is found
         else:
             print(f"TIC ID {args.tic_id} not found in {phot_file}")
