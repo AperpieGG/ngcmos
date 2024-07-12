@@ -39,11 +39,14 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
             = time, flux, flux_err, rms
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
-    ax1.plot(time_binned, flux_binned, 'o', label=f'RMS = {rms_binned:.4f}')
+    ax1.plot(time_binned, flux_binned, 'o', label=f'RMS = {rms_binned:.4f}', color='red')
     ax1.set_xlabel('Time (JD)')
     ax1.set_ylabel('Relative Flux')
     ax1.set_ylim(0.95, 1.05)
     ax1.set_title(f'Rel Phot for TIC ID {tic_id_to_plot} and Tmag = {tmag:.2f}')
+
+    if bin_size > 1:
+        ax1.plot(time, flux, 'o', color='blue', alpha=0.5)
 
     ax2 = ax1.twiny()
     ax2.set_xlim(ax1.get_xlim())
