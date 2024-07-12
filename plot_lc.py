@@ -6,11 +6,11 @@ The data is taken from the rel_phot_NGFIELD.fits file that is created from relat
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
-from utils import plot_images
+from utils import plot_images, bin_time_flux_error
 import argparse
 
 
-def plot_lc(filename, tic_id_to_plot, directory):
+def plot_lc(filename, tic_id_to_plot, bin_size):
     # Open the FITS file and read the data
     with fits.open(filename) as hdul:
         table = hdul[1].data  # Assuming data is in the first extension
@@ -27,6 +27,9 @@ def plot_lc(filename, tic_id_to_plot, directory):
     flux_err = tic_id_data['Relative_Flux_err']
     airmass = tic_id_data['Airmass']
     rms = tic_id_data['RMS'][0]
+
+    if bin_size > 1:
+        time, flux, flux_err = bin_time_flux_error(time, flux, flux_err, bin_size)
 
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
@@ -60,9 +63,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('tic_id', type=int, help='TIC ID of the star')
+    parser.add_argument('--bin_size', type=int, default=1, help='Bin size for time binning')
     args = parser.parse_args()
 
-    plot_lc(args.filename, args.tic_id, directory)
+    plot_lc(args.filename, args.tic_id, args.bin_size)
 
 
 if __name__ == "__main__":
