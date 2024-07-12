@@ -31,7 +31,7 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
     rms = tic_id_data['RMS'][0]
 
     if bin_size > 1:
-        time_binned, flux_binned, flux_err_binned, _, _ = \
+        time_binned, flux_binned, flux_err_binned = \
             bin_time_flux_error(time, flux, flux_err, bin_size)
         rms_binned = np.std(flux_binned)
     else:
