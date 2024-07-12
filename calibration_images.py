@@ -113,116 +113,20 @@ def dark(base_path, out_path, master_bias):
         return master_dark
 
 
-def find_current_night_directory(base_path):
-    """
-    Find the directory for the current night based on the current date.
-    if not then use the current working directory.
-
-    Parameters
-    ----------
-    base_path : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str or None
-        Path to the current night directory if found, otherwise None.
-    """
-
-    # Get the previous date directory in the format YYYYMMDD
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-
-    # Construct the path for the previous_date directory
-    current_date_directory = os.path.join(base_path, previous_date)
-
-    # Check if the directory exists
-    if os.path.isdir(current_date_directory):
-        return current_date_directory
-    else:
-        # Use the current working directory
-        return None
-
-
-# lines 172-222 may be removed cause this script does not run automatically anymore
-# TODO: remove the conditions for the find current night directory and only use the flats
-#  from the create flats
-def flat(base_path, out_path, master_bias, master_dark, dark_exposure=10):
+def flat(out_path):
     """
     Create the master flat from the flat files.
 
     Parameters
     ----------
-    base_path : str
-        Base path for the directory.
     out_path : str
         Path to the output directory.
-    master_bias : numpy.ndarray
-        Master bias.
-    master_dark : numpy.ndarray
-        Master dark.
-    dark_exposure : int
-        Dark exposure time.
-
     Returns
     -------
     numpy.ndarray
         Master flat.
     """
-    current_night_directory = find_current_night_directory(base_path)
-
-    # If current_night_directory is None, set it to the current working directory
-    if current_night_directory is None:
-        current_night_directory = os.getcwd()
-    elif current_night_directory:  # Check if current_night_directory is not None and has a value
-        # Check if there is a master flat specific to the current night directory
-        current_night_master_flat_filename = f'master_flat_{os.path.basename(current_night_directory)}.fits'
-        current_night_master_flat_path = os.path.join(out_path, current_night_master_flat_filename)
-
-        if os.path.exists(current_night_master_flat_path):
-            print(f'Found master flat for current night directory in {current_night_master_flat_path}')
-            return fits.getdata(current_night_master_flat_path)
-
-        # If the master flat for the current night directory doesn't exist, create it
-        print(f'Master flat for current night directory not found. Creating...')
-
-        # Find appropriate files for creating the master flat
-        evening_files = [f for f in glob.glob(os.path.join(current_night_directory, 'evening*.fits')) if
-                         'HDR' in fits.getheader(f)['READMODE']]
-
-        if not evening_files:
-            # If evening files don't exist, use morning files
-            evening_files = [f for f in glob.glob(os.path.join(current_night_directory, 'morning*.fits')) if
-                             'HDR' in fits.getheader(f)['READMODE']]
-
-        if not evening_files:
-            print('No suitable flat field files found.')
-            return None  # or handle the case where no files are found
-
-        print('Creating master flat')
-        # take only the first 21
-        files = evening_files[:21]
-
-        cube = np.zeros((*master_bias.shape, len(files)))
-        for i, f in enumerate(files):
-            data, header = fits.getdata(f, header=True)
-            cube[:, :, i] = data - master_bias - master_dark * header['EXPTIME'] / dark_exposure
-            cube[:, :, i] = cube[:, :, i] / np.average(cube[:, :, i])
-
-        master_flat = np.median(cube, axis=2)
-
-        # Copy header from one of the input files
-        header = fits.getheader(files[0])
-
-        # Write the master flat with the copied header
-        hdu = fits.PrimaryHDU(master_flat, header=header)
-        hdu.writeto(current_night_master_flat_path, overwrite=True)
-
-        hdul = fits.open(current_night_master_flat_path, mode='update')
-        hdul[0].header['FILTER'] = 'NGTS'
-        hdul.close()
-        print(f'Master flat for current night directory created in {current_night_master_flat_path}')
-        return master_flat
-
+    current_night_directory = os.getcwd()
     if current_night_directory == os.getcwd():
         print('Current night directory is the current working directory.')
 
@@ -262,7 +166,7 @@ def reduce_images(base_path, out_path, prefix_filenames):
     """
     master_bias = bias(base_path, out_path)
     master_dark = dark(base_path, out_path, master_bias)
-    master_flat = flat(base_path, out_path, master_bias, master_dark)
+    master_flat = flat(out_path)
 
     reduced_data = []
     reduced_header_info = []
@@ -301,6 +205,4 @@ def reduce_images(base_path, out_path, prefix_filenames):
     return reduced_data, reduced_header_info, filenames
 
 
-def create_directory_if_not_exists(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+
