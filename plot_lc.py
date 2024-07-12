@@ -3,10 +3,12 @@
 Plot light curve for a given TIC ID from a FITS file containing photometry data
 The data is taken from the rel_phot_NGFIELD.fits file that is created from relative_phot.py
 """
+import os
+
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
-from utils import plot_images, bin_time_flux_error
+from utils import plot_images, bin_time_flux_error, get_rel_phot_files, read_phot_file
 import argparse
 
 
@@ -61,12 +63,23 @@ def main():
     directory = '.'
     # Parse command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('tic_id', type=int, help='TIC ID of the star')
     parser.add_argument('--bin_size', type=int, default=1, help='Bin size for time binning')
     args = parser.parse_args()
 
-    plot_lc(args.filename, args.tic_id, args.bin_size)
+    filenames = get_rel_phot_files(directory)
+
+    # Loop through photometry files
+    for phot_file in filenames:
+        phot_table = read_phot_file(os.path.join(directory, phot_file))
+
+        # Check if tic_id exists in the current photometry file
+        if args.tic_id in phot_table['tic_id']:
+            print('Found star in photometry file:', phot_file)
+            plot_lc(phot_file, args.tic_id, args.bin_size)
+            break  # Stop looping if tic_id is found
+        else:
+            print(f"TIC ID {args.tic_id} not found in {phot_file}")
 
 
 if __name__ == "__main__":
