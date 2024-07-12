@@ -22,6 +22,8 @@ def plot_noise_model(all_data):
     for data in all_data:
         RMS_list = data['RMS_list']
         mags_list = data['mags_list']
+        N = data['N']
+        print('The scintillation noise is: ', N)
         ax.plot(mags_list, RMS_list, 'o', alpha=0.5, color='black')
 
     ax.set_xlabel('TESS Magnitude')
