@@ -69,8 +69,14 @@ def main(directory):
             all_data.append(data)
 
             # Print the value of N for the current file
-            # print(f"N for {filename}: {data['N']}")
-            print(f'The file with the minimum N is: {np.min(data["N"])}')
+            # Check if this file has the minimum N
+            if data['N'] < min_N:
+                min_N = data['N']
+                min_N_filename = filename
+
+        # Print the filename with the minimum N
+        if min_N_filename is not None:
+            print(f"The file with the minimum N ({min_N}) is: {min_N_filename}")
 
     # Plot combined results
     plot_noise_model(all_data)
