@@ -76,7 +76,7 @@ def main(directory):
             if data['N'] < min_N:
                 min_N = data['N']
                 min_N_filename = filename
-
+            print(f'Processing filename and with N: {filename} {data["N"]}')
     # Print the filename with the minimum N
     if min_N_filename is not None:
         print(f"The file with the minimum N ({min_N}) is: {min_N_filename}")
