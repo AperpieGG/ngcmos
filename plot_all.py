@@ -62,7 +62,7 @@ def main(directory):
     for filename in os.listdir(directory):
         if filename.endswith('.json'):
             json_file = os.path.join(directory, filename)
-            print(f"Processing file: {json_file}")
+            # print(f"Processing file: {json_file}")
 
             # Load RMS and magnitude data from JSON file
             data = load_rms_mags_data(json_file)
