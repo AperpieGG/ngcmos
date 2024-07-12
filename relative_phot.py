@@ -80,7 +80,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Calculate the median sky value for our star
     sky_median = np.median(sky_star)
-    # print('The sky median for the TIC ID {} is {}'.format(tic_id_to_plot, sky_median))
 
     # Remove outliers from the target star
     time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped \
@@ -88,7 +87,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
                           air_mass=airmass_list, zero_point=zero_point_list)
 
     avg_zero_point = np.mean(zero_point_clipped)
-    avg_airmass = np.mean(airmass_clipped)
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
     print(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
           f"and magnitude = {avg_magnitude:.2f}")
@@ -154,6 +152,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # # Normalize target star flux
     # target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
 
+    # Normalize the target flux by dividing with the mean of the target flux
     flux_ratio = fluxes_clipped / reference_fluxes
     flux_ratio_mean = np.mean(flux_ratio)
     # print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
