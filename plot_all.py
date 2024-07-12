@@ -70,7 +70,7 @@ def main(directory):
 
             # Print the value of N for the current file
             # print(f"N for {filename}: {data['N']}")
-            print(f'The file with the minimum N is: {min(data["N"])}')
+            print(f'The file with the minimum N is: {np.min(data["N"])}')
 
     # Plot combined results
     plot_noise_model(all_data)
