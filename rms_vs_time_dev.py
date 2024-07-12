@@ -71,7 +71,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
     plt.figure(figsize=(6, 10))
     plt.plot(times_binned[0], average_rms_values, 'o', color='blue', label='Actual RMS')
     plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
-    plt.title('Time binned for field: ' + phot_file[11:-4])
+    plt.title('Time binned for field: ' + phot_file[9:-6])
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
