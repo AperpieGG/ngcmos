@@ -67,6 +67,7 @@ def plot_noise_model(data):
     dc_noise = data['dc_noise']
     sky_noise = data['sky_noise']
     N = data['N']
+    print(f'The average scintillation noise is: {np.mean(N)}')
 
     # Filter data points based on magnitude and RMS
     filtered_indices_bright, filtered_indices_dim = filter_data(mags_list, RMS_list)
