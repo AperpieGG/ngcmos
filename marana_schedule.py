@@ -33,9 +33,10 @@ def arg_parse():
                    help='camera_id to follow',
                    type=int,
                    choices=np.arange(801, 814))
-    # p.add_argument('night',
-    #                help="Night to query from (e.g. 20231008)",
-    #                type=str)
+    p.add_argument('--night',
+                   help="Night to query from (e.g. 20231008)",
+                   type=str,
+                   default=datetime.now().strftime("%Y%m%d"))
     return p.parse_args()
 
 
@@ -99,11 +100,12 @@ def get_field_coords(field):
 if __name__ == "__main__":
     args = arg_parse()
 
-    # Fetch all actions for the specified camera
-    action_info = get_action_info(args.camera_id, datetime.now().strftime("%Y%m%d"))
+    # Fetch all actions for the specified camera and night
+    action_info = get_action_info(args.camera_id, args.night)
 
     # Create an empty dictionary to populate
-    OB = {'night': datetime.now().strftime("%Y-%m-%d"), 'actions': []}
+    night_date = datetime.strptime(args.night, "%Y%m%d").strftime("%Y-%m-%d")
+    OB = {'night': night_date, 'actions': []}
     OB['actions'].append(evening_flats)
 
     # Loop over actions and add them to the schedule
@@ -143,7 +145,7 @@ if __name__ == "__main__":
     OB['actions'].append(morning_flats)
 
     # Save the json file
-    with open(f'{datetime.now().strftime("%Y%m%d")}.json', 'w') as fp:
+    with open(f'{args.night}.json', 'w') as fp:
         json.dump(OB, fp, indent=4)
 
-    print(f"Saved observing plan to {datetime.now().strftime('%Y%m%d')}.json")
+    print(f"Saved observing plan to {args.night}.json")
