@@ -114,8 +114,11 @@ def get_prefix(filenames):
     """
     prefixes = set()
     for filename in filenames:
-        prefix = filename[:11]
-        prefixes.add(prefix)
+        with fits.open(filename) as hdulist:
+            object_keyword = hdulist[0].header.get('OBJECT', '')
+            prefix = object_keyword[:11]  # Take first 11 letters
+            if prefix:  # Check if prefix is not empty
+                prefixes.add(prefix)
     return prefixes
 
 
