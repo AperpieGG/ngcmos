@@ -63,8 +63,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         Number of images to bin
 
     Returns:
-        None
-
+        Various outputs related to the relative photometry
     """
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) &
@@ -91,7 +90,9 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
           f"and magnitude = {avg_magnitude:.2f}")
 
-    for tic_id in np.unique(master_star_data['tic_id']):
+    tic_ids = np.unique(master_star_data['tic_id'])
+
+    for tic_id in tic_ids:
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
@@ -104,39 +105,32 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
-    min_rms_index = np.argmin(rms_comp_list)
-    # Get the corresponding tic_id
-    min_rms_tic_id = np.unique(master_star_data['tic_id'])[min_rms_index]
-    # Print the tic_id with the minimum rms value
-    print(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} "
-          f"and RMS = {np.min(rms_comp_list):.4f}")
+    # Convert the list to a numpy array for easy manipulation
+    rms_comp_array = np.array(rms_comp_list)
 
-    # Calculate mean and standard deviation of rms_list
-    rms_std = np.std(rms_comp_list)
+    # Find the index of the minimum RMS value
+    min_rms_index = np.argmin(rms_comp_array)
 
-    # Define the threshold for two sigma clipping
-    threshold = SIGMA * np.min(rms_comp_list)
-    print(f"Threshold for 2 sigma clipping = {threshold:.4f}")
+    # Get the corresponding TIC ID with the minimum RMS value
+    min_rms_tic_id = tic_ids[min_rms_index]
+    min_rms_value = rms_comp_array[min_rms_index]
 
-    # Get the minimum rms value and its corresponding tic_id
-    min_rms_index = np.argmin(rms_comp_list)
-    min_rms_value = rms_comp_list[min_rms_index]
+    # Print the TIC ID with the minimum RMS value
+    print(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {min_rms_value:.4f}")
 
-    # Filter out comparison stars outside of two sigma clipping from the minimum rms star
-    filtered_tic_ids = []
-    for tic_id, rms_value in zip(np.unique(master_star_data['tic_id']), rms_comp_list):
-        if np.abs(rms_value - min_rms_value) <= threshold:
-            filtered_tic_ids.append(tic_id)
+    # Define the threshold for sigma clipping based on the minimum RMS value
+    threshold = SIGMA * min_rms_value
+    print(f"Threshold for {SIGMA} sigma clipping = {threshold:.4f}")
+
+    # Filter out comparison stars outside the sigma clipping threshold
+    filtered_tic_ids = tic_ids[np.abs(rms_comp_array - min_rms_value) <= threshold]
 
     # Print the filtered list of comparison stars
-    print("Comparison stars within two sigma clipping from the minimum rms star:")
+    print("Comparison stars within sigma clipping from the minimum RMS star:")
     for tic_id in filtered_tic_ids:
-        print(
-            f"TIC ID {tic_id} with RMS = "
-            f"{rms_comp_list[np.where(np.unique(master_star_data['tic_id']) == tic_id)[0][0]]:.4f}")
-    print(
-        f"Number of comp stars within a sigma = "
-        f"{len(filtered_tic_ids)} from total of {len(np.unique(master_star_data['tic_id']))}")
+        rms_value = rms_comp_array[tic_ids == tic_id][0]
+        print(f"TIC ID {tic_id} with RMS = {rms_value:.4f}")
+    print(f"Number of comp stars within sigma = {len(filtered_tic_ids)} from total of {len(tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
 
