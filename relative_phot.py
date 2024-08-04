@@ -114,6 +114,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Get the corresponding TIC ID with the minimum RMS value
     min_rms_tic_id = tic_ids[min_rms_index]
     min_rms_value = rms_comp_array[min_rms_index]
+    print('The Number of comparison stars before filtering are:', len(rms_comp_array))
 
     # Print the TIC ID with the minimum RMS value
     print(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {min_rms_value:.4f}")
@@ -123,7 +124,9 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     print(f"Threshold for {SIGMA} sigma clipping = {threshold:.4f}")
 
     # Filter out comparison stars outside the sigma clipping threshold
-    filtered_tic_ids = tic_ids[np.abs(rms_comp_array - min_rms_value) <= threshold]
+    filtered_tic_ids = tic_ids[rms_comp_array < threshold]
+    
+    print('The Number of comparison stars after filtering are:', len(filtered_tic_ids))
 
     # Print the filtered list of comparison stars
     print("Comparison stars within sigma clipping from the minimum RMS star:")
