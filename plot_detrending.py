@@ -4,7 +4,7 @@ import json
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-from utils import plot_images, find_current_night_directory, get_phot_files, read_phot_file, bin_time_flux_error
+from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error
 from wotan import flatten
 
 
@@ -88,7 +88,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
-    parser.add_argument('--tic_id', type=int, help='The TIC ID of the star to plot')
+    parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
 
