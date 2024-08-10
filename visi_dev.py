@@ -245,22 +245,44 @@ def main(args):
                     print(
                         f'{f"{target} ({ra:.5f}°, {dec:.5f}°)":<41} is never visible from the {obs.name}')
 
+    # Determine the night start and end times
+    try:
+        night_start = (times[sunaltaz.alt < -18 * u.deg][0] - utc_midnight).to('hr').value
+        night_end = (times[sunaltaz.alt < -18 * u.deg][-1] - utc_midnight).to('hr').value
+    except IndexError:
+        print(f"Night length: {' ' * 27} Not on this date")
+        exit()
+
+    # Calculate next transits
     if args.period and args.t0 is not None:
-        # estimate when the next transit of the exoplanet will happen
-        # using the period and t0
         period = args.period
         t0 = args.t0
-        # calculate
         t = Time.now()
-        print('The current time is', t)
         t0 = Time(t0, format='jd')
         period = period * u.day
         n_periods = (t - t0) / period
         n_periods = np.ceil(n_periods.value)
-        for i in range(10):
+
+        transits_count = 0
+        i = 0
+        while transits_count < 10:
             transits = t0 + (n_periods + i) * period
-            print(f"Transit {i + 1} will be at {transits.iso}, {transits.jd}")
-            # only show transits within the astronomical night of the observatory
+            i += 1
+
+            # Check if the transit time is not during astronomical night
+            if not (night_start <= transits.jd % 1 * 24 <= night_end):
+                # Transform the sky coordinates to AltAz frame at `transits` time
+                frame_transits = AltAz(obstime=transits, location=obs_site)
+                sky_coord_altaz = sky_coordinates[0].transform_to(frame_transits)
+
+                # Check if the target is visible during this transit
+                alt = sky_coord_altaz.alt.value
+                az = sky_coord_altaz.az.value
+                visibility = obs.is_unobstructed(alt, az, transits)
+                if visibility:
+                    transits_count += 1
+                    print(f"Next transit of {targets[0]}: {transits.iso}")
+
 
 
 if __name__ == '__main__':
