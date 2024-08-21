@@ -16,8 +16,6 @@ import argparse
 import os
 import numpy as np
 from astropy.table import Table
-from matplotlib import pyplot as plt
-
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
                    remove_outliers, extract_phot_file, calculate_trend_and_flux)
 
@@ -94,9 +92,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     tic_ids = np.unique(master_star_data['tic_id'])
 
-    included_tic_ids = []
-    excluded_tic_ids = []
-
     for tic_id in tic_ids:
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
@@ -109,17 +104,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         # measure rms
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
-
-        if rms < 2 * np.min(rms_comp_list):
-            included_tic_ids.append((tic_id, rms))
-        else:
-            excluded_tic_ids.append((tic_id, rms))
-
-    included_mags = [table[table['tic_id'] == tic_id]['Tmag'][0] for tic_id, _ in included_tic_ids]
-    excluded_mags = [table[table['tic_id'] == tic_id]['Tmag'][0] for tic_id, _ in excluded_tic_ids]
-
-    included_rms = [rms for _, rms in included_tic_ids]
-    excluded_rms = [rms for _, rms in excluded_tic_ids]
 
     # Convert the list to a numpy array for easy manipulation
     rms_comp_array = np.array(rms_comp_list)
@@ -141,7 +125,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Filter out comparison stars outside the sigma clipping threshold
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
-    
+
     print('The Number of comparison stars after filtering are:', len(filtered_tic_ids))
 
     # Print the filtered list of comparison stars
@@ -182,9 +166,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
-    return (included_mags, excluded_mags, included_rms, excluded_rms,
-            (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-             avg_magnitude, airmass_clipped, zero_point_clipped))
+    return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+            avg_magnitude, airmass_clipped, zero_point_clipped)
 
 
 def main():
@@ -221,24 +204,12 @@ def main():
 
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
+            # Check if all the Tmag values for the tic_id are less than 14
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
-                included_mags, included_rms, excluded_mags, excluded_rms, result = (
-                    relative_phot(phot_table, tic_id, args.bin_size))
-
-                # Unpack result (other outputs)
-                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, magnitude, airmass_list,
-                 zero_point_list) = result
-
-                # Plot RMS vs Magnitude
-                plt.figure(figsize=(10, 6))
-                plt.scatter(included_mags, included_rms, label='Included Stars', color='blue', s=50)
-                plt.scatter(excluded_mags, excluded_rms, label='Excluded Stars', color='red', s=50)
-                plt.xlabel('Magnitude (Tmag)')
-                plt.ylabel('RMS')
-                plt.title(f'RMS vs Magnitude for TIC ID {tic_id}')
-                plt.legend()
-                plt.grid(True)
-                plt.show()
+                print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
+                      f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
+                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size)
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
