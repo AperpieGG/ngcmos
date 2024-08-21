@@ -31,11 +31,20 @@ def plot_comp_stars(table):
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
+        # Check if the data arrays are empty after outlier removal
+        if len(time_stars) == 0 or len(fluxes_stars) == 0 or len(fluxerrs_stars) == 0:
+            print(f"No valid data for TIC ID {tic_id} after outlier removal. Skipping.")
+            continue
+
         # Detrend the light curve and measure RMS
         trend, fluxes_dt_comp, fluxerrs_dt_comp = (
             calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars))
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
+
+    if len(rms_comp_list) == 0:
+        print("No valid comparison stars found after outlier removal.")
+        return [], [], [], []
 
     rms_comp_array = np.array(rms_comp_list)
     min_rms_index = np.argmin(rms_comp_array)
@@ -63,7 +72,6 @@ def plot_comp_stars(table):
     print(f'Excluded mags and RMS: {len(excluded_mags)} stars')
 
     return included_mags, included_rms, excluded_mags, excluded_rms
-
 
 def main():
     # Set plot parameters
