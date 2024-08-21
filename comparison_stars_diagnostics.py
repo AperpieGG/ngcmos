@@ -42,24 +42,15 @@ def plot_comp_stars(table):
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
-    if len(rms_comp_list) == 0:
-        print("No valid comparison stars found after outlier removal.")
-        return [], [], [], []
-
     rms_comp_array = np.array(rms_comp_list)
     min_rms_index = np.argmin(rms_comp_array)
 
     # Get the corresponding TIC ID with the minimum RMS value
-    min_rms_tic_id = tic_ids[min_rms_index]
     min_rms_value = rms_comp_array[min_rms_index]
     threshold = SIGMA * min_rms_value
 
-    # Check if the stars are within the sigma clipping threshold
-    for tic_id, rms in zip(tic_ids, rms_comp_array):
-        if rms < threshold:
-            included_tic_ids.append((tic_id, rms))
-        else:
-            excluded_tic_ids.append((tic_id, rms))
+    included_tic_ids = [(tic_id, rms) for tic_id, rms in zip(tic_ids, rms_comp_list) if rms < threshold]
+    excluded_tic_ids = [(tic_id, rms) for tic_id, rms in zip(tic_ids, rms_comp_list) if rms >= threshold]
 
     # Prepare data for plotting
     included_mags = [table[table['tic_id'] == tic_id]['Tmag'][0] for tic_id, _ in included_tic_ids]
