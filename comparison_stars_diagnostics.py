@@ -64,6 +64,7 @@ def plot_comp_stars(table):
 
     return included_mags, included_rms, excluded_mags, excluded_rms
 
+
 def main():
     # Set plot parameters
     plot_images()
@@ -74,6 +75,12 @@ def main():
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
+
+    # Initialize lists to collect data across all files
+    all_included_mags = []
+    all_included_rms = []
+    all_excluded_mags = []
+    all_excluded_rms = []
 
     # Loop through photometry files
     for phot_file in phot_files:
@@ -88,23 +95,31 @@ def main():
             print(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
             continue
 
+        # Process each TIC ID and gather data
         for tic_id in np.unique(phot_table['tic_id']):
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 included_mags, included_rms, excluded_mags, excluded_rms = plot_comp_stars(phot_table)
 
-                # Plot RMS vs Magnitude
-                plt.figure(figsize=(10, 6))
-                plt.scatter(included_mags, included_rms, label='Included Stars', color='black', s=50)
-                plt.scatter(excluded_mags, excluded_rms, label='Excluded Stars', color='red', s=50)
-                plt.xlabel('Magnitude (Tmag)')
-                plt.ylabel('RMS')
-                plt.title(f'RMS vs Magnitude for Comparison Stars - {phot_file}')
-                plt.legend()
-                plt.grid(True)
-                plt.savefig(fits_filename)
-                plt.show()
+                # Append data to the overall lists
+                all_included_mags.extend(included_mags)
+                all_included_rms.extend(included_rms)
+                all_excluded_mags.extend(excluded_mags)
+                all_excluded_rms.extend(excluded_rms)
 
-        print(f"Data for {phot_file} saved to {fits_filename}.")
+    # After processing all files, create a single plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(all_included_mags, all_included_rms, label='Included Stars', color='black', s=50)
+    plt.scatter(all_excluded_mags, all_excluded_rms, label='Excluded Stars', color='red', s=50)
+    plt.xlabel('Magnitude (Tmag)')
+    plt.ylabel('RMS')
+    plt.title('RMS vs Magnitude for Comparison Stars')
+    plt.legend()
+    plt.grid(True)
+
+    plt.savefig(fits_filename)
+    plt.show()
+
+    print(f"Final plot saved to {fits_filename}.")
 
 
 if __name__ == "__main__":
