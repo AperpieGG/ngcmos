@@ -17,7 +17,7 @@ def plot_comp_stars(table):
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) &
                              (table['tic_id'])]
-    print(f"Found {len(np.unique(master_star_data['tic_id']))} ")
+    print(f"Found {len(np.unique(master_star_data['tic_id']))} comparison stars.")
 
     rms_comp_list = []
     tic_ids = np.unique(master_star_data['tic_id'])
@@ -31,21 +31,22 @@ def plot_comp_stars(table):
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
-        # detrend the lc and measure rms
+        # Detrend the light curve and measure RMS
         trend, fluxes_dt_comp, fluxerrs_dt_comp = (
             calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars))
-        # measure rms
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
-        rms_comp_array = np.array(rms_comp_list)
-        min_rms_index = np.argmin(rms_comp_array)
 
-        # Get the corresponding TIC ID with the minimum RMS value
-        min_rms_tic_id = tic_ids[min_rms_index]
-        min_rms_value = rms_comp_array[min_rms_index]
-        threshold = SIGMA * min_rms_value
+    rms_comp_array = np.array(rms_comp_list)
+    min_rms_index = np.argmin(rms_comp_array)
 
-        # Check if the star is within the sigma clipping threshold
+    # Get the corresponding TIC ID with the minimum RMS value
+    min_rms_tic_id = tic_ids[min_rms_index]
+    min_rms_value = rms_comp_array[min_rms_index]
+    threshold = SIGMA * min_rms_value
+
+    # Check if the stars are within the sigma clipping threshold
+    for tic_id, rms in zip(tic_ids, rms_comp_array):
         if rms < threshold:
             included_tic_ids.append((tic_id, rms))
         else:
@@ -58,8 +59,9 @@ def plot_comp_stars(table):
     included_rms = [rms for _, rms in included_tic_ids]
     excluded_rms = [rms for _, rms in excluded_tic_ids]
 
-    print(f'The included mags and rms are: {len(included_mags)} and {len(included_rms)}')
-    print(f'The excluded mags and rms are: {len(excluded_mags)} and {len(excluded_rms)}')
+    print(f'Included mags and RMS: {len(included_mags)} stars')
+    print(f'Excluded mags and RMS: {len(excluded_mags)} stars')
+
     return included_mags, included_rms, excluded_mags, excluded_rms
 
 
@@ -93,14 +95,15 @@ def main():
 
                 # Plot RMS vs Magnitude
                 plt.figure(figsize=(10, 6))
-                plt.scatter(included_mags, included_rms, label='Included Stars', color='blue', s=50)
+                plt.scatter(included_mags, included_rms, label='Included Stars', color='black', s=50)
                 plt.scatter(excluded_mags, excluded_rms, label='Excluded Stars', color='red', s=50)
                 plt.xlabel('Magnitude (Tmag)')
                 plt.ylabel('RMS')
-                plt.title(f'RMS vs Magnitude for TIC ID {tic_id}')
+                plt.title(f'RMS vs Magnitude for Comparison Stars - {phot_file}')
                 plt.legend()
                 plt.grid(True)
                 plt.savefig(fits_filename)
+                plt.show()
 
         print(f"Data for {phot_file} saved to {fits_filename}.")
 
