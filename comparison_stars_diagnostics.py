@@ -103,7 +103,7 @@ def main():
 
     # Determine y-limits based on RMS values
     min_rms = min(all_included_rms + all_excluded_rms) if all_included_rms + all_excluded_rms else 0
-    max_rms = 3 * min_rms
+    max_rms = 4 * min_rms
 
     if os.path.exists(fits_filename):
         print(f"file exists will exit now...")
@@ -114,7 +114,7 @@ def main():
     plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(all_excluded_mags)} Excluded Stars', color='red', s=50)
     plt.xlabel('Magnitude (Tmag)')
     plt.ylabel('RMS')
-    plt.ylim(0, max_rms)
+    plt.ylim(min_rms - 0.002, max_rms + 0.002)
     plt.title('RMS vs Magnitude for Comparison Stars')
     plt.legend()
     plt.grid(True)
