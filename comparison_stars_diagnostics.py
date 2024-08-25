@@ -64,6 +64,7 @@ def plot_comp_stars(table):
     return included_mags, included_rms, excluded_mags, excluded_rms
 
 
+
 def main():
     # Set plot parameters
     plot_images()
@@ -74,12 +75,6 @@ def main():
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
-
-    # Initialize lists to collect data across all files
-    all_included_mags = []
-    all_included_rms = []
-    all_excluded_mags = []
-    all_excluded_rms = []
 
     # Loop through photometry files
     for phot_file in phot_files:
@@ -94,36 +89,31 @@ def main():
             print(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
             continue
 
+        # Plot comparison stars for the current photometry file
         included_mags, included_rms, excluded_mags, excluded_rms = plot_comp_stars(phot_table)
-        # Append data to the overall lists
-        all_included_mags.extend(included_mags)
-        all_included_rms.extend(included_rms)
-        all_excluded_mags.extend(excluded_mags)
-        all_excluded_rms.extend(excluded_rms)
 
-    # Determine y-limits based on RMS values
-    min_rms = min(all_included_rms + all_excluded_rms) if all_included_rms + all_excluded_rms else 0
-    max_rms = 4 * min_rms
+        # Determine y-limits based on RMS values
+        min_rms = min(included_rms + excluded_rms) if included_rms + excluded_rms else 0
+        max_rms = 4 * min_rms
 
-    if os.path.exists(fits_filename):
-        print(f"file exists will exit now...")
-        sys.exit()
-    # After processing all files, create a single plot
-    plt.figure(figsize=(10, 6))
-    plt.scatter(all_included_mags, all_included_rms, label=f'{len(all_included_mags)} Included Stars', color='black', s=50)
-    plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(all_excluded_mags)} Excluded Stars', color='red', s=50)
-    plt.xlabel('Magnitude (Tmag)')
-    plt.ylabel('RMS')
-    plt.ylim(min_rms - 0.002, max_rms + 0.002)
-    plt.title('RMS vs Magnitude for Comparison Stars')
-    plt.legend()
-    plt.grid(True)
+        # Create a plot for the current photometry file
+        plt.figure(figsize=(10, 6))
+        plt.scatter(included_mags, included_rms, label=f'{len(included_mags)} Included Stars', color='black', s=50)
+        plt.scatter(excluded_mags, excluded_rms, label=f'{len(excluded_mags)} Excluded Stars', color='red', s=50)
+        plt.xlabel('Magnitude (Tmag)')
+        plt.ylabel('RMS')
+        plt.ylim(min_rms - 0.002, max_rms + 0.002)
+        plt.title(f'RMS vs Magnitude for Comparison Stars - {phot_file}')
+        plt.legend()
+        plt.grid(True)
 
-    plt.savefig(fits_filename)
-    plt.show()
+        plt.savefig(fits_filename)
+        plt.show()
 
-    print(f"Final plot saved to {fits_filename}.")
+        print(f"Plot saved to {fits_filename}.")
 
+    print("All photometry files processed.")
 
+    
 if __name__ == "__main__":
     main()
