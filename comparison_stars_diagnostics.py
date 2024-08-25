@@ -99,13 +99,17 @@ def main():
         all_excluded_mags.extend(excluded_mags)
         all_excluded_rms.extend(excluded_rms)
 
+    # Determine y-limits based on RMS values
+    min_rms = min(all_included_rms + all_excluded_rms) if all_included_rms + all_excluded_rms else 0
+    max_rms = 3 * min_rms
+
     # After processing all files, create a single plot
     plt.figure(figsize=(10, 6))
-    plt.scatter(all_included_mags, all_included_rms, label='Included Stars', color='black', s=50)
-    plt.scatter(all_excluded_mags, all_excluded_rms, label='Excluded Stars', color='red', s=50)
+    plt.scatter(all_included_mags, all_included_rms, label=f'{len(included_mags)} Included Stars', color='black', s=50)
+    plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(excluded_mags)} Excluded Stars', color='red', s=50)
     plt.xlabel('Magnitude (Tmag)')
     plt.ylabel('RMS')
-    plt.ylim(0, 0.1)
+    plt.ylim(min_rms, max_rms)
     plt.title('RMS vs Magnitude for Comparison Stars')
     plt.legend()
     plt.grid(True)
