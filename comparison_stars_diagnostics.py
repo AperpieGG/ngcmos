@@ -95,6 +95,7 @@ def main():
 
         # Process each TIC ID and gather data
         for tic_id in np.unique(phot_table['tic_id']):
+            print(f'All the TIC IDs are in total: {len(np.unique(phot_table["tic_id"]))}')
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
                 included_mags, included_rms, excluded_mags, excluded_rms = plot_comp_stars(phot_table)
 
