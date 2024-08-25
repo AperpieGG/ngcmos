@@ -64,7 +64,6 @@ def plot_comp_stars(table):
     return included_mags, included_rms, excluded_mags, excluded_rms
 
 
-
 def main():
     # Set plot parameters
     plot_images()
@@ -114,6 +113,6 @@ def main():
 
     print("All photometry files processed.")
 
-    
+
 if __name__ == "__main__":
     main()
