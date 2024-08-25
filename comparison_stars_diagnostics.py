@@ -106,7 +106,7 @@ def main():
     max_rms = 3 * min_rms
 
     if os.path.exists(fits_filename):
-        print(f"file exists will exit now")
+        print(f"file exists will exit now...")
         sys.exit()
     # After processing all files, create a single plot
     plt.figure(figsize=(10, 6))
@@ -114,7 +114,7 @@ def main():
     plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(all_excluded_mags)} Excluded Stars', color='red', s=50)
     plt.xlabel('Magnitude (Tmag)')
     plt.ylabel('RMS')
-    plt.ylim(min_rms, max_rms)
+    plt.ylim(0, max_rms)
     plt.title('RMS vs Magnitude for Comparison Stars')
     plt.legend()
     plt.grid(True)
