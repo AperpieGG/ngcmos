@@ -15,8 +15,7 @@ def plot_comp_stars(table):
     Plot the comparison stars for each photometry file.
     """
     # Select stars for master reference star, excluding the target star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) &
-                             (table['tic_id'])]
+    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12)]
     print(f"Found {len(np.unique(master_star_data['tic_id']))} comparison stars.")
 
     rms_comp_list = []
