@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import sys
+
 from matplotlib import pyplot as plt
 import os
 import numpy as np
@@ -103,20 +105,22 @@ def main():
     min_rms = min(all_included_rms + all_excluded_rms) if all_included_rms + all_excluded_rms else 0
     max_rms = 3 * min_rms
 
-    if fits_filename is not None:
-        # After processing all files, create a single plot
-        plt.figure(figsize=(10, 6))
-        plt.scatter(all_included_mags, all_included_rms, label=f'{len(all_included_mags)} Included Stars', color='black', s=50)
-        plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(all_excluded_mags)} Excluded Stars', color='red', s=50)
-        plt.xlabel('Magnitude (Tmag)')
-        plt.ylabel('RMS')
-        plt.ylim(min_rms, max_rms)
-        plt.title('RMS vs Magnitude for Comparison Stars')
-        plt.legend()
-        plt.grid(True)
+    if os.path.exists(fits_filename):
+        print(f"file exists will exit now")
+        sys.exit()
+    # After processing all files, create a single plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(all_included_mags, all_included_rms, label=f'{len(all_included_mags)} Included Stars', color='black', s=50)
+    plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(all_excluded_mags)} Excluded Stars', color='red', s=50)
+    plt.xlabel('Magnitude (Tmag)')
+    plt.ylabel('RMS')
+    plt.ylim(min_rms, max_rms)
+    plt.title('RMS vs Magnitude for Comparison Stars')
+    plt.legend()
+    plt.grid(True)
 
-        plt.savefig(fits_filename)
-        plt.show()
+    plt.savefig(fits_filename)
+    plt.show()
 
     print(f"Final plot saved to {fits_filename}.")
 
