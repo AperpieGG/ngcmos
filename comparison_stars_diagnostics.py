@@ -22,9 +22,7 @@ def plot_comp_stars(table):
     rms_comp_list = []
     tic_ids = np.unique(master_star_data['tic_id'])
 
-    included_tic_ids = []
-    excluded_tic_ids = []
-
+    print(f'The number of comparison stars is {len(tic_ids)}')
     for tic_id in tic_ids:
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
