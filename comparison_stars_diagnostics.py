@@ -105,8 +105,8 @@ def main():
 
     # After processing all files, create a single plot
     plt.figure(figsize=(10, 6))
-    plt.scatter(all_included_mags, all_included_rms, label=f'{len(included_mags)} Included Stars', color='black', s=50)
-    plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(excluded_mags)} Excluded Stars', color='red', s=50)
+    plt.scatter(all_included_mags, all_included_rms, label=f'{len(all_included_mags)} Included Stars', color='black', s=50)
+    plt.scatter(all_excluded_mags, all_excluded_rms, label=f'{len(all_excluded_mags)} Excluded Stars', color='red', s=50)
     plt.xlabel('Magnitude (Tmag)')
     plt.ylabel('RMS')
     plt.ylim(min_rms, max_rms)
