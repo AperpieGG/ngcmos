@@ -15,7 +15,7 @@ def plot_comp_stars(table):
     Plot the comparison stars for each photometry file.
     """
     # Select stars for master reference star, excluding the target star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12)]
+    master_star_data = table[(table['Tmag'] >= 9.5) & (table['Tmag'] <= 12)]
     print(f"Found {len(np.unique(master_star_data['tic_id']))} comparison stars.")
 
     rms_comp_list = []
@@ -87,7 +87,7 @@ def main():
 
         # Check if the output file already exists
         base_filename = phot_file.split('.')[0]  # Remove the file extension
-        fits_filename = f"Comp_{base_filename}.png"
+        fits_filename = f"comp_{base_filename}.png"
         if os.path.exists(fits_filename):
             print(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
             continue
@@ -105,6 +105,7 @@ def main():
     plt.scatter(all_excluded_mags, all_excluded_rms, label='Excluded Stars', color='red', s=50)
     plt.xlabel('Magnitude (Tmag)')
     plt.ylabel('RMS')
+    plt.ylim(0, 0.1)
     plt.title('RMS vs Magnitude for Comparison Stars')
     plt.legend()
     plt.grid(True)
