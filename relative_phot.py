@@ -15,6 +15,7 @@ normalized_reference_flux (dt_flux)
 import argparse
 import os
 import numpy as np
+import logging
 from astropy.table import Table
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
                    remove_outliers, extract_phot_file, calculate_trend_and_flux, expand_and_rename_table)
@@ -22,6 +23,23 @@ from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_er
 SIGMA = 2
 APERTURE = 6
 EXPOSURE = 10
+
+# Set up the logger
+logger = logging.getLogger("rel_phot_logger")
+logger.setLevel(logging.DEBUG)  # You can adjust this level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+# Create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# Create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Add formatter to ch
+ch.setFormatter(formatter)
+
+# Add ch to logger
+logger.addHandler(ch)
 
 
 def relative_phot(table, tic_id_to_plot, bin_size):
@@ -42,8 +60,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Select stars for master reference star, excluding the target star
     master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) &
                              (table['tic_id'] != tic_id_to_plot)]
-    print(f"Found {len(np.unique(master_star_data['tic_id']))} "
-          f"comparison stars for the target star {tic_id_to_plot}")
+    logger.info(f"Found {len(np.unique(master_star_data['tic_id']))} "
+                f"comparison stars for the target star {tic_id_to_plot}")
     rms_comp_list = []
 
     jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
@@ -61,8 +79,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     avg_zero_point = np.mean(zero_point_clipped)
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
-    print(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
-          f"and magnitude = {avg_magnitude:.2f}")
+    logger.info(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
+                f"and magnitude = {avg_magnitude:.2f}")
 
     tic_ids = np.unique(master_star_data['tic_id'])
 
@@ -72,10 +90,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
-        # detrend the lc and measure rms
+        # Detrend the lc and measure rms
         trend, fluxes_dt_comp, fluxerrs_dt_comp = (
             calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars))
-        # measure rms
+        # Measure rms
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
@@ -88,45 +106,37 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Get the corresponding TIC ID with the minimum RMS value
     min_rms_tic_id = tic_ids[min_rms_index]
     min_rms_value = rms_comp_array[min_rms_index]
-    print('The Number of comparison stars before filtering are:', len(rms_comp_array))
+    logger.info(f"The Number of comparison stars before filtering are: {len(rms_comp_array)}")
 
     # Print the TIC ID with the minimum RMS value
-    print(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {min_rms_value:.4f}")
+    logger.info(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {min_rms_value:.4f}")
 
     # Define the threshold for sigma clipping based on the minimum RMS value
     threshold = SIGMA * min_rms_value
-    print(f"Threshold for {SIGMA} sigma clipping = {threshold:.4f}")
+    logger.info(f"Threshold for {SIGMA} sigma clipping = {threshold:.4f}")
 
     # Filter out comparison stars outside the sigma clipping threshold
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
 
-    print('The Number of comparison stars after filtering are:', len(filtered_tic_ids))
+    logger.info(f"The Number of comparison stars after filtering are: {len(filtered_tic_ids)}")
 
     # Print the filtered list of comparison stars
-    print("Comparison stars within sigma clipping from the minimum RMS star:")
+    logger.info("Comparison stars within sigma clipping from the minimum RMS star:")
     for tic_id in filtered_tic_ids:
         rms_value = rms_comp_array[tic_ids == tic_id][0]
-        print(f"TIC ID {tic_id} with RMS = {rms_value:.4f}")
-    print(f"Number of comp stars within sigma = {len(filtered_tic_ids)} from total of {len(tic_ids)}")
+        # logger.info(f"TIC ID {tic_id} with RMS = {rms_value:.4f}")
+    logger.info(f"Number of comp stars within sigma = {len(filtered_tic_ids)} from total of {len(tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
 
     # Calculate reference star flux using only the filtered comparison stars
     reference_fluxes = np.sum(filtered_master_star_data['flux_6'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
-    print(f"Reference flux mean = {reference_flux_mean:.2f}")
+    logger.info(f"Reference flux mean = {reference_flux_mean:.2f}")
 
     # Normalize reference star flux
-    # reference_flux_normalized = reference_fluxes / reference_flux_mean
-    # print(f"Reference flux normalized = {reference_flux_normalized}")
-    #
-    # # Normalize target star flux
-    # target_flux_normalized = fluxes_clipped / np.mean(fluxes_clipped)
-
-    # Normalize the target flux by dividing with the mean of the target flux
     flux_ratio = fluxes_clipped / reference_fluxes
     flux_ratio_mean = np.mean(flux_ratio)
-    # print(f"The target flux has tmag = {tmag:.2f}, and tic_id = {tic_id_to_plot}")
 
     # Perform relative photometry
     dt_flux = flux_ratio / flux_ratio_mean
@@ -158,19 +168,19 @@ def main():
 
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
-    print(f"Photometry files: {phot_files}")
+    logger.info(f"Photometry files: {phot_files}")
 
     # Loop through photometry files
     for phot_file in phot_files:
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-        print(f"Photometry file: {phot_file}")
+        logger.info(f"Photometry file: {phot_file}")
 
         # Check if the output file already exists
         base_filename = phot_file.split('.')[0]  # Remove the file extension
         fits_filename = f"rel_{base_filename}_{bin_size}.fits"
         if os.path.exists(fits_filename):
-            print(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
+            logger.info(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
             continue
 
         # Create an empty list to store data for all TIC IDs
@@ -180,23 +190,23 @@ def main():
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
-                print(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
-                      f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
+                logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
+                            f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
                  magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size)
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
-                print(f"RMS for TIC ID {tic_id} = {rms:.4f}")
+                logger.info(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
                 # Append data to the list
                 data_list.append((tic_id, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
                                   rms, sky_median, airmass_list, zero_point_list, magnitude))
-                print()
+                logger.info('')
             else:
-                print(f"TIC ID {tic_id} is not included in the analysis because "
-                      f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]} and is greater than 14.")
-                print()
+                logger.info(f"TIC ID {tic_id} is not included in the analysis because "
+                            f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]} and is greater than 14.")
+                logger.info('')
 
         # Create an Astropy table from the data list
         data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
@@ -206,7 +216,7 @@ def main():
 
         expanded_data_table.write(fits_filename, format='fits', overwrite=True)
 
-        print(f"Data for {phot_file} saved to {fits_filename}.")
+        logger.info(f"Data for {phot_file} saved to {fits_filename}.")
 
 
 if __name__ == "__main__":
