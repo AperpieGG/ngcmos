@@ -26,20 +26,25 @@ EXPOSURE = 10
 
 # Set up the logger
 logger = logging.getLogger("rel_phot_logger")
-logger.setLevel(logging.DEBUG)  # You can adjust this level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+logger.setLevel(logging.DEBUG)  # Adjust this level as needed (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 # Create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
-# Create formatter
+# Create file handler which logs even debug messages
+log_filename = "relative_photometry.log"
+fh = logging.FileHandler(log_filename)
+fh.setLevel(logging.DEBUG)
+
+# Create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-# Add formatter to ch
 ch.setFormatter(formatter)
+fh.setFormatter(formatter)
 
-# Add ch to logger
+# Add the handlers to the logger
 logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 def relative_phot(table, tic_id_to_plot, bin_size):
