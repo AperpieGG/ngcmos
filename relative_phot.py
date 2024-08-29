@@ -20,7 +20,6 @@ from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_er
                    remove_outliers, extract_phot_file, calculate_trend_and_flux, expand_and_rename_table)
 
 SIGMA = 2
-EXPOSURE = 10
 
 # Set up the logger
 logger = logging.getLogger("rel_phot_logger")
@@ -45,7 +44,7 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def relative_phot(table, tic_id_to_plot, bin_size, APERTURE):
+def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     """
     Create a relative light curve for a specific TIC ID.
 
@@ -175,9 +174,11 @@ def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--aper', type=int, default=6, help='Aperture radius for photometry')
+    parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
     args = parser.parse_args()
     bin_size = args.bin_size
     APERTURE = args.aper
+    EXPOSURE = args.exposure
 
     # Set plot parameters
     plot_images()
@@ -212,7 +213,8 @@ def main():
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size, APERTURE)
+                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size,
+                                                                           APERTURE, EXPOSURE)
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
