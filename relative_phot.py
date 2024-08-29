@@ -64,6 +64,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
     valid_color_data = table[~np.isnan(table['gaiabp']) & ~np.isnan(table['gaiarp'])]
 
+    logger.info(f"Total number of stars with valid color information: {len(valid_color_data)}")
+
     # Get the Tmag of the target star
     target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
 
@@ -77,6 +79,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Calculate the color index of the target star
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]
 
+    logger.info(f"Target star (TIC ID {tic_id_to_plot}) color index (Gaia BP - RP): {target_color_index:.2f}")
+
     # Calculate the color index for all stars
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
 
@@ -85,14 +89,16 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     magnitude_tolerance = 0.5  # Choose stars with similar magnitude
 
     # Filter the stars to be used as reference stars, exclude the target star
-    master_star_data = valid_color_data[
-        (valid_color_data['tic_id'] != tic_id_to_plot) &  # Exclude the target star
-        (np.abs(valid_color_data['Tmag'] - target_tmag) <= magnitude_tolerance) &  # Magnitude tolerance
-        (np.abs(color_index - target_color_index) <= color_tolerance)  # Color index tolerance
-        ]
+    within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
+    logger.info(f"Stars within color tolerance: {len(within_color_limit)}")
 
-    logger.info(
-        f"Found {len(np.unique(master_star_data['tic_id']))} comparison stars for the target star {tic_id_to_plot}")
+    within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag) <= magnitude_tolerance]
+    logger.info(f"Stars within both color and magnitude tolerance: {len(within_magnitude_limit)}")
+
+    # Further filter to exclude the target star
+    master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
+    logger.info(f"Comparison stars remaining after excluding the target star: {len(master_star_data)}")
+
     rms_comp_list = []
 
     # Extract data for the target star
@@ -111,8 +117,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     avg_zero_point = np.mean(zero_point_clipped)
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
-    logger.info(f"The target star has TIC ID = {tic_id_to_plot} and TESS magnitude = {tmag:.2f}, "
-                f"and magnitude = {avg_magnitude:.2f}")
+    logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
+                f"and calculated magnitude = {avg_magnitude:.2f}")
 
     tic_ids = np.unique(master_star_data['tic_id'])
 
@@ -132,19 +138,19 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     min_rms_tic_id = tic_ids[min_rms_index]
     min_rms_value = rms_comp_array[min_rms_index]
 
-    logger.info(f"The Number of comparison stars before filtering are: {len(rms_comp_array)}")
-    logger.info(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {min_rms_value:.4f}")
+    logger.info(f"Number of comparison stars before filtering by RMS: {len(rms_comp_array)}")
+    logger.info(f"Comparison star with min RMS: TIC ID = {min_rms_tic_id}, RMS = {min_rms_value:.4f}")
 
     threshold = SIGMA * min_rms_value
-    logger.info(f"Threshold for {SIGMA} sigma clipping = {threshold:.4f}")
+    logger.info(f"Threshold for {SIGMA}-sigma clipping: {threshold:.4f}")
 
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
-    logger.info(f"The Number of comparison stars after filtering are: {len(filtered_tic_ids)}")
+    logger.info(f"Number of comparison stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    reference_fluxes = np.sum(filtered_master_star_data['flux_6'], axis=0)
+    reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
-    logger.info(f"Reference flux mean = {reference_flux_mean:.2f}")
+    logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
 
     flux_ratio = fluxes_clipped / reference_fluxes
     flux_ratio_mean = np.mean(flux_ratio)
@@ -229,29 +235,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# # Example Gaia data table
-# gaia_data = Table.read("gaia_catalog.fits")  # replace with your Gaia data file
-#
-# # Target star TIC ID and color index
-# target_tic_id = 123456789  # replace with your target's TIC ID
-# target_star = gaia_data[gaia_data['tic_id'] == target_tic_id]
-# target_color_index = target_star['phot_bp_mean_mag'] - target_star['phot_rp_mean_mag']
-# target_magnitude = target_star['phot_g_mean_mag']
-#
-# # Calculate color index for all stars
-# color_index = gaia_data['phot_bp_mean_mag'] - gaia_data['phot_rp_mean_mag']
-#
-# # Define thresholds
-# color_tolerance = 0.2  # Choose stars with a similar color index
-# magnitude_tolerance = 0.5  # Choose stars with similar magnitude
-#
-# # Select comparison stars
-# comparison_stars = gaia_data[
-#     (np.abs(color_index - target_color_index) < color_tolerance) &
-#     (np.abs(gaia_data['phot_g_mean_mag'] - target_magnitude) < magnitude_tolerance) &
-#     (gaia_data['tic_id'] != target_tic_id)  # Exclude the target star
-# ]
-#
-# # Now, comparison_stars contains only stars similar in color and brightness to your red target star
