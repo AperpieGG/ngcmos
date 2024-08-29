@@ -89,15 +89,15 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     magnitude_tolerance = 0.5  # Choose stars with similar magnitude
 
     # Filter the stars to be used as reference stars, exclude the target star
-    within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
+    within_color_limit = np.unique(valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance])
     logger.info(f"Stars within color tolerance: {len(np.unique(within_color_limit['tic_id']))}")
 
-    within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag) <= magnitude_tolerance]
+    within_magnitude_limit = np.unique(within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag) <= magnitude_tolerance])
     logger.info(f"Stars within both color and magnitude tolerance: {len(np.unique(within_magnitude_limit['tic_id']))}")
 
     # Further filter to exclude the target star
-    master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
-    logger.info(f"Comparison stars remaining after excluding the target star: {len(master_star_data)}")
+    master_star_data = np.unique(within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot])
+    logger.info(f"Comparison stars remaining after excluding the target star: {len(np.unique(master_star_data))}")
 
     rms_comp_list = []
 
