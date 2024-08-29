@@ -20,6 +20,8 @@ from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_er
                    remove_outliers, extract_phot_file, calculate_trend_and_flux, expand_and_rename_table)
 
 SIGMA = 2
+# TODO: handle errors when comparison are less than 5
+# TODO: make a condition that will identify if the stars is saturated and so ignore it
 
 # Set up the logger
 logger = logging.getLogger("rel_phot_logger")
