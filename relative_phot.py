@@ -45,6 +45,7 @@ fh.setFormatter(formatter)
 logger.addHandler(ch)
 logger.addHandler(fh)
 
+
 def relative_phot(table, tic_id_to_plot, bin_size):
     """
     Create a relative light curve for a specific TIC ID
@@ -62,9 +63,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     """
     # Filter the stars to be used as reference stars, exclude the target star
     target_tmag = table[table['tic_id'] == tic_id_to_plot]['Tmag'][0]  # Get the Tmag of the target star
-    master_star_data = table[(table['Tmag'] >= 9.5) & (table['Tmag'] <= 12) &
-                             (table['tic_id'] != tic_id_to_plot) &
-                             (np.abs(table['Tmag'] - target_tmag) <= 0.5)]  # Filter comparison stars within +/- 0.5 mags of the target star
+    master_star_data = table[(table['tic_id'] != tic_id_to_plot) &
+                             (np.abs(table['Tmag'] - target_tmag) <= 0.5)]
 
     logger.info(f"Found {len(np.unique(master_star_data['tic_id']))} "
                 f"comparison stars for the target star {tic_id_to_plot}")
@@ -194,7 +194,7 @@ def main():
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
-            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 12):
+            if np.all(9.5 < phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 12):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
