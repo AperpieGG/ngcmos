@@ -13,8 +13,6 @@
 """
 import argparse
 import os
-import sys
-
 import numpy as np
 import logging
 from astropy.table import Table
@@ -22,7 +20,6 @@ from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_er
                    remove_outliers, extract_phot_file, calculate_trend_and_flux, expand_and_rename_table)
 
 SIGMA = 2
-APERTURE = 6
 EXPOSURE = 10
 
 # Set up the logger
@@ -48,7 +45,7 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def relative_phot(table, tic_id_to_plot, bin_size):
+def relative_phot(table, tic_id_to_plot, bin_size, APERTURE):
     """
     Create a relative light curve for a specific TIC ID.
 
@@ -131,8 +128,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     tic_ids = np.unique(master_star_data['tic_id'])
 
     for tic_id in tic_ids:
-        fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
-        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
+        fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
@@ -177,8 +174,10 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
+    parser.add_argument('--aper', type=int, default=6, help='Aperture radius for photometry')
     args = parser.parse_args()
     bin_size = args.bin_size
+    APERTURE = args.aper
 
     # Set plot parameters
     plot_images()
@@ -213,7 +212,7 @@ def main():
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size)
+                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size, APERTURE)
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
