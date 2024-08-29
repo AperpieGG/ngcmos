@@ -211,7 +211,8 @@ def main():
                 logger.info('')
             else:
                 logger.info(f"TIC ID {tic_id} is not included in the analysis because "
-                            f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]} and is greater than 14.")
+                            f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]} "
+                            f"and is outside 9.5-12.")
                 logger.info('')
 
         # Create an Astropy table from the data list
