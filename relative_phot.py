@@ -48,28 +48,54 @@ logger.addHandler(fh)
 
 def relative_phot(table, tic_id_to_plot, bin_size):
     """
-    Create a relative light curve for a specific TIC ID
+    Create a relative light curve for a specific TIC ID.
 
     Parameters:
     table : astropy.table.Table
-        Table containing the photometry data
+        Table containing the photometry data.
     tic_id_to_plot : int
-        TIC ID of the target star to exclude
+        TIC ID of the target star to exclude.
     bin_size : int
-        Number of images to bin
+        Number of images to bin.
 
     Returns:
-        Various outputs related to the relative photometry
+        Various outputs related to the relative photometry.
     """
-    # Filter the stars to be used as reference stars, exclude the target star
-    target_tmag = table[table['tic_id'] == tic_id_to_plot]['Tmag'][0]  # Get the Tmag of the target star
-    master_star_data = table[(table['tic_id'] != tic_id_to_plot) &
-                             (np.abs(table['Tmag'] - target_tmag) <= 0.5)]
+    # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
+    valid_color_data = table[~np.isnan(table['gaiabp']) & ~np.isnan(table['gaiarp'])]
 
-    logger.info(f"Found {len(np.unique(master_star_data['tic_id']))} "
-                f"comparison stars for the target star {tic_id_to_plot}")
+    # Get the Tmag of the target star
+    target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
+
+    # Check if the target star has valid color data
+    if len(target_star) == 0:
+        logger.error(f"Target star with TIC ID {tic_id_to_plot} has missing color information. Exiting function.")
+        return None  # or handle as needed
+
+    target_tmag = target_star['Tmag'][0]
+
+    # Calculate the color index of the target star
+    target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]
+
+    # Calculate the color index for all stars
+    color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
+
+    # Define thresholds
+    color_tolerance = 0.2  # Choose stars with a similar color index
+    magnitude_tolerance = 0.5  # Choose stars with similar magnitude
+
+    # Filter the stars to be used as reference stars, exclude the target star
+    master_star_data = valid_color_data[
+        (valid_color_data['tic_id'] != tic_id_to_plot) &  # Exclude the target star
+        (np.abs(valid_color_data['Tmag'] - target_tmag) <= magnitude_tolerance) &  # Magnitude tolerance
+        (np.abs(color_index - target_color_index) <= color_tolerance)  # Color index tolerance
+        ]
+
+    logger.info(
+        f"Found {len(np.unique(master_star_data['tic_id']))} comparison stars for the target star {tic_id_to_plot}")
     rms_comp_list = []
 
+    # Extract data for the target star
     jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
         extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
     airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
@@ -79,9 +105,9 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     sky_median = np.median(sky_star)
 
     # Remove outliers from the target star
-    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped \
-        = remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star,
-                          air_mass=airmass_list, zero_point=zero_point_list)
+    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
+        remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
+    )
 
     avg_zero_point = np.mean(zero_point_clipped)
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
@@ -91,67 +117,42 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     tic_ids = np.unique(master_star_data['tic_id'])
 
     for tic_id in tic_ids:
-        fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+        fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
+        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
-        # Detrend the lc and measure rms
-        trend, fluxes_dt_comp, fluxerrs_dt_comp = (
-            calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars))
-        # Measure rms
+        # Detrend the light curve and measure rms
+        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
-    # Convert the list to a numpy array for easy manipulation
     rms_comp_array = np.array(rms_comp_list)
-
-    # Find the index of the minimum RMS value
     min_rms_index = np.argmin(rms_comp_array)
-
-    # Get the corresponding TIC ID with the minimum RMS value
     min_rms_tic_id = tic_ids[min_rms_index]
     min_rms_value = rms_comp_array[min_rms_index]
-    logger.info(f"The Number of comparison stars before filtering are: {len(rms_comp_array)}")
 
-    # Print the TIC ID with the minimum RMS value
+    logger.info(f"The Number of comparison stars before filtering are: {len(rms_comp_array)}")
     logger.info(f"Comparison star with min rms is TIC ID = {min_rms_tic_id} and RMS = {min_rms_value:.4f}")
 
-    # Define the threshold for sigma clipping based on the minimum RMS value
     threshold = SIGMA * min_rms_value
     logger.info(f"Threshold for {SIGMA} sigma clipping = {threshold:.4f}")
 
-    # Filter out comparison stars outside the sigma clipping threshold
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
-
     logger.info(f"The Number of comparison stars after filtering are: {len(filtered_tic_ids)}")
 
-    # Print the filtered list of comparison stars
-    logger.info("Comparison stars within sigma clipping from the minimum RMS star:")
-    for tic_id in filtered_tic_ids:
-        rms_value = rms_comp_array[tic_ids == tic_id][0]
-    logger.info(f"Number of comp stars within sigma = {len(filtered_tic_ids)} from total of {len(tic_ids)}")
-
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-
-    # Calculate reference star flux using only the filtered comparison stars
-    reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
+    reference_fluxes = np.sum(filtered_master_star_data['flux_6'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean = {reference_flux_mean:.2f}")
 
-    # Normalize reference star flux
     flux_ratio = fluxes_clipped / reference_fluxes
     flux_ratio_mean = np.mean(flux_ratio)
-
-    # Perform relative photometry
     dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
-    # Correct for color using a second order polynomial
     trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
-
-    # Bin the time, flux, and error
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
