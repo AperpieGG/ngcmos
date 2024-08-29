@@ -102,7 +102,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Further filter to exclude the target star
     master_star_data = np.unique(within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot])
-    logger.info(f"Comparison stars remaining after excluding the target star: {len(master_star_data)}")
+    master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
+    logger.info(f"Comparison stars remaining after excluding the target star: {len(master_stars_data_tic_ids)}")
 
     rms_comp_list = []
 
