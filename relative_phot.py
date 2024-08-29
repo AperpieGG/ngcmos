@@ -91,8 +91,8 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     tic_ids = np.unique(master_star_data['tic_id'])
 
     for tic_id in tic_ids:
-        fluxes = master_star_data[master_star_data['tic_id'] == tic_id]['flux_6']
-        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id]['fluxerr_6']
+        fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
@@ -135,7 +135,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
 
     # Calculate reference star flux using only the filtered comparison stars
-    reference_fluxes = np.sum(filtered_master_star_data['flux_6'], axis=0)
+    reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean = {reference_flux_mean:.2f}")
 
