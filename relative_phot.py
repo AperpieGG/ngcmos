@@ -100,8 +100,9 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     withing_mag_limit_tic_ids = np.unique(within_magnitude_limit['tic_id'])
     logger.info(f"Stars within both color and magnitude tolerance: {len(withing_mag_limit_tic_ids)}")
 
-    logger.info(f"Comp star withing limits has color_index and mag: {within_magnitude_limit['gaiabp'][0] - within_magnitude_limit['gaiarp'][0]:.2f}, "
-                f"{within_magnitude_limit['Tmag'][0]:.2f}")
+    for star in within_magnitude_limit:
+        logger.info(f"Comp star: TIC ID = {star['tic_id']}, Tmag = {star['Tmag']:.2f}, "
+                    f"BP - RP = {star['gaiabp'] - star['gaiarp']:.2f}")
 
     # Further filter to exclude the target star
     master_star_data = np.unique(within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot])
