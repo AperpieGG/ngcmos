@@ -64,7 +64,9 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
     valid_color_data = table[~np.isnan(table['gaiabp']) & ~np.isnan(table['gaiarp'])]
 
-    logger.info(f"Total number of stars with valid color information: {len(np.unique(valid_color_data))}")
+    # check which stars are these
+    valid_color_data_tic_ids = np.unique(valid_color_data['tic_id'])
+    logger.info(f"Total number of stars with valid color information: {len(valid_color_data_tic_ids)}")
 
     # Get the Tmag of the target star
     target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
@@ -72,7 +74,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Check if the target star has valid color data
     if len(target_star) == 0:
         logger.error(f"Target star with TIC ID {tic_id_to_plot} has missing color information. Exiting function.")
-        return None  # or handle as needed
+        return None
 
     target_tmag = target_star['Tmag'][0]
 
@@ -90,10 +92,13 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     # Filter the stars to be used as reference stars, exclude the target star
     within_color_limit = np.unique(valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance])
-    logger.info(f"Stars within color tolerance: {len(within_color_limit['tic_id'])}")
+    within_color_limit_tic_ids = np.unique(within_color_limit['tic_id'])
+    logger.info(f"Stars within color tolerance: {len(within_color_limit_tic_ids)}")
 
-    within_magnitude_limit = np.unique(within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag) <= magnitude_tolerance])
-    logger.info(f"Stars within both color and magnitude tolerance: {len(within_magnitude_limit['tic_id'])}")
+    within_magnitude_limit = np.unique(within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
+                                                          <= magnitude_tolerance])
+    withing_mag_limit_tic_ids = np.unique(within_magnitude_limit['tic_id'])
+    logger.info(f"Stars within both color and magnitude tolerance: {len(withing_mag_limit_tic_ids)}")
 
     # Further filter to exclude the target star
     master_star_data = np.unique(within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot])
