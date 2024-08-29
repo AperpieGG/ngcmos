@@ -64,7 +64,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
     valid_color_data = table[~np.isnan(table['gaiabp']) & ~np.isnan(table['gaiarp'])]
 
-    logger.info(f"Total number of stars with valid color information: {len(valid_color_data)}")
+    logger.info(f"Total number of stars with valid color information: {len(np.unique(valid_color_data))}")
 
     # Get the Tmag of the target star
     target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
