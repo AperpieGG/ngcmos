@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 """
-- First, cut the table for stars 9-11 mags, these will be used as reference stars
+- First, cut the table for stars 9.5-12 mags; these will be used as reference stars
 - Exclude the tic_id you want to perform relative photometry (target_flux)
-- Measure the rms for each raw lightcurve for your reference stars
-- Find the references stars with the lowest rms (2 sigma clipping threshold)
-- Use this stars and sum their fluxes (sum_fluxes)
-- find the mean of the reference master flux (mean_ref_flux)
-- Normalize the sum_fluxes by dividing with the mean_ref_flux (normalized_reference_flux)
-- Normalize the target_flux by dividing with the mean of the target_flux (normalized_target_flux)
-- Perform relative photometry by dividing the normalized_target_flux with the
-normalized_reference_flux (dt_flux)
-- Apply a second order polynomial to correct from color (dt_flux_poly)
+- Measure the RMS for each raw lightcurve for your reference stars
+- Find the reference stars with the lowest RMS (2 sigma clipping threshold)
+- Use these stars and sum their fluxes (sum_fluxes)
+- Find the mean of the reference master flux (mean_ref_flux)
+- Normalize the sum_fluxes by dividing by the mean_ref_flux (normalized_reference_flux)
+- Normalize the target_flux by dividing by the mean of the target_flux (normalized_target_flux)
+- Perform relative photometry by dividing the normalized_target_flux by the normalized_reference_flux (dt_flux)
+- Apply a second-order polynomial to correct for color (dt_flux_poly)
 """
 import argparse
 import os
@@ -26,7 +25,7 @@ EXPOSURE = 10
 
 # Set up the logger
 logger = logging.getLogger("rel_phot_logger")
-logger.setLevel(logging.DEBUG)  # Adjust this level as needed (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+logger.setLevel(logging.DEBUG)
 
 # Create console handler and set level to debug
 ch = logging.StreamHandler()
@@ -46,7 +45,6 @@ fh.setFormatter(formatter)
 logger.addHandler(ch)
 logger.addHandler(fh)
 
-
 def relative_phot(table, tic_id_to_plot, bin_size):
     """
     Create a relative light curve for a specific TIC ID
@@ -62,9 +60,12 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     Returns:
         Various outputs related to the relative photometry
     """
-    # Select stars for master reference star, excluding the target star
-    master_star_data = table[(table['Tmag'] >= 9) & (table['Tmag'] <= 12) &
-                             (table['tic_id'] != tic_id_to_plot)]
+    # Filter the stars to be used as reference stars, exclude the target star
+    target_tmag = table[table['tic_id'] == tic_id_to_plot]['Tmag'][0]  # Get the Tmag of the target star
+    master_star_data = table[(table['Tmag'] >= 9.5) & (table['Tmag'] <= 12) &
+                             (table['tic_id'] != tic_id_to_plot) &
+                             (np.abs(table['Tmag'] - target_tmag) <= 0.5)]  # Filter comparison stars within +/- 0.5 mags of the target star
+
     logger.info(f"Found {len(np.unique(master_star_data['tic_id']))} "
                 f"comparison stars for the target star {tic_id_to_plot}")
     rms_comp_list = []
@@ -129,7 +130,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     logger.info("Comparison stars within sigma clipping from the minimum RMS star:")
     for tic_id in filtered_tic_ids:
         rms_value = rms_comp_array[tic_ids == tic_id][0]
-        # logger.info(f"TIC ID {tic_id} with RMS = {rms_value:.4f}")
     logger.info(f"Number of comp stars within sigma = {len(filtered_tic_ids)} from total of {len(tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
@@ -194,7 +194,7 @@ def main():
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
-            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):
+            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 12):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
@@ -226,3 +226,29 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# # Example Gaia data table
+# gaia_data = Table.read("gaia_catalog.fits")  # replace with your Gaia data file
+#
+# # Target star TIC ID and color index
+# target_tic_id = 123456789  # replace with your target's TIC ID
+# target_star = gaia_data[gaia_data['tic_id'] == target_tic_id]
+# target_color_index = target_star['phot_bp_mean_mag'] - target_star['phot_rp_mean_mag']
+# target_magnitude = target_star['phot_g_mean_mag']
+#
+# # Calculate color index for all stars
+# color_index = gaia_data['phot_bp_mean_mag'] - gaia_data['phot_rp_mean_mag']
+#
+# # Define thresholds
+# color_tolerance = 0.2  # Choose stars with a similar color index
+# magnitude_tolerance = 0.5  # Choose stars with similar magnitude
+#
+# # Select comparison stars
+# comparison_stars = gaia_data[
+#     (np.abs(color_index - target_color_index) < color_tolerance) &
+#     (np.abs(gaia_data['phot_g_mean_mag'] - target_magnitude) < magnitude_tolerance) &
+#     (gaia_data['tic_id'] != target_tic_id)  # Exclude the target star
+# ]
+#
+# # Now, comparison_stars contains only stars similar in color and brightness to your red target star
