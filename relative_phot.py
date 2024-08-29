@@ -194,7 +194,7 @@ def main():
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
-            if np.all(9.5 < phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 12):
+            if np.all(12 > phot_table['Tmag'][phot_table['tic_id'] == tic_id] > 9.5):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
