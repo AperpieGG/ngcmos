@@ -13,6 +13,8 @@
 """
 import argparse
 import os
+import sys
+
 import numpy as np
 import logging
 from astropy.table import Table
@@ -103,7 +105,7 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     for star in within_magnitude_limit:
         logger.info(f"Comp star: TIC ID = {star['tic_id']}, Tmag = {star['Tmag']:.2f}, "
                     f"BP - RP = {star['gaiabp'] - star['gaiarp']:.2f}")
-
+        sys.exit(0)
     # Further filter to exclude the target star
     master_star_data = np.unique(within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot])
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
