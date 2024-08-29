@@ -155,11 +155,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
     logger.info(f"Number of comparison stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
-    for tic_id in filtered_tic_ids:
-        logger.info(f"Comparison star has tic id, color index and magnitude: {tic_id}, "
-                    f"{valid_color_data[valid_color_data['tic_id'] == tic_id]['gaiabp'][0] - valid_color_data[valid_color_data['tic_id'] == tic_id]['gaiarp'][0]}, "
-                    f"{valid_color_data[valid_color_data['tic_id'] == tic_id]['Tmag'][0]}")
-
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
     reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
