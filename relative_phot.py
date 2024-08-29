@@ -201,8 +201,7 @@ def main():
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
-            if np.all((phot_table['Tmag'][phot_table['tic_id'] == tic_id] >= 9.5) &
-                      (phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12)):
+            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
@@ -219,7 +218,7 @@ def main():
             else:
                 logger.info(f"TIC ID {tic_id} is not included in the analysis because "
                             f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]} "
-                            f"and is outside 9.5-12.")
+                            f"and is dimmer than 12 mags.")
                 logger.info('')
 
         # Create an Astropy table from the data list
