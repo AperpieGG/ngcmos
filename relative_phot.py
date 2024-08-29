@@ -89,21 +89,19 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     magnitude_tolerance = 0.5  # Choose stars with similar magnitude
 
     # Filter the stars to be used as reference stars, exclude the target star
-    within_color_limit = np.unique(valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance])
+    within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
     within_color_limit_tic_ids = np.unique(within_color_limit['tic_id'])
     logger.info(f"Stars within color tolerance: {len(within_color_limit_tic_ids)}")
 
-    within_magnitude_limit = np.unique(within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
-                                                          <= magnitude_tolerance])
+    within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
+                                                <= magnitude_tolerance]
     withing_mag_limit_tic_ids = np.unique(within_magnitude_limit['tic_id'])
     logger.info(f"Stars within both color and magnitude tolerance: {len(withing_mag_limit_tic_ids)}")
 
     # Further filter to exclude the target star
-    master_star_data = np.unique(within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot])
+    master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
     logger.info(f"Comparison stars remaining after excluding the target star: {len(master_stars_data_tic_ids)}")
-
-    rms_comp_list = []
 
     # Extract data for the target star
     jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
@@ -125,6 +123,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
                 f"and calculated magnitude = {avg_magnitude:.2f}")
 
     tic_ids = np.unique(master_star_data['tic_id'])
+
+    rms_comp_list = []
 
     for tic_id in tic_ids:
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
