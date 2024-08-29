@@ -102,10 +102,6 @@ def relative_phot(table, tic_id_to_plot, bin_size):
     withing_mag_limit_tic_ids = np.unique(within_magnitude_limit['tic_id'])
     logger.info(f"Stars within both color and magnitude tolerance: {len(withing_mag_limit_tic_ids)}")
 
-    for star in within_magnitude_limit:
-        logger.info(f"Comp star: TIC ID = {star['tic_id']}, Tmag = {star['Tmag']:.2f}, "
-                    f"BP - RP = {star['gaiabp'] - star['gaiarp']:.2f}")
-        sys.exit(0)
     # Further filter to exclude the target star
     master_star_data = np.unique(within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot])
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
@@ -158,6 +154,11 @@ def relative_phot(table, tic_id_to_plot, bin_size):
 
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
     logger.info(f"Number of comparison stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
+
+    for tic_id in filtered_tic_ids:
+        logger.info(f"Comparison star has tic id, color index and magnitude: {tic_id}, "
+                    f"{valid_color_data[valid_color_data['tic_id'] == tic_id]['gaiabp'] - valid_color_data[valid_color_data['tic_id'] == tic_id]['gaiarp']}, "
+                    f"{valid_color_data[valid_color_data['tic_id'] == tic_id]['Tmag']}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
     reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
