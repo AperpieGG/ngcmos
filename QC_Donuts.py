@@ -7,6 +7,7 @@ It also created a mp4 animation of the images with shifts greater than 0.5 pixel
 
 import json
 import os
+import sys
 from datetime import datetime, timedelta
 import numpy as np
 from donuts import Donuts
@@ -350,6 +351,7 @@ def main():
         find_first_image_of_each_prefix(current_night_directory, save_path)
     else:
         print("No current night directory found.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

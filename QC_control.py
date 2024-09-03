@@ -3,7 +3,7 @@
 """
 This script is used to create a mp4 movie of the images taken during the night.
 """
-
+import sys
 from collections import defaultdict
 from datetime import datetime, timedelta
 import glob
@@ -200,6 +200,7 @@ def process_images_by_prefix(base_path, save_path):
 
     else:
         print("No current night directory found.")
+        sys.exit(1)
 
 
 def main():
