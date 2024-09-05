@@ -105,6 +105,12 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
     logger.info(f"Comparison stars remaining after excluding the target star: {len(master_stars_data_tic_ids)}")
 
+    # Check if there are at least 5 comparison stars
+    if len(master_stars_data_tic_ids) < 5:
+        logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
+                       f"comparison stars found (less than 5).")
+        return None
+    
     # Extract data for the target star
     jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
         extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
@@ -175,7 +181,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
-    parser.add_argument('--aper', type=int, default=6, help='Aperture radius for photometry')
+    parser.add_argument('--aper', type=int, default=4, help='Aperture radius for photometry')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
     args = parser.parse_args()
     bin_size = args.bin_size
