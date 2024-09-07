@@ -219,12 +219,14 @@ def main():
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
-                result = relative_phot(phot_table, tic_id, args.bin_size, APERTURE, EXPOSURE)
+                # Perform relative photometry
+                result = relative_phot(phot_table, tic_id, bin_size, APERTURE, EXPOSURE)
+                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+                 magnitude, airmass_list, zero_point_list) = result
+
                 if result is None:
-                    logger.info(f"Skipping TIC ID {tic_id} because of missing color information.")
-                else:
-                    (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-                     magnitude, airmass_list, zero_point_list) = result
+                    logger.info(f"Skipping TIC ID {tic_id} due to missing color information.")
+                    continue
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
