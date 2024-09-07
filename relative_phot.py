@@ -109,7 +109,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
                        f"comparison stars found (less than 5).")
         return None
-    
+
     # Extract data for the target star
     jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
         extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
@@ -219,9 +219,12 @@ def main():
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
-                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-                 magnitude, airmass_list, zero_point_list) = relative_phot(phot_table, tic_id, args.bin_size,
-                                                                           APERTURE, EXPOSURE)
+                result = relative_phot(phot_table, tic_id, args.bin_size, APERTURE, EXPOSURE)
+                if result is None:
+                    logger.info(f"Skipping TIC ID {tic_id} because of missing color information.")
+                else:
+                    (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+                     magnitude, airmass_list, zero_point_list) = result
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
