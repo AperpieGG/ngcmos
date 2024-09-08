@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 """
 This script checks the headers of the FITS files in the specified directory
@@ -14,9 +14,18 @@ from astropy.io import fits
 import numpy as np
 import os
 import json
+import logging
 import warnings
 
 warnings.simplefilter('ignore', category=UserWarning)
+
+# Set up logging
+logging.basicConfig(
+    filename='check_cmos.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 def load_config(filename):
@@ -123,15 +132,15 @@ def check_headers(directory, filenames):
                 ctype2 = header.get('CTYPE2')
 
                 if ctype1 is None or ctype2 is None:
-                    print(f"Warning: {file} does not have CTYPE1 and/or CTYPE2 in the header. Moving to "
-                          f"'no_wcs' directory.")
+                    logger.warning(f"{file} does not have CTYPE1 and/or CTYPE2 in the header. "
+                                   f"Moving to 'no_wcs' directory.")
                     new_path = os.path.join(no_wcs, file)
                     os.rename(os.path.join(directory, file), new_path)
 
         except Exception as e:
-            print(f"Error checking header for {file}: {e}")
+            logger.error(f"Error checking header for {file}: {e}")
 
-    print("Done checking headers, number of files without CTYPE1 and/or CTYPE2:", len(os.listdir(no_wcs)))
+    logger.info(f"Done checking headers, number of files without CTYPE1 and/or CTYPE2: {len(os.listdir(no_wcs))}")
 
 
 def check_donuts(file_groups, filenames):
@@ -142,13 +151,12 @@ def check_donuts(file_groups, filenames):
     ----------
     file_groups : list of str
         Prefixes for the groups of images.
-    filenames : list of str
-        List of lists of filenames for the groups of images.
+    filenames : list of lists of filenames for the groups of images.
     """
     for filename, file_group in zip(filenames, file_groups):
         # Using the first filename as the reference image
         reference_image = file_group[0]
-        print(f"Reference image: {reference_image}")
+        logger.info(f"Reference image: {reference_image}")
 
         # Assuming Donuts class and measure_shift function are defined elsewhere
         d = Donuts(reference_image)
@@ -157,30 +165,30 @@ def check_donuts(file_groups, filenames):
             shift = d.measure_shift(filename)
             sx = round(shift.x.value, 2)
             sy = round(shift.y.value, 2)
-            print(f'{filename} shift X: {sx} Y: {sy}')
+            logger.info(f'{filename} shift X: {sx} Y: {sy}')
             shifts = np.array([abs(sx), abs(sy)])
 
             if np.sum(shifts > 50) > 0:
-                print(f'{filename} image shift too big X: {sx} Y: {sy}')
+                logger.warning(f'{filename} image shift too big X: {sx} Y: {sy}')
                 if not os.path.exists('failed_donuts'):
                     os.mkdir('failed_donuts')
                 comm = f'mv {filename} failed_donuts/'
-                print(comm)
+                logger.info(comm)
                 os.system(comm)
 
 
 def main():
     # set directory for working
     directory = os.getcwd()
-    print(f"Directory: {directory}")
+    logger.info(f"Directory: {directory}")
 
     # filter filenames only for .fits data files
     filenames = filter_filenames(directory)
-    print(f"Number of files: {len(filenames)}")
+    logger.info(f"Number of files: {len(filenames)}")
 
     # Iterate over each filename to get the prefix
     prefixes = get_prefix(filenames)
-    print(f"The prefixes are: {prefixes}")
+    logger.info(f"The prefixes are: {prefixes}")
 
     # Get filenames corresponding to each prefix
     prefix_filenames = [[filename for filename in filenames if filename.startswith(prefix)] for prefix in prefixes]
@@ -191,7 +199,7 @@ def main():
     # Check donuts for each group
     check_donuts(prefix_filenames, filenames)
 
-    print("Done.")
+    logger.info("Done.")
 
 
 if __name__ == "__main__":
