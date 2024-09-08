@@ -6,6 +6,7 @@ from utils import (get_location, wcs_phot, _detect_objects_sep, get_catalog,
                    extract_airmass_and_zp)
 import json
 import warnings
+import logging
 from astropy.io import fits
 from astropy.table import Table, hstack, vstack
 from astropy.wcs import WCS
@@ -15,7 +16,11 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.utils.exceptions import AstropyWarning
 
-# ignore some annoying warnings
+# Set up logging
+logging.basicConfig(filename='process.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 
@@ -125,41 +130,41 @@ def get_prefix(filenames):
 def main():
     # set directory for the current working directory
     directory = os.getcwd()
-    print(f"Directory: {directory}")
+    logging.info(f"Directory: {directory}")
 
     # filter filenames only for .fits data files
     filenames = filter_filenames(directory)
-    print(f"Number of files: {len(filenames)}")
+    logging.info(f"Number of files: {len(filenames)}")
 
     # Get prefixes for each set of images
     prefixes = get_prefix(filenames)
-    print(f"The prefixes are: {prefixes}")
+    logging.info(f"The prefixes are: {prefixes}")
 
     for prefix in prefixes:
         phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
 
         # Open the photometry file for the current prefix
         if os.path.exists(phot_output_filename):
-            print(f"Photometry file for prefix {prefix} already exists, skipping to the next prefix.\n")
+            logging.info(f"Photometry file for prefix {prefix} already exists, skipping to the next prefix.")
             continue
 
-        print(f"Creating new photometry file for prefix {prefix}.\n")
+        logging.info(f"Creating new photometry file for prefix {prefix}.")
         phot_table = None
 
         # Iterate over filenames with the current prefix
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
-            print(f"Processing filename {filename}......")
+            logging.info(f"Processing filename {filename}......")
             # Calibrate image and get FITS file
-            print(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
+            logging.info(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
             reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
-            print(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
+            logging.info(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
             # Convert reduced_data to a dictionary with filenames as keys
             reduced_data_dict = {filename: (data, header) for data, header in zip(reduced_data, reduced_header)}
 
             # Access the reduced data and header corresponding to the filename
             frame_data, frame_hdr = reduced_data_dict[filename]
-            print(f"Extracting photometry for {filename}\n")
+            logging.info(f"Extracting photometry for {filename}")
 
             # Extract airmass and zero point from the header
             airmass, zp = extract_airmass_and_zp(frame_hdr)
@@ -182,12 +187,12 @@ def main():
             frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
                                                 AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
             if len(frame_objects) < N_OBJECTS_LIMIT:
-                print(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!\n")
+                logging.info(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!")
                 continue
 
             # Load the photometry catalog
             phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-            print(f"Found catalog with name {prefix}_catalog_input.fits\n")
+            logging.info(f"Found catalog with name {prefix}_catalog_input.fits")
             # Convert RA and DEC to pixel coordinates using the WCS information from the header
             phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
@@ -202,7 +207,7 @@ def main():
             dec = phot_cat['dec_deg_corr']
 
             frame_ids = [filename for i in range(len(phot_x))]
-            print(f"Found {len(frame_ids)} sources")
+            logging.info(f"Found {len(frame_ids)} sources")
 
             frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
                                     phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, phot_x, phot_y,
@@ -226,16 +231,16 @@ def main():
             else:
                 phot_table = vstack([phot_table, frame_output])
 
-            print(f"Finished photometry for {filename}\n")
+            logging.info(f"Finished photometry for {filename}")
 
         # Save the photometry for the current prefix
         if phot_table is not None:
             phot_table.write(phot_output_filename, overwrite=True)
-            print(f"Saved photometry for prefix {prefix} to {phot_output_filename}\n")
+            logging.info(f"Saved photometry for prefix {prefix} to {phot_output_filename}")
         else:
-            print(f"No photometry data for prefix {prefix}.\n")
+            logging.info(f"No photometry data for prefix {prefix}.")
 
-    print("Done!\n")
+    logging.info("Done!")
 
 
 if __name__ == "__main__":
