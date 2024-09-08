@@ -312,7 +312,7 @@ def find_max_pixel_value(data, x, y, radius):
                  int(x - radius):int(x + radius)].ravel().max(), 2)
 
 
-def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.12):
+def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain=1.131):
     """
     Take a corrected image array and extract photometry for a set of WCS driven
     X and Y pixel positions. Do this for a series of aperture radii and apply
