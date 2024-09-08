@@ -87,7 +87,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Define thresholds
     color_tolerance = 0.2  # Choose stars with a similar color index
-    magnitude_tolerance = 0.5  # Choose stars with similar magnitude
+    magnitude_tolerance = 1  # Choose stars with similar magnitude
 
     # Filter the stars to be used as reference stars, exclude the target star
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
