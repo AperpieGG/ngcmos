@@ -198,7 +198,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Plot comparison stars data
     comparison_mags = master_star_data['Tmag']
     comparison_colors = master_star_data['gaiabp'] - master_star_data['gaiarp']
-    print(comparison_mags, rms_comp_array)
+    print(len(comparison_mags), len(rms_comp_array))
     plot_rms_vs_magnitudes(comparison_mags, rms_comp_array)
     plot_mags_vs_color(comparison_mags, comparison_colors)
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
