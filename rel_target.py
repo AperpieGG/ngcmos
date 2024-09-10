@@ -196,7 +196,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
                                                                          dt_fluxerr_poly, bin_size)
 
     # Plot comparison stars data
-    comparison_mags = master_star_data['Tmag']
+    comparison_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = master_star_data['gaiabp'] - master_star_data['gaiarp']
     print(len(comparison_mags), len(rms_comp_array))
     plot_rms_vs_magnitudes(comparison_mags, rms_comp_array)
