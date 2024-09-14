@@ -69,10 +69,14 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         fluxerr = fluxerrs[i]
         ax = axes[i // cols, i % cols]
         ax.errorbar(time, flux, yerr=fluxerr, fmt='o', color='red', ecolor='lightgray', elinewidth=2, capsize=0)
-        ax.set_xlabel('Time (JD)')
-        ax.set_ylabel('Flux')
-        ax.set_title(f'Light Curve for TIC ID {tic_id}', fontsize=10)
+        ax.set_xlabel('Time (JD)', fontsize=10)
+        ax.set_ylabel('Flux', fontsize=10)
+        ax.set_title(f'Light Curve for TIC ID {tic_id}', fontsize=12)
         ax.grid(True)
+
+        # Make the ticks smaller
+        ax.tick_params(axis='both', which='major', labelsize=8)
+        ax.tick_params(axis='both', which='minor', labelsize=6)
 
     # Hide any unused subplots
     for j in range(i + 1, rows * cols):
