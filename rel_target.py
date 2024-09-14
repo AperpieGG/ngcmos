@@ -122,10 +122,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
     magnitude = valid_color_data['Tmag']
 
-    if magnitude < 9.5:
-        logger.info(f"Target star with TIC ID {tic_id_to_plot} has magnitude < 9.4. Skipping analysis.")
-        return None
-
     color_tolerance = 0.2
     magnitude_tolerance = 1
 
@@ -167,6 +163,11 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     comparison_times = []
 
     for tic_id in tic_ids:
+        # Check the Tmag of the current star and skip if the magnitude is 9.5 or brighter
+        star_tmag = master_star_data[master_star_data['tic_id'] == tic_id]['Tmag'][0]
+        if star_tmag <= 9.5:
+            continue  # Skip this star if it's too bright
+
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
