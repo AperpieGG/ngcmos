@@ -118,13 +118,13 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     magnitude_tolerance = 1
 
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
-    print(f'Comparison stars withing color limit: {len(within_color_limit)}')
+    print(f'Comparison stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
 
     within_magnitude_limit = within_color_limit[np.abs(magnitude - target_tmag) <= magnitude_tolerance]
+    print(f'Comparison stars within mag and color limit: {len(np.unique(within_magnitude_limit["tic_id"]))}')
 
     master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
-    print(f'Comparison stars withing mag limit: {len(master_stars_data_tic_ids)}')
 
     if len(master_stars_data_tic_ids) < 4:
         logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
