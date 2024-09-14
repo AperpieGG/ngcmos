@@ -86,7 +86,7 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         fig.delaxes(axes[j // cols, j % cols])
 
     # Adjust the space around and between subplots using subplots_adjust
-    plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, hspace=0.5, wspace=0.3)
+    plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, hspace=0.4, wspace=0.2)
     plt.show()
 
 
