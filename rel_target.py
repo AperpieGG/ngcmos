@@ -121,7 +121,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     print(f'Comparison stars withing color limit: {len(within_color_limit)}')
 
     within_magnitude_limit = within_color_limit[np.abs(magnitude - target_tmag) <= magnitude_tolerance]
-    
+
     master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
     print(f'Comparison stars withing mag limit: {len(master_stars_data_tic_ids)}')
@@ -212,7 +212,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
 def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
-    parser.add_argument('--tic_id', type=int, required=True, help='TIC ID of the target star for photometry')
+    parser.add_argument('tic_id', type=int, help='TIC ID of the star')
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--aper', type=int, default=4, help='Aperture radius for photometry')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
