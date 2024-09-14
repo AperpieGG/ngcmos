@@ -62,8 +62,8 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     cols = 3  # Number of columns for subplots
     rows = (n + cols - 1) // cols  # Calculate number of rows needed
 
-    fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows),
-                             gridspec_kw={'hspace': 0.5, 'wspace': 0.4},  # Adjust space between rows and columns
+    fig, axes = plt.subplots(rows, cols, figsize=(20, 5 * rows),
+                             gridspec_kw={'hspace': 0.8, 'wspace': 0.4},  # Adjust space between rows and columns
                              squeeze=False)
 
     for i, tic_id in enumerate(tic_ids):
