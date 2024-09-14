@@ -85,7 +85,7 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     for j in range(i + 1, rows * cols):
         fig.delaxes(axes[j // cols, j % cols])
 
-    plt.tight_layout()
+    fig.tight_layout()
     plt.show()
 
 
