@@ -157,21 +157,17 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
                 f"and calculated magnitude = {avg_magnitude:.2f}")
 
     tic_ids = np.unique(master_star_data['tic_id'])
-    filtered_tic_ids = []
+
+    # exclude tic_ids that are brigther than 9.5 mag
+    tic_ids = tic_ids[master_star_data[master_star_data['tic_id'] == tic_ids]['Tmag'] > 9.5]
+    logger.info(f"Comp stars after excluding stars brighter than 9.5 mag: {len(tic_ids)}")
+
     rms_comp_list = []
     comparison_fluxes = []
     comparison_fluxerrs = []
     comparison_times = []
 
     for tic_id in tic_ids:
-        # Check the Tmag of the current star and skip if the magnitude is 9.5 or brighter
-        bright_stars_skipped = 0
-        star_tmag = master_star_data[master_star_data['tic_id'] == tic_id]['Tmag'][0]
-        if star_tmag <= 9.5:
-            bright_stars_skipped += 1
-            logger.info(f"Skipping star with TIC ID {tic_id} and Tmag {star_tmag:.2f} because it's too bright.")
-            continue  # Skip this star if it's too bright
-
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
@@ -187,11 +183,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         comparison_fluxes.append(fluxes_dt_comp)
         comparison_fluxerrs.append(fluxerrs_dt_comp)
 
-        # Keep track of valid TIC IDs after filtering by magnitude
-        filtered_tic_ids.append(tic_id)
-
-    # Convert lists to arrays
-    filtered_tic_ids = np.array(filtered_tic_ids)
     rms_comp_array = np.array(rms_comp_list)
     min_rms_index = np.argmin(rms_comp_array)
     min_rms_tic_id = tic_ids[min_rms_index]
@@ -203,10 +194,10 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     threshold = SIGMA * min_rms_value
     logger.info(f"Threshold for {SIGMA}-sigma clipping: {threshold:.4f}")
 
-    final_filtered_tic_ids = tic_ids[rms_comp_array < threshold]
-    logger.info(f"Number of comparison stars after filtering by sigma clipping: {len(final_filtered_tic_ids)}")
+    filtered_tic_ids = tic_ids[rms_comp_array < threshold]
+    logger.info(f"Number of comparison stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
-    filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], final_filtered_tic_ids)]
+    filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
     reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
