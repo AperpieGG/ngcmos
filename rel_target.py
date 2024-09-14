@@ -132,6 +132,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
                                                 <= magnitude_tolerance]
     logger.info(f"Comp stars within color and mag limit: {len(np.unique(within_magnitude_limit['tic_id']))}")
 
+    within_magnitude_limit = within_magnitude_limit[within_magnitude_limit['Tmag'] < 9.5]
+    logger.info(f"Comp stars dimmer than 9.5 mags: {len(np.unique(within_magnitude_limit['tic_id']))}")
+
     master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
 
@@ -157,10 +160,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
                 f"and calculated magnitude = {avg_magnitude:.2f}")
 
     tic_ids = np.unique(master_star_data['tic_id'])
-
-    # exclude tic_ids that are brigther than 9.5 mag
-    tic_ids = np.unique(tic_ids[master_star_data[master_star_data['tic_id'] == tic_ids]['Tmag'] > 9.5])
-    logger.info(f"Comp stars after excluding stars brighter than 9.5 mag: {len(tic_ids)}")
 
     rms_comp_list = []
     comparison_fluxes = []
