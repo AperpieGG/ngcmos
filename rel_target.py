@@ -68,10 +68,10 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         flux = fluxes[i]
         fluxerr = fluxerrs[i]
         ax = axes[i // cols, i % cols]
-        ax.errorbar(time, flux, yerr=fluxerr, fmt='o', color='red', ecolor='lightgray', elinewidth=2, capsize=0)
+        ax.errorbar(time, flux, yerr=fluxerr, fmt='o', color='red', ecolor='lightgray', elinewidth=1, capsize=0)
         ax.set_xlabel('Time (JD)', fontsize=10)
         ax.set_ylabel('Flux', fontsize=10)
-        ax.set_title(f'Light Curve for TIC ID {tic_id}', fontsize=12)
+        ax.set_title(f'Light Curve for TIC ID {tic_id}', fontsize=10)
         ax.grid(True)
 
         # Make the ticks smaller
@@ -83,7 +83,7 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         fig.delaxes(axes[j // cols, j % cols])
 
     # Adjust the space between plots
-    plt.subplots_adjust(hspace=0.5, wspace=0.3) 
+    plt.subplots_adjust(hspace=0.8, wspace=0.3)  # Adjust hspace for vertical space and wspace for horizontal space
 
     plt.tight_layout()
     plt.show()
