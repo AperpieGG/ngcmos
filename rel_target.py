@@ -122,6 +122,10 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
     magnitude = valid_color_data['Tmag']
 
+    if magnitude < 9.5:
+        logger.info(f"Target star with TIC ID {tic_id_to_plot} has magnitude < 9.4. Skipping analysis.")
+        return None
+
     color_tolerance = 0.2
     magnitude_tolerance = 1
 
