@@ -7,7 +7,7 @@ from utils import plot_images,  get_rel_phot_files, read_phot_file, bin_time_flu
 
 
 def plot_rms_time(table, num_stars, tic_id=None):
-    filtered_table = table[(table['Tmag'] >= 9.5) & (table['Tmag'] <= 10)]
+    filtered_table = table[(table['Tmag'] >= 9.8) & (table['Tmag'] <= 11)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
