@@ -41,7 +41,7 @@ def plot_rms_vs_magnitudes(mags, rms_values):
     plt.figure(figsize=(10, 6))
     plt.scatter(mags, rms_values, c='blue', edgecolor='k', alpha=0.7)
     plt.xlabel('Magnitude')
-    plt.ylabel('RMS')
+    plt.ylabel('RMS per 10 sec')
     plt.title('RMS vs Magnitudes of Comparison Stars')
     plt.grid(True)
     plt.show()
@@ -71,7 +71,8 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         flux = fluxes[i]
         fluxerr = fluxerrs[i]
         ax = axes[i // cols, i % cols]
-        ax.errorbar(time, flux, yerr=fluxerr, fmt='o', color='red', ecolor='lightgray', elinewidth=2, capsize=0)
+        time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, fluxerr, 12)
+        ax.errorbar(time_binned, flux_binned, yerr=fluxerr_binned, fmt='o', color='blue', alpha=0.7)
         ax.set_xlabel('Time (JD)', fontsize=10)
         ax.set_ylabel('Flux', fontsize=10)
         ax.set_title(f'Light Curve for TIC ID {tic_id}', fontsize=10)
