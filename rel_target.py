@@ -40,7 +40,7 @@ logger.addHandler(fh)
 def plot_rms_vs_magnitudes(mags, rms_values):
     plt.figure(figsize=(10, 6))
     plt.scatter(mags, rms_values, c='blue', edgecolor='k', alpha=0.7)
-    plt.xlabel('Magnitude')
+    plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS per 10 sec')
     plt.title('RMS vs Magnitudes of Comparison Stars')
     plt.grid(True)
@@ -50,7 +50,7 @@ def plot_rms_vs_magnitudes(mags, rms_values):
 def plot_mags_vs_color(mags, colors):
     plt.figure(figsize=(10, 6))
     plt.scatter(colors, mags, c='green', edgecolor='k', alpha=0.7)
-    plt.xlabel('Magnitude')
+    plt.xlabel('TESS Magnitude')
     plt.ylabel('Gaia BP - RP (Color)')
     plt.title('Magnitudes vs Gaia BP - RP Color Index')
     plt.grid(True)
