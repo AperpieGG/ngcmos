@@ -3,6 +3,7 @@
 - Updated to run the script for a given tic_id passed as an argument.
 """
 import argparse
+import glob
 import json
 import os
 import numpy as np
@@ -104,9 +105,20 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     plt.show()
 
 
-def open_json_file(filename):
+# Function to find and open a JSON file starting with 'rel'
+def open_json_file():
+    # Use glob to find JSON files starting with 'rel' in the current directory
+    json_files = glob.glob('rms*.json')
+
+    if not json_files:
+        raise FileNotFoundError("No JSON file starting with 'rel' was found in the current directory.")
+
+    # Open the first matching file (you can modify this if you want to handle multiple files)
+    filename = json_files[0]
     with open(filename, 'r') as file:
         data = json.load(file)
+
+    print(f"Opened JSON file: {filename}")
     return data
 
 
@@ -241,7 +253,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Plot comparison stars data
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
-    all_mags, all_rms = get_all_tic_ids('all_tic_ids.json')
+    all_mags, all_rms = get_all_tic_ids(f'rms_mags_rel_phot_{filename}.json')
     plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tic_id_to_plot, min_rms_value)
     print(len(comp_mags), len(comparison_colors))
     plot_mags_vs_color(comp_mags, comparison_colors)
