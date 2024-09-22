@@ -24,7 +24,7 @@ with fits.open('rel_phot_HIP-65-A_1.fits') as hdul:
 # Filter for the specific TIC ID (if needed)
 tic_id_data = table[table['TIC_ID'] == 201248411]
 time = tic_id_data['Time_JD']
-observed_flux = tic_id_data['flux']  # Assuming your FITS data has flux column
+observed_flux = tic_id_data['Relative_Flux']  # Assuming your FITS data has flux column
 
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
