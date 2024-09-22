@@ -124,9 +124,9 @@ def open_json_file():
 
 def get_all_tic_ids():
     data = open_json_file()
-    all_tic_ids = data['TIC_IDs']
+    all_mags = data['Tmag_list']
     all_rms = data['RMS_list']
-    return all_tic_ids, all_rms
+    return all_mags, all_rms
 
 
 def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
