@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 from calibration_images import reduce_images
 from utils import (get_location, wcs_phot, _detect_objects_sep, get_catalog,
-                   extract_airmass_and_zp)
+                   extract_airmass_and_zp, get_light_travel_times)
 import json
 import warnings
 import logging
@@ -205,15 +205,19 @@ def main():
             time_jd = time_jd + half_exptime * u.second
             ra = phot_cat['ra_deg_corr']
             dec = phot_cat['dec_deg_corr']
+            ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
+            time_bary = time_jd.tdb + ltt_bary
+            time_helio = time_jd.utc + ltt_helio
 
             frame_ids = [filename for i in range(len(phot_x))]
             logging.info(f"Found {len(frame_ids)} sources")
 
             frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
-                                    phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, phot_x, phot_y,
+                                    phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, time_bary.value,
+                                    time_helio.value, phot_x, phot_y,
                                     [airmass] * len(phot_x), [zp] * len(phot_x)],
                                    names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
-                                          "x", "y", "airmass", "zp"))
+                                          "jd_bary", "jd_helio", "x", "y", "airmass", "zp"))
 
             # Extract photometry at locations
             frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
