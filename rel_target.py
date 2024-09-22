@@ -125,7 +125,7 @@ def open_json_file():
 def get_all_tic_ids():
     data = open_json_file()
     all_mags = data['Tmag_list']
-    all_rms = data['RMS_list'] / 1e6  # Convert from ppm to fractional RMS
+    all_rms = np.array(data['RMS_list']) / 1e6  # Convert to ppm
     return all_mags, all_rms
 
 
