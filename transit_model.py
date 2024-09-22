@@ -4,7 +4,9 @@ import batman
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
+from utils import plot_images
 
+plot_images()
 # Set up the transit parameters
 params = batman.TransitParams()
 params.t0 = 2458326.10418  # time of inferior conjunction (BJD)
@@ -34,9 +36,9 @@ m = batman.TransitModel(params, time_centered)
 model_flux = m.light_curve(params)
 
 # Plot both the observed flux and the model flux to compare
-plt.figure(figsize=(10,6))
-plt.plot(time_centered, observed_flux, label="Observed Flux", color="blue", alpha=0.7)
-plt.plot(time_centered, model_flux, label="Transit Model", color="red", linestyle='--')
+plt.figure(figsize=(10, 6))
+plt.plot(time_centered, observed_flux, 'o', label="Observed Flux", color="blue")
+plt.plot(time_centered, model_flux, label="Transit Model", color="red", linestyle='-')
 plt.xlabel("Time (days) from central transit")
 plt.ylabel("Relative flux")
 plt.legend()
