@@ -39,7 +39,7 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tic_id_to_plot, rms):
+def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
     plt.figure(figsize=(10, 6))
 
     # Plot all stars with RMS values (in blue)
@@ -48,9 +48,9 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tic_id_to_plo
     # Plot comparison stars with RMS values (in red)
     plt.scatter(comp_mags, comp_rms, c='red', label='Comparison Stars', edgecolor='k', alpha=0.7)
 
-    if tic_id_to_plot['Tmag'][0] in all_mags:
+    if tmag in all_mags:
         # Plot target star with RMS value (in green)
-        plt.scatter(tic_id_to_plot, rms, c='green', label='Target Star', edgecolor='k', alpha=0.7)
+        plt.scatter(tmag, rms, c='green', label='Target Star', edgecolor='k', alpha=0.7)
 
     # Labels and plot configuration
     plt.xlabel('TESS Magnitude')
@@ -255,7 +255,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
     all_mags, all_rms = get_all_tic_ids()
-    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tic_id_to_plot, min_rms_value)
+    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tmag, min_rms_value)
     print(len(comp_mags), len(comparison_colors))
     plot_mags_vs_color(comp_mags, comparison_colors)
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
