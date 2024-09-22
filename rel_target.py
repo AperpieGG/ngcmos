@@ -124,8 +124,8 @@ def open_json_file():
 
 def get_all_tic_ids():
     data = open_json_file()
-    all_tic_ids = data['tic_ids']
-    all_rms = data['rms']
+    all_tic_ids = data['TIC_IDs']
+    all_rms = data['RMS_list']
     return all_tic_ids, all_rms
 
 
