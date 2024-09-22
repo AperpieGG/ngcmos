@@ -39,16 +39,16 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def plot_rms_vs_magnitudes(all_tic_ids, all_rms, comp_rms, comp_mags, tic_id_to_plot, rms):
+def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tic_id_to_plot, rms):
     plt.figure(figsize=(10, 6))
 
     # Plot all stars with RMS values (in blue)
-    plt.scatter(all_tic_ids, all_rms, c='black', label='All Stars', edgecolor='k', alpha=0.7)
+    plt.scatter(all_mags, all_rms, c='black', label='All Stars', edgecolor='k', alpha=0.7)
 
     # Plot comparison stars with RMS values (in red)
     plt.scatter(comp_mags, comp_rms, c='red', label='Comparison Stars', edgecolor='k', alpha=0.7)
 
-    if tic_id_to_plot in all_tic_ids:
+    if tic_id_to_plot['Tmag'][0] in all_mags:
         # Plot target star with RMS value (in green)
         plt.scatter(tic_id_to_plot, rms, c='green', label='Target Star', edgecolor='k', alpha=0.7)
 
@@ -56,6 +56,7 @@ def plot_rms_vs_magnitudes(all_tic_ids, all_rms, comp_rms, comp_mags, tic_id_to_
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS per 10 Sec')
     plt.title('RMS vs TESS Magnitudes of Comparison Stars')
+    plt.xlim(plt.xlim()[0], 1.5 * plt.xlim()[1])
     plt.legend()
     plt.grid(True)
     plt.show()
