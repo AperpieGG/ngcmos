@@ -3,6 +3,7 @@
 - Updated to run the script for a given tic_id passed as an argument.
 """
 import argparse
+import json
 import os
 import numpy as np
 import logging
@@ -37,11 +38,18 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def plot_rms_vs_magnitudes(comp_rms, comp_mags):
+def plot_rms_vs_magnitudes(all_tic_ids, all_rms, comp_rms, comp_mags, tic_id_to_plot, rms):
     plt.figure(figsize=(10, 6))
 
-    # Plot comparison stars with RMS values (in blue)
+    # Plot all stars with RMS values (in blue)
+    plt.scatter(all_tic_ids, all_rms, c='black', label='All Stars', edgecolor='k', alpha=0.7)
+
+    # Plot comparison stars with RMS values (in red)
     plt.scatter(comp_mags, comp_rms, c='red', label='Comparison Stars', edgecolor='k', alpha=0.7)
+
+    if tic_id_to_plot in all_tic_ids:
+        # Plot target star with RMS value (in green)
+        plt.scatter(tic_id_to_plot, rms, c='green', label='Target Star', edgecolor='k', alpha=0.7)
 
     # Labels and plot configuration
     plt.xlabel('TESS Magnitude')
@@ -94,6 +102,19 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     # Adjust the space around and between subplots using subplots_adjust
     plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, hspace=0.4, wspace=0.2)
     plt.show()
+
+
+def open_json_file(filename):
+    with open(filename, 'r') as file:
+        data = json.load(file)
+    return data
+
+
+def get_all_tic_ids(json_file):
+    data = open_json_file(json_file)
+    all_tic_ids = data['tic_ids']
+    all_rms = data['rms']
+    return all_tic_ids, all_rms
 
 
 def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
@@ -220,7 +241,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Plot comparison stars data
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
-    plot_rms_vs_magnitudes(rms_comp_array, comp_mags)
+    all_mags, all_rms = get_all_tic_ids('all_tic_ids.json')
+    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tic_id_to_plot, min_rms_value)
     print(len(comp_mags), len(comparison_colors))
     plot_mags_vs_color(comp_mags, comparison_colors)
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
