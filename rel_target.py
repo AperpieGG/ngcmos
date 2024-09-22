@@ -68,7 +68,7 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
 
 def plot_mags_vs_color(mags, colors):
     plt.figure(figsize=(10, 6))
-    plt.scatter(colors, mags, c='green', edgecolor='k', alpha=0.7)
+    plt.scatter(colors, mags, c='blue', alpha=0.8)
     plt.xlabel('TESS Magnitude')
     plt.ylabel('Gaia BP - RP (Color)')
     plt.title('Magnitudes vs Gaia BP - RP Color Index')
