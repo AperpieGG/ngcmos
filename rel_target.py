@@ -52,12 +52,16 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
         # Plot target star with RMS value (in green)
         plt.scatter(tmag, rms, c='green', label='Target Star', edgecolor='k', alpha=0.7)
 
+    dim_mag = max(all_mags)
+    index = all_mags.index(dim_mag)
+    rms_dim_mag = all_rms[index]
+
     # Labels and plot configuration
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS per 10 Sec')
     plt.title('RMS vs TESS Magnitudes of Comparison Stars')
-    plt.ylim(plt.ylim()[0], 1.5 * plt.ylim()[1])
     plt.legend()
+    plt.ylim(rms_dim_mag - 0.01, rms_dim_mag + 0.01)
     plt.grid(True)
     plt.show()
 
