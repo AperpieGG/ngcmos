@@ -219,12 +219,14 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Plot comparison stars data
     comp_mags = np.unique(master_star_data['Tmag'])
-    all_mags = np.unique(valid_color_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
     plot_rms_vs_magnitudes(rms_comp_array, comp_mags)
     print(len(comp_mags), len(comparison_colors))
     plot_mags_vs_color(comp_mags, comparison_colors)
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
+    # text file and save the comps tic_ids
+    comparison_list = Table([filtered_tic_ids], names=['tic_ids'])
+    comparison_list.write(f'comparison_{tic_id_to_plot}_stars.txt', format='ascii', overwrite=True)
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
             avg_magnitude, airmass_clipped, zero_point_clipped)
