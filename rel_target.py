@@ -56,7 +56,7 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
     plt.xlabel('TESS Magnitude')
     plt.ylabel('RMS per 10 Sec')
     plt.title('RMS vs TESS Magnitudes of Comparison Stars')
-    plt.xlim(plt.xlim()[0], 1.5 * plt.xlim()[1])
+    plt.ylim(plt.ylim()[0], 1.5 * plt.ylim()[1])
     plt.legend()
     plt.grid(True)
     plt.show()
