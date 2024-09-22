@@ -122,8 +122,8 @@ def open_json_file():
     return data
 
 
-def get_all_tic_ids(json_file):
-    data = open_json_file(json_file)
+def get_all_tic_ids():
+    data = open_json_file()
     all_tic_ids = data['tic_ids']
     all_rms = data['rms']
     return all_tic_ids, all_rms
@@ -253,7 +253,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Plot comparison stars data
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
-    all_mags, all_rms = get_all_tic_ids(f'rms_mags_rel_phot_{filename}.json')
+    all_mags, all_rms = get_all_tic_ids()
     plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tic_id_to_plot, min_rms_value)
     print(len(comp_mags), len(comparison_colors))
     plot_mags_vs_color(comp_mags, comparison_colors)
