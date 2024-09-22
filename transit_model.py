@@ -4,7 +4,7 @@ import batman
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from utils import plot_images
+from utils import plot_images, bin_time_flux_error
 
 plot_images()
 # Set up the transit parameters
@@ -26,19 +26,21 @@ with fits.open('rel_phot_HIP-65-A_1.fits') as hdul:
 # Filter for the specific TIC ID (if needed)
 tic_id_data = table[table['TIC_ID'] == 201248411]
 time = tic_id_data['Time_JD']
-observed_flux = tic_id_data['Relative_Flux']  # Assuming your FITS data has flux column
+flux = tic_id_data['Relative_Flux']
+flux_err = tic_id_data['Relative_Flux_err']
 
+time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 12)
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
 
 # Initialize the transit model with the centered time array
-m = batman.TransitModel(params, time_centered)
+m = batman.TransitModel(params, time_binned)
 model_flux = m.light_curve(params)
 
 # Plot both the observed flux and the model flux to compare
 plt.figure(figsize=(10, 6))
-plt.plot(time_centered, observed_flux, 'o', label="Observed Flux", color="blue")
-plt.plot(time_centered, model_flux, label="Transit Model", color="red", linestyle='-')
+plt.plot(time_binned, flux_binned, 'o', label="Observed Flux", color="blue")
+plt.plot(time_binned, model_flux, label="Transit Model", color="red", linestyle='-')
 plt.xlabel("Time (days) from central transit")
 plt.ylabel("Relative flux")
 plt.legend()
