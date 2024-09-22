@@ -43,14 +43,14 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
     plt.figure(figsize=(10, 6))
 
     # Plot all stars with RMS values (in blue)
-    plt.scatter(all_mags, all_rms, c='black', label='All Stars', edgecolor='k', alpha=0.7)
+    plt.scatter(all_mags, all_rms, c='black', label='All Stars', alpha=0.8)
 
     # Plot comparison stars with RMS values (in red)
-    plt.scatter(comp_mags, comp_rms, c='red', label='Comparison Stars', edgecolor='k', alpha=0.7)
+    plt.scatter(comp_mags, comp_rms, c='blue', label='Comparison Stars', alpha=0.8)
 
     if tmag in all_mags:
         # Plot target star with RMS value (in green)
-        plt.scatter(tmag, rms, c='green', label='Target Star', edgecolor='k', alpha=0.7)
+        plt.scatter(tmag, rms, c='red', label='Target Star', alpha=0.8)
 
     dim_mag = max(all_mags)
     index = all_mags.index(dim_mag)
