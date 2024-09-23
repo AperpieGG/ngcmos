@@ -577,7 +577,7 @@ def extract_phot_file(table, tic_id_to_plot, aper):
     # Select rows with the specified TIC ID
     tic_id_data = table[table['tic_id'] == tic_id_to_plot]
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
-    jd_mid = tic_id_data['jd_mid']
+    jd_mid = tic_id_data['jd_bary']
     tmag = tic_id_data['Tmag'][0]
     fluxes = tic_id_data[f'flux_{aper}']
     fluxerrs = tic_id_data[f'fluxerr_{aper}']
