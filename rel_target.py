@@ -177,7 +177,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Comp stars within color and mag limit: {len(np.unique(within_magnitude_limit['tic_id']))}")
 
     within_magnitude_limit = within_magnitude_limit[within_magnitude_limit['Tmag'] > 9.4]
-    logger.info(f"Comp stars dimmer than 9.5 mags: {len(np.unique(within_magnitude_limit['tic_id']))}")
+    logger.info(f"Comp stars dimmer than 9.4 mags: {len(np.unique(within_magnitude_limit['tic_id']))}")
 
     master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
