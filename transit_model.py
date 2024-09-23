@@ -39,8 +39,8 @@ model_flux = m.light_curve(params)
 
 # Plot both the observed flux and the model flux to compare
 plt.figure(figsize=(10, 6))
-plt.plot(time, flux, 'o', label="Observed Flux", color="grey", alpha=0.5)
-plt.plot(time_binned, flux_binned, 'o', label="Bin 5 min", color="blue", edgecolor="yellow")
+plt.scatter(time, flux, 'o', label="Observed Flux", color="grey", alpha=0.5)
+plt.scatter(time_binned, flux_binned, 'o', label="Bin 5 min", color="blue", edgecolor="yellow")
 plt.plot(time_binned, model_flux, label="Transit Model", color="black", linestyle='-')
 plt.xlabel("Time (days) from central transit")
 plt.ylabel("Relative flux")
