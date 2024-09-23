@@ -29,7 +29,7 @@ time = tic_id_data['Time_JD']
 flux = tic_id_data['Relative_Flux']
 flux_err = tic_id_data['Relative_Flux_err']
 
-time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 12)
+time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 30)
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
 
@@ -39,8 +39,9 @@ model_flux = m.light_curve(params)
 
 # Plot both the observed flux and the model flux to compare
 plt.figure(figsize=(10, 6))
-plt.plot(time_binned, flux_binned, 'o', label="Observed Flux", color="blue")
-plt.plot(time_binned, model_flux, label="Transit Model", color="red", linestyle='-')
+plt.plot(time, flux, 'o', label="Observed Flux", color="grey", alpha=0.5)
+plt.plot(time_binned, flux_binned, 'o', label="Bin 5 min", color="blue", edgecolor="yellow")
+plt.plot(time_binned, model_flux, label="Transit Model", color="black", linestyle='-')
 plt.xlabel("Time (days) from central transit")
 plt.ylabel("Relative flux")
 plt.legend()
