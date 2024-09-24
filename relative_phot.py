@@ -95,8 +95,10 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
                                                 <= magnitude_tolerance]
-    withing_mag_limit_tic_ids = np.unique(within_magnitude_limit['tic_id'])
-    logger.info(f"Stars within both color and magnitude tolerance: {len(withing_mag_limit_tic_ids)}")
+
+    within_magnitude_limit = within_magnitude_limit[within_magnitude_limit['Tmag'] > 9.4]
+    logger.info(f"Comp stars dimmer than 9.4 mags and within mag limit: "
+                f"{len(np.unique(within_magnitude_limit['tic_id']))}")
 
     # Further filter to exclude the target star
     master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
@@ -104,7 +106,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Comparison stars remaining after excluding the target star: {len(master_stars_data_tic_ids)}")
 
     # Check if there are at least 5 comparison stars
-    if len(master_stars_data_tic_ids) < 5:
+    if len(master_stars_data_tic_ids) < 3:
         logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
                        f"comparison stars found (less than 5).")
         return None
