@@ -147,6 +147,8 @@ def main():
     # get a list of subdirectories inside the parent directory
     subdirectories = [name for name in os.listdir(parent_directory) if
                       os.path.isdir(os.path.join(parent_directory, name))]
+    subdirectories = [subdirectory for subdirectory in subdirectories if
+                      subdirectory.startswith("action") and subdirectory.endswith("_observeField")]
 
     print('The subdirectories are:', subdirectories)
 
