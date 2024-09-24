@@ -4,7 +4,8 @@ import os
 import numpy as np
 
 from calibration_images_ccd import bias
-from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog
+from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog, get_light_travel_times, \
+    extract_airmass_and_zp
 import json
 import warnings
 from astropy.io import fits
@@ -215,6 +216,8 @@ def main():
                 frame_data, frame_hdr = reduced_data_dict[filename]
                 print(f"Extracting photometry for {filename}\n")
 
+                airmass, zp = extract_airmass_and_zp(frame_hdr)
+
                 wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
                 wcs_header = {}
                 for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
@@ -251,14 +254,19 @@ def main():
                 time_jd = time_jd + half_exptime * u.second
                 ra = phot_cat['ra_deg_corr']
                 dec = phot_cat['dec_deg_corr']
+                ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
+                time_bary = time_jd.tdb + ltt_bary
+                time_helio = time_jd.utc + ltt_helio
 
                 frame_ids = [filename for i in range(len(phot_x))]
                 print(f"Found {len(frame_ids)} sources")
 
                 frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
-                                        phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, phot_x, phot_y],
-                                       names=(
-                                       "frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid", "x", "y"))
+                                        phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, time_bary.value,
+                                        time_helio.value, phot_x, phot_y,
+                                        [airmass] * len(phot_x), [zp] * len(phot_x)],
+                                       names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
+                                              "jd_bary", "jd_helio", "x", "y", "airmass", "zp"))
 
                 # Extract photometry at locations
                 frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
