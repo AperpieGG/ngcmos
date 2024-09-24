@@ -8,6 +8,8 @@ import json
 import os
 import numpy as np
 import logging
+
+from astropy.io import fits
 from astropy.table import Table
 from matplotlib import pyplot as plt
 
@@ -271,6 +273,35 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
             avg_magnitude, airmass_clipped, zero_point_clipped)
 
 
+def plot_lc(flux, time, flux_error, rms, airmass, tic_id_to_plot, tmag):
+    # Open the FITS file and read the data
+
+    time_binned, flux_binned, flux_err_binned, rms_binned = time, flux, flux_error, rms
+    fig, ax1 = plt.subplots(figsize=(8, 6))
+
+    ax1.plot(time_binned, flux_binned, 'o', label=f'RMS = {rms_binned:.4f}', color='red')
+    ax1.set_xlabel('Time (JD)')
+    ax1.set_ylabel('Relative Flux')
+    ax1.set_ylim(0.95, 1.05)
+    ax1.set_title(f'Rel Phot for TIC ID {tic_id_to_plot} and Tmag = {tmag:.2f}')
+
+    ax2 = ax1.twiny()
+    ax2.set_xlim(ax1.get_xlim())
+    ax2.set_xlabel('Airmass')
+
+    # Interpolate airmass values at the positions of the primary x-axis ticks
+    primary_xticks = ax1.get_xticks()
+    interpolated_airmass = np.interp(primary_xticks, time, airmass)
+    airmass_ticks = [f'{a:.2f}' for a in interpolated_airmass]
+
+    ax2.set_xticks(primary_xticks)
+    ax2.set_xticklabels(airmass_ticks, rotation=45, ha='right')
+
+    ax1.legend()
+    plt.tight_layout()
+    plt.show()
+
+
 def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
     parser.add_argument('tic_id', type=int, help='TIC ID of the star')
@@ -324,6 +355,8 @@ def main():
             rms = np.std(dt_flux_binned)
             logger.info(f"RMS for TIC ID {tic_id_to_plot} = {rms:.4f}")
 
+            plot_lc(dt_flux_binned, time_binned, dt_fluxerr_binned, rms, airmass_list, tic_id_to_plot, tmag)
+            
             # Create an Astropy table from the result
             data_list = [(tic_id_to_plot, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
                           rms, sky_median, airmass_list, zero_point_list, magnitude)]
