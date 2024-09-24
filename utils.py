@@ -564,7 +564,7 @@ def extract_phot_file(table, tic_id_to_plot, aper):
 
     Returns:
     jd_mid : array
-        Values of JD midpoints
+        Values of BJD midpoints
     tmag : float
         Tmag value for the specified TIC ID
     fluxes : array
