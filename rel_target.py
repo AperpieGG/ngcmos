@@ -284,17 +284,6 @@ def plot_lc(flux, time, rms, airmass, tic_id_to_plot, tmag):
     ax1.set_ylim(0.95, 1.05)
     ax1.set_title(f'Rel Phot for TIC ID {tic_id_to_plot} and Tmag = {tmag:.2f}')
 
-    ax2 = ax1.twiny()
-    ax2.set_xlim(ax1.get_xlim())
-    ax2.set_xlabel('Airmass')
-
-    # # take airmass an place it in second x-axis
-    primary_xticks = ax1.get_xticks()
-    interpolated_airmass = np.interp(primary_xticks, time, airmass)
-    airmass_ticks = [f'{a:.2f}' for a in interpolated_airmass]
-    ax2.set_xticks(primary_xticks)
-    ax2.set_xticklabels(airmass_ticks, rotation=45, ha='right')
-
     ax1.legend()
     plt.tight_layout()
     plt.show()
