@@ -9,6 +9,7 @@ python /home/ops/refcatpipe2/cmos/simple_wrapper_ccd.py
 python /home/ops/ngcmos/check_ccd.py
 python /home/ops/ngcmos/calibration_images_ccd.py
 python /home/ops/ngcmos/process_ccd.py
+python /home/ops/ngcmos/relative_phot.py
 python /home/ops/ngcmos/zip_fits.py # zipped the fits to bz2 and deleted .fits files
 
 echo "Finishing processing!"
