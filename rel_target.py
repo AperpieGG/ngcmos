@@ -42,7 +42,11 @@ logger.addHandler(fh)
 
 
 def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 8))
+
+    all_rms = all_rms * 1e6  # Convert to ppm
+    comp_rms = comp_rms * 1e6  # Convert to ppm
+    rms = rms * 1e6  # Convert to ppm
 
     # Plot all stars with RMS values (in blue)
     plt.scatter(all_mags, all_rms, c='black', label='All Stars', alpha=0.8)
@@ -60,11 +64,12 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
 
     # Labels and plot configuration
     plt.xlabel('TESS Magnitude')
-    plt.ylabel('RMS per 10 Sec')
+    plt.ylabel('RMS ppm per 10 sec')
     plt.title('RMS vs TESS Magnitudes of Comparison Stars')
     plt.legend()
     plt.ylim(rms_dim_mag - 0.01, rms_dim_mag + 0.01)
     plt.grid(True)
+    plt.gca().invert_xaxis()
     plt.show()
 
 
@@ -188,7 +193,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     magnitude_tolerance = 1
 
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
-    print(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
+    logger.info(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
 
     within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
                                                 <= magnitude_tolerance]
