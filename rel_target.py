@@ -163,31 +163,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     target_tmag = target_star['Tmag'][0]
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]
-
-    # Calculate the color index for all stars
-    color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
-    magnitude = valid_color_data['Tmag']
-
-    color_tolerance = 0.2
-    magnitude_tolerance = 1
-
-    within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
-    print(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
-
-    within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
-                                                <= magnitude_tolerance]
-    logger.info(f"Comp stars within color and mag limit: {len(np.unique(within_magnitude_limit['tic_id']))}")
-
-    within_magnitude_limit = within_magnitude_limit[within_magnitude_limit['Tmag'] > 9.4]
-    logger.info(f"Comp stars dimmer than 9.4 mags: {len(np.unique(within_magnitude_limit['tic_id']))}")
-
-    master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
-    master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
-
-    if len(master_stars_data_tic_ids) < 4:
-        logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
-                       f"comparison stars found (less than 5).")
-        return None
+    logger.info(f'The target has color index = {target_color_index:.2f} and TESS magnitude = {target_tmag:.2f}')
 
     # Extract data for the target star
     jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
@@ -204,6 +180,31 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
     logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
                 f"and calculated magnitude = {avg_magnitude:.2f}")
+
+    # Calculate the color index for all stars
+    color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
+
+    color_tolerance = 0.2
+    magnitude_tolerance = 1
+
+    within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
+    print(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
+
+    within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
+                                                <= magnitude_tolerance]
+    logger.info(f"Comp stars within color and mag limit: {len(np.unique(within_magnitude_limit['tic_id']))}")
+
+    within_magnitude_limit = within_magnitude_limit[within_magnitude_limit['Tmag'] > 9.4]
+    logger.info(f"Comp stars dimmer than 9.4 mags: {len(np.unique(within_magnitude_limit['tic_id']))}")
+
+    master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
+    master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
+    logger.info(f'The comparison stars before RMS filtering are: {master_stars_data_tic_ids}')
+
+    if len(master_stars_data_tic_ids) < 4:
+        logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
+                       f"comparison stars found (less than 5).")
+        return None
 
     tic_ids = np.unique(master_star_data['tic_id'])
 
@@ -233,14 +234,13 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     min_rms_tic_id = tic_ids[min_rms_index]
     min_rms_value = rms_comp_array[min_rms_index]
 
-    logger.info(f"Number of comparison stars before filtering by RMS: {len(rms_comp_array)}")
-    logger.info(f"Comparison star with min RMS: TIC ID = {min_rms_tic_id}, RMS = {min_rms_value:.4f}")
+    logger.info(f"Min Comp star with min RMS: TIC ID = {min_rms_tic_id}, RMS = {min_rms_value:.4f}")
 
     threshold = SIGMA * min_rms_value
     logger.info(f"Threshold for {SIGMA}-sigma clipping: {threshold:.4f}")
 
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
-    logger.info(f"Number of comparison stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
+    logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
     reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
@@ -262,7 +262,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
     all_mags, all_rms = get_all_tic_ids()
     plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tmag, min_rms_value)
-    print(len(comp_mags), len(comparison_colors))
     plot_mags_vs_color(comp_mags, comparison_colors)
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
     # text file and save the comps tic_ids
@@ -273,7 +272,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
             avg_magnitude, airmass_clipped, zero_point_clipped)
 
 
-def plot_lc(flux, time, rms, airmass, tic_id_to_plot, tmag):
+def plot_lc(flux, time, rms, tic_id_to_plot, tmag):
     # Open the FITS file and read the data
 
     fig, ax1 = plt.subplots(figsize=(8, 6))
@@ -342,7 +341,7 @@ def main():
             rms = np.std(dt_flux_binned)
             logger.info(f"RMS for TIC ID {tic_id_to_plot} = {rms:.4f}")
 
-            plot_lc(dt_flux_binned, time_binned, rms, airmass_list, tic_id_to_plot, tmag)
+            plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, tmag)
 
             # Create an Astropy table from the result
             data_list = [(tic_id_to_plot, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
