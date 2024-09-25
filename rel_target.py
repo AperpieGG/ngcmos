@@ -37,35 +37,29 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag):
-    plt.figure(figsize=(10, 8))
+def plot_noise_model(comp_rms, comp_mags, tmag):
+    data = open_json_file()
+    fig, ax = plt.subplots(figsize=(10, 8))
+    RMS_list = np.array(data['RMS_list']) / 1e6
+    tic_ids = data['TIC_IDs']
+    mags_list = data['mags_list']
+    Tmag_list = data['Tmag_list']
 
-    # Plot all stars with RMS values (in black)
-    plt.scatter(all_mags, all_rms * 1e6, c='black', label='All Stars', alpha=0.8)
+    if tmag in Tmag_list:
+        index = Tmag_list.index(tmag)
+        rms_target = RMS_list[index]
+        logger.info(f"RMS for target star with Tmag = {tmag}: {RMS_list[index]:.4f}")
 
-    # Plot comparison stars with RMS values (in blue)
-    plt.scatter(comp_mags, comp_rms * 1e6, c='blue', label='Comparison Stars', alpha=0.8)
-
-    # if tmag in all_mags:
-    #     # find rms for tmag
-    #     index = all_mags.index(tmag)
-    #     rms_tmag = all_rms[index]
-    #     logger.info(f"RMS for target star with Tmag = {tmag}: {rms_tmag:.4f}")
-    #     # Plot target star with RMS value (in red)
-    #     plt.scatter(tmag, rms_tmag, c='red', label='Target Star', alpha=0.8)
-
-    dim_mag = max(all_mags)
-    index = all_mags.index(dim_mag)
-    rms_dim_mag = all_rms[index]
-
-    # Labels and plot configuration
-    plt.xlabel('TESS Magnitude')
-    plt.ylabel('RMS ppm per 10 sec')
-    plt.title('RMS vs TESS Magnitudes of Comparison Stars')
-    plt.legend()
-    plt.ylim(rms_dim_mag - 0.01, rms_dim_mag + 0.01)
-    plt.grid(True)
-    plt.gca().invert_xaxis()
+    ax.plot(Tmag_list, RMS_list, 'o', color='c', label='total stars', alpha=0.8)
+    ax.plot(comp_mags, comp_rms, 'o', color='b', label='comparison stars', alpha=0.8)
+    ax.plot(tmag, rms_target, 'o', color='r', label='target star', alpha=0.8)
+    ax.set_xlabel('TESS Magnitude')
+    ax.set_ylabel('RMS (ppm)')
+    ax.set_yscale('log')
+    # ax.set_ylim(1000, 100000)
+    ax.invert_xaxis()
+    plt.legend(loc='best')
+    plt.tight_layout()
     plt.show()
 
 
@@ -111,13 +105,6 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     # Adjust the space around and between subplots using subplots_adjust
     plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, hspace=0.4, wspace=0.2)
     plt.show()
-
-
-def get_all_tic_ids():
-    data = open_json_file()
-    all_mags = data['Tmag_list']
-    all_rms = np.array(data['RMS_list']) / 1e6  # Convert to ppm
-    return all_mags, all_rms
 
 
 def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
@@ -244,10 +231,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Plot comparison stars data
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
-    all_mags, all_rms = get_all_tic_ids()
 
     # Plot the RMS vs magnitudes for all stars
-    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tmag)
+    plot_noise_model(rms_comp_array, comp_mags, tmag)
 
     # Plot the magnitudes vs color index for all stars
     plot_mags_vs_color(comp_mags, comparison_colors)
