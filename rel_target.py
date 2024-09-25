@@ -227,7 +227,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     logger.info(f'The FINAL number of comparison stars is: {len(filtered_tic_ids)}')
     # take mags and rms for these filtered_tic_ids
-    comp_mags = filtered_master_star_data['Tmag']
+    comp_mags = np.unique(filtered_master_star_data['Tmag'])
     comp_rms = rms_comp_array[np.isin(tic_ids, filtered_tic_ids)]
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
 
