@@ -39,8 +39,8 @@ logger.addHandler(fh)
 
 def plot_noise_model(comp_mags, comp_rms, tmag):
     data = open_json_file()
-    fig, ax = plt.subplots(figsize=(10, 8))
-    RMS_list = np.array(data['RMS_list'])
+    fig, ax = plt.subplots(figsize=(10, 6))
+    RMS_list = np.array(data['RMS_list']) / 1e6
     Tmag_list = data['Tmag_list']
 
     if tmag in Tmag_list:
@@ -48,14 +48,19 @@ def plot_noise_model(comp_mags, comp_rms, tmag):
         rms_target = RMS_list[index]
         logger.info(f"RMS for target star with Tmag = {tmag}: {RMS_list[index]:.4f}")
     ax.plot(Tmag_list, RMS_list, 'o', color='c', label='All stars', alpha=0.8)
-    ax.plot(comp_mags, comp_rms * 1e6, 'o', color='b', label='Comparison stars', alpha=0.8)
+    ax.plot(comp_mags, comp_rms, 'o', color='b', label='Comparison stars', alpha=0.8)
     ax.plot(tmag, rms_target, 'o', color='r', label='Target star', alpha=0.8)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
-    # ax.set_ylim(1000, 100000)
+
+    dim_mag = max(comp_mags)
+    index = comp_mags.index(dim_mag)
+    rms_dim_mag = comp_mags[index]
+    plt.ylim(rms_dim_mag - 0.01, rms_dim_mag + 0.01)
     ax.invert_xaxis()
     plt.legend(loc='best')
+    plt.grid(True)
     plt.tight_layout()
     plt.show()
 
