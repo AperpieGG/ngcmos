@@ -3,18 +3,14 @@
 - Updated to run the script for a given tic_id passed as an argument.
 """
 import argparse
-import glob
-import json
 import os
 import numpy as np
 import logging
-
-from astropy.io import fits
 from astropy.table import Table
 from matplotlib import pyplot as plt
-
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
-                   remove_outliers, extract_phot_file, calculate_trend_and_flux, expand_and_rename_table)
+                   remove_outliers, extract_phot_file, calculate_trend_and_flux,
+                   expand_and_rename_table, open_json_file)
 
 SIGMA = 2
 
@@ -46,16 +42,15 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
 
     all_rms = all_rms * 1e6  # Convert to ppm
     comp_rms = comp_rms * 1e6  # Convert to ppm
-    rms = rms * 1e6  # Convert to ppm
 
-    # Plot all stars with RMS values (in blue)
+    # Plot all stars with RMS values (in black)
     plt.scatter(all_mags, all_rms, c='black', label='All Stars', alpha=0.8)
 
-    # Plot comparison stars with RMS values (in red)
+    # Plot comparison stars with RMS values (in blue)
     plt.scatter(comp_mags, comp_rms, c='blue', label='Comparison Stars', alpha=0.8)
 
     if tmag in all_mags:
-        # Plot target star with RMS value (in green)
+        # Plot target star with RMS value (in red)
         plt.scatter(tmag, rms, c='red', label='Target Star', alpha=0.8)
 
     dim_mag = max(all_mags)
@@ -115,23 +110,6 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     # Adjust the space around and between subplots using subplots_adjust
     plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, hspace=0.4, wspace=0.2)
     plt.show()
-
-
-# Function to find and open a JSON file starting with 'rel'
-def open_json_file():
-    # Use glob to find JSON files starting with 'rel' in the current directory
-    json_files = glob.glob('rms*.json')
-
-    if not json_files:
-        raise FileNotFoundError("No JSON file starting with 'rel' was found in the current directory.")
-
-    # Open the first matching file (you can modify this if you want to handle multiple files)
-    filename = json_files[0]
-    with open(filename, 'r') as file:
-        data = json.load(file)
-
-    print(f"Opened JSON file: {filename}")
-    return data
 
 
 def get_all_tic_ids():
@@ -266,8 +244,14 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
     all_mags, all_rms = get_all_tic_ids()
-    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tmag, min_rms_value)
+
+    # Plot the RMS vs magnitudes for all stars
+    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tmag, rms)
+
+    # Plot the magnitudes vs color index for all stars
     plot_mags_vs_color(comp_mags, comparison_colors)
+
+    # Plot light curves for comparison stars
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
     # text file and save the comps tic_ids
     comparison_list = Table([filtered_tic_ids], names=['tic_ids'])
