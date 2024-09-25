@@ -54,6 +54,7 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag):
         index = all_mags.index(tmag)
         rms_tmag = all_rms[index]
         rms_tmag = rms_tmag * 1e6  # Convert to ppm
+        logger.info(f"RMS for target star with Tmag = {tmag}: {rms_tmag:.4f}")
         # Plot target star with RMS value (in red)
         plt.scatter(tmag, rms_tmag, c='red', label='Target Star', alpha=0.8)
 
