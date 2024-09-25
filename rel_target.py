@@ -42,7 +42,6 @@ def plot_noise_model(comp_rms, comp_mags, tmag):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = np.array(data['RMS_list']) / 1e6
     tic_ids = data['TIC_IDs']
-    mags_list = data['mags_list']
     Tmag_list = data['Tmag_list']
 
     if tmag in Tmag_list:
@@ -231,9 +230,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Plot comparison stars data
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
-
+    comps_mags_rms = np.array([rms_comp_array[tic_ids == tic_id][0] for tic_id in comp_mags])
     # Plot the RMS vs magnitudes for all stars
-    plot_noise_model(rms_comp_array, comp_mags, tmag)
+    plot_noise_model(comps_mags_rms, comp_mags, tmag)
 
     # Plot the magnitudes vs color index for all stars
     plot_mags_vs_color(comp_mags, comparison_colors)
