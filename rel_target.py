@@ -39,6 +39,10 @@ logger.addHandler(fh)
 
 def plot_noise_model(comp_mags, comp_rms, tmag):
     data = open_json_file()
+    if data is None:
+        logger.error("Error reading JSON file - it probably does not You should run Noise_model.py script first."
+                     "Exiting function.")
+        return None
     fig, ax = plt.subplots(figsize=(10, 6))
     RMS_list = np.array(data['RMS_list']) / 1e6
     Tmag_list = data['Tmag_list']
