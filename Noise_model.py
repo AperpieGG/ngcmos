@@ -138,7 +138,7 @@ def main():
     # Construct output file name
     cwd_last_four = os.getcwd()[-4:]
     file_name = f"rms_mags_{filename.replace('.fits', '')}_{cwd_last_four}.json"
-    save_path = '/home/ops/data/rms_json/'
+    save_path = os.getcwd()
     output_path = os.path.join(save_path, file_name)
 
     # Save JSON file using custom encoder
