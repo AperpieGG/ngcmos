@@ -41,20 +41,18 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag):
     plt.figure(figsize=(10, 8))
 
     # Plot all stars with RMS values (in black)
-    all_rms_value = all_rms[0] * 1e6
-    print(f'The first rms value is {all_rms_value}')
-    plt.scatter(all_mags, all_rms, c='black', label='All Stars', alpha=0.8)
+    plt.scatter(all_mags, all_rms * 1e6, c='black', label='All Stars', alpha=0.8)
 
     # Plot comparison stars with RMS values (in blue)
-    plt.scatter(comp_mags, comp_rms, c='blue', label='Comparison Stars', alpha=0.8)
+    plt.scatter(comp_mags, comp_rms * 1e6, c='blue', label='Comparison Stars', alpha=0.8)
 
-    if tmag in all_mags:
-        # find rms for tmag
-        index = all_mags.index(tmag)
-        rms_tmag = all_rms[index]
-        logger.info(f"RMS for target star with Tmag = {tmag}: {rms_tmag:.4f}")
-        # Plot target star with RMS value (in red)
-        plt.scatter(tmag, rms_tmag, c='red', label='Target Star', alpha=0.8)
+    # if tmag in all_mags:
+    #     # find rms for tmag
+    #     index = all_mags.index(tmag)
+    #     rms_tmag = all_rms[index]
+    #     logger.info(f"RMS for target star with Tmag = {tmag}: {rms_tmag:.4f}")
+    #     # Plot target star with RMS value (in red)
+    #     plt.scatter(tmag, rms_tmag, c='red', label='Target Star', alpha=0.8)
 
     dim_mag = max(all_mags)
     index = all_mags.index(dim_mag)
