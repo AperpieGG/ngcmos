@@ -70,7 +70,7 @@ def plot_noise_model(data):
     print(f'The average scintillation noise is: {np.mean(N)}')
 
     # Filter data points based on magnitude and RMS
-    filtered_indices_bright, filtered_indices_dim = filter_data(mags_list, RMS_list)
+    filtered_indices_bright, filtered_indices_dim = filter_data(Tmag_list, RMS_list)
 
     # append the indices of the outliers
     filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
