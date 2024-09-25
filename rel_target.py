@@ -52,7 +52,7 @@ def plot_noise_model(comp_mags, comp_rms, tmag):
     ax.plot(tmag, rms_target, 'o', color='r', label='Target star', alpha=0.8)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS per 10 sec')
-    ax.set_yscale('log')
+    # ax.set_yscale('log')
 
     dim_mag = max(Tmag_list)
     rms_dim_mag = RMS_list[Tmag_list.index(dim_mag)]
