@@ -232,7 +232,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
 
     # Plot the RMS vs magnitudes for all stars
-    plot_noise_model(comp_mags,comp_rms, tmag)
+    print(len(comp_mags), len(comp_rms))
+    plot_noise_model(comp_mags, comp_rms, tmag)
 
     # Plot the magnitudes vs color index for all stars
     plot_mags_vs_color(comp_mags, comparison_colors)
