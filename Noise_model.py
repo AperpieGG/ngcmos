@@ -5,8 +5,7 @@ import os
 import json
 import numpy as np
 from astropy.io import fits
-from utils import noise_sources  # Assuming you have a noise_sources function in utils
-# TODO: pass the following as arguments so you can run CCD model
+from utils import noise_sources 
 # Constants for noise calculations
 
 
