@@ -630,7 +630,7 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_current):
+def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_current, exposure):
     """
     Returns the noise sources for a given flux
 
@@ -652,6 +652,8 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_c
         value of read noise
     dark_current : float
         value of dark current
+    exposure : float
+        value of exposure time
 
     Returns
     -------
@@ -676,7 +678,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_c
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
-    exposure_time = 10
+    exposure_time = exposure
 
     synthetic_flux = np.arange(100, 1e7, 1000)
     synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
