@@ -37,7 +37,7 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
+def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag):
     plt.figure(figsize=(10, 8))
 
     all_rms = all_rms * 1e6  # Convert to ppm
@@ -50,8 +50,11 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag, rms):
     plt.scatter(comp_mags, comp_rms, c='blue', label='Comparison Stars', alpha=0.8)
 
     if tmag in all_mags:
+        # find rms for tmag
+        index = all_mags.index(tmag)
+        rms_tmag = all_rms[index]
         # Plot target star with RMS value (in red)
-        plt.scatter(tmag, rms, c='red', label='Target Star', alpha=0.8)
+        plt.scatter(tmag, rms_tmag, c='red', label='Target Star', alpha=0.8)
 
     dim_mag = max(all_mags)
     index = all_mags.index(dim_mag)
@@ -246,7 +249,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     all_mags, all_rms = get_all_tic_ids()
 
     # Plot the RMS vs magnitudes for all stars
-    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tmag, rms)
+    plot_rms_vs_magnitudes(all_mags, all_rms, rms_comp_array, comp_mags, tmag)
 
     # Plot the magnitudes vs color index for all stars
     plot_mags_vs_color(comp_mags, comparison_colors)
