@@ -48,7 +48,7 @@ def plot_noise_model(comp_mags, tmag):
         rms_target = RMS_list[index]
         logger.info(f"RMS for target star with Tmag = {tmag}: {RMS_list[index]:.4f}")
     if comp_mags in Tmag_list:
-        index = Tmag_list.any(comp_mags)
+        index = Tmag_list.index(comp_mags)
         rms_comp = RMS_list[index]
         logger.info(f"RMS for comparison stars with Tmag = {comp_mags}: {RMS_list[index]:.4f}")
 
@@ -235,6 +235,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
 
     # Plot the RMS vs magnitudes for all stars
+    logger.info(f"The comp mag list is: {comp_mags}")
     plot_noise_model(comp_mags, tmag)
 
     # Plot the magnitudes vs color index for all stars
