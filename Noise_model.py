@@ -6,11 +6,8 @@ import json
 import numpy as np
 from astropy.io import fits
 from utils import noise_sources  # Assuming you have a noise_sources function in utils
-
+# TODO: pass the following as arguments so you can run CCD model
 # Constants for noise calculations
-APERTURE = 6  # Aperture size for the telescope
-READ_NOISE = 1.56  # Read noise in electrons
-DARK_CURRENT = 1.6  # Dark current in electrons per second
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -50,13 +47,25 @@ def read_data(filename):
 def main():
     """ Main function to parse arguments, read data, calculate noise sources, and save results to a JSON file """
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(
-        description='Read and organize TIC IDs with associated RMS, Sky, Airmass, ZP, and Magnitude from FITS table')
+    if __name__ == '__main__':
+        parser = argparse.ArgumentParser(
+            description='Read and organize TIC IDs with associated '
+                        'RMS, Sky, Airmass, ZP, and Magnitude from FITS table.'
+                        'Example usage if you have CMOS: RN=1.56, DC=1.6, Aper=4, Exp=10.0, Bin=1'
+                        'Example usage if you have CCD: RN=12.0, DC=0.005, Aper=4, Exp=10.0, Bin=1')
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('--bin_size', type=int, default=1, help='Bin size for noise calculations')
+    parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
+    parser.add_argument('--aper', type=float, default=4, help='Aperture size in meters')
+    parser.add_argument('--rn', type=float, default=1.56, help='Read noise in electrons')
+    parser.add_argument('--dc', type=float, default=1.6, help='Dark current in electrons per second')
     args = parser.parse_args()
     filename = args.filename
     bin_size = args.bin_size
+    EXPOSURE = args.exp
+    APERTURE = args.aper  # Aperture size for the telescope
+    READ_NOISE = args.rn  # Read noise in electrons
+    DARK_CURRENT = args.dc  # Dark current in electrons per second
 
     # Get the current working directory
     current_dir = os.getcwd()
@@ -99,7 +108,8 @@ def main():
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_array, zp_array, APERTURE, READ_NOISE, DARK_CURRENT))
+        noise_sources(sky_list, bin_size, airmass_array, zp_array, APERTURE,
+                      READ_NOISE, DARK_CURRENT, EXPOSURE))
 
     # Convert lists to JSON serializable lists
     synthetic_mag_list = synthetic_mag.tolist()
