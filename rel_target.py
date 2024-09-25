@@ -230,6 +230,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
+    logger.info(f'The FINAL number of comparison stars is: {len(filtered_tic_ids)}')
     # Plot comparison stars data
     comp_mags = np.unique(master_star_data['Tmag'])
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
