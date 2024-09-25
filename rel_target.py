@@ -41,7 +41,6 @@ def plot_noise_model(comp_mags, tmag):
     data = open_json_file()
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = np.array(data['RMS_list']) / 1e6
-    tic_ids = data['TIC_IDs']
     Tmag_list = data['Tmag_list']
 
     if tmag in Tmag_list:
@@ -49,7 +48,7 @@ def plot_noise_model(comp_mags, tmag):
         rms_target = RMS_list[index]
         logger.info(f"RMS for target star with Tmag = {tmag}: {RMS_list[index]:.4f}")
     if comp_mags in Tmag_list:
-        index = Tmag_list.index(comp_mags)
+        index = Tmag_list.any(comp_mags)
         rms_comp = RMS_list[index]
         logger.info(f"RMS for comparison stars with Tmag = {comp_mags}: {RMS_list[index]:.4f}")
 
