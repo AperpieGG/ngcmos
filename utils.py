@@ -2,6 +2,8 @@
 Functions for handling on-sky or on chip coordinates
 """
 import fnmatch
+import glob
+import json
 import os
 from datetime import datetime, timedelta
 from astropy.io import fits
@@ -766,3 +768,19 @@ def expand_and_rename_table(phot_table):
     expanded_table = Table(rows=expanded_rows, names=phot_table.colnames)
 
     return expanded_table
+
+
+def open_json_file():
+    # Use glob to find JSON files starting with 'rel' in the current directory
+    json_files = glob.glob('rms*.json')
+
+    if not json_files:
+        raise FileNotFoundError("No JSON file starting with 'rel' was found in the current directory.")
+
+    # Open the first matching file (you can modify this if you want to handle multiple files)
+    filename = json_files[0]
+    with open(filename, 'r') as file:
+        data = json.load(file)
+
+    print(f"Opened JSON file: {filename}")
+    return data
