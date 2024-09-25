@@ -40,16 +40,16 @@ logger.addHandler(fh)
 def plot_noise_model(comp_mags, comp_rms, tmag):
     data = open_json_file()
     fig, ax = plt.subplots(figsize=(10, 8))
-    RMS_list = np.array(data['RMS_list']) / 1e6
+    RMS_list = np.array(data['RMS_list'])
     Tmag_list = data['Tmag_list']
 
     if tmag in Tmag_list:
         index = Tmag_list.index(tmag)
         rms_target = RMS_list[index]
         logger.info(f"RMS for target star with Tmag = {tmag}: {RMS_list[index]:.4f}")
-    ax.plot(Tmag_list, RMS_list, 'o', color='c', label='total stars', alpha=0.8)
-    ax.plot(comp_mags, comp_rms, 'o', color='r', label='target star', alpha=0.8)
-    ax.plot(tmag, rms_target, 'o', color='r', label='target star', alpha=0.8)
+    ax.plot(Tmag_list, RMS_list, 'o', color='c', label='All stars', alpha=0.8)
+    ax.plot(comp_mags, comp_rms * 1e6, 'o', color='b', label='Comparison stars', alpha=0.8)
+    ax.plot(tmag, rms_target, 'o', color='r', label='Target star', alpha=0.8)
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
@@ -228,14 +228,17 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f'The FINAL number of comparison stars is: {len(filtered_tic_ids)}')
     # take mags and rms for these filtered_tic_ids
     comparison_mags_rms = []
+    comparison_colors = []
+
     for tic_id in filtered_tic_ids:
         tic_data = master_star_data[master_star_data['tic_id'] == tic_id]
         comparison_mags_rms.append((tic_data['Tmag'][0], rms_comp_array[tic_ids == tic_id][0]))
+        comparison_colors.append(tic_data['gaiabp'][0] - tic_data['gaiarp'][0])
 
-    # split the array to comparison rms and comparison magds
+    # split the array to comparison rms and comparison mags
     comparison_mags = np.array([x[0] for x in comparison_mags_rms])
     comparison_rms = np.array([x[1] for x in comparison_mags_rms])
-    comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
+
     # Plot the RMS vs magnitudes for all stars
     plot_noise_model(comparison_mags, comparison_rms, tmag)
 
