@@ -54,9 +54,8 @@ def plot_noise_model(comp_mags, comp_rms, tmag):
     ax.set_ylabel('RMS per 10 sec')
     ax.set_yscale('log')
 
-    dim_mag = max(comp_mags)
-    index = comp_mags.index(dim_mag)
-    rms_dim_mag = comp_mags[index]
+    dim_mag = max(Tmag_list)
+    rms_dim_mag = RMS_list[Tmag_list.index(dim_mag)]
     plt.ylim(rms_dim_mag - 0.01, rms_dim_mag + 0.01)
     ax.invert_xaxis()
     plt.legend(loc='best')
