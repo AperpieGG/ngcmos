@@ -227,12 +227,13 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     logger.info(f'The FINAL number of comparison stars is: {len(filtered_tic_ids)}')
     # take mags and rms for these filtered_tic_ids
-    comp_mags = np.unique(filtered_master_star_data['Tmag'])
+    mags_comp_array = np.unique(filtered_master_star_data['Tmag'])
+    comp_mags = mags_comp_array[np.isin(tic_ids, filtered_tic_ids)]
     comp_rms = rms_comp_array[np.isin(tic_ids, filtered_tic_ids)]
     comparison_colors = np.unique(master_star_data['gaiabp'] - master_star_data['gaiarp'])
 
     # Plot the RMS vs magnitudes for all stars
-    print(len(comp_mags), len(comp_rms))
+    logger.info(f'The first comp star has tic id: {filtered_tic_ids[0]}, and Tmag: {comp_mags[0]} and RMS: {comp_rms[0]}')
     plot_noise_model(comp_mags, comp_rms, tmag)
 
     # Plot the magnitudes vs color index for all stars
