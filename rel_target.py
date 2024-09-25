@@ -41,6 +41,8 @@ def plot_rms_vs_magnitudes(all_mags, all_rms, comp_rms, comp_mags, tmag):
     plt.figure(figsize=(10, 8))
 
     # Plot all stars with RMS values (in black)
+    all_rms_value = all_rms[0] * 1e6
+    print(f'The first rms value is {all_rms_value}')
     plt.scatter(all_mags, all_rms, c='black', label='All Stars', alpha=0.8)
 
     # Plot comparison stars with RMS values (in blue)
