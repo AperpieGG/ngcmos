@@ -316,7 +316,7 @@ if __name__ == "__main__":
                                                  'Exp=10.0, Bin=1')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--exp', type=float, default=10, help='Exposure time in seconds')
-    parser.add_argument('--aper', type=float, default=4, help='Aperture size in meters')
+    parser.add_argument('--aper', type=int, default=4, help='Aperture size in meters')
     parser.add_argument('--rn', type=float, default=1.56, help='Read noise in electrons')
     parser.add_argument('--dc', type=float, default=1.6, help='Dark current in electrons per second')
     args = parser.parse_args()
