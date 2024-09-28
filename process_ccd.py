@@ -152,7 +152,7 @@ def main():
     subdirectories = [subdirectory for subdirectory in subdirectories if
                       subdirectory.startswith("action") and subdirectory.endswith("_observeField")]
 
-    logging.info('The subdirectories are:', subdirectories)
+    logging.info(f'The subdirectories are: {subdirectories}')
 
     for subdirectory in subdirectories:
         if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
@@ -202,10 +202,12 @@ def main():
                         # Trim ref_frame_data to match the dimensions of master_bias
                         if master_bias.shape == (2048, 2048):
                             ref_frame_data = ref_frame_data[:, 20:2068]
-                            logging.info(f"Trimmed ref_frame_data shape to match master_bias shape: {ref_frame_data.shape}")
+                            logging.info(f"Trimmed ref_frame_data shape to match master_bias "
+                                         f"shape: {ref_frame_data.shape}")
                             ref_frame_data_corr = ref_frame_data - master_bias
                             logging.info(
-                                f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
+                                f"After bias subtraction, mean pixel value for {filename}: "
+                                f"{np.mean(ref_frame_data_corr)}")
                         else:
                             logging.info("Unable to trim ref_frame_data: master_bias shape is not (2048, 2088)")
                             continue
