@@ -285,7 +285,7 @@ def main(phot_file, bin_size, aper, EXPOSURE, RN, DC):
         json.dump(output_data, json_file, indent=4)
 
 
-def main_loop(phot_files, bin_size):
+def main_loop(phot_files, bin_size, aper, EXPOSURE, RN, DC):
     for phot_file in phot_files:
         output_file = f"rms_mags_{phot_file.replace('.fits', '')}_ccd_{bin_size}.json"
         output_path = os.path.join(os.getcwd(), output_file)
@@ -296,7 +296,7 @@ def main_loop(phot_files, bin_size):
             continue
 
         # If the output file doesn't exist, run the main function
-        main(phot_file, bin_size)
+        main(phot_file, bin_size, aper, EXPOSURE, RN, DC)
 
 
 if __name__ == "__main__":
@@ -327,4 +327,4 @@ if __name__ == "__main__":
     DARK_CURRENT = args.dc  # Dark current in electrons per second
 
     # Run the main function for each photometry file
-    main_loop(phot_files, bin_size)
+    main_loop(phot_files, bin_size, APERTURE, EXPOSURE, READ_NOISE, DARK_CURRENT)
