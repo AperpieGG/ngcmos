@@ -1,9 +1,7 @@
 #! /usr/bin/env python
+import logging
 import os
-
 import numpy as np
-
-from calibration_images_ccd import bias
 from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog, get_light_travel_times, \
     extract_airmass_and_zp
 import json
@@ -18,6 +16,10 @@ from astropy import units as u
 from astropy.utils.exceptions import AstropyWarning
 import fitsio
 
+
+# Set up logging
+logging.basicConfig(filename='process.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
@@ -150,7 +152,7 @@ def main():
     subdirectories = [subdirectory for subdirectory in subdirectories if
                       subdirectory.startswith("action") and subdirectory.endswith("_observeField")]
 
-    print('The subdirectories are:', subdirectories)
+    logging.info('The subdirectories are:', subdirectories)
 
     for subdirectory in subdirectories:
         if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
@@ -159,31 +161,31 @@ def main():
 
             # set directory for the current subdirectory
             directory = subdirectory_path
-            print(f"Directory: {directory}")
+            logging.info(f"Directory: {directory}")
 
             # filter filenames only for .fits data files
             filenames = filter_filenames(directory)
-            print(f"Number of files: {len(filenames)}")
+            logging.info(f"Number of files: {len(filenames)}")
 
             # Get prefixes for each set of images
             prefix = get_prefix(filenames, directory)
-            # print prefix for the specific subdirectory
-            print(f"The prefix for the {subdirectory} is: {prefix}")
+            # prefix for the specific subdirectory
+            logging.info(f"The prefix for the {subdirectory} is: {prefix}")
 
             phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
 
             if os.path.exists(phot_output_filename):
-                print(f"Photometry file for prefix {prefix} already exists, skipping to the next prefix.\n")
+                logging.info(f"Photometry file for prefix {prefix} already exists, skipping to the next prefix.\n")
                 continue
 
-            print(f"Creating new photometry file for prefix {prefix}.\n")
+            logging.info(f"Creating new photometry file for prefix {prefix}.\n")
             phot_table = None
 
             for filename in filenames:
-                print(f"Processing filename {filename}......")
+                logging.info(f"Processing filename {filename}......")
                 # Calibrate image and get FITS file
                 ref_frame_data, ref_header = load_fits(os.path.join(directory, filename))
-                print(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
+                logging.info(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
 
                 if os.path.exists(os.path.join(parent_directory, 'master_bias.fits')):
                     master_bias = fits.getdata(os.path.join(parent_directory, 'master_bias.fits'))
@@ -192,31 +194,31 @@ def main():
                     # Check if master_bias has the same dimensions as ref_frame_data
                     if ref_frame_data.shape == master_bias.shape:
                         ref_frame_data_corr = ref_frame_data - master_bias
-                        print(
+                        logging.info(
                             f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
                     else:
-                        print(
+                        logging.info(
                             f"Master bias shape {master_bias.shape} does not match frame shape {ref_frame_data.shape}!")
                         # Trim ref_frame_data to match the dimensions of master_bias
                         if master_bias.shape == (2048, 2048):
                             ref_frame_data = ref_frame_data[:, 20:2068]
-                            print(f"Trimmed ref_frame_data shape to match master_bias shape: {ref_frame_data.shape}")
+                            logging.info(f"Trimmed ref_frame_data shape to match master_bias shape: {ref_frame_data.shape}")
                             ref_frame_data_corr = ref_frame_data - master_bias
-                            print(
+                            logging.info(
                                 f"After bias subtraction, mean pixel value for {filename}: {np.mean(ref_frame_data_corr)}")
                         else:
-                            print("Unable to trim ref_frame_data: master_bias shape is not (2048, 2088)")
+                            logging.info("Unable to trim ref_frame_data: master_bias shape is not (2048, 2088)")
                             continue
                 else:
                     # Handle the case where master_bias is not assigned
-                    print("Master bias not found, skipping bias subtraction.")
+                    logging.info("Master bias not found, skipping bias subtraction.")
                     ref_frame_data_corr = ref_frame_data  # No bias subtraction
 
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (ref_frame_data_corr, ref_header)}
 
                 frame_data, frame_hdr = reduced_data_dict[filename]
-                print(f"Extracting photometry for {filename}\n")
+                logging.info(f"Extracting photometry for {filename}\n")
 
                 airmass, zp = extract_airmass_and_zp(frame_hdr)
 
@@ -238,12 +240,12 @@ def main():
                 frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
                                                     AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
                 if len(frame_objects) < N_OBJECTS_LIMIT:
-                    print(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!\n")
+                    logging.info(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!\n")
                     continue
 
                 # Load the photometry catalog
                 phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-                print(f"Found catalog with name {prefix}_catalog_input.fits\n")
+                logging.info(f"Found catalog with name {prefix}_catalog_input.fits\n")
                 # Convert RA and DEC to pixel coordinates using the WCS information from the header
                 phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
@@ -261,7 +263,7 @@ def main():
                 time_helio = time_jd.utc + ltt_helio
 
                 frame_ids = [filename for i in range(len(phot_x))]
-                print(f"Found {len(frame_ids)} sources")
+                logging.info(f"Found {len(frame_ids)} sources")
 
                 frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
                                         phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, time_bary.value,
@@ -286,16 +288,16 @@ def main():
                 else:
                     phot_table = vstack([phot_table, frame_output])
 
-                print(f"Finished photometry for {filename}\n")
+                logging.info(f"Finished photometry for {filename}\n")
 
                 # Save the photometry for the current prefix
             if phot_table is not None:
                 phot_table.write(phot_output_filename, overwrite=True)
-                print(f"Saved photometry for prefix {prefix} to {phot_output_filename}\n")
+                logging.info(f"Saved photometry for prefix {prefix} to {phot_output_filename}\n")
             else:
-                print(f"No photometry data for prefix {prefix}.\n")
+                logging.info(f"No photometry data for prefix {prefix}.\n")
 
-            print("Done!\n")
+            logging.info("Done!\n")
 
 
 if __name__ == "__main__":
