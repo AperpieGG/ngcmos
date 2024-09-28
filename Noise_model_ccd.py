@@ -86,7 +86,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
             continue
 
         # Apply sigma clipping to flux and sky arrays
-        time_clipped, flux_4_clipped, fluxerr_4_clipped = remove_outliers(jd_mid, flux_4, fluxerr_4)
+        time_clipped, flux_4_clipped, fluxerr_4_clipped, _, _ = remove_outliers(jd_mid, flux_4, fluxerr_4)
 
         # Detrend the flux by converting back to fluxes and normalize by the mean lc
         trend, dt_flux, dt_fluxerr = calculate_trend_and_flux(time_clipped, flux_4_clipped, fluxerr_4_clipped)
