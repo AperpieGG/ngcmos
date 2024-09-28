@@ -120,6 +120,9 @@ def extract_header(table, image_directory):
     for frame_id in unique_frame_ids:
         # Get the path to the FITS file
         fits_file_path = os.path.join(image_directory, frame_id + '.bz2')
+        if not os.path.exists(fits_file_path):
+            print(f'Images are not zipped for {frame_id}, checking for fits files...')
+            fits_file_path = os.path.join(image_directory, frame_id + '.fits')
 
         # Read FITS file header to extract airmass
         with fits.open(fits_file_path) as hdul:
