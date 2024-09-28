@@ -38,7 +38,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
+def calculate_mean_rms_flux(table, bin_size, num_stars, average_zp, aper):
     """
     Calculate the mean flux and RMS for a given number of stars
 
@@ -50,10 +50,10 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
         Number of images to bin
     num_stars : int
         Number of stars to plot
-    directory : str
-        Directory containing the images
     average_zp : float
         Average zero point value
+    aper : float
+        Aperture size in pixels
 
     Returns
     -------
@@ -79,9 +79,9 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, directory, average_zp):
         tic_id_data = table[(table['tic_id'] == tic_id)]
         jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
-        flux_4 = tic_id_data['flux_6']
-        fluxerr_4 = tic_id_data['fluxerr_6']
-        sky_4 = tic_id_data['flux_w_sky_6'] - tic_id_data['flux_6']
+        flux_4 = tic_id_data[f'flux_{aper}']
+        fluxerr_4 = tic_id_data[f'flux_err_{aper}']
+        sky_4 = tic_id_data[f'flux_w_sky_{aper}'] - tic_id_data[f'flux_{aper}']
         if Tmag > 14:
             continue
 
@@ -148,7 +148,7 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def noise_sources(sky_list, bin_size, airmass_list, zp):
+def noise_sources(sky_list, bin_size, airmass_list, zp, aper, EXPOSURE, RN, DC):
     """
     Returns the noise sources for a given flux
 
@@ -164,6 +164,14 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
         values of airmass
     zp : list
         values of zero points
+    aper : float
+        aperture size in pixels
+    EXPOSURE : float
+        exposure time in seconds
+    RN : float
+        read noise in electrons
+    DC : float
+        dark current in electrons per second
 
     Returns
     -------
@@ -184,22 +192,21 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     """
 
     # set aperture radius
-    aperture_radius = 6
+    aperture_radius = aper
     npix = np.pi * aperture_radius ** 2
 
     # set exposure time and and random flux
-    exposure_time = 10
+    exposure_time = EXPOSURE
 
     synthetic_flux = np.arange(100, 1e7, 1000)
     synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
 
     # set dark current rate from cmos characterisation
-    dark_current_rate = 0.00515
-    dark_current = dark_current_rate * exposure_time * npix
+    dark_current = DC * exposure_time * npix
     dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
 
     # set read noise from cmos characterisation
-    read_noise_pix = 12.6
+    read_noise_pix = RN
     read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     read_signal = npix * (read_noise_pix ** 2)
 
@@ -223,7 +230,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp):
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
 
 
-def main(phot_file, bin_size):
+def main(phot_file, bin_size, aper, EXPOSURE, RN, DC):
     # Set plot parameters
     plot_images()
 
@@ -240,12 +247,12 @@ def main(phot_file, bin_size):
 
     # Calculate mean and RMS for the noise model
     mean_flux_list, RMS_list, sky_list, mags_list, Tmags_list = calculate_mean_rms_flux(
-        phot_table, bin_size=bin_size, num_stars=max_num_stars, directory=current_night_directory,
+        phot_table, bin_size=bin_size, num_stars=max_num_stars, aper=aper,
         average_zp=np.mean(zp))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_list, zp))
+        noise_sources(sky_list, bin_size, airmass_list, zp, aper, EXPOSURE, RN, DC))
 
     # Plot the noise model
 
@@ -272,7 +279,7 @@ def main(phot_file, bin_size):
         "N": N_list,
         "RNS": RNS_list
     }
-    file_name = f"rms_mags_{phot_file.replace('.fits', '')}_ccd_{bin_size}.json"
+    file_name = f"rms_mags_{phot_file.replace('.fits', '')}_{bin_size}.json"
     output_path = os.path.join(os.getcwd(), file_name)
     with open(output_path, 'w') as json_file:
         json.dump(output_data, json_file, indent=4)
@@ -301,10 +308,23 @@ if __name__ == "__main__":
     print(f"Photometry files: {phot_files}")
 
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific tic_id')
+    parser = argparse.ArgumentParser(description='Read and organize TIC IDs with associated '
+                                                 'RMS, Sky, Airmass, ZP, and Magnitude from FITS table.'
+                                                 'Example usage if you have CMOS: RN=1.56, DC=1.6, Aper=4, Exp=10.0, '
+                                                 'Bin=1'
+                                                 'Example usage if you have CCD: RN=12.6, DC=0.00515, Aper=4, '
+                                                 'Exp=10.0, Bin=1')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    parser.add_argument('--exp', type=float, default=10, help='Exposure time in seconds')
+    parser.add_argument('--aper', type=float, default=4, help='Aperture size in meters')
+    parser.add_argument('--rn', type=float, default=1.56, help='Read noise in electrons')
+    parser.add_argument('--dc', type=float, default=1.6, help='Dark current in electrons per second')
     args = parser.parse_args()
     bin_size = args.bin
+    EXPOSURE = args.exp
+    APERTURE = args.aper  # Aperture size for the telescope
+    READ_NOISE = args.rn  # Read noise in electrons
+    DARK_CURRENT = args.dc  # Dark current in electrons per second
 
     # Run the main function for each photometry file
     main_loop(phot_files, bin_size)
