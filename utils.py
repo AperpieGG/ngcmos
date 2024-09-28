@@ -630,7 +630,7 @@ def scintilation_noise(airmass_list):
     return N
 
 
-def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_current, exposure):
+def noise_sources(sky_list, bin_size, airmass_list, zp, aper, rn, dc, exposure):
     """
     Returns the noise sources for a given flux
 
@@ -648,9 +648,9 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_c
         values of zero points
     aper : int
         aperture size
-    read_noise : float
+    rn : float
         value of read noise
-    dark_current : float
+    dc : float
         value of dark current
     exposure : float
         value of exposure time
@@ -684,12 +684,11 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, read_noise, dark_c
     synthetic_mag = np.mean(zp) - 2.5 * np.log10(synthetic_flux / exposure_time)
 
     # set dark current rate from cmos characterisation
-    dark_current_rate = dark_current
-    dark_current = dark_current_rate * exposure_time * npix
+    dark_current = dc * exposure_time * npix
     dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
 
     # set read noise from cmos characterisation
-    read_noise_pix = read_noise
+    read_noise_pix = rn
     read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     read_signal = npix * (read_noise_pix ** 2)
 
