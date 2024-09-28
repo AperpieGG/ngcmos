@@ -80,7 +80,7 @@ def calculate_mean_rms_flux(table, bin_size, num_stars, average_zp, aper):
         jd_mid = tic_id_data['jd_mid']
         Tmag = tic_id_data['Tmag'][0]
         flux_4 = tic_id_data[f'flux_{aper}']
-        fluxerr_4 = tic_id_data[f'flux_err_{aper}']
+        fluxerr_4 = tic_id_data[f'fluxerr_{aper}']
         sky_4 = tic_id_data[f'flux_w_sky_{aper}'] - tic_id_data[f'flux_{aper}']
         if Tmag > 14:
             continue
