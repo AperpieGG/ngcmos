@@ -90,7 +90,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Filter the stars to be used as reference stars, exclude the target star
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
-    print(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
+    logger.info(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
 
     within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
                                                 <= magnitude_tolerance]
