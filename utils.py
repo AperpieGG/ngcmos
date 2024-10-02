@@ -588,7 +588,7 @@ def extract_phot_file(table, tic_id_to_plot, aper):
     return jd_mid, tmag, fluxes, fluxerrs, sky
 
 
-def calculate_trend_and_flux(time, flux, fluxerr, degree=2):
+def calculate_trend_and_flux(time, flux, fluxerr, degree=3):
     """
     Calculate the trend of the flux values over time and adjust flux and fluxerr accordingly.
 

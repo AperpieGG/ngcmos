@@ -26,7 +26,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
+def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree):
     """
     Plot the light curve for a specific TIC ID with detrending
 
@@ -51,11 +51,11 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size):
     fluxerrs = tic_id_data['fluxerr_6']
 
     # # use polyfit to detrend the light curve
-    # trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, 2),
-    #                    jd_mid - int(jd_mid[0]))
+    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, degree),
+                       jd_mid - int(jd_mid[0]))
 
     # use wotan to detrend the light curve
-    flatten_flux, trend = flatten(jd_mid, fluxes, window_length=0.02, method='mean', return_trend=True)
+    # flatten_flux, trend = flatten(jd_mid, fluxes, window_length=0.02, method='mean', return_trend=True)
 
     dt_flux = fluxes / trend
     dt_fluxerr = fluxerrs / trend
@@ -90,6 +90,7 @@ def main():
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
+    parser.add_argument('--degree', type=int, default=2, help='Degree of polynomial fit for detrending')
     args = parser.parse_args()
 
     # Set plot parameters
@@ -109,7 +110,7 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc_with_detrend(phot_table, args.tic_id, args.bin)
+            plot_lc_with_detrend(phot_table, args.tic_id, args.bin, args.degree)
             break  # Stop looping if tic_id is found
         else:
             print(f"TIC ID {args.tic_id} not found in {phot_file}")
