@@ -80,12 +80,12 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree, aper):
 
     # Plot raw flux with wotan model
     ax1.plot(time_binned, dt_flux_binned, '.', color='black', label='Raw Flux')
-    ax1.plot(time_stars, trend, color='red', label='Model fit')
+    ax1.plot(time_binned, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-    ax2.plot(time_stars, dt_flux, '.', color='black', alpha=0.5)
+    ax2.plot(time_binned, dt_flux, '.', color='black', alpha=0.5)
     if bin_size > 1:
         ax2.plot(time_binned, dt_flux, 'o', color='black', markerfacecolor='blue')
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
