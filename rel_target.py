@@ -270,8 +270,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # plot flux ratio for the target star
     plt.figure(figsize=(10, 6))
-    plt.plot(time_stars, fluxerrs_star, 'o', color='blue', alpha=0.8, label='Target Star')
-    plt.plot(time_stars, reference_fluxes, 'o', color='red', alpha=0.8, label='Reference Stars')
+    plt.plot(time_stars, dt_flux, 'o', color='blue', alpha=0.8, label='Target Star')
+    # plt.plot(time_stars, reference_fluxes, 'o', color='red', alpha=0.8, label='Reference Stars')
     plt.xlabel('Time (JD)')
     plt.ylabel('Flux Ratio')
     plt.title(f'Flux Ratio for TIC ID {tic_id_to_plot}')
