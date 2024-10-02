@@ -241,7 +241,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    logger.info(f'The length of the flux of each filter tic_id: {len(filtered_master_star_data)}')
     # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
 
     # Group the flux values by time and sum them across all comparison stars for each time step
@@ -250,6 +249,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Loop through all comparison stars to sum up the fluxes at each time step
     for tic_id in filtered_tic_ids:
         star_fluxes = filtered_master_star_data[filtered_master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        if len(star_fluxes) != len(time_clipped):
+            logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
+            continue
         reference_fluxes += star_fluxes
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
