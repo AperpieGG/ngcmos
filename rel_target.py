@@ -214,7 +214,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         # Detrend the light curve and measure rms
-        flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.05, method='mean', return_trend=True)
+        flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
         fluxes_dt_comp = fluxes_stars / trend
         fluxerrs_dt_comp = fluxerrs_stars / trend
 
@@ -251,7 +251,12 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
-    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
+    # Detrend the light curve and measure rms
+    flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
+    dt_flux_poly = fluxes_stars / trend
+    dt_fluxerr_poly = fluxerrs_stars / trend
+
+    # trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
