@@ -16,7 +16,7 @@ from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_er
 SIGMA = 2
 
 # Set up the logger
-logger = logging.getLogger("rel_phot_logger")
+logger = logging.getLogger("rel_phot_logger_dev")
 logger.setLevel(logging.DEBUG)
 
 # Create console handler and set level to debug
@@ -178,7 +178,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Calculate the color index for all stars
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
 
-    color_tolerance = 0.2
+    color_tolerance = 0.1
     magnitude_tolerance = 1
 
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
@@ -213,11 +213,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
-        # # Detrend the light curve and measure rms
-        # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
-        # fluxes_dt_comp = fluxes_stars / trend
-        # fluxerrs_dt_comp = fluxerrs_stars / trend
-
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
@@ -241,9 +236,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
 
-    # added
     # Group the flux values by time and sum them across all comparison stars for each time step
     reference_fluxes = np.zeros_like(time_stars)
 
@@ -254,7 +247,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
             logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
             continue
         reference_fluxes += star_fluxes
-    # added finishes here
 
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
@@ -277,11 +269,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     plt.title(f'Flux Ratio for TIC ID {tic_id_to_plot}')
     plt.grid(True)
     plt.show()
-
-    # # Detrend the light curve and measure rms
-    # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
-    # dt_flux_poly = dt_flux / trend
-    # dt_fluxerr_poly = dt_fluxerr / trend
 
     trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
@@ -361,12 +348,6 @@ def main():
 
         logger.info(f"Photometry file: {phot_file}")
 
-        # Check if the output file already exists
-        fits_filename = f"lc_{tic_id_to_plot}_{bin_size}.fits"
-        if os.path.exists(fits_filename):
-            logger.info(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
-            continue
-
         # Extract data for the specific TIC ID
         if tic_id_to_plot in np.unique(phot_table['tic_id']):
             logger.info(f"Performing relative photometry for TIC ID = {tic_id_to_plot}")
@@ -387,18 +368,6 @@ def main():
             logger.info(f"RMS for TIC ID {tic_id_to_plot} = {rms:.4f}")
 
             plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, tmag)
-
-            # Create an Astropy table from the result
-            data_list = [(tic_id_to_plot, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                          rms, sky_median, airmass_list, zero_point_list, magnitude)]
-            data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
-                                                      'RMS', 'Sky', 'Airmass', 'ZP', 'Magnitude'))
-
-            expanded_data_table = expand_and_rename_table(data_table)
-
-            expanded_data_table.write(fits_filename, format='fits', overwrite=True)
-
-            logger.info(f"Data for TIC ID {tic_id_to_plot} saved to {fits_filename}.")
         else:
             logger.info(f"TIC ID {tic_id_to_plot} is not present in the photometry file {phot_file}.")
 
