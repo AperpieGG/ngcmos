@@ -60,7 +60,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree, aper):
     #                    time_stars - int(time_stars[0]))
 
     # use wotan to detrend the light curve
-    flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.1, method='mean', return_trend=True)
+    flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.05, method='mean', return_trend=True, edge_cutoff=0.1)
 
     dt_flux = fluxes_stars / trend
     dt_fluxerr = fluxerrs_stars / trend
