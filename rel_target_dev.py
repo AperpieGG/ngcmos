@@ -162,16 +162,16 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Extract data for the target star
     jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
         extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
-    airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
-    zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
+    airmass = table[table['tic_id'] == tic_id_to_plot]['airmass']
+    zero_point = table[table['tic_id'] == tic_id_to_plot]['zp']
 
     sky_median = np.median(sky_star)
-    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
-        remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
-    )
+    # time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
+    #     remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
+    # )
 
-    avg_zero_point = np.mean(zero_point_clipped)
-    avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
+    avg_zero_point = np.mean(zero_point)
+    avg_magnitude = -2.5 * np.log10(np.mean(fluxes_star) / EXPOSURE) + avg_zero_point
     logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
                 f"and calculated magnitude = {avg_magnitude:.2f}")
 
@@ -211,19 +211,19 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-        time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
+        # time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         # # Detrend the light curve and measure rms
         # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
         # fluxes_dt_comp = fluxes_stars / trend
         # fluxerrs_dt_comp = fluxerrs_stars / trend
 
-        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
+        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
         # Collect data for plotting light curves
-        comparison_times.append(time_stars)
+        comparison_times.append(time)
         comparison_fluxes.append(fluxes_dt_comp)
         comparison_fluxerrs.append(fluxerrs_dt_comp)
 
@@ -245,12 +245,12 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # added
     # Group the flux values by time and sum them across all comparison stars for each time step
-    reference_fluxes = np.zeros_like(time_stars)
+    reference_fluxes = np.zeros_like(time)
 
     # Loop through all comparison stars to sum up the fluxes at each time step
     for tic_id in filtered_tic_ids:
         star_fluxes = filtered_master_star_data[filtered_master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        if len(star_fluxes) != len(time_stars):
+        if len(star_fluxes) != len(time):
             logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
             continue
         reference_fluxes += star_fluxes
@@ -270,7 +270,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # plot flux ratio for the target star
     plt.figure(figsize=(10, 6))
-    plt.plot(time_stars, dt_flux, 'o', color='blue', alpha=0.8, label='Target Star')
+    plt.plot(time, dt_flux, 'o', color='blue', alpha=0.8, label='Target Star')
     # plt.plot(time_stars, reference_fluxes, 'o', color='red', alpha=0.8, label='Reference Stars')
     plt.xlabel('Time (JD)')
     plt.ylabel('Flux Ratio')
@@ -283,8 +283,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # dt_flux_poly = dt_flux / trend
     # dt_fluxerr_poly = dt_fluxerr / trend
 
-    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
-    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
+    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time, dt_flux, dt_fluxerr)
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
     logger.info(f'The FINAL number of comparison stars is: {len(filtered_tic_ids)}')
@@ -314,7 +314,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     comparison_list.write(f'comparison_{tic_id_to_plot}_stars.txt', format='ascii', overwrite=True)
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-            avg_magnitude, airmass_clipped, zero_point_clipped)
+            avg_magnitude, airmass, zero_point)
 
 
 def plot_lc(flux, time, rms, tic_id_to_plot, tmag):
