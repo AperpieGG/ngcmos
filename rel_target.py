@@ -251,6 +251,16 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
+    # plot flux ratio for the target star
+    plt.figure(figsize=(10, 6))
+    plt.plot(time_clipped, fluxes_clipped, 'o', color='blue', alpha=0.8, label='Target Star')
+    plt.plot(time_clipped, reference_fluxes, 'o', color='red', alpha=0.8, label='Reference Stars')
+    plt.xlabel('Time (JD)')
+    plt.ylabel('Flux Ratio')
+    plt.title(f'Flux Ratio for TIC ID {tic_id_to_plot}')
+    plt.grid(True)
+    plt.show()
+
     # # Detrend the light curve and measure rms
     # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
     # dt_flux_poly = dt_flux / trend
