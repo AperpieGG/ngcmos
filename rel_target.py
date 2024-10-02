@@ -87,7 +87,7 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     # Loop over figures
     for fig_num in range(num_figures):
         fig, axes = plt.subplots(rows_per_figure, cols, figsize=(16, 3 * rows_per_figure),
-                                 gridspec_kw={'hspace': 0.8, 'wspace': 0.2},
+                                 gridspec_kw={'hspace': 0.5, 'wspace': 0.2},
                                  squeeze=False)
 
         # Start and end indices for the current figure
