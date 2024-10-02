@@ -246,13 +246,13 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
 
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
-    flux_ratio = fluxerrs_clipped / reference_fluxes
+    flux_ratio = fluxes_clipped / reference_fluxes
     # Calculate the average flux ratio of the target star
     flux_ratio_mean = np.mean(flux_ratio)
     # Normalize the flux ratio (result around unity)
     dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
-        (fluxerrs_clipped / fluxerrs_clipped) ** 2 + (fluxerrs_clipped[0] / fluxerrs_clipped[0]) ** 2)
+        (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
     # # Detrend the light curve and measure rms
     # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
