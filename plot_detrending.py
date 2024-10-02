@@ -55,12 +55,13 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree, aper):
     fluxerrs = tic_id_data[f'fluxerr_{aper}']
     time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(jd_mid, fluxes, fluxerrs)
 
-    # # # use polyfit to detrend the light curve
-    # trend = np.polyval(np.polyfit(time_stars - int(time_stars[0]), fluxes_stars, degree),
-    #                    time_stars - int(time_stars[0]))
+    # use polyfit to detrend the light curve
+    trend = np.polyval(np.polyfit(time_stars - int(time_stars[0]), fluxes_stars, degree),
+                       time_stars - int(time_stars[0]))
 
     # use wotan to detrend the light curve
-    flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.05, method='mean', return_trend=True, edge_cutoff=0.1)
+    # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.05,
+    # method='mean', return_trend=True, edge_cutoff=0.1)
 
     dt_flux = fluxes_stars / trend
     dt_fluxerr = fluxerrs_stars / trend
