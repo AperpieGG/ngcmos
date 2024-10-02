@@ -244,12 +244,12 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
 
     # Group the flux values by time and sum them across all comparison stars for each time step
-    reference_fluxes = np.zeros_like(time_clipped)
+    reference_fluxes = np.zeros_like(time_stars)
 
     # Loop through all comparison stars to sum up the fluxes at each time step
     for tic_id in filtered_tic_ids:
         star_fluxes = filtered_master_star_data[filtered_master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        if len(star_fluxes) != len(time_clipped):
+        if len(star_fluxes) != len(time_stars):
             logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
             continue
         reference_fluxes += star_fluxes
