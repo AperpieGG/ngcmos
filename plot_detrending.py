@@ -66,7 +66,7 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree, aper):
     dt_fluxerr = fluxerrs_stars / trend
 
     # Bin the time, flux, and error
-    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_stars, dt_flux, dt_fluxerr, bin_size)
 
     RMS = np.std(dt_flux_binned)
     print(f"RMS for TIC ID {tic_id_to_plot} = {RMS:.4f}")
@@ -75,13 +75,13 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree, aper):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     # Plot raw flux with wotan model
-    ax1.plot(jd_mid, fluxes, '.', color='black', label='Raw Flux')
-    ax1.plot(jd_mid, trend, color='red', label='Model fit')
+    ax1.plot(time_stars, fluxes_stars, '.', color='black', label='Raw Flux')
+    ax1.plot(time_stars, trend, color='red', label='Model fit')
     ax1.set_title(f'Detrended LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
     ax1.set_xlabel('MJD [days]')
     ax1.set_ylabel('Flux [e-]')
     ax1.legend()
-    ax2.plot(jd_mid, dt_flux, '.', color='black', alpha=0.5)
+    ax2.plot(time_stars, dt_flux, '.', color='black', alpha=0.5)
     if bin_size > 1:
         ax2.plot(time_binned, dt_flux_binned, 'o', color='black', markerfacecolor='blue')
     ax2.set_ylabel('Detrended Flux [e-], binned {}'.format(bin_size))
