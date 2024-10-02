@@ -244,7 +244,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
 
     # Group the flux values by time and sum them across all comparison stars for each time step
-    reference_fluxes = np.zeros_like(time_clipped)
+    reference_fluxes = np.zeros_like(time)
 
     # Loop through all comparison stars to sum up the fluxes at each time step
     for tic_id in filtered_tic_ids:
