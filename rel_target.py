@@ -211,19 +211,19 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-        time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
+        # time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         # # Detrend the light curve and measure rms
         # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
         # fluxes_dt_comp = fluxes_stars / trend
         # fluxerrs_dt_comp = fluxerrs_stars / trend
 
-        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
+        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
         # Collect data for plotting light curves
-        comparison_times.append(time_stars)
+        comparison_times.append(time)
         comparison_fluxes.append(fluxes_dt_comp)
         comparison_fluxerrs.append(fluxerrs_dt_comp)
 
@@ -241,7 +241,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
+    # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
 
     # Group the flux values by time and sum them across all comparison stars for each time step
     reference_fluxes = np.zeros_like(time_clipped)
