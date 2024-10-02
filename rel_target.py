@@ -64,11 +64,12 @@ def plot_noise_model(comp_mags, comp_rms, tmag):
     plt.show()
 
 
-def plot_mags_vs_color(mags, colors):
+def plot_mags_vs_color(mags, colors, tmag, target_color_index):
     plt.figure(figsize=(10, 6))
     plt.scatter(colors, mags, c='blue', alpha=0.8)
-    plt.xlabel('TESS Magnitude')
-    plt.ylabel('Gaia BP - RP (Color)')
+    plt.scatter(target_color_index, tmag, c='red', alpha=0.8)
+    plt.xlabel('Gaia BP - RP (Color)')
+    plt.ylabel('TESS Magnitude')
     plt.title('Magnitudes vs Gaia BP - RP Color Index')
     plt.grid(True)
     plt.show()
@@ -129,7 +130,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # check which stars are these
     valid_color_data_tic_ids = np.unique(valid_color_data['tic_id'])
     logger.info(f"Total number of stars with valid color information: {len(valid_color_data_tic_ids)}")
-    
+
     # Get the Tmag of the target star
     target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
 
@@ -251,7 +252,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     plot_noise_model(comparison_mags, comparison_rms, tmag)
 
     # Plot the magnitudes vs color index for all stars
-    plot_mags_vs_color(comparison_mags, comparison_colors)
+    plot_mags_vs_color(comparison_mags, comparison_colors, target_tmag, target_color_index)
 
     # Plot light curves for comparison stars
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
