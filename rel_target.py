@@ -253,8 +253,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Detrend the light curve and measure rms
     flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
-    dt_flux_poly = fluxes_stars / trend
-    dt_fluxerr_poly = fluxerrs_stars / trend
+    dt_flux_poly = dt_flux / trend
+    dt_fluxerr_poly = dt_fluxerr / trend
 
     # trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
