@@ -241,42 +241,18 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
-
-    # added
-    # Group the flux values by time and sum them across all comparison stars for each time step
-    reference_fluxes = np.zeros_like(time_stars)
-
-    # Loop through all comparison stars to sum up the fluxes at each time step
-    for tic_id in filtered_tic_ids:
-        star_fluxes = filtered_master_star_data[filtered_master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        if len(star_fluxes) != len(time_stars):
-            logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
-            continue
-        reference_fluxes += star_fluxes
-    # added finishes here
-
+    reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
 
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
-    flux_ratio = fluxes_star / reference_fluxes
+    flux_ratio = fluxerrs_clipped / reference_fluxes
     # Calculate the average flux ratio of the target star
     flux_ratio_mean = np.mean(flux_ratio)
     # Normalize the flux ratio (result around unity)
     dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
-        (fluxerrs_star / fluxes_star) ** 2 + (fluxerrs_star[0] / fluxes_star[0]) ** 2)
-
-    # plot flux ratio for the target star
-    plt.figure(figsize=(10, 6))
-    plt.plot(time_stars, dt_flux, 'o', color='blue', alpha=0.8, label='Target Star')
-    # plt.plot(time_stars, reference_fluxes, 'o', color='red', alpha=0.8, label='Reference Stars')
-    plt.xlabel('Time (JD)')
-    plt.ylabel('Flux Ratio')
-    plt.title(f'Flux Ratio for TIC ID {tic_id_to_plot}')
-    plt.grid(True)
-    plt.show()
+        (fluxerrs_clipped / fluxerrs_clipped) ** 2 + (fluxerrs_clipped[0] / fluxerrs_clipped[0]) ** 2)
 
     # # Detrend the light curve and measure rms
     # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
