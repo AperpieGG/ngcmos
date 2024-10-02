@@ -241,15 +241,13 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
+    logger.info(f"Comp stars after filtering by sigma clipping: {len(np.unique(filtered_master_star_data['tic_id']))}")
     # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
 
     # Group the flux values by time and sum them across all comparison stars for each time step
     reference_fluxes = np.zeros_like(time_clipped)
 
     # Loop through all comparison stars to sum up the fluxes at each time step
-    # print the length of each star's fluxes
-    flux_len = len(filtered_master_star_data[filtered_master_star_data['tic_id'] == tic_id_to_plot][f'flux_{APERTURE}'])
-    logger.info(f"Length of each star's fluxes: {flux_len}")
     for tic_id in filtered_tic_ids:
         star_fluxes = filtered_master_star_data[filtered_master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         reference_fluxes += star_fluxes
