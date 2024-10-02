@@ -4,7 +4,7 @@ import json
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error
+from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers
 from wotan import flatten
 
 
@@ -26,7 +26,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree):
+def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree, aper):
     """
     Plot the light curve for a specific TIC ID with detrending
 
@@ -37,6 +37,10 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree):
         TIC ID of the star to plot
     bin_size : int
         Number of images to bin
+    degree : int
+        Degree of polynomial fit for detrending
+    aper : int
+        Aperture size for photometry
 
     Returns:
         None
@@ -47,18 +51,19 @@ def plot_lc_with_detrend(table, tic_id_to_plot, bin_size, degree):
     # Get jd_mid, flux_2, and fluxerr_2 for the selected rows
     jd_mid = tic_id_data['jd_mid']
     tmag = tic_id_data['Tmag'][0]
-    fluxes = tic_id_data['flux_6']
-    fluxerrs = tic_id_data['fluxerr_6']
+    fluxes = tic_id_data[f'flux_{aper}']
+    fluxerrs = tic_id_data[f'fluxerr_{aper}']
+    time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(jd_mid, fluxes, fluxerrs)
 
     # # use polyfit to detrend the light curve
-    trend = np.polyval(np.polyfit(jd_mid - int(jd_mid[0]), fluxes, degree),
-                       jd_mid - int(jd_mid[0]))
+    trend = np.polyval(np.polyfit(time_stars - int(time_stars[0]), fluxes_stars, degree),
+                       time_stars - int(time_stars[0]))
 
     # use wotan to detrend the light curve
     # flatten_flux, trend = flatten(jd_mid, fluxes, window_length=0.02, method='mean', return_trend=True)
 
-    dt_flux = fluxes / trend
-    dt_fluxerr = fluxerrs / trend
+    dt_flux = fluxes_stars / trend
+    dt_fluxerr = fluxerrs_stars / trend
 
     # Bin the time, flux, and error
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, dt_flux, dt_fluxerr, bin_size)
@@ -89,6 +94,7 @@ def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
+    parser.add_argument('--aper', type=int, default=4, help='Aperture size for photometry')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--degree', type=int, default=2, help='Degree of polynomial fit for detrending')
     args = parser.parse_args()
@@ -110,7 +116,7 @@ def main():
         # Check if tic_id exists in the current photometry file
         if args.tic_id in phot_table['tic_id']:
             print('Found star in photometry file:', phot_file)
-            plot_lc_with_detrend(phot_table, args.tic_id, args.bin, args.degree)
+            plot_lc_with_detrend(phot_table, args.tic_id, args.bin, args.degree, args.aper)
             break  # Stop looping if tic_id is found
         else:
             print(f"TIC ID {args.tic_id} not found in {phot_file}")
