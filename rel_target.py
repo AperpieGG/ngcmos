@@ -243,6 +243,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
     # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
 
+    # added
     # Group the flux values by time and sum them across all comparison stars for each time step
     reference_fluxes = np.zeros_like(time_stars)
 
@@ -253,6 +254,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
             logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
             continue
         reference_fluxes += star_fluxes
+    # added finishes here
+
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
 
@@ -268,7 +271,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # plot flux ratio for the target star
     plt.figure(figsize=(10, 6))
     plt.plot(time_clipped, fluxes_clipped, 'o', color='blue', alpha=0.8, label='Target Star')
-    plt.plot(time_clipped, reference_fluxes, 'o', color='red', alpha=0.8, label='Reference Stars')
+    plt.plot(time_stars, reference_fluxes, 'o', color='red', alpha=0.8, label='Reference Stars')
     plt.xlabel('Time (JD)')
     plt.ylabel('Flux Ratio')
     plt.title(f'Flux Ratio for TIC ID {tic_id_to_plot}')
