@@ -10,7 +10,7 @@ from astropy.table import Table
 from matplotlib import pyplot as plt
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
                    remove_outliers, extract_phot_file, calculate_trend_and_flux,
-                   expand_and_rename_table, open_json_file)
+                   expand_and_rename_table, open_json_file, calculate_trend_and_flux_wotan)
 
 SIGMA = 2
 
@@ -213,7 +213,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         # Detrend the light curve and measure rms
-        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
+        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux_wotan(time_stars, fluxes_stars, fluxerrs_stars)
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
@@ -246,7 +246,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
 
-    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
+    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux_wotan(time_clipped, dt_flux, dt_fluxerr)
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
