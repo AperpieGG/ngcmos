@@ -324,7 +324,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         comparison_rms = np.array([x[1] for x in comparison_mags_rms])
 
     # Plot the RMS vs magnitudes for all stars
-    plot_noise_model(comparison_mags, comparison_rms, tmag)
+    plot_noise_model(comparison_mags, comparison_rms, target_tmag)
 
     # Plot the magnitudes vs color index for all stars
     plot_mags_vs_color(comparison_mags, comparison_colors, target_tmag, target_color_index)
