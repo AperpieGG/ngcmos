@@ -17,27 +17,30 @@ from astropy.utils.exceptions import AstropyWarning
 import fitsio
 
 
-# Set up the logger
-logger = logging.getLogger("process_ccd")
-logger.setLevel(logging.DEBUG)
+# Set up logging
+logger = logging.getLogger()  # Get the root logger
+logger.setLevel(logging.INFO)  # Set the overall logging level
 
-# Create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+# Create file handler
+file_handler = logging.FileHandler('process.log')
+file_handler.setLevel(logging.INFO)  # Set the level for the file handler
 
-# Create file handler which logs even debug messages
-log_filename = "process.log"
-fh = logging.FileHandler(log_filename)
-fh.setLevel(logging.DEBUG)
+# Create stream handler (for terminal output)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)  # Set the level for the stream handler
 
-# Create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-fh.setFormatter(formatter)
+# Create a formatter and set it for both handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
 
-# Add the handlers to the logger
-logger.addHandler(ch)
-logger.addHandler(fh)
+# Add both handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
+
+# Ignore some annoying warnings
+warnings.simplefilter('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 
 
 GAIN = 1
