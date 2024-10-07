@@ -333,7 +333,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-            avg_magnitude, airmass_clipped, zero_point_clipped)
+            avg_magnitude, airmass_clipped, zero_point_clipped, target_tmag)
 
 
 def plot_lc(flux, time, rms, tic_id_to_plot, tmag):
@@ -393,7 +393,7 @@ def main():
         if tic_id_to_plot in np.unique(phot_table['tic_id']):
             logger.info(f"Performing relative photometry for TIC ID = {tic_id_to_plot}")
             # Perform relative photometry
-            result = relative_phot(phot_table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE)
+            result = relative_phot(phot_table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_stars_file)
 
             # Check if result is None
             if result is None:
@@ -402,13 +402,13 @@ def main():
 
             # Unpack the result if it's not None
             (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-             magnitude, airmass_list, zero_point_list) = result
+             magnitude, airmass_list, zero_point_list, target_tmag) = result
 
             # Calculate RMS
             rms = np.std(dt_flux_binned)
             logger.info(f"RMS for TIC ID {tic_id_to_plot} = {rms:.4f}")
 
-            plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, tmag)
+            plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, target_tmag)
 
             # Create an Astropy table from the result
             data_list = [(tic_id_to_plot, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
