@@ -288,7 +288,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     # Open the file to write comparison stars information
     with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
         # Write the header
-        f.write('tic_id\tTmag\tRMS\n')
+        f.write('tic_id\tTmag\tRMS\tColors\tFluxes\tFluxerrs\n')
 
         # Iterate over filtered TIC IDs, magnitudes, and RMS values
         for tic_id, tmag, rms, colors, fluxes, fluxerrs in zip(filtered_tic_ids, comparison_mags,
