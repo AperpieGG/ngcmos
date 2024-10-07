@@ -265,14 +265,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
             comparison_fluxes.append(fluxes_dt_comp)
             comparison_fluxerrs.append(fluxerrs_dt_comp)
 
-        # Filter stars by RMS threshold (existing code)
-
-        # Save comparison stars' information to a text file
-        with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
-            f.write('TIC_ID\tTmag\tRMS\n')
-            for tic_id, tmag, rms in comp_star_info:
-                f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\n')
-
+        # Filter stars by RMS threshold
         rms_comp_array = np.array(rms_comp_list)
         min_rms_index = np.argmin(rms_comp_array)
         min_rms_tic_id = tic_ids[min_rms_index]
@@ -322,6 +315,12 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         # split the array to comparison rms and comparison mags
         comparison_mags = np.array([x[0] for x in comparison_mags_rms])
         comparison_rms = np.array([x[1] for x in comparison_mags_rms])
+
+    # Save comparison stars' information to a text file
+    with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
+        f.write('TIC_ID\tTmag\tRMS\n')
+        for tic_id, tmag, rms in comp_star_info:
+            f.write(f'{tic_id}\t{tmag:.2f}\t{rms:.4f}\n')
 
     # Plot the RMS vs magnitudes for all stars
     plot_noise_model(comparison_mags, comparison_rms, target_tmag)
