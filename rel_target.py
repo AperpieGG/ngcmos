@@ -202,6 +202,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     tic_ids = np.unique(master_star_data['tic_id'])
 
+    # Create list to store comparison star info
+    comp_star_info = []
+
     rms_comp_list = []
     comparison_fluxes = []
     comparison_fluxerrs = []
@@ -213,19 +216,26 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
-        # # Detrend the light curve and measure rms
-        # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
-        # fluxes_dt_comp = fluxes_stars / trend
-        # fluxerrs_dt_comp = fluxerrs_stars / trend
-
+        # Detrend and get the RMS
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
         rms = np.std(fluxes_dt_comp)
         rms_comp_list.append(rms)
 
-        # Collect data for plotting light curves
+        # Append TIC ID, Tmag, and RMS to comp_star_info
+        comp_star_info.append((tic_id, master_star_data[master_star_data['tic_id'] == tic_id]['Tmag'][0], rms))
+
+        # Collect data for plotting
         comparison_times.append(time_stars)
         comparison_fluxes.append(fluxes_dt_comp)
         comparison_fluxerrs.append(fluxerrs_dt_comp)
+
+    # Filter stars by RMS threshold (existing code)
+
+    # Save comparison stars' information to a text file
+    with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
+        f.write('TIC_ID\tTmag\tRMS\n')
+        for tic_id, tmag, rms in comp_star_info:
+            f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\n')
 
     rms_comp_array = np.array(rms_comp_list)
     min_rms_index = np.argmin(rms_comp_array)
@@ -315,11 +325,14 @@ def main():
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--aper', type=int, default=4, help='Aperture radius for photometry')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
+    parser.add_argument('--comp_stars', type=str, default='comparison_stars.txt',
+                        help='Text file containing comparison stars TIC')
     args = parser.parse_args()
     bin_size = args.bin_size
     APERTURE = args.aper
     EXPOSURE = args.exposure
     tic_id_to_plot = args.tic_id
+    comp_stars_file = args.comp_stars
 
     # Set plot parameters
     plot_images()
