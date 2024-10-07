@@ -285,9 +285,15 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Plot light curves for comparison stars
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
-    # text file and save the comps tic_ids
-    comparison_list = Table([filtered_tic_ids], names=['tic_ids'])
-    comparison_list.write(f'comparison_{tic_id_to_plot}_stars.txt', format='ascii', overwrite=True)
+    # Open the file to write comparison stars information
+    with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
+        # Write the header
+        f.write('tic_id\tTmag\tRMS\n')
+
+        # Iterate over filtered TIC IDs, magnitudes, and RMS values
+        for tic_id, tmag, rms in zip(filtered_tic_ids, comparison_mags, comparison_rms):
+            # Write each row in the specified format
+            f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\n')
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
             avg_magnitude, airmass_clipped, zero_point_clipped)
