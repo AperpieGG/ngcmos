@@ -196,7 +196,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         logger.info(f'The target has color index = {target_color_index:.2f} and TESS magnitude = {target_tmag:.2f}')
 
         # Extract data for the target star
-        jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
+        jd_mid_star, target_tmag, fluxes_star, fluxerrs_star, sky_star = (
             extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
         airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
         zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
@@ -208,7 +208,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
 
         avg_zero_point = np.mean(zero_point_clipped)
         avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
-        logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
+        logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {target_tmag:.2f}, "
                     f"and calculated magnitude = {avg_magnitude:.2f}")
 
         # Calculate the color index for all stars
