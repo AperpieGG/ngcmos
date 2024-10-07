@@ -204,7 +204,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         # Read the comparison stars from the text file
         with open(comp_stars_txt, 'r') as f:
             comp_stars = f.readlines()
-        tic_ids = [int(x.strip()) for x in comp_stars]
+            # take the first column without the header
+            tic_ids = [int(line.split()[0]) for line in comp_stars if line[0].isdigit()]
 
     else:
         tic_ids = np.unique(master_star_data['tic_id'])
