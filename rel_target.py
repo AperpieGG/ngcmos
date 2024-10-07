@@ -200,6 +200,13 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
                        f"comparison stars found (less than 5).")
         return None
 
+    # if comp_stars_txt is not None:
+    #     # Read the comparison stars from the text file
+    #     with open(comp_stars_txt, 'r') as f:
+    #         comp_stars = f.readlines()
+    #     tic_ids = [int(x.strip()) for x in comp_stars]
+    
+    # else:
     tic_ids = np.unique(master_star_data['tic_id'])
 
     rms_comp_list = []
