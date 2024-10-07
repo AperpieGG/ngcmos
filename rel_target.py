@@ -126,28 +126,7 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         plt.show()
 
 
-def read_comparison_stars(filename):
-    """
-    Reads comparison stars from a provided text file.
-
-    Parameters:
-    filename : str
-        Path to the file containing comparison stars (TIC ID, Tmag, RMS).
-
-    Returns:
-    list : A list of comparison star information (tic_id, tmag, rms).
-    """
-    comp_stars = []
-    with open(filename, 'r') as f:
-        # Skip the header line
-        next(f)
-        for line in f:
-            tic_id, tmag, rms = line.strip().split('\t')
-            comp_stars.append((int(tic_id), float(tmag), float(rms)))
-    return comp_stars
-
-
-def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_stars_file=None):
+def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     """
     Create a relative light curve for a specific TIC ID.
 
@@ -158,181 +137,160 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         TIC ID of the target star to exclude.
     bin_size : int
         Number of images to bin.
-    comp_stars_file : str or None
-        Path to a text file with comparison stars. If provided, the comparison stars will be read from the file.
 
     Returns:
         Various outputs related to the relative photometry.
     """
+    # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
+    valid_color_data = table[~np.isnan(table['gaiabp']) & ~np.isnan(table['gaiarp'])]
 
-    if comp_stars_file:
-        # If a comparison stars file is provided, read it
-        logger.info(f"Using comparison stars from {comp_stars_file}")
-        comp_star_info = read_comparison_stars(comp_stars_file)
+    # check which stars are these
+    valid_color_data_tic_ids = np.unique(valid_color_data['tic_id'])
+    logger.info(f"Total number of stars with valid color information: {len(valid_color_data_tic_ids)}")
 
-        # Extract TIC IDs, Tmags, and RMS from the file
-        tic_ids = [item[0] for item in comp_star_info]
-        comparison_mags = np.array([item[1] for item in comp_star_info])
-        comparison_rms = np.array([item[2] for item in comp_star_info])
-        logger.info(f"Comparison stars are in total: {len(tic_ids)}")
+    # Get the Tmag of the target star
+    target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
 
-    else:
-        # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
-        valid_color_data = table[~np.isnan(table['gaiabp']) & ~np.isnan(table['gaiarp'])]
+    if len(target_star) == 0:
+        logger.error(f"Target star with TIC ID {tic_id_to_plot} has missing color information. Exiting function.")
+        return None
 
-        # check which stars are these
-        valid_color_data_tic_ids = np.unique(valid_color_data['tic_id'])
-        logger.info(f"Total number of stars with valid color information: {len(valid_color_data_tic_ids)}")
+    target_tmag = target_star['Tmag'][0]
+    target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]
+    logger.info(f'The target has color index = {target_color_index:.2f} and TESS magnitude = {target_tmag:.2f}')
 
-        # Get the Tmag of the target star
-        target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
+    # Extract data for the target star
+    jd_mid_star, tmag, fluxes_star, fluxerrs_star, sky_star = (
+        extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
+    airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
+    zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
 
-        if len(target_star) == 0:
-            logger.error(f"Target star with TIC ID {tic_id_to_plot} has missing color information. Exiting function.")
-            return None
+    sky_median = np.median(sky_star)
+    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
+        remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
+    )
 
-        target_tmag = target_star['Tmag'][0]
-        target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]
-        logger.info(f'The target has color index = {target_color_index:.2f} and TESS magnitude = {target_tmag:.2f}')
+    avg_zero_point = np.mean(zero_point_clipped)
+    avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
+    logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
+                f"and calculated magnitude = {avg_magnitude:.2f}")
 
-        # Extract data for the target star
-        jd_mid_star, target_tmag, fluxes_star, fluxerrs_star, sky_star = (
-            extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
-        airmass_list = table[table['tic_id'] == tic_id_to_plot]['airmass']
-        zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
+    # Calculate the color index for all stars
+    color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
 
-        sky_median = np.median(sky_star)
-        time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
-            remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
-        )
+    color_tolerance = 0.2
+    magnitude_tolerance = 1
 
-        avg_zero_point = np.mean(zero_point_clipped)
-        avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
-        logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {target_tmag:.2f}, "
-                    f"and calculated magnitude = {avg_magnitude:.2f}")
+    within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
+    logger.info(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
 
-        # Calculate the color index for all stars
-        color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
+    within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
+                                                <= magnitude_tolerance]
+    logger.info(f"Comp stars within color and mag limit: {len(np.unique(within_magnitude_limit['tic_id']))}")
 
-        color_tolerance = 0.2
-        magnitude_tolerance = 1
+    within_magnitude_limit = within_magnitude_limit[within_magnitude_limit['Tmag'] > 9.4]
+    logger.info(f"Comp stars dimmer than 9.4 mags: {len(np.unique(within_magnitude_limit['tic_id']))}")
 
-        within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
-        logger.info(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
+    master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
+    master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
+    logger.info(f'The comparison stars before RMS filtering are: {master_stars_data_tic_ids}')
 
-        within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
-                                                    <= magnitude_tolerance]
-        logger.info(f"Comp stars within color and mag limit: {len(np.unique(within_magnitude_limit['tic_id']))}")
+    if len(master_stars_data_tic_ids) < 4:
+        logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
+                       f"comparison stars found (less than 5).")
+        return None
 
-        within_magnitude_limit = within_magnitude_limit[within_magnitude_limit['Tmag'] > 9.4]
-        logger.info(f"Comp stars dimmer than 9.4 mags: {len(np.unique(within_magnitude_limit['tic_id']))}")
+    tic_ids = np.unique(master_star_data['tic_id'])
 
-        master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
-        master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
-        logger.info(f'The comparison stars before RMS filtering are: {master_stars_data_tic_ids}')
+    rms_comp_list = []
+    comparison_fluxes = []
+    comparison_fluxerrs = []
+    comparison_times = []
 
-        if len(master_stars_data_tic_ids) < 4:
-            logger.warning(f"Target TIC ID {tic_id_to_plot} skipped because only {len(master_stars_data_tic_ids)} "
-                           f"comparison stars found (less than 5).")
-            return None
-
-        tic_ids = np.unique(master_star_data['tic_id'])
-
-        # Create list to store comparison star info
-        comp_star_info = []
-
-        rms_comp_list = []
-        comparison_fluxes = []
-        comparison_fluxerrs = []
-        comparison_times = []
-
-        for tic_id in tic_ids:
-            fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-            fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
-            time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-            time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
-
-            # Detrend and get the RMS
-            trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
-            rms = np.std(fluxes_dt_comp)
-            rms_comp_list.append(rms)
-
-            # Append TIC ID, Tmag, and RMS to comp_star_info
-            comp_star_info.append((tic_id, master_star_data[master_star_data['tic_id'] == tic_id]['Tmag'][0], rms))
-
-            # Collect data for plotting
-            comparison_times.append(time_stars)
-            comparison_fluxes.append(fluxes_dt_comp)
-            comparison_fluxerrs.append(fluxerrs_dt_comp)
-
-        # Filter stars by RMS threshold
-        rms_comp_array = np.array(rms_comp_list)
-        min_rms_index = np.argmin(rms_comp_array)
-        min_rms_tic_id = tic_ids[min_rms_index]
-        min_rms_value = rms_comp_array[min_rms_index]
-
-        logger.info(f"Min Comp star with min RMS: TIC ID = {min_rms_tic_id}, RMS = {min_rms_value:.4f}")
-
-        threshold = SIGMA * min_rms_value
-        logger.info(f"Threshold for {SIGMA}-sigma clipping: {threshold:.4f}")
-
-        filtered_tic_ids = tic_ids[rms_comp_array < threshold]
-        logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
-
-        filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-        reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
-        reference_flux_mean = np.mean(reference_fluxes)
-        logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
-
-        # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
-        flux_ratio = fluxes_clipped / reference_fluxes
-        # Calculate the average flux ratio of the target star
-        flux_ratio_mean = np.mean(flux_ratio)
-        # Normalize the flux ratio (result around unity)
-        dt_flux = flux_ratio / flux_ratio_mean
-        dt_fluxerr = dt_flux * np.sqrt(
-            (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
+    for tic_id in tic_ids:
+        fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+        time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
+        time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         # # Detrend the light curve and measure rms
-        # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
-        # dt_flux_poly = dt_flux / trend
-        # dt_fluxerr_poly = dt_fluxerr / trend
+        # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
+        # fluxes_dt_comp = fluxes_stars / trend
+        # fluxerrs_dt_comp = fluxerrs_stars / trend
 
-        trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
-                                                                             dt_fluxerr_poly, bin_size)
+        trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
+        rms = np.std(fluxes_dt_comp)
+        rms_comp_list.append(rms)
 
-        logger.info(f'The FINAL number of comparison stars is: {len(filtered_tic_ids)}')
-        # take mags and rms for these filtered_tic_ids
-        comparison_mags_rms = []
-        comparison_colors = []
+        # Collect data for plotting light curves
+        comparison_times.append(time_stars)
+        comparison_fluxes.append(fluxes_dt_comp)
+        comparison_fluxerrs.append(fluxerrs_dt_comp)
 
-        for tic_id in filtered_tic_ids:
-            tic_data = master_star_data[master_star_data['tic_id'] == tic_id]
-            comparison_mags_rms.append((tic_data['Tmag'][0], rms_comp_array[tic_ids == tic_id][0]))
-            comparison_colors.append(tic_data['gaiabp'][0] - tic_data['gaiarp'][0])
+    rms_comp_array = np.array(rms_comp_list)
+    min_rms_index = np.argmin(rms_comp_array)
+    min_rms_tic_id = tic_ids[min_rms_index]
+    min_rms_value = rms_comp_array[min_rms_index]
 
-        # split the array to comparison rms and comparison mags
-        comparison_mags = np.array([x[0] for x in comparison_mags_rms])
-        comparison_rms = np.array([x[1] for x in comparison_mags_rms])
+    logger.info(f"Min Comp star with min RMS: TIC ID = {min_rms_tic_id}, RMS = {min_rms_value:.4f}")
 
-    # Save comparison stars' information to a text file
-    with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
-        f.write('TIC_ID\tTmag\tRMS\n')
-        for tic_id, tmag, rms in comp_star_info:
-            f.write(f'{tic_id}\t{tmag:.2f}\t{rms:.4f}\n')
+    threshold = SIGMA * min_rms_value
+    logger.info(f"Threshold for {SIGMA}-sigma clipping: {threshold:.4f}")
+
+    filtered_tic_ids = tic_ids[rms_comp_array < threshold]
+    logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
+
+    filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
+    reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
+    reference_flux_mean = np.mean(reference_fluxes)
+    logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
+
+    # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
+    flux_ratio = fluxes_clipped / reference_fluxes
+    # Calculate the average flux ratio of the target star
+    flux_ratio_mean = np.mean(flux_ratio)
+    # Normalize the flux ratio (result around unity)
+    dt_flux = flux_ratio / flux_ratio_mean
+    dt_fluxerr = dt_flux * np.sqrt(
+        (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
+
+    # # Detrend the light curve and measure rms
+    # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
+    # dt_flux_poly = dt_flux / trend
+    # dt_fluxerr_poly = dt_fluxerr / trend
+
+    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
+    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
+                                                                         dt_fluxerr_poly, bin_size)
+
+    logger.info(f'The FINAL number of comparison stars is: {len(filtered_tic_ids)}')
+    # take mags and rms for these filtered_tic_ids
+    comparison_mags_rms = []
+    comparison_colors = []
+
+    for tic_id in filtered_tic_ids:
+        tic_data = master_star_data[master_star_data['tic_id'] == tic_id]
+        comparison_mags_rms.append((tic_data['Tmag'][0], rms_comp_array[tic_ids == tic_id][0]))
+        comparison_colors.append(tic_data['gaiabp'][0] - tic_data['gaiarp'][0])
+
+    # split the array to comparison rms and comparison mags
+    comparison_mags = np.array([x[0] for x in comparison_mags_rms])
+    comparison_rms = np.array([x[1] for x in comparison_mags_rms])
 
     # Plot the RMS vs magnitudes for all stars
-    plot_noise_model(comparison_mags, comparison_rms, target_tmag)
+    plot_noise_model(comparison_mags, comparison_rms, tmag)
 
     # Plot the magnitudes vs color index for all stars
     plot_mags_vs_color(comparison_mags, comparison_colors, target_tmag, target_color_index)
 
     # Plot light curves for comparison stars
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
+    # text file and save the comps tic_ids
+    comparison_list = Table([filtered_tic_ids], names=['tic_ids'])
+    comparison_list.write(f'comparison_{tic_id_to_plot}_stars.txt', format='ascii', overwrite=True)
 
     return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-            avg_magnitude, airmass_clipped, zero_point_clipped, target_tmag)
+            avg_magnitude, airmass_clipped, zero_point_clipped)
 
 
 def plot_lc(flux, time, rms, tic_id_to_plot, tmag):
@@ -392,7 +350,7 @@ def main():
         if tic_id_to_plot in np.unique(phot_table['tic_id']):
             logger.info(f"Performing relative photometry for TIC ID = {tic_id_to_plot}")
             # Perform relative photometry
-            result = relative_phot(phot_table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_stars_file)
+            result = relative_phot(phot_table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE)
 
             # Check if result is None
             if result is None:
@@ -401,13 +359,13 @@ def main():
 
             # Unpack the result if it's not None
             (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-             magnitude, airmass_list, zero_point_list, target_tmag) = result
+             magnitude, airmass_list, zero_point_list) = result
 
             # Calculate RMS
             rms = np.std(dt_flux_binned)
             logger.info(f"RMS for TIC ID {tic_id_to_plot} = {rms:.4f}")
 
-            plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, target_tmag)
+            plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, tmag)
 
             # Create an Astropy table from the result
             data_list = [(tic_id_to_plot, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
