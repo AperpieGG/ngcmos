@@ -291,9 +291,11 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         f.write('tic_id\tTmag\tRMS\n')
 
         # Iterate over filtered TIC IDs, magnitudes, and RMS values
-        for tic_id, tmag, rms in zip(filtered_tic_ids, comparison_mags, comparison_rms):
+        for tic_id, tmag, rms, colors, fluxes, fluxerrs in zip(filtered_tic_ids, comparison_mags,
+                                                               comparison_rms, comparison_colors,
+                                                               comparison_fluxes, comparison_fluxerrs):
             # Write each row in the specified format
-            f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\n')
+            f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\t{colors:.4f}\t{fluxes}\t{fluxerrs}\n')
 
     return (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
             avg_magnitude, airmass_clipped, zero_point_clipped)
