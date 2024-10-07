@@ -174,6 +174,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         tic_ids = [item[0] for item in comp_star_info]
         comparison_mags = np.array([item[1] for item in comp_star_info])
         comparison_rms = np.array([item[2] for item in comp_star_info])
+        logger.info(f"Comparison stars are in total: {len(tic_ids)}")
 
     else:
         # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
