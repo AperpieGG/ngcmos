@@ -126,7 +126,7 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         plt.show()
 
 
-def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
+def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_stars_txt=None):
     """
     Create a relative light curve for a specific TIC ID.
 
@@ -200,14 +200,14 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
                        f"comparison stars found (less than 5).")
         return None
 
-    # if comp_stars_txt is not None:
-    #     # Read the comparison stars from the text file
-    #     with open(comp_stars_txt, 'r') as f:
-    #         comp_stars = f.readlines()
-    #     tic_ids = [int(x.strip()) for x in comp_stars]
-    
-    # else:
-    tic_ids = np.unique(master_star_data['tic_id'])
+    if comp_stars_txt is not None:
+        # Read the comparison stars from the text file
+        with open(comp_stars_txt, 'r') as f:
+            comp_stars = f.readlines()
+        tic_ids = [int(x.strip()) for x in comp_stars]
+
+    else:
+        tic_ids = np.unique(master_star_data['tic_id'])
 
     rms_comp_list = []
     comparison_fluxes = []
@@ -292,17 +292,22 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Plot light curves for comparison stars
     plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
-    # Open the file to write comparison stars information
-    with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
-        # Write the header
-        f.write('tic_id\tTmag\tRMS\tColors\tFluxes\tFluxerrs\n')
 
-        # Iterate over filtered TIC IDs, magnitudes, and RMS values
-        for tic_id, tmag, rms, colors, fluxes, fluxerrs in zip(filtered_tic_ids, comparison_mags,
-                                                               comparison_rms, comparison_colors,
-                                                               comparison_fluxes, comparison_fluxerrs):
-            # Write each row in the specified format
-            f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\t{colors:.4f}\t{fluxes}\t{fluxerrs}\n')
+    comparison_files_path = os.path.join(os.getcwd(), f'comparison_stars_{tic_id_to_plot}.txt')
+    if os.path.exists(comparison_files_path):
+        logger.info(f"Comparison stars information already saved to {comparison_files_path}.")
+    else:
+        # Open the file to write comparison stars information
+        with open(f'comparison_stars_{tic_id_to_plot}.txt', 'w') as f:
+            # Write the header
+            f.write('tic_id\tTmag\tRMS\tColors\tFluxes\tFluxerrs\n')
+
+            # Iterate over filtered TIC IDs, magnitudes, and RMS values
+            for tic_id, tmag, rms, colors, fluxes, fluxerrs in zip(filtered_tic_ids, comparison_mags,
+                                                                   comparison_rms, comparison_colors,
+                                                                   comparison_fluxes, comparison_fluxerrs):
+                # Write each row in the specified format
+                f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\t{colors:.4f}\t{fluxes}\t{fluxerrs}\n')
 
     return (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
             avg_magnitude, airmass_clipped, zero_point_clipped)
@@ -365,7 +370,7 @@ def main():
         if tic_id_to_plot in np.unique(phot_table['tic_id']):
             logger.info(f"Performing relative photometry for TIC ID = {tic_id_to_plot}")
             # Perform relative photometry
-            result = relative_phot(phot_table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE)
+            result = relative_phot(phot_table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_stars_file)
 
             # Check if result is None
             if result is None:
