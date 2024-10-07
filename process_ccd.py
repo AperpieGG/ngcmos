@@ -17,13 +17,27 @@ from astropy.utils.exceptions import AstropyWarning
 import fitsio
 
 
-# Set up logging
-logging.basicConfig(filename='process.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# Set up the logger
+logger = logging.getLogger("process_ccd")
+logger.setLevel(logging.DEBUG)
 
-# ignore some annoying warnings
-warnings.simplefilter('ignore', category=UserWarning)
-warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
+# Create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# Create file handler which logs even debug messages
+log_filename = "process.log"
+fh = logging.FileHandler(log_filename)
+fh.setLevel(logging.DEBUG)
+
+# Create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+
+# Add the handlers to the logger
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 GAIN = 1
