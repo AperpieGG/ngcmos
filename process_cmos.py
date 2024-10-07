@@ -16,9 +16,27 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.utils.exceptions import AstropyWarning
 
+
 # Set up logging
-logging.basicConfig(filename='process.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger()  # Get the root logger
+logger.setLevel(logging.INFO)  # Set the overall logging level
+
+# Create file handler
+file_handler = logging.FileHandler('process.log')
+file_handler.setLevel(logging.INFO)  # Set the level for the file handler
+
+# Create stream handler (for terminal output)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)  # Set the level for the stream handler
+
+# Create a formatter and set it for both handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+
+# Add both handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 # Ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
