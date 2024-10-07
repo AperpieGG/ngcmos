@@ -246,7 +246,10 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     threshold = SIGMA * min_rms_value
     logger.info(f"Threshold for {SIGMA}-sigma clipping: {threshold:.4f}")
 
-    filtered_tic_ids = tic_ids[rms_comp_array < threshold]
+    if comp_stars_txt is not None:
+        filtered_tic_ids = tic_ids
+    else:
+        filtered_tic_ids = tic_ids[rms_comp_array < threshold]
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
