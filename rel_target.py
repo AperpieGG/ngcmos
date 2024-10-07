@@ -295,7 +295,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
             # Write each row in the specified format
             f.write(f'{tic_id}\t{tmag:.4f}\t{rms:.4f}\n')
 
-    return (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+    return (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
             avg_magnitude, airmass_clipped, zero_point_clipped)
 
 
@@ -364,17 +364,17 @@ def main():
                 continue
 
             # Unpack the result if it's not None
-            (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+            (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
              magnitude, airmass_list, zero_point_list) = result
 
             # Calculate RMS
             rms = np.std(dt_flux_binned)
             logger.info(f"RMS for TIC ID {tic_id_to_plot} = {rms:.4f}")
 
-            plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, tmag)
+            plot_lc(dt_flux_binned, time_binned, rms, tic_id_to_plot, target_tmag)
 
             # Create an Astropy table from the result
-            data_list = [(tic_id_to_plot, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
+            data_list = [(tic_id_to_plot, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
                           rms, sky_median, airmass_list, zero_point_list, magnitude)]
             data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
                                                       'RMS', 'Sky', 'Airmass', 'ZP', 'Magnitude'))
