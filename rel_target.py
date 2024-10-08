@@ -340,8 +340,7 @@ def main():
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--aper', type=int, default=4, help='Aperture radius for photometry')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
-    parser.add_argument('--comp_stars', type=str, default='comparison_stars.txt',
-                        help='Text file containing comparison stars TIC')
+    parser.add_argument('--comp_stars', type=str, help='Text file containing comparison stars TIC')
     args = parser.parse_args()
     bin_size = args.bin_size
     APERTURE = args.aper
