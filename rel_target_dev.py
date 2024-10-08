@@ -4,13 +4,14 @@
 """
 import argparse
 import os
+import sys
+
 import numpy as np
-from wotan import flatten
 import logging
 from astropy.table import Table
 from matplotlib import pyplot as plt
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
-                   remove_outliers, extract_phot_file, calculate_trend_and_flux,
+                   extract_phot_file, calculate_trend_and_flux,
                    expand_and_rename_table, open_json_file)
 
 SIGMA = 2
@@ -143,18 +144,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     """
     # Remove rows where either Gaia BP or RP magnitude is missing (NULL values)
     valid_color_data = table[~np.isnan(table['gaiabp']) & ~np.isnan(table['gaiarp'])]
-
-    # check which stars are these
-    valid_color_data_tic_ids = np.unique(valid_color_data['tic_id'])
-    logger.info(f"Total number of stars with valid color information: {len(valid_color_data_tic_ids)}")
-
-    # Get the Tmag of the target star
+    logger.info(f"Total number of stars with valid color information: {len(np.unique(valid_color_data['tic_id']))}")
     target_star = valid_color_data[valid_color_data['tic_id'] == tic_id_to_plot]
-
-    if len(target_star) == 0:
-        logger.error(f"Target star with TIC ID {tic_id_to_plot} has missing color information. Exiting function.")
-        return None
-
     target_tmag = target_star['Tmag'][0]
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]
     logger.info(f'The target has color index = {target_color_index:.2f} and TESS magnitude = {target_tmag:.2f}')
@@ -164,26 +155,19 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         extract_phot_file(table, tic_id_to_plot, aper=APERTURE))
     airmass = table[table['tic_id'] == tic_id_to_plot]['airmass']
     zero_point = table[table['tic_id'] == tic_id_to_plot]['zp']
-
     sky_median = np.median(sky_star)
-    # time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
-    #     remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
-    # )
-
     avg_zero_point = np.mean(zero_point)
+
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_star) / EXPOSURE) + avg_zero_point
     logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
                 f"and calculated magnitude = {avg_magnitude:.2f}")
 
     # Calculate the color index for all stars
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
-
     color_tolerance = 0.1
     magnitude_tolerance = 1
-
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
     logger.info(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
-
     within_magnitude_limit = within_color_limit[np.abs(within_color_limit['Tmag'] - target_tmag)
                                                 <= magnitude_tolerance]
     logger.info(f"Comp stars within color and mag limit: {len(np.unique(within_magnitude_limit['tic_id']))}")
@@ -211,12 +195,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-        # time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
-
-        # # Detrend the light curve and measure rms
-        # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
-        # fluxes_dt_comp = fluxes_stars / trend
-        # fluxerrs_dt_comp = fluxerrs_stars / trend
 
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
         rms = np.std(fluxes_dt_comp)
@@ -240,10 +218,28 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     filtered_tic_ids = tic_ids[rms_comp_array < threshold]
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
+    # these are the final tic_ids to use for comparison, and we will plot their raw light curves
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    # reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
+    final_tic_ids = np.unique(filtered_master_star_data['tic_id'])
 
-    # added
+    # take time, fluxes and fluxerrs for these final tic_ids to plot
+    times_filtered_id = []
+    fluxes_filtered_id = []
+    fluxerrs_filtered_id = []
+
+    for tic_id in final_tic_ids:
+        time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
+        fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+
+        times_filtered_id.append(time)
+        fluxes_filtered_id.append(fluxes)
+        fluxerrs_filtered_id.append(fluxerrs)
+
+    plot_lightcurves_in_subplots(times_filtered_id, fluxes_filtered_id, fluxerrs_filtered_id, final_tic_ids)
+
+    sys.exit()
+
     # Group the flux values by time and sum them across all comparison stars for each time step
     reference_fluxes = np.zeros_like(time)
 
@@ -254,7 +250,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
             logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
             continue
         reference_fluxes += star_fluxes
-    # added finishes here
 
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
@@ -277,11 +272,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     plt.title(f'Flux Ratio for TIC ID {tic_id_to_plot}')
     plt.grid(True)
     plt.show()
-
-    # # Detrend the light curve and measure rms
-    # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
-    # dt_flux_poly = dt_flux / trend
-    # dt_fluxerr_poly = dt_fluxerr / trend
 
     trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time, dt_flux, dt_fluxerr)
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time, dt_flux_poly,
