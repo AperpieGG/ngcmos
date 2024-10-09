@@ -241,7 +241,8 @@ def main(phot_file, bin_size, aper, EXPOSURE, RN, DC):
     print(f"Plotting the photometry file {phot_file}...")
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-    airmass_list, zp = extract_header(phot_table, current_night_directory)
+    airmass_list = phot_table['airmass']
+    zp = phot_table['zp']
 
     max_num_stars = len(np.unique(phot_table['tic_id']))  # Maximum number of stars based on unique TIC IDs
 
