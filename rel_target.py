@@ -255,7 +255,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     reference_fluxes = np.sum([master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
                                for tic_id in filtered_tic_ids], axis=0)
 
-    plot_lc(reference_fluxes, time_clipped, np.std(reference_fluxes), tic_id_to_plot, tmag)
+    plt.plot(time_clipped, reference_fluxes, 'o', label='Reference Star', color='blue')
+    plt.show()
 
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
     flux_ratio = fluxes_clipped / reference_fluxes
@@ -271,9 +272,10 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     # dt_flux_poly = dt_flux / trend
     # dt_fluxerr_poly = dt_fluxerr / trend
 
+    plot_lc(dt_flux, time_clipped, np.std(dt_flux), tic_id_to_plot, target_tmag)
     # trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
-    trend, dt_flux_poly, dt_fluxerr_poly =  time_clipped, dt_flux, dt_fluxerr
-    
+    trend, dt_flux_poly, dt_fluxerr_poly = time_clipped, dt_flux, dt_fluxerr
+
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
