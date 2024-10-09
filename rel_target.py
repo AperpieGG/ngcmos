@@ -261,7 +261,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
     flux_ratio = fluxes_clipped / reference_fluxes
     # Calculate the average flux ratio of the target star
-    flux_ratio_mean = np.mean(flux_ratio)
+    flux_ratio_mean = np.median(flux_ratio)
     # Normalize the flux ratio (result around unity)
     dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
