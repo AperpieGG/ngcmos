@@ -12,7 +12,7 @@ from astropy.table import Table
 from matplotlib import pyplot as plt
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
                    extract_phot_file, calculate_trend_and_flux,
-                   expand_and_rename_table, open_json_file)
+                   expand_and_rename_table, open_json_file, remove_outliers)
 
 SIGMA = 2
 
@@ -195,6 +195,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
+        time, fluxes, fluxerrs, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
         rms = np.std(fluxes_dt_comp)
