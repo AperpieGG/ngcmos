@@ -164,7 +164,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Calculate the color index for all stars
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
-    color_tolerance = 0.1
+    color_tolerance = 0.2
     magnitude_tolerance = 1
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
     logger.info(f'Comp stars within color limit: {len(np.unique(within_color_limit["tic_id"]))}')
