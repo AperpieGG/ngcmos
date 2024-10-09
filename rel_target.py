@@ -221,11 +221,11 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     comparison_times = []
 
     for tic_id in tic_ids:
-        fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
-        time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
+        comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        comp_fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+        comp_time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         # time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
-        time_stars, fluxes_stars, fluxerrs_stars = time, fluxes, fluxerrs
+        time_stars, fluxes_stars, fluxerrs_stars = comp_time, comp_fluxes, comp_fluxerrs
 
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
         rms = np.std(fluxes_dt_comp)
@@ -303,7 +303,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     plot_mags_vs_color(comparison_mags, comparison_colors, target_tmag, target_color_index)
 
     # Plot light curves for comparison stars
-    plot_lightcurves_in_subplots(comparison_times, comparison_fluxes, comparison_fluxerrs, filtered_tic_ids)
+    plot_lightcurves_in_subplots(comp_time, comp_fluxes, comp_fluxerrs, filtered_tic_ids)
 
     comparison_files_path = os.path.join(os.getcwd(), f'comparison_stars_{tic_id_to_plot}.txt')
     if os.path.exists(comparison_files_path):
