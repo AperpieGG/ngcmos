@@ -2,8 +2,8 @@
 import logging
 import os
 import numpy as np
-from utils import get_location, wcs_phot, _detect_objects_sep, get_catalog, get_light_travel_times, \
-    extract_airmass_and_zp
+from utils import (get_location, wcs_phot, _detect_objects_sep, get_catalog,
+                   extract_airmass_and_zp, get_light_travel_times)
 import json
 import warnings
 from astropy.io import fits
@@ -43,7 +43,7 @@ warnings.simplefilter('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 
 
-GAIN = 1
+GAIN = 2
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
 APERTURE_RADII = [2, 3, 4, 5, 6]
@@ -58,24 +58,6 @@ DETECTION_SIGMA = 3
 ZP_CLIP_SIGMA = 3
 
 OK, TOO_FEW_OBJECTS, UNKNOWN = range(3)
-
-
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
 
 
 def filter_filenames(directory):
