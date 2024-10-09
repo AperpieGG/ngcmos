@@ -104,6 +104,8 @@ def main():
     airmass_array = np.array(airmass_list)
     zp_array = np.array(zp_list)
     print('The average airmass and zero point are: ', np.mean(airmass_array), np.mean(zp_array))
+    print('The average sky brightness is: ', np.mean(sky_list))
+    print('The length of the sky_list is:', len(sky_list))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
