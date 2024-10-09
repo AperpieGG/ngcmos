@@ -173,7 +173,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
                                                                                            fluxerrs_star,
                                                                                            airmass_list,
                                                                                            zero_point_list)
-       
+
     avg_zero_point = np.mean(zero_point_clipped)
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
     logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
@@ -252,14 +252,10 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         filtered_tic_ids = tic_ids[rms_comp_array < threshold]
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
-    # filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-
     reference_fluxes = np.sum([master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
                                for tic_id in filtered_tic_ids], axis=0)
 
-    logger.info(f"Reference flux sum after filtering: {reference_fluxes}")
-    reference_flux_mean = np.mean(reference_fluxes)
-    logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
+    plot_lc(reference_fluxes, time_clipped, np.std(reference_fluxes), tic_id_to_plot, tmag)
 
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
     flux_ratio = fluxes_clipped / reference_fluxes
@@ -275,7 +271,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     # dt_flux_poly = dt_flux / trend
     # dt_fluxerr_poly = dt_fluxerr / trend
 
-    trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
+    # trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
+    trend, dt_flux_poly, dt_fluxerr_poly =  time_clipped, dt_flux, dt_fluxerr
+    
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time_clipped, dt_flux_poly,
                                                                          dt_fluxerr_poly, bin_size)
 
