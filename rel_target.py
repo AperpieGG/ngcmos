@@ -182,7 +182,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     # Calculate the color index for all stars
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
 
-    color_tolerance = 0.2
+    color_tolerance = 0.1
     magnitude_tolerance = 1
 
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
@@ -261,9 +261,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     plt.plot(time_clipped, fluxes_clipped, 'o', label='Target Star', color='red')
     plt.show()
 
-    average_reference_flux = np.mean(reference_fluxes)
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
-    flux_ratio = fluxes_clipped / average_reference_flux
+    flux_ratio = fluxes_clipped / reference_fluxes
     # Calculate the average flux ratio of the target star
     flux_ratio_mean = np.mean(flux_ratio)
     # Normalize the flux ratio (result around unity)
