@@ -237,7 +237,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         fluxes_filtered_id.append(fluxes)
         fluxerrs_filtered_id.append(fluxerrs)
 
-    plot_lc(fluxes_star, jd_mid_star, np.std(fluxes_star), tic_id_to_plot, tmag)
+    plot_lightcurves_in_subplots(fluxes_star, jd_mid_star, fluxerrs_star, [tic_id_to_plot])
     plot_lightcurves_in_subplots(times_filtered_id, fluxes_filtered_id, fluxerrs_filtered_id, final_tic_ids)
 
     sys.exit()
