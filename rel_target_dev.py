@@ -274,7 +274,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_star / fluxes_star) ** 2 + (fluxerrs_star[0] / fluxes_star[0]) ** 2)
 
-    plot_lc(jd_mid_star, dt_flux, rms_target, tic_id_to_plot, tmag)
+    plot_lc(dt_flux, jd_mid_star, rms_target, tic_id_to_plot, tmag)
 
     sys.exit()
 
