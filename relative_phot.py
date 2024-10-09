@@ -121,7 +121,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
 
     # Remove outliers from the target star
     time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
-        remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
+        (jd_mid_star, fluxes_star, fluxerrs_star, airmass_list, zero_point_list)
     )
 
     avg_zero_point = np.mean(zero_point_clipped)
@@ -138,7 +138,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
         bary_time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_bary']
-        time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(bary_time, fluxes, fluxerrs)
+        time_stars, fluxes_stars, fluxerrs_stars = (bary_time, fluxes, fluxerrs)
 
         # Detrend the light curve and measure rms
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
