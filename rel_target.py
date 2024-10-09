@@ -166,10 +166,14 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     zero_point_list = table[table['tic_id'] == tic_id_to_plot]['zp']
 
     sky_median = np.median(sky_star)
-    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
-        remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
-    )
-
+    # time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (
+    #     remove_outliers(jd_mid_star, fluxes_star, fluxerrs_star, air_mass=airmass_list, zero_point=zero_point_list)
+    # )
+    time_clipped, fluxes_clipped, fluxerrs_clipped, airmass_clipped, zero_point_clipped = (jd_mid_star, fluxes_star,
+                                                                                           fluxerrs_star,
+                                                                                           airmass_list,
+                                                                                           zero_point_list)
+       
     avg_zero_point = np.mean(zero_point_clipped)
     avg_magnitude = -2.5 * np.log10(np.mean(fluxes_clipped) / EXPOSURE) + avg_zero_point
     logger.info(f"The target star has TIC ID = {tic_id_to_plot}, TESS magnitude = {tmag:.2f}, "
