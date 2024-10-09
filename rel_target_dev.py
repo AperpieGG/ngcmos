@@ -77,6 +77,16 @@ def plot_mags_vs_color(mags, colors, tmag, target_color_index):
     plt.show()
 
 
+def plot_raw_lc(time, fluxes, fluxerrs, tic_id, tmag):
+    plt.figure(figsize=(10, 6))
+    plt.errorbar(time, fluxes, yerr=fluxerrs, fmt='o', color='blue', alpha=0.8)
+    plt.xlabel('Time (JD)')
+    plt.ylabel('Flux')
+    plt.title(f'Raw Light Curve for TIC ID {tic_id} and TESS Magnitude {tmag:.2f}')
+    plt.grid(True)
+    plt.show()
+
+
 def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
     n = len(tic_ids)
     cols = 3  # Number of columns for subplots
@@ -236,8 +246,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         times_filtered_id.append(time)
         fluxes_filtered_id.append(fluxes)
         fluxerrs_filtered_id.append(fluxerrs)
-
-    plot_lightcurves_in_subplots(fluxes_star, jd_mid_star, fluxerrs_star, [tic_id_to_plot])
+        
+    plot_raw_lc(jd_mid_star, fluxes_star, fluxerrs_star, tic_id_to_plot, tmag)
     plot_lightcurves_in_subplots(times_filtered_id, fluxes_filtered_id, fluxerrs_filtered_id, final_tic_ids)
 
     sys.exit()
