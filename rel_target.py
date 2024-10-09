@@ -253,9 +253,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    print(len(filtered_master_star_data))
+    logger.info(f"The filtered master data is {filtered_master_star_data}")
     reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
-    print(len(reference_fluxes))
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
 
