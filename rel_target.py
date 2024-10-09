@@ -259,9 +259,11 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     plt.show()
 
     plt.plot(time_clipped, fluxes_clipped, 'o', label='Target Star', color='red')
+    plt.show()
 
+    average_reference_flux = np.mean(reference_fluxes)
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
-    flux_ratio = fluxes_clipped / reference_fluxes
+    flux_ratio = fluxes_clipped / average_reference_flux
     # Calculate the average flux ratio of the target star
     flux_ratio_mean = np.mean(flux_ratio)
     # Normalize the flux ratio (result around unity)
