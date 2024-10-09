@@ -255,6 +255,12 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     reference_fluxes = np.sum([master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
                                for tic_id in filtered_tic_ids], axis=0)
 
+    # Collect data for plotting light curves for the final comparison stars
+    comp_fluxes = [master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+                   for tic_id in filtered_tic_ids]
+    comp_fluxerrs = [master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+                     for tic_id in filtered_tic_ids]
+
     plt.plot(time_clipped, reference_fluxes, 'o', label='Reference Star', color='blue')
     plt.show()
 
