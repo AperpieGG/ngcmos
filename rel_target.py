@@ -220,12 +220,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-        time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
-
-        # # Detrend the light curve and measure rms
-        # flatten_flux, trend = flatten(time_stars, fluxes_stars, window_length=0.02, method='mean', return_trend=True)
-        # fluxes_dt_comp = fluxes_stars / trend
-        # fluxerrs_dt_comp = fluxerrs_stars / trend
+        # time_stars, fluxes_stars, fluxerrs_stars, _, _ = remove_outliers(time, fluxes, fluxerrs)
+        time_stars, fluxes_stars, fluxerrs_stars = time, fluxes, fluxerrs
 
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time_stars, fluxes_stars, fluxerrs_stars)
         rms = np.std(fluxes_dt_comp)
@@ -253,8 +249,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     logger.info(f"Comp stars after filtering by sigma clipping: {len(filtered_tic_ids)}")
 
     filtered_master_star_data = master_star_data[np.isin(master_star_data['tic_id'], filtered_tic_ids)]
-    logger.info(f"The filtered master data is {filtered_master_star_data}")
     reference_fluxes = np.sum(filtered_master_star_data[f'flux_{APERTURE}'], axis=0)
+    logger.info(f"Reference flux sum after filtering: {reference_fluxes}")
     reference_flux_mean = np.mean(reference_fluxes)
     logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
 
