@@ -205,7 +205,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
-        time, fluxes, fluxerrs, _, _ = remove_outliers(time, fluxes, fluxerrs)
+        # time, fluxes, fluxerrs, _, _ = remove_outliers(time, fluxes, fluxerrs)
 
         trend, fluxes_dt_comp, fluxerrs_dt_comp = calculate_trend_and_flux(time, fluxes, fluxerrs)
         rms = np.std(fluxes_dt_comp)
@@ -246,30 +246,26 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
         times_filtered_id.append(time)
         fluxes_filtered_id.append(fluxes)
         fluxerrs_filtered_id.append(fluxerrs)
-        
+
     plot_raw_lc(jd_mid_star, fluxes_star, fluxerrs_star, tic_id_to_plot, tmag)
-    plot_lightcurves_in_subplots(times_filtered_id, fluxes_filtered_id, fluxerrs_filtered_id, final_tic_ids)
+    # plot_lightcurves_in_subplots(times_filtered_id, fluxes_filtered_id, fluxerrs_filtered_id, final_tic_ids)
 
-    sys.exit()
+    # sum-up all the fluxes of the comparison stars
+    reference_fluxes = np.sum([master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+                               for tic_id in filtered_tic_ids], axis=0)
+    reference_fluxerrs = np.sqrt(np.sum([master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}'] ** 2
+                                        for tic_id in filtered_tic_ids], axis=0))
 
-    # Group the flux values by time and sum them across all comparison stars for each time step
-    reference_fluxes = np.zeros_like(time)
-
-    # Loop through all comparison stars to sum up the fluxes at each time step
-    for tic_id in filtered_tic_ids:
-        star_fluxes = filtered_master_star_data[filtered_master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        if len(star_fluxes) != len(time):
-            logger.warning(f"Length of fluxes for TIC ID {tic_id} does not match the target star. Skipping.")
-            continue
-        reference_fluxes += star_fluxes
-
-    reference_flux_mean = np.mean(reference_fluxes)
-    logger.info(f"Reference flux mean after filtering: {reference_flux_mean:.2f}")
+    # plot the fluxes of the comparison stars
+    plot_raw_lc(jd_mid_star, reference_fluxes, reference_fluxerrs, 'Master Star', tmag)
 
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
     flux_ratio = fluxes_star / reference_fluxes
     # Calculate the average flux ratio of the target star
     flux_ratio_mean = np.mean(flux_ratio)
+    logger.info(f'The average flux ratio for the target star is: {flux_ratio_mean:.4f}')
+    plot_lc(jd_mid_star, flux_ratio, fluxerrs_star, tic_id_to_plot, tmag)
+
     # Normalize the flux ratio (result around unity)
     dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
@@ -284,6 +280,9 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
     plt.title(f'Flux Ratio for TIC ID {tic_id_to_plot}')
     plt.grid(True)
     plt.show()
+
+    sys.exit()
+
 
     trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time, dt_flux, dt_fluxerr)
     time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(time, dt_flux_poly,
