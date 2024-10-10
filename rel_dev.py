@@ -163,9 +163,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     plt.show()
 
     # plot raw comparison lc
-    comp_time_binned, fluxes_comp_binned, fluxerrs_comp_binned = (
-        bin_time_flux_error(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, 12))
-    plot_lightcurves_in_subplots(comp_time_binned, fluxes_comp_binned, fluxerrs_comp_binned, tic_ids)
+    plot_lightcurves_in_subplots(comp_time_list, comp_fluxes_list, comp_fluxerrs, tic_ids)
     plt.show()
 
     # plot raw target lc
