@@ -274,7 +274,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
             (fluxerrs_clipped / fluxes_clipped) ** 2)
 
         # use plot_lightcurves_in_subplots function to plot all the comparison stars
-        plot_lc(comp_dt_fluxes, time_clipped, np.std(comp_dt_fluxes), tic_id, tmag)
+        plt.plot(time_clipped, comp_dt_fluxes, 'o', label=f'Comp Star {tic_id}', alpha=0.8)
         plt.show()
 
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
