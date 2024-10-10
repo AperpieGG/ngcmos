@@ -102,8 +102,8 @@ def plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, ref
             ax.set_title(f'Comparison star: {tic_id}')
             ax.set_xlabel('Time')
             ax.set_ylabel('Flux')
-
-        plt.suptitle(f'Batch {batch_num + 1}: Comparison Stars')
+            
+        plt.tight_layout()
         plt.show()
 
 
@@ -223,7 +223,6 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     # excluding the tic to be plotted
     plot_lightcurves_in_batches(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, filtered_tic_ids,
                                 reference_fluxes, reference_fluxerrs, APERTURE)
-
 
 
 def main():
