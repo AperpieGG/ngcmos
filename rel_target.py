@@ -182,7 +182,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     # Calculate the color index for all stars
     color_index = valid_color_data['gaiabp'] - valid_color_data['gaiarp']
 
-    color_tolerance = 0.2
+    color_tolerance = 0.1
     magnitude_tolerance = 1
 
     within_color_limit = valid_color_data[np.abs(color_index - target_color_index) <= color_tolerance]
@@ -265,6 +265,18 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     plt.plot(time_clipped, fluxes_clipped, 'o', label='Target Star', color='red')
     plt.show()
 
+    for tic_id in filtered_tic_ids:
+        # divide each tic_id with the reference flux and plot them
+        comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        comp_dt_fluxes = comp_fluxes / reference_fluxes
+        comp_dt_fluxerrs = comp_dt_fluxes * np.sqrt(
+            (master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}'] / comp_fluxes) ** 2 +
+            (fluxerrs_clipped / fluxes_clipped) ** 2)
+
+        # use plot_lightcurves_in_subplots function to plot all the comparison stars
+        plot_lc(comp_dt_fluxes, time_clipped, np.std(comp_dt_fluxes), tic_id, tmag)
+        plt.show()
+
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
     flux_ratio = fluxes_clipped / reference_fluxes
     # Calculate the average flux ratio of the target star
@@ -273,11 +285,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     dt_flux = flux_ratio / flux_ratio_mean
     dt_fluxerr = dt_flux * np.sqrt(
         (fluxerrs_clipped / fluxes_clipped) ** 2 + (fluxerrs_clipped[0] / fluxes_clipped[0]) ** 2)
-
-    # # Detrend the light curve and measure rms
-    # flatten_flux, trend = flatten(time_clipped, dt_flux, window_length=0.02, method='mean', return_trend=True)
-    # dt_flux_poly = dt_flux / trend
-    # dt_fluxerr_poly = dt_fluxerr / trend
 
     plot_lc(dt_flux, time_clipped, np.std(dt_flux), tic_id_to_plot, target_tmag)
     # trend, dt_flux_poly, dt_fluxerr_poly = calculate_trend_and_flux(time_clipped, dt_flux, dt_fluxerr)
