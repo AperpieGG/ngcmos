@@ -171,7 +171,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
         bin_time_flux_error(jd_mid_star, fluxes_star, fluxerrs_star, 12))
     plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red')
     plt.title(f'Target star: {tic_id_to_plot}')
-    plt.ylim(54000, 61000)  # to exclude the outlier
+    plt.ylim(55500, 61000)  # to exclude the outlier
     plt.show()
 
 
