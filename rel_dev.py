@@ -174,6 +174,24 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     plt.ylim(55500, 61000)  # to exclude the outlier
     plt.show()
 
+    # plot flattened comparison lc for each tic_id by dividing the master reference flux and
+    # excluding the tic to be plotted
+    for i, tic_id in enumerate(filtered_tic_ids):
+        comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+        comp_fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+        comp_time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
+
+        reference_fluxes_comp = np.sum([master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
+                                       for tic_id in filtered_tic_ids if tic_id != tic_id], axis=0)
+
+        comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
+
+        comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
+        comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12)
+        plt.errorbar(comp_fluxes_dt_binned, comp_fluxes_dt_binned, yerr=comp_fluxerrs_dt_binned, fmt='o', color='blue')
+        plt.title(f'Comparison star: {tic_id}')
+        plt.show()
+
 
 def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
