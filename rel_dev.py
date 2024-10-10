@@ -159,7 +159,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     master_time_binned, master_fluxes_binned, master_fluxerrs_binned = (
         bin_time_flux_error(comp_time, reference_fluxes, reference_fluxerrs, 12))
     plt.errorbar(master_time_binned, master_fluxes_binned, yerr=master_fluxerrs_binned, fmt='o', color='green')
-    plt.title(f"Master comparison star)")
+    plt.title(f"Master comparison star")
     plt.show()
 
     # plot raw comparison lc
@@ -170,7 +170,8 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
         bin_time_flux_error(jd_mid_star, fluxes_star, fluxerrs_star, 12))
     plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red')
-    plt.ylim(52000, 62000)  # to exclude the outlier
+    plt.title(f'Target star: {tic_id_to_plot}')
+    plt.ylim(54000, 61000)  # to exclude the outlier
     plt.show()
 
 
