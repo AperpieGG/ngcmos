@@ -185,10 +185,11 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
                                        for tic_id in filtered_tic_ids if tic_id != tic_id], axis=0)
 
         comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
-
         comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
-        comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12)
-        plt.errorbar(comp_fluxes_dt_binned, comp_fluxes_dt_binned, yerr=comp_fluxerrs_dt_binned, fmt='o', color='blue')
+
+        comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
+            bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
+        plt.errorbar(comp_time_dt, comp_fluxes_dt_binned, yerr=comp_fluxerrs_dt_binned, fmt='o', color='blue')
         plt.title(f'Comparison star: {tic_id}')
         plt.show()
 
