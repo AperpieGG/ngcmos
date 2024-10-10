@@ -188,7 +188,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
         comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
             bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
-        plt.errorbar(comp_time_dt, comp_fluxes_dt_binned, yerr=comp_fluxerrs_dt_binned, fmt='o', color='blue')
+        plt.plot(comp_time_dt, comp_fluxes_dt_binned, 'o')
         plt.title(f'Comparison star: {tic_id}')
         plt.show()
 
