@@ -115,9 +115,9 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     rms_comp_list = []
     comparison_fluxes_dt = []
     comparison_fluxerrs_dt = []
-    comp_fluxes = []
-    comp_fluxerrs = []
-    comp_time = []
+    comp_fluxes_list = []
+    comp_fluxerrs_list = []
+    comp_time_list = []
 
     for tic_id in tic_ids:
         comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
@@ -128,9 +128,9 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
         rms_comp_list.append(np.std(fluxes_dt_comp))
         comparison_fluxes_dt.append(fluxes_dt_comp)
         comparison_fluxerrs_dt.append(fluxerrs_dt_comp)
-        comp_time.append(comp_time)
-        comp_fluxes.append(comp_fluxes)
-        comp_fluxerrs.append(comp_fluxerrs)
+        comp_time_list.append(comp_time)
+        comp_fluxes_list.append(comp_fluxes)
+        comp_fluxerrs_list.append(comp_fluxerrs)
 
     rms_comp_array = np.array(rms_comp_list)
     min_rms_index = np.argmin(rms_comp_array)
@@ -164,10 +164,10 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # plot raw comparison lc
     comp_time_binned, fluxes_comp_binned, fluxerrs_comp_binned = (
-        bin_time_flux_error(comp_time, comp_fluxes, comp_fluxerrs, 12))
+        bin_time_flux_error(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, 12))
     plot_lightcurves_in_subplots(comp_time_binned, fluxes_comp_binned, fluxerrs_comp_binned, tic_ids)
     plt.show()
-    
+
     # plot raw target lc
     target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
         bin_time_flux_error(jd_mid_star, fluxes_star, fluxerrs_star, 12))
