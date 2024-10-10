@@ -62,6 +62,51 @@ def plot_lightcurves_in_subplots(times, fluxes, fluxerrs, tic_ids):
         plt.show()
 
 
+def plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs,
+                                APERTURE, batch_size=9):
+    """
+    Plot the light curves for comparison stars in batches of `batch_size` (9 per figure by default).
+    """
+    total_stars = len(tic_ids)
+    num_batches = int(np.ceil(total_stars / batch_size))  # Calculate how many batches we need
+
+    for batch_num in range(num_batches):
+        fig, axes = plt.subplots(3, 3, figsize=(15, 10))  # Create 3x3 grid of subplots
+        fig.subplots_adjust(hspace=0.4, wspace=0.4)
+
+        for i in range(batch_size):
+            idx = batch_num * batch_size + i
+            if idx >= total_stars:
+                break  # Exit if we exceed the number of stars to plot
+
+            tic_id = tic_ids[idx]
+            ax = axes[i // 3, i % 3]  # Select the correct subplot
+
+            comp_fluxes = flux_list[idx]
+            comp_fluxerrs = fluxerr_list[idx]
+            comp_time = time_list[idx]
+
+            # Subtract the flux of the current comparison star from the master reference flux
+            reference_fluxes_comp = reference_fluxes - comp_fluxes
+
+            # Calculate the relative flux and error
+            comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
+            comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
+
+            # Bin the data (optional, can be skipped if not needed)
+            comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
+                bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
+
+            # Plot the light curve in the current subplot
+            ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color='blue', alpha=0.8)
+            ax.set_title(f'Comparison star: {tic_id}')
+            ax.set_xlabel('Time')
+            ax.set_ylabel('Flux')
+
+        plt.suptitle(f'Batch {batch_num + 1}: Comparison Stars')
+        plt.show()
+
+
 def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     """
     Create a relative light curve for a specific TIC ID.
@@ -176,21 +221,9 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # plot flattened comparison lc for each tic_id by dividing the master reference flux and
     # excluding the tic to be plotted
-    for i, tic_id in enumerate(filtered_tic_ids):
-        comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        comp_fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
-        comp_time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
+    plot_lightcurves_in_batches(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, filtered_tic_ids,
+                                reference_fluxes, reference_fluxerrs, APERTURE)
 
-        reference_fluxes_comp = reference_fluxes - comp_fluxes
-
-        comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
-        comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
-
-        comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
-            bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
-        plt.plot(comp_time_dt, comp_fluxes_dt_binned, 'o')
-        plt.title(f'Comparison star: {tic_id}')
-        plt.show()
 
 
 def main():
