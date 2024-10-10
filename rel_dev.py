@@ -181,8 +181,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
         comp_fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         comp_time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
 
-        reference_fluxes_comp = np.sum([master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-                                       for tic_id in filtered_tic_ids if tic_id != tic_id], axis=0)
+        reference_fluxes_comp = reference_fluxes - comp_fluxes
 
         comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
         comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
