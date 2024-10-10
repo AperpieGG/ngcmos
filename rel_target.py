@@ -273,6 +273,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
         # use plot_lightcurves_in_subplots function to plot all the comparison stars
         plt.plot(time_clipped, comp_dt_fluxes, 'o', label=f'RMS = {comp_rms}', alpha=0.8)
         plt.title(f'Comp star: {tic_id}')
+        plt.xlabel(f'BJD time')
+        plt.ylabel(f'Flux ratio')
         plt.legend(loc='best')
         plt.show()
 
