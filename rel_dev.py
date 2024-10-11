@@ -165,6 +165,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
             valid_tic_ids.append(tic_id)
 
     print(f'Comparison stars after flux filtering: {valid_tic_ids}')
+    tic_ids = valid_tic_ids
     # At this point we have the info for the target star and filtered comparison stars
     # will a run a loop to find which stars have the lowest RMS using a 2 order polynomial
     rms_comp_list = []
@@ -174,7 +175,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     comp_fluxerrs_list = []
     comp_time_list = []
 
-    for tic_id in valid_tic_ids:
+    for tic_id in tic_ids:
         comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
         comp_fluxerrs = master_star_data[master_star_data['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
         comp_time = master_star_data[master_star_data['tic_id'] == tic_id]['jd_mid']
