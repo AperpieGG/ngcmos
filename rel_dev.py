@@ -153,19 +153,16 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     master_star_data = within_magnitude_limit[within_magnitude_limit['tic_id'] != tic_id_to_plot]
     master_stars_data_tic_ids = np.unique(master_star_data['tic_id'])
     print(f'The comparison stars before RMS filtering are: {master_stars_data_tic_ids}')
+
+    # Filter out stars with fluxes outside the range [40000, 100000]
+    fluxes_min = 40000
+    fluxes_max = 100000
+
+    # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
+    master_star_data = master_star_data[(np.mean(master_star_data[f'flux_{APERTURE}']) > fluxes_min) &
+                                        np.mean((master_star_data[f'flux_{APERTURE}']) < fluxes_max)]
     tic_ids = np.unique(master_star_data['tic_id'])
 
-    # Exclude stars based on average flux
-    valid_tic_ids = []
-    for tic_id in tic_ids:
-        comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        avg_flux = np.mean(comp_fluxes)
-
-        if 40000 <= avg_flux <= 100000:  # Only keep stars with average flux between 40,000 and 100,000 electrons
-            valid_tic_ids.append(tic_id)
-
-    print(f'Comparison stars after flux filtering: {valid_tic_ids}')
-    tic_ids = valid_tic_ids
     # At this point we have the info for the target star and filtered comparison stars
     # will a run a loop to find which stars have the lowest RMS using a 2 order polynomial
     rms_comp_list = []
