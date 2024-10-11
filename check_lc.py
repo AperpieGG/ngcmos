@@ -160,8 +160,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
-    parser.add_argument('tic_ids', type=int, nargs='+',
-                        help='The TIC IDs of the stars to plot (space-separated list)')
+    parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
     parser.add_argument('aperture', type=int,
                         help='The aperture size for photometry (i.e. 1-6)')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
@@ -181,24 +180,20 @@ def main():
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Loop through TIC IDs
-    for tic_id in args.tic_ids:
-        print(f"Processing TIC ID: {tic_id}")
+    # Loop through photometry files
+    for phot_file in phot_files:
+        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-        # Loop through photometry files
-        found = False
-        for phot_file in phot_files:
-            phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
+        # Check if tic_id exists in the current photometry file
+        if args.tic_id in phot_table['tic_id']:
+            print('Found star in photometry file:', phot_file)
+            plot_lc(phot_table, args.tic_id, bin_size, aperture, image_directory=current_night_directory)
+            break  # Stop looping if tic_id is found
+        else:
+            print(f"TIC ID {args.tic_id} not found in {phot_file}")
 
-            # Check if tic_id exists in the current photometry file
-            if tic_id in phot_table['tic_id']:
-                print(f'Found TIC ID {tic_id} in photometry file: {phot_file}')
-                plot_lc(phot_table, tic_id, bin_size, aperture, image_directory=current_night_directory)
-                found = True
-                break  # Stop searching for this TIC ID once it's found
-
-        if not found:
-            print(f"TIC ID {tic_id} not found in any photometry file.")
+    else:
+        print(f"TIC ID {args.tic_id} not found in any photometry file.")
 
 
 if __name__ == "__main__":
