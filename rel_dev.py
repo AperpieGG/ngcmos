@@ -243,13 +243,13 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
     y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
 
-    comps_x = []
-    comps_y = []
+    x_comps = []
+    y_comps = []
     for tic_id in filtered_tic_ids:
         comp_x = master_star_data[master_star_data['tic_id'] == tic_id]['x']
         comp_y = master_star_data[master_star_data['tic_id'] == tic_id]['y']
-        comps_x.append(comp_x)
-        comps_y.append(comp_y)
+        x_comps.append(comp_x)
+        y_comps.append(comp_y)
 
     # Plot the FITS image
     if image_data is not None:
@@ -287,8 +287,6 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
         print("Error: Could not load FITS image.")
 
 
-
-
 def get_image_data(frame_id):
     """
     Get the image data corresponding to the given frame_id.
@@ -302,6 +300,7 @@ def get_image_data(frame_id):
     # Construct the path to the image file using the frame_id
     image_directory = '.'
     image_path_fits = os.path.join(image_directory, frame_id)
+    print(f"Image path: {image_path_fits}")
     image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
 
 
