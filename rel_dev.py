@@ -3,8 +3,10 @@
 - Updated to run the script for a given tic_id passed as an argument.
 """
 import argparse
+import bz2
 import os
 import numpy as np
+from astropy.io import fits
 from astropy.visualization import ZScaleInterval
 from matplotlib import pyplot as plt
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
@@ -297,11 +299,33 @@ def get_image_data(frame_id):
     Returns:
         numpy.ndarray or None: The image data if the image exists, otherwise None.
     """
-    # Construct the path to the image file using the frame_id
-    image_directory = '.'
-    image_path_fits = os.path.join(image_directory, frame_id)
-    print(f"Image path: {image_path_fits}")
-    image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
+    # Define the directory where the images are stored (use cwd if not explicitly defined)
+    image_directory = os.getcwd()  # You can change this to the desired image directory path
+    image_path_fits = os.path.join(image_directory, frame_id + '.fits')
+    image_path_bz2 = os.path.join(image_directory, frame_id + '.fits.bz2')
+
+    print(f"Looking for FITS image at: {image_path_fits}")
+    print(f"Looking for compressed FITS image at: {image_path_bz2}")
+
+    # Check if the uncompressed FITS file exists
+    if os.path.exists(image_path_fits):
+        print("FITS file found.")
+        with fits.open(image_path_fits) as hdul:
+            image_data = hdul[0].data  # Assuming the image data is in the primary HDU
+        return image_data
+
+    # Check if the compressed FITS file (.bz2) exists
+    elif os.path.exists(image_path_bz2):
+        print("Compressed FITS file found, decompressing...")
+        # Decompress the .bz2 file and read the FITS data
+        with bz2.open(image_path_bz2, 'rb') as f:
+            with fits.open(f) as hdul:
+                image_data = hdul[0].data  # Assuming the image data is in the primary HDU
+        return image_data
+
+    else:
+        print(f"Error: Neither {image_path_fits} nor {image_path_bz2} exists.")
+        return None
 
 
 def main():
