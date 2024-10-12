@@ -251,14 +251,14 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     # Create a circle for the target star (in red)
     interval = ZScaleInterval()
     vmin, vmax = interval.get_limits(image_data)
-    target_circle = plt.Circle((x_target, y_target), radius=5, color='red', fill=False )
+    target_circle = plt.Circle((x_target, y_target), radius=8, color='red', fill=False )
     plt.gca().add_patch(target_circle)
 
     # Do the same for comparison stars (for example, x_comp, y_comp for each comparison star)
     for tic_id in filtered_tic_ids:
         x_comp = table[table['tic_id'] == tic_id]['x'][0]
         y_comp = table[table['tic_id'] == tic_id]['y'][0]
-        comp_circle = plt.Circle((x_comp, y_comp), radius=5, color='blue', fill=False)
+        comp_circle = plt.Circle((x_comp, y_comp), radius=8, color='green', fill=False)
         plt.gca().add_patch(comp_circle)
 
     plt.imshow(image_data, cmap='gray', origin='lower', vmin=vmin, vmax=vmax)
