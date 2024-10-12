@@ -244,8 +244,9 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # Assuming x, y coordinates are already extracted for the target star and comparison stars
     # Example: x_target, y_target for the target star
-    x_target = table[table['tic_id'] == tic_id_to_plot]['x'].values[0]
-    y_target = table[table['tic_id'] == tic_id_to_plot]['y'].values[0]
+    x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
+    y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+    print(f'Target star coordinates: x = {x_target}, y = {y_target}')
 
     # Create a circle for the target star (in red)
     target_circle = plt.Circle((x_target, y_target), radius=5, color='red', fill=False)
@@ -253,8 +254,8 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # Do the same for comparison stars (for example, x_comp, y_comp for each comparison star)
     for tic_id in filtered_tic_ids:
-        x_comp = table[table['tic_id'] == tic_id]['x'].values[0]
-        y_comp = table[table['tic_id'] == tic_id]['y'].values[0]
+        x_comp = table[table['tic_id'] == tic_id]['x'][0]
+        y_comp = table[table['tic_id'] == tic_id]['y'][0]
         comp_circle = plt.Circle((x_comp, y_comp), radius=5, color='blue', fill=False)
         plt.gca().add_patch(comp_circle)
 
