@@ -258,7 +258,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     for tic_id in filtered_tic_ids:
         x_comp = table[table['tic_id'] == tic_id]['x'][0]
         y_comp = table[table['tic_id'] == tic_id]['y'][0]
-        comp_circle = plt.Circle((x_comp, y_comp), radius=5, color='blue', fill=False, lnewidth=1)
+        comp_circle = plt.Circle((x_comp, y_comp), radius=5, color='blue', fill=False, linewidth=1)
         plt.gca().add_patch(comp_circle)
 
     plt.imshow(image_data, cmap='gray', origin='lower', vmin=vmin, vmax=vmax)
