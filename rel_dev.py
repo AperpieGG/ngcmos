@@ -301,11 +301,9 @@ def get_image_data(frame_id):
     """
     # Define the directory where the images are stored (use cwd if not explicitly defined)
     image_directory = os.getcwd()  # You can change this to the desired image directory path
-    image_path_fits = os.path.join(image_directory, frame_id + '.fits')
-    image_path_bz2 = os.path.join(image_directory, frame_id + '.fits.bz2')
+    image_path_fits = os.path.join(image_directory, frame_id)
 
     print(f"Looking for FITS image at: {image_path_fits}")
-    print(f"Looking for compressed FITS image at: {image_path_bz2}")
 
     # Check if the uncompressed FITS file exists
     if os.path.exists(image_path_fits):
@@ -314,17 +312,8 @@ def get_image_data(frame_id):
             image_data = hdul[0].data  # Assuming the image data is in the primary HDU
         return image_data
 
-    # Check if the compressed FITS file (.bz2) exists
-    elif os.path.exists(image_path_bz2):
-        print("Compressed FITS file found, decompressing...")
-        # Decompress the .bz2 file and read the FITS data
-        with bz2.open(image_path_bz2, 'rb') as f:
-            with fits.open(f) as hdul:
-                image_data = hdul[0].data  # Assuming the image data is in the primary HDU
-        return image_data
-
     else:
-        print(f"Error: Neither {image_path_fits} nor {image_path_bz2} exists.")
+        print(f"Error: Neither {image_path_fits} exists.")
         return None
 
 
