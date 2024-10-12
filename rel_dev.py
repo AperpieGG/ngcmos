@@ -249,7 +249,9 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     print(f'Target star coordinates: x = {x_target}, y = {y_target}')
 
     # Create a circle for the target star (in red)
-    target_circle = plt.Circle((x_target, y_target), radius=5, color='red', fill=False)
+    interval = ZScaleInterval()
+    vmin, vmax = interval.get_limits(image_data)
+    target_circle = plt.Circle((x_target, y_target), radius=5, color='red', fill=False )
     plt.gca().add_patch(target_circle)
 
     # Do the same for comparison stars (for example, x_comp, y_comp for each comparison star)
@@ -259,43 +261,14 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
         comp_circle = plt.Circle((x_comp, y_comp), radius=5, color='blue', fill=False)
         plt.gca().add_patch(comp_circle)
 
-    plt.imshow(image_data, cmap='gray')
+    plt.imshow(image_data, cmap='gray', origin='lower', vmin=vmin, vmax=vmax)
+    plt.tight_layout()
+    # Add labels and legend
+    plt.xlabel('X Pixel')
+    plt.ylabel('Y Pixel')
+    plt.legend([target_circle, comp_circle], ['Target', 'Comp Stars'], loc='upper right')
+    plt.title(f'Target: {tic_id_to_plot}')
     plt.show()
-
-    # Plot the FITS image
-    if image_data is not None:
-        plt.figure(figsize=(8, 8))
-
-        # Define the limits for the region around the stars (you can adjust this radius)
-        radius = 30  # pixels
-
-        # Normalize the image data using zscale
-        interval = ZScaleInterval()
-        vmin, vmax = interval.get_limits(image_data)
-        normalized_image_data = np.clip((image_data - vmin) / (vmax - vmin), 0, 1)
-
-        # Plot the normalized image
-        plt.imshow(normalized_image_data, cmap='gray', origin='lower')
-
-        # Plot a circle for the target star (in red)
-        target_circle = plt.Circle((x_target, y_target), radius=10, edgecolor='red', facecolor='none', lw=2,
-                                   label='Target Star')
-        plt.gca().add_patch(target_circle)
-
-        # Plot circles for the comparison stars (in green)
-        for x_comp, y_comp in zip(x_comps, y_comps):
-            comp_circle = plt.Circle((x_comp, y_comp), radius=10, edgecolor='lime', facecolor='none', lw=1,
-                                     label='Comparison Star')
-            plt.gca().add_patch(comp_circle)
-
-        # Add labels and legend
-        plt.xlabel('X Pixel')
-        plt.ylabel('Y Pixel')
-        plt.legend([target_circle], ['Target Star'], loc='upper right')
-        plt.title(f'FITS Image with Target and Comparison Stars')
-        plt.show()
-    else:
-        print("Error: Could not load FITS image.")
 
 
 def get_image_data(frame_id):
