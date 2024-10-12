@@ -237,11 +237,11 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     plot_lightcurves_in_batches(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, filtered_tic_ids,
                                 reference_fluxes, reference_fluxerrs, APERTURE)
 
-
     # load the fits image on this particular field.
-    image_data = get_image_data(tic_id_to_plot['frame_id'][0])
-    x_target = target_star['x'][0]  # X coordinate of the target star
-    y_target = target_star['y'][0]  # Y coordinate of the target star
+    image_data = get_image_data(table[table['tic_id'] == tic_id_to_plot]['frame_id'][0])
+
+    x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
+    y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
 
     # Extract the x-y coordinates of the comparison stars
     comparison_stars_data = master_star_data[master_star_data['tic_id'].isin(filtered_tic_ids)]
