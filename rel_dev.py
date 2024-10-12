@@ -243,10 +243,13 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
     y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
 
-    # Extract the x-y coordinates of the comparison stars
-    comparison_stars_data = master_star_data[master_star_data['tic_id'].isin(filtered_tic_ids)]
-    x_comps = comparison_stars_data['x']
-    y_comps = comparison_stars_data['y']
+    comps_x = []
+    comps_y = []
+    for tic_id in filtered_tic_ids:
+        comp_x = master_star_data[master_star_data['tic_id'] == tic_id]['x']
+        comp_y = master_star_data[master_star_data['tic_id'] == tic_id]['y']
+        comps_x.append(comp_x)
+        comps_y.append(comp_y)
 
     # Plot the FITS image
     if image_data is not None:
