@@ -308,7 +308,8 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     flux_ratio_mean = np.mean(flux_ratio)
     # Normalize the flux ratio (result around unity)
     target_fluxes_dt = flux_ratio / flux_ratio_mean
-    plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red')
+    RMS = np.std(target_fluxes_dt)
+    plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS = {RMS:.4f}')
     plt.title(f'Target star: {tic_id_to_plot} divided by master')
     plt.show()
 
