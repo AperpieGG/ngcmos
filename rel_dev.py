@@ -242,16 +242,24 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     # load the fits image on this particular field.
     image_data = get_image_data(table[table['tic_id'] == tic_id_to_plot]['frame_id'][0])
 
-    x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
-    y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+    # Assuming x, y coordinates are already extracted for the target star and comparison stars
+    # Example: x_target, y_target for the target star
+    x_target = table[table['tic_id'] == tic_id_to_plot]['x'].values[0]
+    y_target = table[table['tic_id'] == tic_id_to_plot]['y'].values[0]
 
-    x_comps = []
-    y_comps = []
+    # Create a circle for the target star (in red)
+    target_circle = plt.Circle((x_target, y_target), radius=5, color='red', fill=False)
+    plt.gca().add_patch(target_circle)
+
+    # Do the same for comparison stars (for example, x_comp, y_comp for each comparison star)
     for tic_id in filtered_tic_ids:
-        comp_x = master_star_data[master_star_data['tic_id'] == tic_id]['x']
-        comp_y = master_star_data[master_star_data['tic_id'] == tic_id]['y']
-        x_comps.append(comp_x)
-        y_comps.append(comp_y)
+        x_comp = table[table['tic_id'] == tic_id]['x'].values[0]
+        y_comp = table[table['tic_id'] == tic_id]['y'].values[0]
+        comp_circle = plt.Circle((x_comp, y_comp), radius=5, color='blue', fill=False)
+        plt.gca().add_patch(comp_circle)
+
+    plt.imshow(image_data, cmap='gray')
+    plt.show()
 
     # Plot the FITS image
     if image_data is not None:
