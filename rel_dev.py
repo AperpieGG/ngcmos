@@ -110,6 +110,34 @@ def plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, ref
         plt.show()
 
 
+def get_image_data(frame_id):
+    """
+    Get the image data corresponding to the given frame_id.
+
+    Parameters:
+        frame_id (str): The frame_id of the image.
+
+    Returns:
+        numpy.ndarray or None: The image data if the image exists, otherwise None.
+    """
+    # Define the directory where the images are stored (use cwd if not explicitly defined)
+    image_directory = os.getcwd()  # You can change this to the desired image directory path
+    image_path_fits = os.path.join(image_directory, frame_id)
+
+    print(f"Looking for FITS image at: {image_path_fits}")
+
+    # Check if the uncompressed FITS file exists
+    if os.path.exists(image_path_fits):
+        print("FITS file found.")
+        with fits.open(image_path_fits) as hdul:
+            image_data = hdul[0].data  # Assuming the image data is in the primary HDU
+        return image_data
+
+    else:
+        print(f"Error: Neither {image_path_fits} exists.")
+        return None
+
+
 def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     """
     Create a relative light curve for a specific TIC ID.
@@ -273,33 +301,16 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     plt.title(f'Target: {tic_id_to_plot}')
     plt.show()
 
-
-def get_image_data(frame_id):
-    """
-    Get the image data corresponding to the given frame_id.
-
-    Parameters:
-        frame_id (str): The frame_id of the image.
-
-    Returns:
-        numpy.ndarray or None: The image data if the image exists, otherwise None.
-    """
-    # Define the directory where the images are stored (use cwd if not explicitly defined)
-    image_directory = os.getcwd()  # You can change this to the desired image directory path
-    image_path_fits = os.path.join(image_directory, frame_id)
-
-    print(f"Looking for FITS image at: {image_path_fits}")
-
-    # Check if the uncompressed FITS file exists
-    if os.path.exists(image_path_fits):
-        print("FITS file found.")
-        with fits.open(image_path_fits) as hdul:
-            image_data = hdul[0].data  # Assuming the image data is in the primary HDU
-        return image_data
-
-    else:
-        print(f"Error: Neither {image_path_fits} exists.")
-        return None
+    # finally plot the light curve for the target star flattened by the master
+    # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
+    flux_ratio = target_fluxes_binned / master_fluxes_binned
+    # Calculate the average flux ratio of the target star
+    flux_ratio_mean = np.mean(flux_ratio)
+    # Normalize the flux ratio (result around unity)
+    target_fluxes_dt = flux_ratio / flux_ratio_mean
+    plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red')
+    plt.title(f'Target star: {tic_id_to_plot} divided by master')
+    plt.show()
 
 
 def main():
