@@ -5,6 +5,7 @@
 import argparse
 import os
 import numpy as np
+from astropy.visualization import ZScaleInterval
 from matplotlib import pyplot as plt
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
                    extract_phot_file, calculate_trend_and_flux)
@@ -235,6 +236,70 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     # excluding the tic to be plotted
     plot_lightcurves_in_batches(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, filtered_tic_ids,
                                 reference_fluxes, reference_fluxerrs, APERTURE)
+
+
+    # load the fits image on this particular field.
+    image_data = get_image_data(tic_id_to_plot['frame_id'][0])
+    x_target = target_star['x'][0]  # X coordinate of the target star
+    y_target = target_star['y'][0]  # Y coordinate of the target star
+
+    # Extract the x-y coordinates of the comparison stars
+    comparison_stars_data = master_star_data[master_star_data['tic_id'].isin(filtered_tic_ids)]
+    x_comps = comparison_stars_data['x']
+    y_comps = comparison_stars_data['y']
+
+    # Plot the FITS image
+    if image_data is not None:
+        plt.figure(figsize=(8, 8))
+
+        # Define the limits for the region around the stars (you can adjust this radius)
+        radius = 30  # pixels
+
+        # Normalize the image data using zscale
+        interval = ZScaleInterval()
+        vmin, vmax = interval.get_limits(image_data)
+        normalized_image_data = np.clip((image_data - vmin) / (vmax - vmin), 0, 1)
+
+        # Plot the normalized image
+        plt.imshow(normalized_image_data, cmap='gray', origin='lower')
+
+        # Plot a circle for the target star (in red)
+        target_circle = plt.Circle((x_target, y_target), radius=10, edgecolor='red', facecolor='none', lw=2,
+                                   label='Target Star')
+        plt.gca().add_patch(target_circle)
+
+        # Plot circles for the comparison stars (in green)
+        for x_comp, y_comp in zip(x_comps, y_comps):
+            comp_circle = plt.Circle((x_comp, y_comp), radius=10, edgecolor='lime', facecolor='none', lw=1,
+                                     label='Comparison Star')
+            plt.gca().add_patch(comp_circle)
+
+        # Add labels and legend
+        plt.xlabel('X Pixel')
+        plt.ylabel('Y Pixel')
+        plt.legend([target_circle], ['Target Star'], loc='upper right')
+        plt.title(f'FITS Image with Target and Comparison Stars')
+        plt.show()
+    else:
+        print("Error: Could not load FITS image.")
+
+
+
+
+def get_image_data(frame_id):
+    """
+    Get the image data corresponding to the given frame_id.
+
+    Parameters:
+        frame_id (str): The frame_id of the image.
+
+    Returns:
+        numpy.ndarray or None: The image data if the image exists, otherwise None.
+    """
+    # Construct the path to the image file using the frame_id
+    image_directory = '.'
+    image_path_fits = os.path.join(image_directory, frame_id)
+    image_path_bz2 = os.path.join(image_directory, frame_id + '.bz2')
 
 
 def main():
