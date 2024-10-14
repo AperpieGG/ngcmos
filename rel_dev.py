@@ -7,6 +7,7 @@ import bz2
 import os
 import numpy as np
 from astropy.io import fits
+from astropy.stats import median_absolute_deviation
 from astropy.visualization import ZScaleInterval
 from matplotlib import pyplot as plt
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
@@ -187,8 +188,9 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     tic_ids = master_stars_data_tic_ids
 
     # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
-    fluxes_min = np.mean(fluxes_star) - 10 * np.std(fluxes_star)
-    fluxes_max = np.mean(fluxes_star) + 10 * np.std(fluxes_star)
+    mad = median_absolute_deviation(fluxes_star)
+    fluxes_min = np.mean(fluxes_star) - 15 * mad
+    fluxes_max = np.mean(fluxes_star) + 15 * mad
 
     # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
     for tic_id in tic_ids:
