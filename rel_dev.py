@@ -10,7 +10,7 @@ from astropy.io import fits
 from astropy.visualization import ZScaleInterval
 from matplotlib import pyplot as plt
 from utils import (plot_images, get_phot_files, read_phot_file, bin_time_flux_error,
-                   extract_phot_file, calculate_trend_and_flux)
+                   extract_phot_file, calculate_trend_and_flux, remove_outliers)
 
 SIGMA = 2
 
@@ -312,6 +312,10 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
     target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
     RMS = np.std(target_fluxes_dt_unbinned)
+
+    #  Now we will remove the outliers
+    target_time_binned, target_fluxes_binned, target_fluxerrs_binned, _, _ = (
+        remove_outliers(target_time_binned, target_fluxes_binned, target_fluxerrs_binned))
     plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
     plt.title(f'Target star: {tic_id_to_plot} divided by master')
     plt.legend(loc='best')
