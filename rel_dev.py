@@ -189,8 +189,8 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
     mad = median_absolute_deviation(fluxes_star)
-    fluxes_min = np.mean(fluxes_star) - 20 * mad
-    fluxes_max = np.mean(fluxes_star) + 20 * mad
+    fluxes_min = np.mean(fluxes_star) - 25 * mad
+    fluxes_max = np.mean(fluxes_star) + 25 * mad
     print(f'Fluxes min = {fluxes_min:.2f}, Fluxes max = {fluxes_max:.2f}')
 
     # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
