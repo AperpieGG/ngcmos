@@ -303,13 +303,16 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # finally plot the light curve for the target star flattened by the master
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
-    flux_ratio = target_fluxes_binned / master_fluxes_binned
+    flux_ratio_binned = target_fluxes_binned / master_fluxes_binned
+    flux_ratio = fluxes_star / reference_fluxes
     # Calculate the average flux ratio of the target star
+    flux_ratio_mean_binned = np.mean(flux_ratio_binned)
     flux_ratio_mean = np.mean(flux_ratio)
     # Normalize the flux ratio (result around unity)
-    target_fluxes_dt = flux_ratio / flux_ratio_mean
-    RMS = np.std(target_fluxes_dt)
-    plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS = {RMS:.4f}')
+    target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
+    target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
+    RMS = np.std(target_fluxes_dt_unbinned)
+    plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
     plt.title(f'Target star: {tic_id_to_plot} divided by master')
     plt.legend(loc='best')
     plt.show()
