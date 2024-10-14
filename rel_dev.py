@@ -186,9 +186,9 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     print(f'The comparison stars before RMS filtering are: {master_stars_data_tic_ids}')
     tic_ids = master_stars_data_tic_ids
 
-    # Filter out stars with fluxes outside the range [40000, 100000]
-    fluxes_min = 40000
-    fluxes_max = 100000
+    # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
+    fluxes_min = np.min(fluxes_star)
+    fluxes_max = np.max(fluxes_star)
 
     # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
     for tic_id in tic_ids:
@@ -257,9 +257,11 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     # plot raw target lc
     target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
         bin_time_flux_error(jd_mid_star, fluxes_star, fluxerrs_star, 12))
+    target_time_binned, target_fluxes_binned, target_fluxerrs_binned, _, _ = (
+        remove_outliers(target_time_binned, target_fluxes_binned, target_fluxerrs_binned))
     plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red')
     plt.title(f'Target star: {tic_id_to_plot}')
-    plt.ylim(55500, 61000)  # to exclude the outlier
+    # plt.ylim(55500, 61000)  # to exclude the outlier
     plt.show()
 
     # plot flattened comparison lc for each tic_id by dividing the master reference flux and
@@ -278,7 +280,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # Create a circle for the target star (in red)
     interval = ZScaleInterval()
-    vmin, vmax = interval.get_limits(image_data)
+    vmin, vmax = np.percentile(image_data, [5, 95])
     target_circle = plt.Circle((x_target, y_target), radius=5, color='green', fill=False, linewidth=1.5)
     plt.gca().add_patch(target_circle)
 
