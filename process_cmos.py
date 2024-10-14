@@ -77,26 +77,6 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 
-def find_current_night_directory(directory):
-    """
-    Find the directory for the current night based on the current date.
-    If not found, use the current working directory.
-
-    Parameters
-    ----------
-    directory : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str
-        Path to the current night directory.
-    """
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-    current_date_directory = os.path.join(directory, previous_date)
-    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
-
-
 def filter_filenames(directory):
     """
     Filter filenames based on specific criteria.
