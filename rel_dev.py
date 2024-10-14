@@ -264,8 +264,8 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 
     # plot flattened comparison lc for each tic_id by dividing the master reference flux and
     # excluding the tic to be plotted
-    # plot_lightcurves_in_batches(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, filtered_tic_ids,
-    #                             reference_fluxes, reference_fluxerrs, APERTURE)
+    plot_lightcurves_in_batches(comp_time_list, comp_fluxes_list, comp_fluxerrs_list, filtered_tic_ids,
+                                reference_fluxes, reference_fluxerrs, APERTURE)
 
     # load the fits image on this particular field.
     image_data = get_image_data(table[table['tic_id'] == tic_id_to_plot]['frame_id'][0])
