@@ -187,8 +187,8 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     tic_ids = master_stars_data_tic_ids
 
     # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
-    fluxes_min = - 10 * np.mean(fluxes_star)
-    fluxes_max = + 10 * np.mean(fluxes_star)
+    fluxes_min = - 5 * np.mean(fluxes_star)
+    fluxes_max = + 5 * np.mean(fluxes_star)
 
     # Filter out stars with fluxes outside the range [fluxes_min, fluxes_max]
     for tic_id in tic_ids:
