@@ -47,7 +47,7 @@ cropped_image_data = image_data[center_y - crop_size:center_y + crop_size,
 
 # Estimate background noise level
 mean, median, std = np.mean(cropped_image_data), np.median(cropped_image_data), mad_std(cropped_image_data)
-daofind = DAOStarFinder(fwhm=4, threshold=5. * std, brightest=1000)
+daofind = DAOStarFinder(fwhm=4, threshold=5. * std, brightest=250)
 selected_sources = daofind(cropped_image_data - median)
 print(f"Number of sources found: {len(selected_sources)}")
 
