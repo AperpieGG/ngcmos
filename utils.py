@@ -655,6 +655,7 @@ def calculate_trend_and_flux_wotan(time, flux, fluxerr, method='biweight', windo
 
 
 def scintilation_noise(airmass_list, exposure):
+    # Following Osborne et al. 2015 for Paranal
     D = 0.2  # telescope diameter
     h = 2400  # height of Paranal
     H = 8000  # height of atmospheric scale
