@@ -654,14 +654,13 @@ def calculate_trend_and_flux_wotan(time, flux, fluxerr, method='biweight', windo
     return trend, dt_flux, dt_fluxerr
 
 
-def scintilation_noise(airmass_list):
-    t = 10  # exposure time
+def scintilation_noise(airmass_list, exposure):
     D = 0.2  # telescope diameter
-    h = 2433  # height of Paranal
+    h = 2400  # height of Paranal
     H = 8000  # height of atmospheric scale
     airmass = np.mean(airmass_list)  # airmass
-    C_y = 1.54  # constant
-    N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / t) * (airmass ** 3) * np.exp((-2. * h) / H))
+    C_y = 1.56  # constant
+    N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / exposure) * (airmass ** 3) * np.exp((-2. * h) / H))
     print('Scintilation noise: ', N)
     return N
 
@@ -735,7 +734,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, rn, dc, exposure):
     # set random photon shot noise from the flux
     photon_shot_noise = np.sqrt(synthetic_flux) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
 
-    N = scintilation_noise(airmass_list)
+    N = scintilation_noise(airmass_list, exposure)
 
     N_sc = (N * synthetic_flux) ** 2
     N = N / np.sqrt(bin_size) * 1000000  # Convert to ppm
