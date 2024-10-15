@@ -329,7 +329,8 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
 def main():
     parser = argparse.ArgumentParser(description='Perform relative photometry for a given night')
     parser.add_argument('tic_id', type=int, help='TIC ID of the star')
-    parser.add_argument('--aper', type=int, default=5, help='Aperture radius for photometry')
+    parser.add_argument('--aper', type=int, default=5, help='Aperture radius for photometry, '
+                                                            'CMOS = 5, CCD = 4')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
     args = parser.parse_args()
     APERTURE = args.aper
