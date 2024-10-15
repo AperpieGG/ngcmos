@@ -30,6 +30,7 @@ def gaussian_2d(xy, amplitude, xo, yo, sigma_x, sigma_y, theta, offset):
 # Argument parser to allow command-line input
 parser = argparse.ArgumentParser(description='Measure FWHM from a FITS image.')
 parser.add_argument('image', type=str, help='Path to the FITS image')
+parser.add_argument('--crop_size', type=int, default=800, help='CMOS = 800, CCD = 652')
 args = parser.parse_args()
 
 # Load the FITS file
@@ -40,7 +41,7 @@ hdul.close()
 
 # Define the central region
 center_x, center_y = image_data.shape[1] // 2, image_data.shape[0] // 2
-crop_size = 800  # Half the size of the 500x500 area
+crop_size = args.crop_size  # Half the size of the 500x500 area
 cropped_image_data = image_data[center_y - crop_size:center_y + crop_size,
                      center_x - crop_size:center_x + crop_size]
 
