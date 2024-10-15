@@ -259,9 +259,12 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     # plot raw target lc
     target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
         bin_time_flux_error(jd_mid_star, fluxes_star, fluxerrs_star, 12))
-    target_time_binned, target_fluxes_binned, target_fluxerrs_binned, _, _ = (
+
+    target_time_binned_no_out, target_fluxes_binned_no_out, target_fluxerrs_binned_no_out, _, _ = (
         remove_outliers(target_time_binned, target_fluxes_binned, target_fluxerrs_binned))
-    plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red')
+
+    plt.errorbar(target_time_binned_no_out, target_fluxes_binned_no_out, yerr=target_fluxerrs_binned_no_out,
+                 fmt='o', color='red')
     plt.title(f'Target star: {tic_id_to_plot}')
     # plt.ylim(55500, 61000)  # to exclude the outlier
     plt.show()
@@ -316,10 +319,7 @@ def relative_phot(table, tic_id_to_plot, APERTURE, EXPOSURE):
     target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
     target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
     RMS = np.std(target_fluxes_dt_unbinned)
-
-    #  Now we will remove the outliers
-    target_time_binned, target_fluxes_binned, target_fluxerrs_binned, _, _ = (
-        remove_outliers(target_time_binned, target_fluxes_binned, target_fluxerrs_binned))
+    
     plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
     plt.title(f'Target star: {tic_id_to_plot} divided by master')
     plt.legend(loc='best')
