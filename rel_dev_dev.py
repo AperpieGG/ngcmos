@@ -76,22 +76,45 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
 
 
 def find_best_comps(table, tic_id_to_plot):
+    # Filter the table based on color/magnitude tolerance
     filtered_table, airmass = limits_for_comps(table, tic_id_to_plot)
     tic_ids = np.unique(filtered_table['tic_id'])
     print(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
     comp_fluxes = []
     comp_mags = []
+
+    # Define the exposure time (exp) and aperture (APERTURE) if not already defined
+    exp = 10  # Adjust if different
+    APERTURE = 'some_aperture_value'  # Adjust to your actual aperture
+
     for tic_id in tic_ids:
-        flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-        zero_point_list = filtered_table[filtered_table['tic_id'] == tic_id]['zp']
-        exp = 10
-        comp_fluxes.append(flux)
+        flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}'].values
+        zero_point_list = filtered_table[filtered_table['tic_id'] == tic_id]['zp'].values
+
+        # Skip if flux is zero or NaN
+        if np.any(flux <= 0) or np.any(np.isnan(flux)):
+            print(f'Skipping TIC ID {tic_id} due to invalid flux values.')
+            continue
+
+        # Compute the magnitude
         mag = -2.5 * np.log10(flux / exp) + zero_point_list
+
+        # Skip if the magnitude contains NaN or invalid values
+        if np.any(np.isnan(mag)):
+            print(f'Skipping TIC ID {tic_id} due to invalid magnitude.')
+            continue
+
+        comp_fluxes.append(flux)
         comp_mags.append(mag)
 
+    # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
     comp_mags = np.array(comp_mags)
+
+    # Check if comp_mags is non-empty before proceeding
+    if len(comp_mags) == 0:
+        raise ValueError("No valid comparison stars found after filtering for flux and magnitude.")
 
     # Call the function to find bad comparison stars
     comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
@@ -101,6 +124,7 @@ def find_best_comps(table, tic_id_to_plot):
 
     print(f"Number of iterations to converge: {iterations}")
     return good_comp_star_table  # Return the filtered table including only good comp stars
+
 
 
 def get_phot_files(directory):
