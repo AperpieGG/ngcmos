@@ -46,31 +46,48 @@ def find_comp_star_rms(comp_fluxes, airmass):
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     comp_star_mask = np.array([True for cs in comp_star_rms])
-    i = 0.
+    i = 0
     while True:
-        i += 1.
+        i += 1
         comp_mags = np.copy(comp_mags0[comp_star_mask])
         comp_rms = np.copy(comp_star_rms[comp_star_mask])
         N1 = len(comp_mags)
+
+        if N1 == 0:
+            print("No valid comparison stars left after filtering.")
+            break
+
         edges = np.arange(comp_mags.min(), comp_mags.max() + dmag, dmag)
         dig = np.digitize(comp_mags, edges)
         mag_nodes = (edges[:-1] + edges[1:]) / 2.
-        std_medians = np.array([np.nan if len(comp_rms[dig == i]) == 0
-                                else np.median(comp_rms[dig == i])
-                                for i in range(1, len(edges))])
-        cut = np.isnan(std_medians)
-        mag_nodes = mag_nodes[~cut]
-        std_medians = std_medians[~cut]
+
+        # Ensure `comp_rms[dig == i]` uses correct 1D indexing
+        std_medians = np.array([np.nan if len(comp_rms[dig == j]) == 0
+                                else np.median(comp_rms[dig == j])
+                                for j in range(1, len(edges))])
+
+        # Remove NaN entries from std_medians and mag_nodes
+        valid_mask = ~np.isnan(std_medians)
+        mag_nodes = mag_nodes[valid_mask]
+        std_medians = std_medians[valid_mask]
+
+        if len(mag_nodes) == 0 or len(std_medians) == 0:
+            print("No valid standard medians found.")
+            break
+
+        # Fit a spline to the medians
         spl = Spline(mag_nodes, std_medians)
         mod = spl(comp_mags)
         mod0 = spl(comp_mags0)
+
         std = np.std(comp_rms - mod)
         comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
         N2 = np.sum(comp_star_mask)
-        if N1 == N2:
+
+        # Exit condition: no further changes or too many iterations
+        if N1 == N2 or i > 10:
             break
-        elif i > 10.:
-            break
+
     return comp_star_mask, comp_star_rms, i
 
 
@@ -124,7 +141,6 @@ def find_best_comps(table, tic_id_to_plot):
 
     print(f"Number of iterations to converge: {iterations}")
     return good_comp_star_table  # Return the filtered table including only good comp stars
-
 
 
 def get_phot_files(directory):
