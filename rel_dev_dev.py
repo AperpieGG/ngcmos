@@ -96,6 +96,7 @@ def find_best_comps(table, tic_id_to_plot):
             print(f'Skipping TIC ID {tic_id} due to invalid flux values.')
             continue
 
+        print(f'Processing TIC ID {tic_id}')
         # Compute the magnitude
         mag = -2.5 * np.log10(flux / exp) + zero_point_list
 
