@@ -105,7 +105,7 @@ def get_phot_files(directory):
     Function to retrieve the first photometry file from a given directory.
     Returns the filename as a string.
     """
-    files = [f for f in os.listdir(directory) if f.strip('phot').endswith('.fits')]
+    files = [f for f in os.listdir(directory) if f.startswith('phot') and f.endswith('.fits')]
     if len(files) == 0:
         raise FileNotFoundError("No FITS files found in the directory.")
     return files[0]  # Return the first FITS file found as a string
