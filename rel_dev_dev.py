@@ -143,6 +143,9 @@ def find_best_comps(table, tic_id_to_plot):
     # Now filter the table based on these tic_ids
     good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
 
+    # print the rms of the stars that kept there
+    print(f"RMS of comparison stars after filtering: {comp_star_rms[comp_star_mask]}")
+
     print(f"Number of iterations to converge: {iterations}")
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
@@ -171,9 +174,9 @@ def main():
     # Find the best comparison stars
     best_comps_table = find_best_comps(phot_table, tic_id_to_plot)
 
-    # Output the best comparison stars
-    print("Best comparison stars table:")
-    print(best_comps_table)
+    # Print the best comparison stars
+    tic_id = best_comps_table['tic_id']
+    print(f"The best comparison stars are: {tic_id}")
 
 
 # Run the main function
