@@ -119,22 +119,23 @@ def find_best_comps(table, tic_id_to_plot):
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         zero_point_list = filtered_table[filtered_table['tic_id'] == tic_id]['zp']
+        tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
 
-        # Skip if flux is zero or NaN
-        if np.any(flux <= 0) or np.any(np.isnan(flux)):
-            print(f'Skipping TIC ID {tic_id} due to invalid flux values.')
-            continue
-
-        # Compute the magnitude
-        mag = -2.5 * np.log10(flux / exp) + zero_point_list
-
-        # Skip if the magnitude contains NaN or invalid values
-        if np.any(np.isnan(mag)):
-            print(f'Skipping TIC ID {tic_id} due to invalid magnitude.')
-            continue
+        # # Skip if flux is zero or NaN
+        # if np.any(flux <= 0) or np.any(np.isnan(flux)):
+        #     print(f'Skipping TIC ID {tic_id} due to invalid flux values.')
+        #     continue
+        #
+        # # Compute the magnitude
+        # mag = -2.5 * np.log10(flux / exp) + zero_point_list
+        #
+        # # Skip if the magnitude contains NaN or invalid values
+        # if np.any(np.isnan(mag)):
+        #     print(f'Skipping TIC ID {tic_id} due to invalid magnitude.')
+        #     continue
 
         comp_fluxes.append(flux)
-        comp_mags.append(mag)
+        comp_mags.append(tmag)
 
     # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
