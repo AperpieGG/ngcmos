@@ -112,27 +112,12 @@ def find_best_comps(table, tic_id_to_plot):
     comp_fluxes = []
     comp_mags = []
 
-    # Define the exposure time (exp) and aperture (APERTURE) if not already defined
-    exp = 10  # Adjust if different
+    # Define the  aperture (APERTURE) if not already defined
     APERTURE = 5  # Adjust to your actual aperture
 
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-        zero_point_list = filtered_table[filtered_table['tic_id'] == tic_id]['zp']
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
-
-        # # Skip if flux is zero or NaN
-        # if np.any(flux <= 0) or np.any(np.isnan(flux)):
-        #     print(f'Skipping TIC ID {tic_id} due to invalid flux values.')
-        #     continue
-        #
-        # # Compute the magnitude
-        # mag = -2.5 * np.log10(flux / exp) + zero_point_list
-        #
-        # # Skip if the magnitude contains NaN or invalid values
-        # if np.any(np.isnan(mag)):
-        #     print(f'Skipping TIC ID {tic_id} due to invalid magnitude.')
-        #     continue
 
         comp_fluxes.append(flux)
         comp_mags.append(tmag)
@@ -150,7 +135,13 @@ def find_best_comps(table, tic_id_to_plot):
     comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
 
     # Filter the table based on the mask
-    good_comp_star_table = filtered_table[comp_star_mask]
+    # good_comp_star_table = filtered_table[comp_star_mask]
+
+    # Filter tic_ids based on the mask
+    good_tic_ids = tic_ids[comp_star_mask]
+
+    # Now filter the table based on these tic_ids
+    good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
 
     print(f"Number of iterations to converge: {iterations}")
     return good_comp_star_table  # Return the filtered table including only good comp stars
