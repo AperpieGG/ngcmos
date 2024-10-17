@@ -44,16 +44,16 @@ def find_comp_star_rms(comp_fluxes, airmass):
 
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
-    # Compute RMS for each comparison star across time (axis=1)
-    comp_star_rms = np.std(comp_fluxes, axis=1)  # Resulting shape: (163,)
-    print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
+    # Compute RMS for each comparison star (without specifying axis, as it's a 1D array)
+    comp_star_rms = np.std(comp_fluxes)  # Remove axis=1, since it's 1D
+    print(f'Number of comparison stars RMS before filtering: {len(comp_fluxes)}')
 
-    comp_star_mask = np.array([True for cs in comp_star_rms])  # Shape: (163,)
+    comp_star_mask = np.array([True for cs in comp_fluxes])  # Shape: (163,)
     i = 0
     while True:
         i += 1
         comp_mags = np.copy(comp_mags0[comp_star_mask])  # Select only valid magnitudes
-        comp_rms = np.copy(comp_star_rms[comp_star_mask])  # Select only valid RMS values
+        comp_rms = np.copy(comp_fluxes[comp_star_mask])  # Select only valid flux values
         N1 = len(comp_mags)
 
         if N1 == 0:
@@ -84,7 +84,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
         mod0 = spl(comp_mags0)
 
         std = np.std(comp_rms - mod)
-        comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
+        comp_star_mask = (comp_fluxes <= mod0 + std * sig_level)
         N2 = np.sum(comp_star_mask)
 
         # Exit condition: no further changes or too many iterations
