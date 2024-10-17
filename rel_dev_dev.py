@@ -124,8 +124,8 @@ def find_best_comps(table, tic_id_to_plot):
             print(f'Skipping TIC ID {tic_id} due to invalid magnitude.')
             continue
 
-        comp_fluxes.append(flux)
-        comp_mags.append(mag)
+        comp_fluxes.append(np.mean(flux))
+        comp_mags.append(np.mean(mag))
 
     # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
