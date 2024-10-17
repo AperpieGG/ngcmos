@@ -45,7 +45,7 @@ def find_comp_star_rms(comp_fluxes, airmass, comp_mags0):
 
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
-    comp_star_rms = find_comp_star_rms(comp_fluxes, airmass, comp_mags0)
+    comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     comp_star_mask = np.array([True for cs in comp_star_rms])
     i = 0.
     while True:
@@ -83,9 +83,11 @@ def find_best_comps(table, tic_id_to_plot):
     comp_mags = []
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+        zero_point_list = filtered_table[filtered_table['tic_id'] == tic_id]['zp']
+        exp = 10
         comp_fluxes.append(flux)
-        tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
-        comp_mags.append(tmag)
+        mag = -2.5 * np.log10(flux / exp) + zero_point_list
+        comp_mags.append(mag)
 
     comp_fluxes = np.array(comp_fluxes)
     comp_mags = np.array(comp_mags)
