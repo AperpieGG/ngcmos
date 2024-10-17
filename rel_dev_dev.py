@@ -8,7 +8,7 @@ from utils import plot_images, read_phot_file  # Assuming read_phot_file is avai
 # Constants for filtering stars
 SIGMA = 2
 COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 10
+MAGNITUDE_TOLERANCE = 3
 
 
 def target_info(table, tic_id_to_plot):
@@ -113,7 +113,6 @@ def find_best_comps(table, tic_id_to_plot):
             print(f'Skipping TIC ID {tic_id} due to invalid flux values.')
             continue
 
-        print(f'Processing TIC ID {tic_id}')
         # Compute the magnitude
         mag = -2.5 * np.log10(flux / exp) + zero_point_list
 
