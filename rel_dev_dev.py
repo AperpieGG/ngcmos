@@ -32,7 +32,7 @@ def limits_for_comps(table, tic_id_to_plot):
     return filtered_table, airmass_list
 
 
-def find_comp_star_rms(comp_fluxes, airmass, comp_mags0):
+def find_comp_star_rms(comp_fluxes, airmass):
     comp_star_rms = []
     for i, flux in enumerate(comp_fluxes):
         airmass_cs = np.polyfit(airmass, flux, 1)
