@@ -6,9 +6,9 @@ from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file  # Assuming read_phot_file is available in utils
 
 # Constants for filtering stars
-SIGMA = 2
-COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 2
+COLOR_TOLERANCE = 0.1
+MAGNITUDE_TOLERANCE = 3
+APERTURE = 5
 
 
 def target_info(table, tic_id_to_plot):
@@ -111,9 +111,6 @@ def find_best_comps(table, tic_id_to_plot):
 
     comp_fluxes = []
     comp_mags = []
-
-    # Define the  aperture (APERTURE) if not already defined
-    APERTURE = 5  # Adjust to your actual aperture
 
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
