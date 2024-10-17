@@ -3,7 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
-from utils import plot_images, read_phot_file, get_phot_files  # Assuming read_phot_file is available in utils
+from utils import plot_images, read_phot_file  # Assuming read_phot_file is available in utils
 
 # Constants for filtering stars
 SIGMA = 2
@@ -97,6 +97,17 @@ def find_best_comps(table, tic_id_to_plot):
 
     print(f"Number of iterations to converge: {iterations}")
     return good_comp_star_table  # Return the filtered table including only good comp stars
+
+
+def get_phot_files(directory):
+    """
+    Function to retrieve the first photometry file from a given directory.
+    Returns the filename as a string.
+    """
+    files = [f for f in os.listdir(directory) if f.endswith('.fits')]
+    if len(files) == 0:
+        raise FileNotFoundError("No FITS files found in the directory.")
+    return files[0]  # Return the first FITS file found as a string
 
 
 def main():
