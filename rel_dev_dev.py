@@ -46,8 +46,7 @@ def find_comp_star_rms(comp_fluxes, airmass):
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
-    comp_star_mask = np.array([True for cs in comp_star_rms])
-    print(f'The comp star mask is: {comp_star_mask}')
+    comp_star_mask = np.array([True for _ in comp_star_rms])
     i = 0
     while True:
         i += 1
@@ -63,10 +62,16 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
         dig = np.digitize(comp_mags, edges)
         mag_nodes = (edges[:-1] + edges[1:]) / 2.
 
-        # Ensure `comp_rms[dig == i]` uses correct 1D indexing
-        std_medians = np.array([np.nan if len(comp_rms[dig == j]) == 0
-                                else np.median(comp_rms[dig == j])
-                                for j in range(1, len(edges))])
+        # Initialize std_medians and populate it based on bins
+        std_medians = []
+        for j in range(1, len(edges)):
+            in_bin = comp_rms[dig == j]
+            if len(in_bin) == 0:
+                std_medians.append(np.nan)  # No stars in this bin
+            else:
+                std_medians.append(np.median(in_bin))
+
+        std_medians = np.array(std_medians)
 
         # Remove NaN entries from std_medians and mag_nodes
         valid_mask = ~np.isnan(std_medians)
@@ -85,6 +90,10 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
         std = np.std(comp_rms - mod)
         comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
         N2 = np.sum(comp_star_mask)
+
+        # Print the number of stars included and excluded
+        print(f"Iteration {i}:")
+        print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
 
         # Exit condition: no further changes or too many iterations
         if N1 == N2 or i > 10:
