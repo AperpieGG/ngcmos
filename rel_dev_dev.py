@@ -47,6 +47,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
     comp_star_mask = np.array([True for cs in comp_star_rms])
+    print(f'The comp star mask is: {comp_star_mask}')
     i = 0
     while True:
         i += 1
