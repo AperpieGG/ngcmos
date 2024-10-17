@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import InterpolatedUnivariateSpline as ius
+from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file  # Assuming read_phot_file is available in utils
 
 # Constants for filtering stars
@@ -9,12 +10,14 @@ SIGMA = 2
 COLOR_TOLERANCE = 0.2
 MAGNITUDE_TOLERANCE = 0.5
 
+
 def target_info(table, tic_id_to_plot):
     target_star = table[table['tic_id'] == tic_id_to_plot]  # Extract the target star data
     target_tmag = target_star['Tmag'][0]  # Extract the TESS magnitude of the target star
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
     airmass_list = target_star['airmass']  # Extract airmass_list from target star
     return target_tmag, target_color_index, airmass_list
+
 
 def limits_for_comps(table, tic_id_to_plot):
     target_tmag, target_color, airmass_list = target_info(table, tic_id_to_plot)
@@ -27,6 +30,7 @@ def limits_for_comps(table, tic_id_to_plot):
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
     return filtered_table, airmass_list
 
+
 def find_comp_star_rms(comp_fluxes, airmass, comp_mags0):
     comp_star_rms = []
     for i, flux in enumerate(comp_fluxes):
@@ -37,6 +41,7 @@ def find_comp_star_rms(comp_fluxes, airmass, comp_mags0):
         rms_val = np.std(flux_norm)
         comp_star_rms.append(rms_val)
     return np.array(comp_star_rms)
+
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass, comp_mags0)
@@ -56,7 +61,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
         cut = np.isnan(std_medians)
         mag_nodes = mag_nodes[~cut]
         std_medians = std_medians[~cut]
-        spl = ius(mag_nodes, std_medians)
+        spl = Spline(mag_nodes, std_medians)
         mod = spl(comp_mags)
         mod0 = spl(comp_mags0)
         std = np.std(comp_rms - mod)
@@ -67,6 +72,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
         elif i > 10.:
             break
     return comp_star_mask, comp_star_rms, i
+
 
 def find_best_comps(table, tic_id_to_plot):
     filtered_table, airmass = limits_for_comps(table, tic_id_to_plot)
@@ -92,13 +98,15 @@ def find_best_comps(table, tic_id_to_plot):
     print(f"Number of iterations to converge: {iterations}")
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
+
 def main():
     # Set the target TIC ID and the current night directory
     tic_id_to_plot = 9725627
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
-    phot_file = read_phot_file(current_night_directory)  # Assuming read_phot_file gets the right file from the directory
+    phot_file = read_phot_file(
+        current_night_directory)  # Assuming read_phot_file gets the right file from the directory
     table = phot_file  # Assuming the photometry file is read into a table-like format
 
     # Find the best comparison stars
@@ -107,6 +115,7 @@ def main():
     # Output the best comparison stars
     print("Best comparison stars table:")
     print(best_comps_table)
+
 
 # Run the main function
 if __name__ == "__main__":
