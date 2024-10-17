@@ -8,8 +8,7 @@ from utils import plot_images, read_phot_file  # Assuming read_phot_file is avai
 # Constants for filtering stars
 SIGMA = 2
 COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 0.5
-APERTURE = 5
+MAGNITUDE_TOLERANCE = 10
 
 
 def target_info(table, tic_id_to_plot):
@@ -86,7 +85,7 @@ def find_best_comps(table, tic_id_to_plot):
 
     # Define the exposure time (exp) and aperture (APERTURE) if not already defined
     exp = 10  # Adjust if different
-    APERTURE = 'some_aperture_value'  # Adjust to your actual aperture
+    APERTURE = 5  # Adjust to your actual aperture
 
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}'].values
