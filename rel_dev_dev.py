@@ -144,6 +144,7 @@ def find_best_comps(table, tic_id_to_plot):
         raise ValueError("No valid comparison stars found after filtering for flux and magnitude.")
 
     # Call the function to find bad comparison stars
+    print(f'The number of comp mags and comp_fluxes is: {len(comp_mags)}, {len(comp_fluxes)}')
     comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
 
     # Filter the table based on the mask
