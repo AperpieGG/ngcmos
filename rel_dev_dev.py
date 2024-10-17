@@ -9,6 +9,7 @@ from utils import plot_images, read_phot_file  # Assuming read_phot_file is avai
 SIGMA = 2
 COLOR_TOLERANCE = 0.2
 MAGNITUDE_TOLERANCE = 0.5
+APERTURE = 5
 
 
 def target_info(table, tic_id_to_plot):
@@ -81,7 +82,7 @@ def find_best_comps(table, tic_id_to_plot):
     comp_fluxes = []
     comp_mags = []
     for tic_id in tic_ids:
-        flux = filtered_table[filtered_table['tic_id'] == tic_id]['flux']
+        flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         comp_fluxes.append(flux)
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
         comp_mags.append(tmag)
