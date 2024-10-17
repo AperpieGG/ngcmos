@@ -8,7 +8,7 @@ from utils import plot_images, read_phot_file  # Assuming read_phot_file is avai
 # Constants for filtering stars
 SIGMA = 2
 COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 3
+MAGNITUDE_TOLERANCE = 2
 
 
 def target_info(table, tic_id_to_plot):
@@ -145,6 +145,7 @@ def find_best_comps(table, tic_id_to_plot):
 
     # Call the function to find bad comparison stars
     print(f'The number of comp mags and comp_fluxes is: {len(comp_mags)}, {len(comp_fluxes)}')
+    print(f'The dimensions of these two are: {comp_mags.shape}, {comp_fluxes.shape}')
     comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
 
     # Filter the table based on the mask
