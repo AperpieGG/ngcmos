@@ -66,7 +66,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
 
         # Calculate median RMS in each magnitude bin
         std_medians = np.array([np.nan if len(comp_rms[dig == j]) == 0
-                                else np.median(comp_rms[dig == j])
+                                else np.median(comp_rms[dig == j - 1])  # Fix indexing to 1D
                                 for j in range(1, len(edges))])
 
         # Remove NaN entries from std_medians and mag_nodes
