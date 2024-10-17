@@ -107,7 +107,7 @@ def main():
     # Read the photometry file
     phot_file = read_phot_file(
         current_night_directory)  # Assuming read_phot_file gets the right file from the directory
-    table = phot_file  # Assuming the photometry file is read into a table-like format
+    table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
     # Find the best comparison stars
     best_comps_table = find_best_comps(table, tic_id_to_plot)
