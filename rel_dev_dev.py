@@ -45,6 +45,7 @@ def find_comp_star_rms(comp_fluxes, airmass):
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
+    print(comp_star_rms)
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
     comp_star_mask = np.array([True for _ in comp_star_rms])
     i = 0
@@ -132,8 +133,8 @@ def find_best_comps(table, tic_id_to_plot):
             print(f'Skipping TIC ID {tic_id} due to invalid magnitude.')
             continue
 
-        comp_fluxes.append(np.mean(flux))
-        comp_mags.append(np.mean(mag))
+        comp_fluxes.append(flux)
+        comp_mags.append(mag)
 
     # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
