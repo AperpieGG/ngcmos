@@ -88,8 +88,8 @@ def find_best_comps(table, tic_id_to_plot):
     APERTURE = 5  # Adjust to your actual aperture
 
     for tic_id in tic_ids:
-        flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}'].values
-        zero_point_list = filtered_table[filtered_table['tic_id'] == tic_id]['zp'].values
+        flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+        zero_point_list = filtered_table[filtered_table['tic_id'] == tic_id]['zp']
 
         # Skip if flux is zero or NaN
         if np.any(flux <= 0) or np.any(np.isnan(flux)):
