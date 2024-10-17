@@ -132,7 +132,7 @@ def find_best_comps(table, tic_id_to_plot):
     comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
 
     # Filter the table based on the mask
-    # good_comp_star_table = filtered_table[comp_star_mask]
+    print(f'Star with the min rms: {np.min(comp_star_rms)}')
 
     # Filter tic_ids based on the mask
     good_tic_ids = tic_ids[comp_star_mask]
@@ -173,7 +173,7 @@ def main():
 
     # Print the best comparison stars
     tic_id = best_comps_table['tic_id']
-    print(f"The best comparison stars are: {tic_id}")
+    print(f"The best comparison stars are: {len(tic_id)}")
 
 
 # Run the main function
