@@ -94,14 +94,20 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
         mag_nodes = mag_nodes[valid_mask]
         std_medians = std_medians[valid_mask]
 
-        if len(mag_nodes) == 0 or len(std_medians) == 0:
-            print("No valid standard medians found.")
-            break
-
-        # Fit a spline to the medians
-        spl = Spline(mag_nodes, std_medians)
-        mod = spl(comp_mags)
-        mod0 = spl(comp_mags0)
+        # Handle case with too few points for spline fitting
+        if len(mag_nodes) < 4 or len(std_medians) < 4:  # Less than 4 points
+            print("Too few valid points for spline fitting. Falling back to linear fit.")
+            if len(mag_nodes) > 1:
+                mod = np.interp(comp_mags, mag_nodes, std_medians)  # Use linear interpolation
+                mod0 = np.interp(comp_mags0, mag_nodes, std_medians)
+            else:
+                print("Not enough data for linear interpolation either. Skipping iteration.")
+                break
+        else:
+            # Fit a spline to the medians if enough data
+            spl = Spline(mag_nodes, std_medians)
+            mod = spl(comp_mags)
+            mod0 = spl(comp_mags0)
 
         std = np.std(comp_rms - mod)
         comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
@@ -116,7 +122,6 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
             break
 
     return comp_star_mask, comp_star_rms, i
-
 
 def find_best_comps(table, tic_id_to_plot, APERTURE):
     # Filter the table based on color/magnitude tolerance
