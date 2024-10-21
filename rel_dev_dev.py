@@ -9,7 +9,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming r
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 1
+MAGNITUDE_TOLERANCE = 2
 
 plot_images()
 
