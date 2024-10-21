@@ -19,7 +19,7 @@ def plot_light_curves():
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
     plt.subplots_adjust(wspace=0)  # Remove space between plots
 
-    plot_axes = [ax1, ax2]  # Use these axes for plotting
+    plot_axes = [ax2, ax1]  # Swapped the axes (ax2 is now left, ax1 is right)
 
     for i, json_filename in enumerate(json_files[:2]):  # Limit to two plots (one per column)
         # Load the JSON data from each file
@@ -40,7 +40,7 @@ def plot_light_curves():
 
         # Plot each light curve in black
         plot_axes[i].plot(target_time_binned, target_fluxes_dt, 'o', color='black')
-        plot_axes[i].set_title(f'{label} data for Target Light Curve')
+        plot_axes[i].set_title(f'{label}')
         plot_axes[i].set_xlabel('Binned Time (BJD)')
         if i == 0:
             plot_axes[i].set_ylabel('Normalized Flux')
