@@ -8,7 +8,8 @@ from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming r
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.1
-MAGNITUDE_TOLERANCE = 10
+MAGNITUDE_TOLERANCE = 5
+FLUX_TOLERANCE = 20000
 APERTURE = 5
 
 plot_images()
@@ -19,18 +20,39 @@ def target_info(table, tic_id_to_plot):
     target_tmag = target_star['Tmag'][0]  # Extract the TESS magnitude of the target star
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
     airmass_list = target_star['airmass']  # Extract airmass_list from target star
-    return target_tmag, target_color_index, airmass_list
+
+    # Calculate mean flux for the target star (specific to the chosen aperture)
+    target_flux_mean = target_star[f'flux_{APERTURE}'].mean()
+
+    return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
 def limits_for_comps(table, tic_id_to_plot):
-    target_tmag, target_color, airmass_list = target_info(table, tic_id_to_plot)
+    # Get target star info including the mean flux
+    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot)
+
+    # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
     color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
     color_data = table[color_mask]
+
+    # Further filter based on TESS magnitude within the tolerance
     mag_mask = np.abs(color_data['Tmag'] - target_tmag) <= MAGNITUDE_TOLERANCE
     valid_color_mag_table = color_data[mag_mask]
+
+    # Apply flux tolerance based on the mean flux of the target star (± FLUX_TOLERANCE)
+    lower_flux_limit = target_flux_mean - FLUX_TOLERANCE
+    upper_flux_limit = target_flux_mean + FLUX_TOLERANCE
+    valid_flux_mask = (valid_color_mag_table[f'flux_{APERTURE}'] >= lower_flux_limit) & \
+                      (valid_color_mag_table[f'flux_{APERTURE}'] <= upper_flux_limit)
+
+    # Apply flux filter
+    valid_color_mag_table = valid_color_mag_table[valid_flux_mask]
+
+    # Exclude stars with Tmag less than 9.4 and remove the target star from the table
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
+
     return filtered_table, airmass_list
 
 
