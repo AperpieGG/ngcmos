@@ -249,6 +249,7 @@ def main():
         # Find the best comparison stars
         best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
         tic_ids = np.unique(best_comps_table['tic_id'])
+        print(f'Found {len(tic_ids)} comparison stars for the file')
 
     time_list = []
     flux_list = []
