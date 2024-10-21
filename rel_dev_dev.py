@@ -171,9 +171,7 @@ def main():
     # Find the best comparison stars
     best_comps_table = find_best_comps(phot_table, tic_id_to_plot)
 
-    # Print the best comparison stars
-    tic_id = best_comps_table['tic_id']
-    print(f"The best comparison stars are: {len(tic_id)}")
+    # reference_fluces = np.sum()
 
 
 # Run the main function
