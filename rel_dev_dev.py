@@ -5,7 +5,8 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
-from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming read_phot_file is available in utils
+from utils import plot_images, read_phot_file, bin_time_flux_error, \
+    remove_outliers  # Assuming read_phot_file is available in utils
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2
@@ -317,6 +318,10 @@ def main():
             RMS = np.std(target_fluxes_dt_unbinned)
             RMS_binned = np.std(target_fluxes_dt)
             print(f'Target star has an RMS of {RMS:.4f} before binning and {RMS_binned:.4f} after binning.')
+
+            # remove outliers
+            target_time_binned, target_fluxes_dt, target_fluxerrs_dt, _, _ = (
+                remove_outliers(target_time_binned, target_fluxes_dt, target_fluxerrs_binned))
 
             plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
             plt.title(f'Target star: {tic_id_to_plot} divided by master')
