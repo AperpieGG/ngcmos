@@ -256,13 +256,16 @@ def main():
 
     # Collect time, flux, and flux error data
     for tic_id in tic_ids:
-        # If comparison stars were loaded from the file, ensure best_comps_table is created
         if args.comp_stars:
-            best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
-
-        comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
-        comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-        comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+            # If comparison stars are loaded from the file, do not call find_best_comps
+            comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_mid']
+            comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+            comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+        else:
+            # If no comp_stars file, use best_comps_table
+            comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
+            comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+            comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
 
         time_list.append(comp_time)
         flux_list.append(comp_fluxes)
