@@ -241,109 +241,114 @@ def main():
 
         phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
 
-        if args.comp_stars:
-            # Read the file with known comparison stars
-            comp_stars_file = args.comp_stars
-            comp_stars = np.loadtxt(comp_stars_file, dtype=int)
-            # Use the tic_ids directly from the phot_table
-            tic_ids = np.intersect1d(comp_stars, np.unique(phot_table['tic_id']))
-            print(f'Found {len(tic_ids)} comparison stars from the file.')
-        else:
-            # Find the best comparison stars
-            best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
-            tic_ids = np.unique(best_comps_table['tic_id'])
-            print(f'Found {len(tic_ids)} comparison stars from the analysis')
+        # Extract data for the specific TIC ID
+        if tic_id_to_plot in np.unique(phot_table['tic_id']):
+            print(f"Performing relative photometry for TIC ID = {tic_id_to_plot}")
 
-        time_list = []
-        flux_list = []
-        fluxerr_list = []
-
-        # Collect time, flux, and flux error data
-        for tic_id in tic_ids:
             if args.comp_stars:
-                # If comparison stars are loaded from the file, do not call find_best_comps
-                comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_mid']
-                comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-                comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+                # Read the file with known comparison stars
+                comp_stars_file = args.comp_stars
+                comp_stars = np.loadtxt(comp_stars_file, dtype=int)
+                # Use the tic_ids directly from the phot_table
+                tic_ids = np.intersect1d(comp_stars, np.unique(phot_table['tic_id']))
+                print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
-                # If no comp_stars file, use best_comps_table
-                comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
-                comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-                comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+                # Find the best comparison stars
+                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
+                tic_ids = np.unique(best_comps_table['tic_id'])
+                print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
-            time_list.append(comp_time)
-            flux_list.append(comp_fluxes)
-            fluxerr_list.append(comp_fluxerrs)
+            time_list = []
+            flux_list = []
+            fluxerr_list = []
 
-        # Convert lists to arrays
-        flux_list = np.array(flux_list)
-        fluxerr_list = np.array(fluxerr_list)
-        time_list = np.array(time_list)
-
-        # Reference fluxes and errors (sum of all stars, excluding the target star)
-        reference_fluxes = np.sum(flux_list, axis=0)
-        reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
-
-        # Bin the master reference data
-        time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
-            bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
-
-        # Call the plot function
-        plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
-
-        # Perform relative photometry for target star and plot
-        target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
-        target_flux = target_star[f'flux_{APERTURE}']
-        target_fluxerr = target_star[f'fluxerr_{APERTURE}']
-        target_time = target_star['jd_mid']
-
-        # Bin the target star data
-        target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-            bin_time_flux_error(target_time, target_flux, target_fluxerr, 12))
-
-        # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
-        flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
-        flux_ratio = target_flux / reference_fluxes
-        # Calculate the average flux ratio of the target star
-        flux_ratio_mean_binned = np.mean(flux_ratio_binned)
-        flux_ratio_mean = np.mean(flux_ratio)
-        # Normalize the flux ratio (result around unity)
-        target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
-        target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
-        RMS = np.std(target_fluxes_dt_unbinned)
-        RMS_binned = np.std(target_fluxes_dt)
-        print(f'Target star has an RMS of {RMS:.4f} before binning and {RMS_binned:.4f} after binning.')
-
-        plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
-        plt.title(f'Target star: {tic_id_to_plot} divided by master')
-        plt.legend(loc='best')
-        plt.show()
-
-        if APERTURE == 5:
-            camera = 'CMOS'
-        elif APERTURE == 4:
-            camera = 'CCD'
-
-        # Save target_time_binned and target_fluxes_dt in a JSON file
-        data_to_save = {
-            "time": target_time_binned.tolist(),
-            "flux": target_fluxes_dt.tolist()
-        }
-
-        json_filename = f'target_light_curve_{tic_id_to_plot}_{camera}.json'
-        with open(json_filename, 'w') as json_file:
-            json.dump(data_to_save, json_file, indent=4)
-
-        print(f'Data saved to {json_filename}')
-
-        # Save tic_ids used for comparison stars in a txt file
-        comp_stars_filename = f'comp_stars_{tic_id_to_plot}_{camera}.txt'
-
-        with open(comp_stars_filename, 'w') as comp_stars_file:
+            # Collect time, flux, and flux error data
             for tic_id in tic_ids:
-                comp_stars_file.write(f'{tic_id}\n')
+                if args.comp_stars:
+                    # If comparison stars are loaded from the file, do not call find_best_comps
+                    comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_mid']
+                    comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+                    comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+                else:
+                    # If no comp_stars file, use best_comps_table
+                    comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
+                    comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+                    comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+
+                time_list.append(comp_time)
+                flux_list.append(comp_fluxes)
+                fluxerr_list.append(comp_fluxerrs)
+
+            # Convert lists to arrays
+            flux_list = np.array(flux_list)
+            fluxerr_list = np.array(fluxerr_list)
+            time_list = np.array(time_list)
+
+            # Reference fluxes and errors (sum of all stars, excluding the target star)
+            reference_fluxes = np.sum(flux_list, axis=0)
+            reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
+
+            # Bin the master reference data
+            time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
+                bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
+
+            # Call the plot function
+            plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
+
+            # Perform relative photometry for target star and plot
+            target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
+            target_flux = target_star[f'flux_{APERTURE}']
+            target_fluxerr = target_star[f'fluxerr_{APERTURE}']
+            target_time = target_star['jd_mid']
+
+            # Bin the target star data
+            target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
+                bin_time_flux_error(target_time, target_flux, target_fluxerr, 12))
+
+            # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
+            flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
+            flux_ratio = target_flux / reference_fluxes
+            # Calculate the average flux ratio of the target star
+            flux_ratio_mean_binned = np.mean(flux_ratio_binned)
+            flux_ratio_mean = np.mean(flux_ratio)
+            # Normalize the flux ratio (result around unity)
+            target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
+            target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
+            RMS = np.std(target_fluxes_dt_unbinned)
+            RMS_binned = np.std(target_fluxes_dt)
+            print(f'Target star has an RMS of {RMS:.4f} before binning and {RMS_binned:.4f} after binning.')
+
+            plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
+            plt.title(f'Target star: {tic_id_to_plot} divided by master')
+            plt.legend(loc='best')
+            plt.show()
+
+            if APERTURE == 5:
+                camera = 'CMOS'
+            elif APERTURE == 4:
+                camera = 'CCD'
+
+            # Save target_time_binned and target_fluxes_dt in a JSON file
+            data_to_save = {
+                "time": target_time_binned.tolist(),
+                "flux": target_fluxes_dt.tolist()
+            }
+
+            json_filename = f'target_light_curve_{tic_id_to_plot}_{camera}.json'
+            with open(json_filename, 'w') as json_file:
+                json.dump(data_to_save, json_file, indent=4)
+
+            print(f'Data saved to {json_filename}')
+
+            # Save tic_ids used for comparison stars in a txt file
+            comp_stars_filename = f'comp_stars_{tic_id_to_plot}_{camera}.txt'
+
+            with open(comp_stars_filename, 'w') as comp_stars_file:
+                for tic_id in tic_ids:
+                    comp_stars_file.write(f'{tic_id}\n')
+        else:
+            print(f"No data found for TIC ID = {tic_id_to_plot}")
 
 
-# Run the main function
 if __name__ == "__main__":
     main()
