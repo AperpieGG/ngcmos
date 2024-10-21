@@ -15,8 +15,6 @@ def plot_light_curves():
         print('No JSON files found that start with "target_light_curve".')
         return
 
-    plt.figure(figsize=(10, 6))
-
     for json_filename in json_files:
         # Load the JSON data from each file
         with open(json_filename, 'r') as json_file:
@@ -29,13 +27,15 @@ def plot_light_curves():
         # Determine if the file corresponds to 'CMOS' or 'CCD' based on the filename
         if json_filename.endswith('CMOS.json'):
             label = 'CMOS'
+            color = 'red'
         elif json_filename.endswith('CCD.json'):
             label = 'CCD'
+            color = 'blue'
         else:
             label = 'Unknown'  # Fallback if neither matches
 
         # Plot each light curve
-        plt.plot(target_time_binned, target_fluxes_dt, 'o-', label=f'{label}')
+        plt.plot(target_time_binned, target_fluxes_dt, 'o', color=color, label=f'{label}')
 
     # Customize the plot
     plt.title('Target Light Curves')
