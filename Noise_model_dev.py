@@ -73,10 +73,9 @@ def find_stars(table, APERTURE):
     selected_tic_ids = []
 
     for tic_id in unique_tic_ids:
-        # use only stars that Tmag< 14
-        tic_mask = [table['tic_id'] == tic_id]
-        fluxes = table[f'flux_{APERTURE}'][tic_mask]
-        Tmag = table['Tmag'][tic_mask][0]
+        tic_mask = filtered_table['tic_id'] == tic_id
+        fluxes = filtered_table[f'flux_{APERTURE}'][tic_mask]
+        Tmag = filtered_table['Tmag'][tic_mask][0]
 
         # Fit airmass and calculate RMS
         airmass_cs = np.polyfit(airmass[tic_mask], fluxes, 1)
