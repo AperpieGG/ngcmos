@@ -16,7 +16,7 @@ def plot_light_curves():
         return
 
     # Set up the figure and the subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
     plt.subplots_adjust(wspace=0)  # Remove space between plots
 
     plot_axes = [ax1, ax2]  # Use these axes for plotting
@@ -30,10 +30,18 @@ def plot_light_curves():
         target_time_binned = data['time']
         target_fluxes_dt = data['flux']
 
+        # Determine if the file corresponds to 'CMOS' or 'CCD' based on the filename
+        if json_filename.endswith('CMOS.json'):
+            label = 'CMOS'
+        elif json_filename.endswith('CCD.json'):
+            label = 'CCD'
+        else:
+            label = 'Unknown'  # Fallback if neither matches
+
         # Plot each light curve in black
-        plot_axes[i].plot(target_time_binned, target_fluxes_dt, 'o-', color='black')
-        plot_axes[i].set_title(f'{json_filename}')
-        plot_axes[i].set_xlabel('Binned Time (JD)')
+        plot_axes[i].plot(target_time_binned, target_fluxes_dt, 'o', color='black')
+        plot_axes[i].set_title(f'{label} data for Target Light Curve')
+        plot_axes[i].set_xlabel('Binned Time (BJD)')
         if i == 0:
             plot_axes[i].set_ylabel('Normalized Flux')
         plot_axes[i].grid(True)
