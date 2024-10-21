@@ -15,7 +15,13 @@ def plot_light_curves():
         print('No JSON files found that start with "target_light_curve".')
         return
 
-    for json_filename in json_files:
+    # Set up the figure and the subplots
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+    plt.subplots_adjust(wspace=0)  # Remove space between plots
+
+    plot_axes = [ax1, ax2]  # Use these axes for plotting
+
+    for i, json_filename in enumerate(json_files[:2]):  # Limit to two plots (one per column)
         # Load the JSON data from each file
         with open(json_filename, 'r') as json_file:
             data = json.load(json_file)
@@ -24,25 +30,16 @@ def plot_light_curves():
         target_time_binned = data['time']
         target_fluxes_dt = data['flux']
 
-        # Determine if the file corresponds to 'CMOS' or 'CCD' based on the filename
-        if json_filename.endswith('CMOS.json'):
-            label = 'CMOS'
-            color = 'red'
-        elif json_filename.endswith('CCD.json'):
-            label = 'CCD'
-            color = 'blue'
-        else:
-            label = 'Unknown'  # Fallback if neither matches
+        # Plot each light curve in black
+        plot_axes[i].plot(target_time_binned, target_fluxes_dt, 'o-', color='black')
+        plot_axes[i].set_title(f'{json_filename}')
+        plot_axes[i].set_xlabel('Binned Time (JD)')
+        if i == 0:
+            plot_axes[i].set_ylabel('Normalized Flux')
+        plot_axes[i].grid(True)
 
-        # Plot each light curve
-        plt.plot(target_time_binned, target_fluxes_dt, 'o', color=color, label=f'{label}')
-
-    # Customize the plot
-    plt.title('Target Light Curves')
-    plt.xlabel('Binned Time (JD)')
-    plt.ylabel('Normalized Flux')
-    plt.grid(True)
-    plt.legend(loc='best')
+    # Customize the overall figure
+    plt.suptitle('Target Light Curves')
     plt.show()
 
 
