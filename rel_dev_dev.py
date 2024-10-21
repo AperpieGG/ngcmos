@@ -9,7 +9,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming r
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 2
+MAGNITUDE_TOLERANCE = 1
 
 plot_images()
 
@@ -155,10 +155,6 @@ def find_best_comps(table, tic_id_to_plot, APERTURE):
     # Now filter the table based on these tic_ids
     good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
 
-    # print the rms of the stars that kept there
-    print(f"RMS of comparison stars after filtering: {comp_star_rms[comp_star_mask]}")
-
-    print(f"Number of iterations to converge: {iterations}")
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
@@ -249,7 +245,7 @@ def main():
         # Find the best comparison stars
         best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
         tic_ids = np.unique(best_comps_table['tic_id'])
-        print(f'Found {len(tic_ids)} comparison stars for the file')
+        print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
     time_list = []
     flux_list = []
