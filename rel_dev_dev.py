@@ -244,7 +244,7 @@ def main():
         comp_stars = np.loadtxt(comp_stars_file, dtype=int)
         # Use the tic_ids directly from the phot_table
         tic_ids = np.intersect1d(comp_stars, np.unique(phot_table['tic_id']))
-        print(f'Comparison stars from file: {tic_ids}')
+        print(f'Found {len(tic_ids)} comparison stars from the file.')
     else:
         # Find the best comparison stars
         best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
