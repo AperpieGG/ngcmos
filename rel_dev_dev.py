@@ -3,7 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
-from utils import plot_images, read_phot_file  # Assuming read_phot_file is available in utils
+from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming read_phot_file is available in utils
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.1
@@ -147,6 +147,51 @@ def find_best_comps(table, tic_id_to_plot):
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
+def plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs,
+                                batch_size=9):
+    """
+    Plot the light curves for comparison stars in batches of `batch_size` (9 per figure by default).
+    """
+    total_stars = len(tic_ids)
+    num_batches = int(np.ceil(total_stars / batch_size))  # Calculate how many batches we need
+
+    for batch_num in range(num_batches):
+        fig, axes = plt.subplots(3, 3, figsize=(15, 10))  # Create 3x3 grid of subplots
+        fig.subplots_adjust(hspace=0.4, wspace=0.4)
+
+        for i in range(batch_size):
+            idx = batch_num * batch_size + i
+            if idx >= total_stars:
+                break  # Exit if we exceed the number of stars to plot
+
+            tic_id = tic_ids[idx]
+            ax = axes[i // 3, i % 3]  # Select the correct subplot
+
+            comp_fluxes = flux_list[idx]
+            comp_fluxerrs = fluxerr_list[idx]
+            comp_time = time_list[idx]
+
+            # Subtract the flux of the current comparison star from the master reference flux
+            reference_fluxes_comp = reference_fluxes - comp_fluxes
+
+            # Calculate the relative flux and error
+            comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
+            comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
+
+            # Bin the data (optional, can be skipped if not needed)
+            comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
+                bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
+
+            # Plot the light curve in the current subplot
+            ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color='blue', alpha=0.8)
+            ax.set_title(f'Comparison star: {tic_id}')
+            ax.set_xlabel('Time')
+            ax.set_ylabel('Flux')
+
+        plt.tight_layout()
+        plt.show()
+
+
 def get_phot_files(directory):
     """
     Function to retrieve the first photometry file from a given directory.
@@ -171,9 +216,20 @@ def main():
     # Find the best comparison stars
     best_comps_table = find_best_comps(phot_table, tic_id_to_plot)
 
-    # reference_fluces = np.sum()
+    # Sum up the fluxes and errors of the reference stars
+    reference_fluxes = best_comps_table[[f'flux_{APERTURE}']].sum(axis=0)
+    reference_fluxerrs = np.sqrt(np.sum(best_comps_table[[f'flux_{APERTURE}_err']] ** 2, axis=0))
 
+    # Extract time, flux, flux error, and TIC IDs from the photometry table
+    time_list = best_comps_table['time']
+    flux_list = best_comps_table[[f'flux_{APERTURE}']]
+    fluxerr_list = best_comps_table[[f'flux_{APERTURE}_err']]
+    tic_ids = best_comps_table['tic_id']
 
+    # plot using the function
+    plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs)
+
+    
 # Run the main function
 if __name__ == "__main__":
     main()
