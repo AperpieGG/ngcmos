@@ -7,7 +7,6 @@ from utils import plot_images
 
 plot_images()
 
-
 def get_phot_files(directory):
     """
     Function to retrieve photometry files from a given directory.
@@ -88,7 +87,7 @@ def find_stars(table, APERTURE):
     return np.array(comp_star_rms), np.array(selected_Tmags), np.array(selected_tic_ids)
 
 
-def plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms, ccd_tmags):
+def plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms=None, ccd_tmags=None):
     """
     Plot RMS vs Tmag for both CMOS and CCD data.
 
@@ -98,9 +97,9 @@ def plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms, ccd_tmags):
         RMS values for CMOS stars.
     cmos_tmags : np.array
         Tmag values for CMOS stars.
-    ccd_rms : np.array
+    ccd_rms : np.array, optional
         RMS values for CCD stars.
-    ccd_tmags : np.array
+    ccd_tmags : np.array, optional
         Tmag values for CCD stars.
     """
     plt.figure(figsize=(10, 6))
@@ -108,13 +107,14 @@ def plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms, ccd_tmags):
     # Plot CMOS
     plt.scatter(cmos_tmags, cmos_rms, color='red', label='CMOS', alpha=0.7)
 
-    # Plot CCD
-    plt.scatter(ccd_tmags, ccd_rms, color='blue', label='CCD', alpha=0.7)
+    if ccd_rms is not None and ccd_tmags is not None:
+        # Plot CCD
+        plt.scatter(ccd_tmags, ccd_rms, color='blue', label='CCD', alpha=0.7)
 
     # Add labels and title
     plt.xlabel('Tmag')
     plt.ylabel('RMS')
-    plt.gca().invert_xaxis()
+    plt.gca().invert_xaxis()  # Invert Tmag axis (brighter stars have lower Tmag)
     plt.legend(loc='upper right')
     plt.grid(True)
     plt.show()
@@ -122,8 +122,8 @@ def plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms, ccd_tmags):
 
 def main():
     """
-    Main function to process CMOS and CCD photometry files, calculate RMS and Tmag,
-    and plot the results.
+    Main function to process CMOS and then CCD photometry files, calculate RMS and Tmag,
+    and plot the results sequentially to save time.
     """
 
     # Get the list of photometry files (assumes one is CMOS and one is CCD)
@@ -134,18 +134,23 @@ def main():
     cmos_file = [f for f in phot_files if 'CMOS' in f][0]
     ccd_file = [f for f in phot_files if 'CCD' in f][0]
 
-    # Read the photometry data from the CMOS and CCD files
+    # Read and process the CMOS file to find stars, RMS, and Tmag
+    print("Processing CMOS data...")
     cmos_table = read_phot_files(os.path.join(directory, cmos_file))
-    ccd_table = read_phot_files(os.path.join(directory, ccd_file))
-
-    # Process the CMOS file to find stars, RMS, and Tmag
     cmos_rms, cmos_tmags, cmos_tic_ids = find_stars(cmos_table, APERTURE=5)
 
-    # Use the same TIC IDs to find corresponding stars in the CCD file
+    # Plot the CMOS data first
+    print("Plotting CMOS data...")
+    plot_rms_vs_tmag(cmos_rms, cmos_tmags)
+
+    # Now, read the CCD data after having the CMOS tic_ids
+    print("Processing CCD data...")
+    ccd_table = read_phot_files(os.path.join(directory, ccd_file))
     ccd_mask = np.isin(ccd_table['tic_id'], cmos_tic_ids)
     ccd_rms, ccd_tmags, _ = find_stars(ccd_table[ccd_mask], APERTURE=4)
 
-    # Plot the results
+    # Plot the combined CMOS and CCD data
+    print("Plotting combined CMOS and CCD data...")
     plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms, ccd_tmags)
 
 
