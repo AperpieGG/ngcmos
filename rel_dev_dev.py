@@ -7,8 +7,8 @@ from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming read_phot_file is available in utils
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 1
+COLOR_TOLERANCE = 0.1
+MAGNITUDE_TOLERANCE = 10
 APERTURE = 5
 
 plot_images()
@@ -46,7 +46,7 @@ def find_comp_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
+def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     print(comp_star_rms)
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
