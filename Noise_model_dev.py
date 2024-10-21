@@ -41,59 +41,6 @@ def read_phot_files(filename):
         return None
 
 
-def exclude_outliers_by_rms(tmag_values, rms_values, bin_width=0.5, sigma=2):
-    """
-    Exclude stars whose RMS is far from the mean in bins of Tmag values.
-
-    Parameters
-    ----------
-    tmag_values : array-like
-        Array of Tmag values for the stars.
-    rms_values : array-like
-        Array of RMS values for the stars.
-    bin_width : float, optional
-        The width of the bins for Tmag, default is 0.5.
-    sigma : float, optional
-        The number of standard deviations from the mean used to exclude outliers.
-
-    Returns
-    -------
-    clean_tmag_values : array-like
-        Tmag values after outlier exclusion.
-    clean_rms_values : array-like
-        RMS values after outlier exclusion.
-    """
-
-    clean_tmag_values = []
-    clean_rms_values = []
-
-    # Define the range of Tmag bins
-    min_tmag = np.min(tmag_values)
-    max_tmag = np.max(tmag_values)
-    bins = np.arange(min_tmag, max_tmag + bin_width, bin_width)
-
-    for i in range(len(bins) - 1):
-        bin_mask = (tmag_values >= bins[i]) & (tmag_values < bins[i + 1])
-        bin_rms_values = rms_values[bin_mask]
-        bin_tmag_values = tmag_values[bin_mask]
-
-        if len(bin_rms_values) == 0:
-            continue  # Skip empty bins
-
-        # Calculate the mean and std deviation of the RMS values in the bin
-        mean_rms = np.mean(bin_rms_values)
-        std_rms = np.std(bin_rms_values)
-
-        # Create a mask for outliers based on the sigma threshold
-        outlier_mask = np.abs(bin_rms_values - mean_rms) < sigma * std_rms
-
-        # Keep only non-outliers
-        clean_tmag_values.extend(bin_tmag_values[outlier_mask])
-        clean_rms_values.extend(bin_rms_values[outlier_mask])
-
-    return np.array(clean_tmag_values), np.array(clean_rms_values)
-
-
 def find_stars(table, APERTURE):
     """
     Find stars in the photometry table and calculate RMS and Tmag for each star.
@@ -124,7 +71,7 @@ def find_stars(table, APERTURE):
     for tic_id in unique_tic_ids:
         tic_mask = [tic_id == i for i in table['tic_id'] if i < 14]
         fluxes = table[f'flux_{APERTURE}'][tic_mask]
-        Tmag = table['Tmag'][0][tic_mask]
+        Tmag = table['Tmag'][tic_mask][0]
 
         # Fit airmass and calculate RMS
         airmass_cs = np.polyfit(airmass[tic_mask], fluxes, 1)
@@ -175,8 +122,8 @@ def plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms=None, ccd_tmags=None):
 
 def main():
     """
-    Main function to process CMOS and CCD photometry files, calculate RMS and Tmag,
-    and plot the results.
+    Main function to process CMOS and then CCD photometry files, calculate RMS and Tmag,
+    and plot the results sequentially to save time.
     """
 
     # Get the list of photometry files (assumes one is CMOS and one is CCD)
@@ -192,13 +139,9 @@ def main():
     cmos_table = read_phot_files(os.path.join(directory, cmos_file))
     cmos_rms, cmos_tmags, cmos_tic_ids = find_stars(cmos_table, APERTURE=5)
 
-    # Exclude stars with RMS far from the mean within Tmag bins
-    print("Excluding outliers from CMOS data...")
-    cmos_tmags_clean, cmos_rms_clean = exclude_outliers_by_rms(cmos_tmags, cmos_rms, bin_width=0.5, sigma=2)
-
-    # Plot the cleaned CMOS data
-    print("Plotting cleaned CMOS data...")
-    plot_rms_vs_tmag(cmos_rms_clean, cmos_tmags_clean)
+    # Plot the CMOS data first
+    print("Plotting CMOS data...")
+    plot_rms_vs_tmag(cmos_rms, cmos_tmags)
 
     # Now, read the CCD data after having the CMOS tic_ids
     print("Processing CCD data...")
@@ -206,13 +149,10 @@ def main():
     ccd_mask = np.isin(ccd_table['tic_id'], cmos_tic_ids)
     ccd_rms, ccd_tmags, _ = find_stars(ccd_table[ccd_mask], APERTURE=4)
 
-    # Exclude outliers from CCD data as well
-    print("Excluding outliers from CCD data...")
-    ccd_tmags_clean, ccd_rms_clean = exclude_outliers_by_rms(ccd_tmags, ccd_rms, bin_width=0.5, sigma=2)
+    # Plot the combined CMOS and CCD data
+    print("Plotting combined CMOS and CCD data...")
+    plot_rms_vs_tmag(cmos_rms, cmos_tmags, ccd_rms, ccd_tmags)
 
-    # Plot the cleaned CMOS and CCD data
-    print("Plotting cleaned CMOS and CCD data...")
-    plot_rms_vs_tmag(cmos_rms_clean, cmos_tmags_clean, ccd_rms_clean, ccd_tmags_clean)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
