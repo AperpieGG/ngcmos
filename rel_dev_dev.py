@@ -167,14 +167,15 @@ def plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, ref
             tic_id = tic_ids[idx]
             ax = axes[i // 3, i % 3]  # Select the correct subplot
 
+            # Get the current comparison star flux and time
             comp_fluxes = flux_list[idx]
             comp_fluxerrs = fluxerr_list[idx]
             comp_time = time_list[idx]
 
-            # Subtract the flux of the current comparison star from the master reference flux
-            reference_fluxes_comp = reference_fluxes - comp_fluxes
+            # Calculate the sum of all fluxes except the current star's flux
+            reference_fluxes_comp = np.sum(flux_list, axis=0) - comp_fluxes
 
-            # Calculate the relative flux and error
+            # Normalize the current star's flux by the sum of the other comparison stars' fluxes
             comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
             comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
 
@@ -216,20 +217,35 @@ def main():
     # Find the best comparison stars
     best_comps_table = find_best_comps(phot_table, tic_id_to_plot)
 
-    # Sum up the fluxes and errors of the reference stars
-    reference_fluxes = best_comps_table[[f'flux_{APERTURE}']].sum(axis=0)
-    reference_fluxerrs = np.sqrt(np.sum(best_comps_table[[f'flux_{APERTURE}_err']] ** 2, axis=0))
+    tic_ids = np.unique(best_comps_table['tic_id'])
 
-    # Extract time, flux, flux error, and TIC IDs from the photometry table
-    time_list = best_comps_table['time']
-    flux_list = best_comps_table[[f'flux_{APERTURE}']]
-    fluxerr_list = best_comps_table[[f'flux_{APERTURE}_err']]
-    tic_ids = best_comps_table['tic_id']
+    time_list = []
+    flux_list = []
+    fluxerr_list = []
 
-    # plot using the function
+    # Collect time, flux, and flux error data
+    for tic_id in tic_ids:
+        comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
+        comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+        comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+
+        time_list.append(comp_time)
+        flux_list.append(comp_fluxes)
+        fluxerr_list.append(comp_fluxerrs)
+
+    # Convert lists to arrays
+    flux_list = np.array(flux_list)
+    fluxerr_list = np.array(fluxerr_list)
+    time_list = np.array(time_list)
+
+    # Reference fluxes and errors (sum of all stars, excluding the target star)
+    reference_fluxes = np.sum(flux_list, axis=0)
+    reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
+
+    # Call the plot function
     plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs)
 
-    
+
 # Run the main function
 if __name__ == "__main__":
     main()
