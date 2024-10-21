@@ -9,12 +9,11 @@ from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming r
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2
 MAGNITUDE_TOLERANCE = 2
-APERTURE = 5
 
 plot_images()
 
 
-def target_info(table, tic_id_to_plot):
+def target_info(table, tic_id_to_plot, APERTURE):
     target_star = table[table['tic_id'] == tic_id_to_plot]  # Extract the target star data
     target_tmag = target_star['Tmag'][0]  # Extract the TESS magnitude of the target star
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
@@ -26,9 +25,9 @@ def target_info(table, tic_id_to_plot):
     return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
-def limits_for_comps(table, tic_id_to_plot):
+def limits_for_comps(table, tic_id_to_plot, APERTURE)
     # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot)
+    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
@@ -118,9 +117,9 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
     return comp_star_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot):
+def find_best_comps(table, tic_id_to_plot, APERTURE):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE)
     tic_ids = np.unique(filtered_table['tic_id'])
     print(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
@@ -223,8 +222,10 @@ def main():
     # add parse for tic_id_to_plot
     parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
+    parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
     args = parser.parse_args()
     tic_id_to_plot = args.tic_id
+    APERTURE = args.aper
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
@@ -233,7 +234,7 @@ def main():
 
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
     # Find the best comparison stars
-    best_comps_table = find_best_comps(phot_table, tic_id_to_plot)
+    best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
 
     tic_ids = np.unique(best_comps_table['tic_id'])
 
