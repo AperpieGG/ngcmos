@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import numpy as np
+import argparse
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming read_phot_file is available in utils
@@ -205,8 +206,11 @@ def get_phot_files(directory):
 
 
 def main():
-    # Set the target TIC ID and the current night directory
-    tic_id_to_plot = 9725627
+    # add parse for tic_id_to_plot
+    parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
+    parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
+    args = parser.parse_args()
+    tic_id_to_plot = args.tic_id
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
