@@ -329,6 +329,13 @@ def main():
 
     print(f'Data saved to {json_filename}')
 
+    # Save tic_ids used for comparison stars in a txt file
+    comp_stars_filename = f'comp_stars_{tic_id_to_plot}_{camera}.txt'
+
+    with open(comp_stars_filename, 'w') as comp_stars_file:
+        for tic_id in tic_ids:
+            comp_stars_file.write(f'{tic_id}\n')
+
 
 # Run the main function
 if __name__ == "__main__":
