@@ -290,7 +290,7 @@ def main():
 
             # Bin the master reference data
             time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
-                bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 30))
+                bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
 
             # Call the plot function
             plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
@@ -303,7 +303,7 @@ def main():
 
             # Bin the target star data
             target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-                bin_time_flux_error(target_time, target_flux, target_fluxerr, 30))
+                bin_time_flux_error(target_time, target_flux, target_fluxerr, 12))
 
             # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
             flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
