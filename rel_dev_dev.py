@@ -150,8 +150,7 @@ def find_best_comps(table, tic_id_to_plot):
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
-def plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs,
-                                batch_size=9):
+def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
     """
     Plot the light curves for comparison stars in batches of `batch_size` (9 per figure by default).
     """
@@ -176,7 +175,8 @@ def plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, ref
             comp_time = time_list[idx]
 
             # Calculate the sum of all fluxes except the current star's flux
-            reference_fluxes_comp = np.sum(flux_list, axis=0) - comp_fluxes
+            reference_fluxes_comp = np.sum(np.delete(flux_list, i, axis=0), axis=0)
+            reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
 
             # Normalize the current star's flux by the sum of the other comparison stars' fluxes
             comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
@@ -253,7 +253,7 @@ def main():
         bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
 
     # Call the plot function
-    plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs)
+    plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
 
     # perform relative photometry for target star and plot
     target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
