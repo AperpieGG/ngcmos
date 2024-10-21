@@ -220,10 +220,13 @@ def get_phot_files(directory):
 
 
 def main():
-    # add parse for tic_id_to_plot
+    # Add parse for tic_id_to_plot
     parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
     parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
+    # Add argument to provide a txt file if comparison stars are known
+    parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
+
     args = parser.parse_args()
     tic_id_to_plot = args.tic_id
     APERTURE = args.aper
@@ -234,10 +237,18 @@ def main():
     print(f'Photometry file: {phot_file}')
 
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    # Find the best comparison stars
-    best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
 
-    tic_ids = np.unique(best_comps_table['tic_id'])
+    if args.comp_stars:
+        # Read the file with known comparison stars
+        comp_stars_file = args.comp_stars
+        comp_stars = np.loadtxt(comp_stars_file, dtype=int)
+        # Use the tic_ids directly from the phot_table
+        tic_ids = np.intersect1d(comp_stars, np.unique(phot_table['tic_id']))
+        print(f'Comparison stars from file: {tic_ids}')
+    else:
+        # Find the best comparison stars
+        best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
+        tic_ids = np.unique(best_comps_table['tic_id'])
 
     time_list = []
     flux_list = []
@@ -245,6 +256,10 @@ def main():
 
     # Collect time, flux, and flux error data
     for tic_id in tic_ids:
+        # If comparison stars were loaded from the file, ensure best_comps_table is created
+        if args.comp_stars:
+            best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
+
         comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
         comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
@@ -269,7 +284,7 @@ def main():
     # Call the plot function
     plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
 
-    # perform relative photometry for target star and plot
+    # Perform relative photometry for target star and plot
     target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
     target_flux = target_star[f'flux_{APERTURE}']
     target_fluxerr = target_star[f'fluxerr_{APERTURE}']
@@ -279,8 +294,7 @@ def main():
     target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
         bin_time_flux_error(target_time, target_flux, target_fluxerr, 12))
 
-    # finally plot the light curve for the target star flattened by the master
-    # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
+    # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
     flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
     flux_ratio = target_flux / reference_fluxes
     # Calculate the average flux ratio of the target star
@@ -302,6 +316,7 @@ def main():
         camera = 'CMOS'
     elif APERTURE == 4:
         camera = 'CCD'
+
     # Save target_time_binned and target_fluxes_dt in a JSON file
     data_to_save = {
         "time": target_time_binned.tolist(),
