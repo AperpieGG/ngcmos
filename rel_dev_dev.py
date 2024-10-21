@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 import os
 import numpy as np
 import argparse
@@ -296,6 +297,22 @@ def main():
     plt.title(f'Target star: {tic_id_to_plot} divided by master')
     plt.legend(loc='best')
     plt.show()
+
+    if APERTURE == 5:
+        camera = 'CMOS'
+    elif APERTURE == 4:
+        camera = 'CCD'
+    # Save target_time_binned and target_fluxes_dt in a JSON file
+    data_to_save = {
+        "time": target_time_binned.tolist(),
+        "flux": target_fluxes_dt.tolist()
+    }
+
+    json_filename = f'target_light_curve_{tic_id_to_plot}_{camera}.json'
+    with open(json_filename, 'w') as json_file:
+        json.dump(data_to_save, json_file, indent=4)
+
+    print(f'Data saved to {json_filename}')
 
 
 # Run the main function
