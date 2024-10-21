@@ -242,6 +242,10 @@ def main():
     reference_fluxes = np.sum(flux_list, axis=0)
     reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
 
+    # Bin the master reference data
+    time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
+        bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
+
     # Call the plot function
     plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs)
 
@@ -257,7 +261,7 @@ def main():
 
     # finally plot the light curve for the target star flattened by the master
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
-    flux_ratio_binned = target_fluxes_binned / reference_fluxes
+    flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
     flux_ratio = target_flux / reference_fluxes
     # Calculate the average flux ratio of the target star
     flux_ratio_mean_binned = np.mean(flux_ratio_binned)
