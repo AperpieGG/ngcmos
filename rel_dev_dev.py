@@ -245,6 +245,26 @@ def main():
     # Call the plot function
     plot_lightcurves_in_batches(time_list, flux_list, fluxerr_list, tic_ids, reference_fluxes, reference_fluxerrs)
 
+    # perform relative photometry for target star and plot
+    target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
+    target_flux = target_star[f'flux_{APERTURE}']
+    target_fluxerr = target_star[f'fluxerr_{APERTURE}']
+    target_time = target_star['jd_mid']
+
+    # finally plot the light curve for the target star flattened by the master
+    # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
+    flux_ratio = target_flux / reference_fluxes
+    # Calculate the average flux ratio of the target star
+    flux_ratio_mean = np.mean(flux_ratio)
+    # Normalize the flux ratio (result around unity)
+    target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
+    RMS = np.std(target_fluxes_dt_unbinned)
+
+    plt.plot(target_time, target_fluxes_dt_unbinned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
+    plt.title(f'Target star: {tic_id_to_plot} divided by master')
+    plt.legend(loc='best')
+    plt.show()
+
 
 # Run the main function
 if __name__ == "__main__":
