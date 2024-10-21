@@ -42,7 +42,7 @@ def plot_light_curves():
         plot_axes[i].plot(target_time_binned, target_fluxes_dt, 'o', color='black')
         plot_axes[i].set_title(f'{label}')
         plot_axes[i].set_xlabel('Binned Time (BJD)')
-        if i == 0:
+        if i == 1:
             plot_axes[i].set_ylabel('Normalized Flux')
         plot_axes[i].grid(True)
 
