@@ -124,7 +124,7 @@ def find_stars(table, APERTURE):
     for tic_id in unique_tic_ids:
         tic_mask = [tic_id == i for i in table['tic_id'] if i < 14]
         fluxes = table[f'flux_{APERTURE}'][tic_mask]
-        Tmag = table['Tmag'][tic_mask][0]
+        Tmag = table['Tmag'][0][tic_mask]
 
         # Fit airmass and calculate RMS
         airmass_cs = np.polyfit(airmass[tic_mask], fluxes, 1)
