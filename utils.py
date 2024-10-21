@@ -49,14 +49,14 @@ def plot_images():
 
     # Font and fontsize
     plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.size'] = 14
+    plt.rcParams['font.size'] = 12
 
     # Legend
     plt.rcParams['legend.frameon'] = True
     plt.rcParams['legend.framealpha'] = 0.8
     plt.rcParams['legend.loc'] = 'best'
     plt.rcParams['legend.fancybox'] = True
-    plt.rcParams['legend.fontsize'] = 14
+    plt.rcParams['legend.fontsize'] = 12
 
 
 def get_location():
