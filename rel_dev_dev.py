@@ -288,6 +288,8 @@ def main():
     target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
     target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
     RMS = np.std(target_fluxes_dt_unbinned)
+    RMS_binned = np.std(target_fluxes_dt)
+    print(f'Target star has an RMS of {RMS:.4f} before binning and {RMS_binned:.4f} after binning.')
 
     plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
     plt.title(f'Target star: {tic_id_to_plot} divided by master')
