@@ -9,7 +9,6 @@ from utils import plot_images, read_phot_file, bin_time_flux_error  # Assuming r
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2
 MAGNITUDE_TOLERANCE = 5
-FLUX_TOLERANCE = 30000
 APERTURE = 5
 
 plot_images()
@@ -39,15 +38,6 @@ def limits_for_comps(table, tic_id_to_plot):
     # Further filter based on TESS magnitude within the tolerance
     mag_mask = np.abs(color_data['Tmag'] - target_tmag) <= MAGNITUDE_TOLERANCE
     valid_color_mag_table = color_data[mag_mask]
-
-    # Apply flux tolerance based on the mean flux of the target star (± FLUX_TOLERANCE)
-    lower_flux_limit = target_flux_mean - FLUX_TOLERANCE
-    upper_flux_limit = target_flux_mean + FLUX_TOLERANCE
-    valid_flux_mask = (valid_color_mag_table[f'flux_{APERTURE}'] >= lower_flux_limit) & \
-                      (valid_color_mag_table[f'flux_{APERTURE}'] <= upper_flux_limit)
-
-    # Apply flux filter
-    valid_color_mag_table = valid_color_mag_table[valid_flux_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
