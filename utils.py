@@ -791,7 +791,7 @@ def expand_and_rename_table(phot_table):
         # Expand jd_mid, relative_flux, and relative_flux_err columns into individual columns
         for i in range(len(jd_mid_values)):
             expanded_row = list(row)
-            expanded_row[row.colnames.index('Time_JD')] = jd_mid_values[i]
+            expanded_row[row.colnames.index('Time_BJD')] = jd_mid_values[i]
             expanded_row[row.colnames.index('Relative_Flux')] = relative_flux_values[i]
             expanded_row[row.colnames.index('Relative_Flux_err')] = relative_flux_err_values[i]
 
