@@ -36,7 +36,7 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb=0.5, dmf=1.5):
     color_data = table[color_mask]
 
     # Filter stars brighter than the target within dmb and fainter than the target within dmf
-    mag_mask = (color_data['Tmag'] >= target_tmag - dmb) & (color_data['Tmag'] <= target_tmag + dmf)
+    mag_mask = (color_data['Tmag'] <= target_tmag - dmb) & (color_data['Tmag'] >= target_tmag + dmf)
     valid_color_mag_table = color_data[mag_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
@@ -227,7 +227,7 @@ def main():
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
     parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
     parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
-    parser.add_argument('--dmf', type=float, default=1.5, help='Fainter comparison star threshold (default: 3.5 mag)')
+    parser.add_argument('--dmf', type=float, default=1.5, help='Fainter comparison star threshold (default: 1.5 mag)')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
