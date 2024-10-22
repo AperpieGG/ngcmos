@@ -232,7 +232,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(target_time, dt_flux,
                                                                              dt_fluxerr, bin_size)
 
-        return target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median
+        return target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass_list
 
     except Exception as e:
         logger.error(f"Error in relative photometry for TIC ID {tic_id_to_plot}: {str(e)}")
@@ -290,7 +290,7 @@ def main():
                     continue
 
                 # Unpack the result if it's not None
-                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median) = result
+                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass) = result
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
@@ -298,7 +298,7 @@ def main():
 
                 # Append data to the list
                 data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  sky_median, rms))
+                                  sky_median, rms, airmass))
                 logger.info('')
             else:
                 logger.info(f"TIC ID {tic_id} is not included in the analysis because "
@@ -308,7 +308,7 @@ def main():
 
         # Create an Astropy table from the data list
         data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
-                                                  'Relative_Flux_err', 'Sky', 'RMS'))
+                                                  'Relative_Flux_err', 'Sky', 'RMS', 'Airmass'))
 
         expanded_data_table = expand_and_rename_table(data_table)
 
