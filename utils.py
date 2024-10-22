@@ -784,7 +784,7 @@ def expand_and_rename_table(phot_table):
     expanded_rows = []
 
     for row in phot_table:
-        jd_mid_values = row['Time_JD']
+        jd_mid_values = row['Time_BJD']
         relative_flux_values = row['Relative_Flux']
         relative_flux_err_values = row['Relative_Flux_err']
 
