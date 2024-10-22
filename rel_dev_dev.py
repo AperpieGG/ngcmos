@@ -10,7 +10,6 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2
-MAGNITUDE_TOLERANCE = 1
 
 plot_images()
 
@@ -27,17 +26,17 @@ def target_info(table, tic_id_to_plot, APERTURE):
     return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb=0.5, dmf=3.5):
     # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
+    target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _ = target_info(table, tic_id_to_plot, APERTURE)
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
     color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
     color_data = table[color_mask]
 
-    # Further filter based on TESS magnitude within the tolerance
-    mag_mask = np.abs(color_data['Tmag'] - target_tmag) <= MAGNITUDE_TOLERANCE
+    # Filter stars brighter than the target within dmb and fainter than the target within dmf
+    mag_mask = (color_data['Tmag'] >= target_tmag - dmb) & (color_data['Tmag'] <= target_tmag + dmf)
     valid_color_mag_table = color_data[mag_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
@@ -227,6 +226,8 @@ def main():
     parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
     parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
+    parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
+    parser.add_argument('--dmf', type=float, default=3.5, help='Fainter comparison star threshold (default: 3.5 mag)')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
@@ -255,7 +256,7 @@ def main():
                 print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
                 # Find the best comparison stars
-                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
+                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, args.dmb, args.dmf)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
