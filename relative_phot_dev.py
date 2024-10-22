@@ -100,8 +100,8 @@ def find_comp_star_rms(comp_fluxes, airmass):
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
-    print(comp_star_rms)
-    print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
+    logger.info(f"Initial RMS values for comparison stars: {comp_star_rms}")
+    logger.info(f"Initial number of comparison stars: {len(comp_star_rms)}")
     comp_star_mask = np.array([True for _ in comp_star_rms])
     i = 0
     while True:
@@ -111,7 +111,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
         N1 = len(comp_mags)
 
         if N1 == 0:
-            print("No valid comparison stars left after filtering.")
+            logger.info("No valid comparison stars left. Exiting.")
             break
 
         edges = np.arange(comp_mags.min(), comp_mags.max() + dmag, dmag)
@@ -136,12 +136,12 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
 
         # Handle case with too few points for spline fitting
         if len(mag_nodes) < 4 or len(std_medians) < 4:  # Less than 4 points
-            print("Too few valid points for spline fitting. Falling back to linear fit.")
+            logger.info("Not enough data for spline fitting. Trying linear interpolation.")
             if len(mag_nodes) > 1:
                 mod = np.interp(comp_mags, mag_nodes, std_medians)  # Use linear interpolation
                 mod0 = np.interp(comp_mags0, mag_nodes, std_medians)
             else:
-                print("Not enough data for linear interpolation either. Skipping iteration.")
+                logger.info("Only one point available. Exiting.")
                 break
         else:
             # Fit a spline to the medians if enough data
@@ -153,9 +153,8 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
         comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
         N2 = np.sum(comp_star_mask)
 
-        # Print the number of stars included and excluded
-        print(f"Iteration {i}:")
-        print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
+        # the number of stars included and excluded
+        logger.info(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}")
 
         # Exit condition: no further changes or too many iterations
         if N1 == N2 or i > 10:
@@ -168,7 +167,7 @@ def find_best_comps(table, tic_id_to_plot, APERTURE):
     # Filter the table based on color/magnitude tolerance
     filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE)
     tic_ids = np.unique(filtered_table['tic_id'])
-    print(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
+    logger.info(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
     comp_fluxes = []
     comp_mags = []
@@ -189,11 +188,11 @@ def find_best_comps(table, tic_id_to_plot, APERTURE):
         raise ValueError("No valid comparison stars found after filtering for flux and magnitude.")
 
     # Call the function to find bad comparison stars
-    print(f'The dimensions of these two are: {comp_mags.shape}, {comp_fluxes.shape}')
+    logger.info(f'The dimensions of these two are: {comp_mags.shape}, {comp_fluxes.shape}')
     comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
 
     # Filter the table based on the mask
-    print(f'Star with the min rms: {np.min(comp_star_rms)} and tic_id: {tic_ids[np.argmin(comp_star_rms)]}')
+    logger.info(f'Star with the min rms: {np.min(comp_star_rms)} and tic_id: {tic_ids[np.argmin(comp_star_rms)]}')
 
     # Filter tic_ids based on the mask
     good_tic_ids = tic_ids[comp_star_mask]
