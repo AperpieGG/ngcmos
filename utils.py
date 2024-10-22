@@ -787,8 +787,8 @@ def expand_and_rename_table(phot_table):
         jd_mid_values = row['Time_JD']
         relative_flux_values = row['Relative_Flux']
         relative_flux_err_values = row['Relative_Flux_err']
-        airmass = row['Airmass']
-        zp = row['ZP']
+        # airmass = row['Airmass']
+        # zp = row['ZP']
 
         # Expand jd_mid, relative_flux, and relative_flux_err columns into individual columns
         for i in range(len(jd_mid_values)):
@@ -796,8 +796,8 @@ def expand_and_rename_table(phot_table):
             expanded_row[row.colnames.index('Time_JD')] = jd_mid_values[i]
             expanded_row[row.colnames.index('Relative_Flux')] = relative_flux_values[i]
             expanded_row[row.colnames.index('Relative_Flux_err')] = relative_flux_err_values[i]
-            expanded_row[row.colnames.index('Airmass')] = airmass[i]
-            expanded_row[row.colnames.index('ZP')] = zp[i]
+            # expanded_row[row.colnames.index('Airmass')] = airmass[i]
+            # expanded_row[row.colnames.index('ZP')] = zp[i]
             expanded_rows.append(expanded_row)
 
     # Create a new table with expanded columns
