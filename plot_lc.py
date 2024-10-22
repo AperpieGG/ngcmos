@@ -24,7 +24,12 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
         return
 
     tmag = tic_id_data['Tmag'][0]
-    time = tic_id_data['Time_JD']
+    # handle time in case tic_id_data['Time_JD'] does not exist
+    if 'Time_JD' not in tic_id_data.names:
+        time = tic_id_data['Time_BJD']
+    else:
+        time = tic_id_data['Time_JD']
+
     flux = tic_id_data['Relative_Flux']
     flux_err = tic_id_data['Relative_Flux_err']
     airmass = tic_id_data['Airmass']
