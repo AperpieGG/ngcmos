@@ -169,6 +169,10 @@ def find_best_comps(table, tic_id_to_plot, APERTURE):
     tic_ids = np.unique(filtered_table['tic_id'])
     logger.info(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
+    if len(tic_ids) == 0:
+        logger.warning(f"No valid comparison stars found for TIC ID {tic_id_to_plot}.")
+        return None  # Return None if no comparison stars found
+
     comp_fluxes = []
     comp_mags = []
 
@@ -183,16 +187,13 @@ def find_best_comps(table, tic_id_to_plot, APERTURE):
     comp_fluxes = np.array(comp_fluxes)
     comp_mags = np.array(comp_mags)
 
-    # Check if comp_mags is non-empty before proceeding
-    if len(comp_mags) == 0:
-        raise ValueError("No valid comparison stars found after filtering for flux and magnitude.")
-
     # Call the function to find bad comparison stars
     logger.info(f'The dimensions of these two are: {comp_mags.shape}, {comp_fluxes.shape}')
     comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
 
-    # Filter the table based on the mask
-    logger.info(f'Star with the min rms: {np.min(comp_star_rms)} and tic_id: {tic_ids[np.argmin(comp_star_rms)]}')
+    if len(comp_star_mask) == 0:
+        logger.warning(f"No valid comparison stars remaining for TIC ID {tic_id_to_plot} after sigma clipping.")
+        return None
 
     # Filter tic_ids based on the mask
     good_tic_ids = tic_ids[comp_star_mask]
