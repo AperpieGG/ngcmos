@@ -40,7 +40,7 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb=0.5, dmf=1.5):
     valid_color_mag_table = color_data[mag_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
-    valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
+    # valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
 
     return filtered_table, airmass_list
