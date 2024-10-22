@@ -787,8 +787,6 @@ def expand_and_rename_table(phot_table):
         jd_mid_values = row['Time_JD']
         relative_flux_values = row['Relative_Flux']
         relative_flux_err_values = row['Relative_Flux_err']
-        # airmass = row['Airmass']
-        # zp = row['ZP']
 
         # Expand jd_mid, relative_flux, and relative_flux_err columns into individual columns
         for i in range(len(jd_mid_values)):
@@ -796,14 +794,22 @@ def expand_and_rename_table(phot_table):
             expanded_row[row.colnames.index('Time_JD')] = jd_mid_values[i]
             expanded_row[row.colnames.index('Relative_Flux')] = relative_flux_values[i]
             expanded_row[row.colnames.index('Relative_Flux_err')] = relative_flux_err_values[i]
-            # expanded_row[row.colnames.index('Airmass')] = airmass[i]
-            # expanded_row[row.colnames.index('ZP')] = zp[i]
+
+            # Optionally check if 'Airmass' and 'ZP' columns exist before accessing
+            if 'Airmass' in row.colnames:
+                expanded_row[row.colnames.index('Airmass')] = row['Airmass'][i]
+            if 'ZP' in row.colnames:
+                expanded_row[row.colnames.index('ZP')] = row['ZP'][i]
+
             expanded_rows.append(expanded_row)
 
-    # Create a new table with expanded columns
-    expanded_table = Table(rows=expanded_rows, names=phot_table.colnames)
+    # Create a new table with the expanded rows, excluding Airmass and ZP
+    # Define the names you want to keep in the new table
+    column_names = ['TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux', 'Relative_Flux_err', 'Sky', 'RMS']
+    # Add 'Airmass' and 'ZP' if needed, otherwise skip them
+    new_table = Table(rows=expanded_rows, names=column_names)
 
-    return expanded_table
+    return new_table
 
 
 def open_json_file():
