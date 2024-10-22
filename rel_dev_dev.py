@@ -26,7 +26,7 @@ def target_info(table, tic_id_to_plot, APERTURE):
     return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb=0.5, dmf=3.5):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb=0.5, dmf=1.5):
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
