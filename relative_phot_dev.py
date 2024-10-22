@@ -307,7 +307,7 @@ def main():
                 logger.info('')
 
         # Create an Astropy table from the data list
-        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
+        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux',
                                                   'Relative_Flux_err', 'Sky', 'RMS'))
 
         expanded_data_table = expand_and_rename_table(data_table)
