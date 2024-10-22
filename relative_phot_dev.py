@@ -281,16 +281,15 @@ def main():
                     continue
 
                 # Unpack the result if it's not None
-                (tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
-                 magnitude, airmass_list, zero_point_list) = result
+                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median) = result
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
                 logger.info(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
                 # Append data to the list
-                data_list.append((tic_id, tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  rms, sky_median, airmass_list, zero_point_list, magnitude))
+                data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
+                                  sky_median, rms))
                 logger.info('')
             else:
                 logger.info(f"TIC ID {tic_id} is not included in the analysis because "
@@ -299,8 +298,8 @@ def main():
                 logger.info('')
 
         # Create an Astropy table from the data list
-        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
-                                                  'RMS', 'Sky', 'Airmass', 'ZP', 'Magnitude'))
+        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
+                                                  'Relative_Flux_err', 'Sky', 'RMS'))
 
         expanded_data_table = expand_and_rename_table(data_table)
 
