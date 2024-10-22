@@ -9,7 +9,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers  # Assuming read_phot_file is available in utils
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 0.2
+COLOR_TOLERANCE = 0.1
 
 plot_images()
 
@@ -36,7 +36,7 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb=0.5, dmf=1.5):
     color_data = table[color_mask]
 
     # Filter stars brighter than the target within dmb and fainter than the target within dmf
-    mag_mask = (color_data['Tmag'] <= target_tmag - dmb) & (color_data['Tmag'] >= target_tmag + dmf)
+    mag_mask = (color_data['Tmag'] >= target_tmag - dmb) & (color_data['Tmag'] <= target_tmag + dmf)
     valid_color_mag_table = color_data[mag_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
