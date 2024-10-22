@@ -32,7 +32,11 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
 
     flux = tic_id_data['Relative_Flux']
     flux_err = tic_id_data['Relative_Flux_err']
-    airmass = tic_id_data['Airmass']
+    # handle airmass in case tic_id_data['Airmass'] does not exist
+    if 'Airmass' not in tic_id_data.names:
+        airmass = np.zeros_like(time)
+    else:
+        airmass = tic_id_data['Airmass']
     rms = tic_id_data['RMS'][0]
 
     if bin_size > 1:
