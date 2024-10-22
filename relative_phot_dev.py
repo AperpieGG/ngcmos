@@ -204,31 +204,39 @@ def find_best_comps(table, tic_id_to_plot, APERTURE):
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
-def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE):
+def relative_phot(table, tic_id_to_plot, bin_size, APERTURE):
+    try:
+        filtered_table = find_best_comps(table, tic_id_to_plot, APERTURE)
 
-    filtered_table = find_best_comps(table, tic_id_to_plot, APERTURE)
+        if filtered_table is None or len(filtered_table) == 0:
+            logger.warning(f"No valid comparison stars found for TIC ID {tic_id_to_plot}. Skipping.")
+            return None
 
-    (target_tmag, target_color_index, airmass_list, target_flux_mean,
-     target_sky, target_flux, target_fluxerr, target_time) = target_info(table, tic_id_to_plot, APERTURE)
+        (target_tmag, target_color_index, airmass_list, target_flux_mean,
+         target_sky, target_flux, target_fluxerr, target_time) = target_info(table, tic_id_to_plot, APERTURE)
 
-    # Calculate the median sky value for our star
-    sky_median = np.median(target_sky)
+        # Calculate the median sky value for our star
+        sky_median = np.median(target_sky)
 
-    tic_ids = np.unique(filtered_table['tic_id'])
+        tic_ids = np.unique(filtered_table['tic_id'])
 
-    reference_fluxes = np.sum([filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-                               for tic_id in tic_ids], axis=0)
+        reference_fluxes = np.sum([filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+                                   for tic_id in tic_ids], axis=0)
 
-    flux_ratio = target_flux / reference_fluxes
-    flux_ratio_mean = np.mean(flux_ratio)
-    dt_flux = flux_ratio / flux_ratio_mean
-    dt_fluxerr = dt_flux * np.sqrt(
-        (target_fluxerr / target_flux) ** 2 + (target_fluxerr[0] / target_flux[0]) ** 2)
+        flux_ratio = target_flux / reference_fluxes
+        flux_ratio_mean = np.mean(flux_ratio)
+        dt_flux = flux_ratio / flux_ratio_mean
+        dt_fluxerr = dt_flux * np.sqrt(
+            (target_fluxerr / target_flux) ** 2 + (target_fluxerr[0] / target_flux[0]) ** 2)
 
-    time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(target_time, dt_flux,
-                                                                         dt_fluxerr, bin_size)
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(target_time, dt_flux,
+                                                                             dt_fluxerr, bin_size)
 
-    return target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median
+        return target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median
+
+    except Exception as e:
+        logger.error(f"Error in relative photometry for TIC ID {tic_id_to_plot}: {str(e)}")
+        return None
 
 
 def main():
@@ -274,7 +282,7 @@ def main():
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 # Perform relative photometry
-                result = relative_phot(phot_table, tic_id, bin_size, APERTURE, EXPOSURE)
+                result = relative_phot(phot_table, tic_id, bin_size, APERTURE)
 
                 # Check if result is None
                 if result is None:
