@@ -110,8 +110,8 @@ plt.figure()
 vmin, vmax = np.percentile(image_data, [5, 95])
 if crop_size == 652:
     # rotate the image 180 degrees
-    plt.imshow(image_data, cmap='hot', vmin=vmin, vmax=vmax)
-    plt.gca().invert_yaxis()
+    plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
+    # plt.gca().invert_yaxis()
 else:
     plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
 positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
