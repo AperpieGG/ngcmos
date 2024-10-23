@@ -109,9 +109,9 @@ for i, (x_star, y_star) in enumerate(zip(selected_sources['xcentroid'], selected
 plt.figure()
 vmin, vmax = np.percentile(image_data, [5, 95])
 if crop_size == 652:
-    # rotate the image 180 degrees
-    plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
-    # plt.gca().invert_yaxis()
+    # Rotate the image 180 degrees using np.rot90 twice
+    rotated_image = np.rot90(image_data, 2)
+    plt.imshow(rotated_image, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
 else:
     plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
 positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
