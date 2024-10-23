@@ -122,6 +122,6 @@ print(f'Average FWHM_y: {average_fwhm_y:.2f} pixels')
 FWHM = (average_fwhm_x + average_fwhm_y) / 2
 print(f'Final FWHM: {FWHM:.2f} pixels')
 plt.title(f'Measured FWHM: {FWHM:.2f} pixels')
-if crop_size is not None:
+if crop_size == 652:
     plt.gca().invert_yaxis()
 plt.show()
