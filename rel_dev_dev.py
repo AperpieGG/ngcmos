@@ -227,12 +227,14 @@ def main():
     parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
     parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
+    parser.add_argument('--cam', type=str, default='CMOS', help='Aperture number to use for photometry.')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
     args = parser.parse_args()
     tic_id_to_plot = args.tic_id
     APERTURE = args.aper
+    camera = args.cam
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
@@ -327,11 +329,6 @@ def main():
             plt.title(f'Target star: {tic_id_to_plot} divided by master')
             plt.legend(loc='best')
             plt.show()
-
-            if APERTURE == 5:
-                camera = 'CMOS'
-            elif APERTURE == 4:
-                camera = 'CCD'
 
             # Save target_time_binned and target_fluxes_dt in a JSON file
             data_to_save = {
