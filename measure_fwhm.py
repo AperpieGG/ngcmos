@@ -109,9 +109,6 @@ for i, (x_star, y_star) in enumerate(zip(selected_sources['xcentroid'], selected
 plt.figure()
 vmin, vmax = np.percentile(image_data, [5, 95])
 plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
-if crop_size == 652:
-    # Flip the image along the y-axis
-    flipped_image_data = np.flipud(image_data)
 positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
                           selected_sources['ycentroid'] + (center_y - crop_size)))
 apertures = CircularAperture(positions, r=5.)
@@ -125,7 +122,5 @@ print(f'Average FWHM_y: {average_fwhm_y:.2f} pixels')
 FWHM = (average_fwhm_x + average_fwhm_y) / 2
 print(f'Final FWHM: {FWHM:.2f} pixels')
 plt.title(f'Measured FWHM: {FWHM:.2f} pixels')
-
-
 plt.show()
 plt.show()
