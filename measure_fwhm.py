@@ -108,7 +108,7 @@ for i, (x_star, y_star) in enumerate(zip(selected_sources['xcentroid'], selected
 # Plot the selected stars with the fitted Gaussian
 plt.figure()
 vmin, vmax = np.percentile(image_data, [5, 95])
-plt.imshow(image_data, cmap='hot', vmin=vmin, vmax=vmax)
+plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
 positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
                           selected_sources['ycentroid'] + (center_y - crop_size)))
 apertures = CircularAperture(positions, r=5.)
