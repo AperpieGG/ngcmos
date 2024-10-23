@@ -37,13 +37,13 @@ def plot_light_curves():
         label = json_filename.split('_')[-1].replace('.json', '')  # Use last part before .json
 
         # Plot each light curve in black
-        axes[i].plot(target_time_binned, target_fluxes_dt, 'o', color='black')
+        axes[i].plot(target_time_binned, target_fluxes_dt, 'o', color='black', label=f'RMS = {data["RMS"]:.4f}')
         axes[i].set_title(f'{label}')
         axes[i].set_xlabel('Binned Time (BJD)')
         if i == 0:
             axes[i].set_ylabel('Normalized Flux')
         axes[i].grid(True)
-
+    plt.legend(loc='best')
     plt.show()
 
 
