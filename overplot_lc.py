@@ -43,7 +43,7 @@ def plot_light_curves():
         if i == 0:
             axes[i].set_ylabel('Normalized Flux')
         axes[i].grid(True)
-    plt.legend(loc='best')
+        axes[i].legend()  # Add legend to display the RMS
     plt.show()
 
 
