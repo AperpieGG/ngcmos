@@ -112,12 +112,17 @@ if crop_size == 652:
     # Rotate the image 180 degrees using np.rot90 twice
     rotated_image = np.rot90(image_data, 2)
     plt.imshow(rotated_image, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
+    positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
+                              selected_sources['ycentroid'] + (center_y - crop_size)))
+    apertures = CircularAperture(positions, r=5.)
+    apertures.plot(color='blue', lw=1.5, alpha=0.5)
 else:
     plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
-positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
-                          selected_sources['ycentroid'] + (center_y - crop_size)))
-apertures = CircularAperture(positions, r=5.)
-apertures.plot(color='blue', lw=1.5, alpha=0.5)
+    positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
+                              selected_sources['ycentroid'] + (center_y - crop_size)))
+    apertures = CircularAperture(positions, r=5.)
+    apertures.plot(color='blue', lw=1.5, alpha=0.5)
+
 
 # Calculate the average FWHM values
 average_fwhm_x = np.median(fwhms_x)
