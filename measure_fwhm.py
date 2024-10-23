@@ -109,6 +109,8 @@ for i, (x_star, y_star) in enumerate(zip(selected_sources['xcentroid'], selected
 plt.figure()
 vmin, vmax = np.percentile(image_data, [5, 95])
 plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
+# rotate the image 180 degrees
+plt.gca().invert_yaxis()
 positions = np.transpose((selected_sources['xcentroid'] + (center_x - crop_size),
                           selected_sources['ycentroid'] + (center_y - crop_size)))
 apertures = CircularAperture(positions, r=5.)
