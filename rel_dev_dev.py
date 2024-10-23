@@ -333,7 +333,8 @@ def main():
             # Save target_time_binned and target_fluxes_dt in a JSON file
             data_to_save = {
                 "time": target_time_binned.tolist(),
-                "flux": target_fluxes_dt.tolist()
+                "flux": target_fluxes_dt.tolist(),
+                "RMS": RMS.tolist()
             }
 
             json_filename = f'target_light_curve_{tic_id_to_plot}_{camera}.json'
