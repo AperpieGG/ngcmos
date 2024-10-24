@@ -11,7 +11,8 @@ from astropy.io import fits
 from utils import plot_images
 
 plot_images()
-# TODO, find best stars for CMOS with the smaller RMS for each mag (use Ed's code for that - find bad comps)
+# TODO: find best stars for CMOS with the smaller RMS for each mag (use Ed's code for that - find bad comps)
+# TODO: add noise source script to also plot the total model for each camera
 
 
 def get_phot_files(directory):
