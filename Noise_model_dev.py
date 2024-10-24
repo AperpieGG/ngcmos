@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""""
+"""
 Script to plot the RMS vs Tmags for CMOS and CCD. It takes the photometry files
 and search for the Tmag and fits a second order polynomial with the airmass,
 normalizes the lc and find the RMS for each particular star
