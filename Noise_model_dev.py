@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+""""
+Script to plot the RMS vs Tmags for CMOS and CCD. It takes the photometry files
+and search for the Tmag and fits a second order polynomial with the airmass,
+normalizes the lc and find the RMS for each particular star
+"""
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +11,8 @@ from astropy.io import fits
 from utils import plot_images
 
 plot_images()
+# TODO, find best stars for CMOS with the smaller RMS for each mag (use Ed's code for that - find bad comps)
+
 
 def get_phot_files(directory):
     """
