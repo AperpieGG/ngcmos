@@ -16,7 +16,7 @@ params.rp = 0.889  # planet radius (in units of stellar radii)
 params.a = 0.05325  # semi-major axis (in units of stellar radii)
 params.inc = 89.57  # orbital inclination (degrees)
 params.ecc = 0.  # eccentricity
-params.w = 178  # longitude of periastron (degrees)
+params.w = 90  # longitude of periastron (degrees)
 params.u = [0.545, 0.195]  # limb darkening coefficients [u1, u2]
 params.limb_dark = "quadratic"  # limb darkening model
 
@@ -30,7 +30,7 @@ flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
 
-time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 2)
+time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 12)
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
 
