@@ -124,88 +124,15 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
 
 
 def find_comp_star_rms(comp_fluxes, airmass):
-    """
-    Calculate the RMS of the comparison star fluxes and their time-dependent RMS.
-
-    Parameters:
-        comp_fluxes (numpy.ndarray): Fluxes of comparison stars (2D array: [stars, time]).
-        airmass (numpy.ndarray): Airmass values corresponding to the time points.
-
-    Returns:
-        numpy.ndarray: Array of RMS values for each comparison star.
-        list of numpy.ndarray: RMS values as a function of time for each star.
-    """
     comp_star_rms = []
-    time_rms = []  # This will store time-varying RMS values for each star
-
     for i, flux in enumerate(comp_fluxes):
-        # Perform airmass correction
         airmass_cs = np.polyfit(airmass, flux, 1)
         airmass_mod = np.polyval(airmass_cs, airmass)
         flux_corrected = flux / airmass_mod
         flux_norm = flux_corrected / np.median(flux_corrected)
-
-        # Calculate RMS over the entire time range
         rms_val = np.std(flux_norm)
         comp_star_rms.append(rms_val)
-
-        # Calculate time-dependent RMS (rolling or segment-based)
-        segment_rms = [np.std(flux_norm[i:i + 10]) for i in
-                       range(0, len(flux_norm), 10)]  # Example: RMS in windows of 10 points
-        time_rms.append(segment_rms)
-
-    return np.array(comp_star_rms), time_rms
-
-
-def fit_linear_model_to_rms(time_rms, time_intervals):
-    """
-    Fit a linear model to time-varying RMS data for each comparison star.
-
-    Parameters:
-        time_rms (list of numpy.ndarray): List of time-dependent RMS values for each star.
-        time_intervals (numpy.ndarray): Corresponding time points.
-
-    Returns:
-        numpy.ndarray: Array of slopes (from linear fits) for each comparison star.
-    """
-    slopes = []
-
-    for rms_values in time_rms:
-        if len(rms_values) > 1:  # Ensure there's enough data to fit
-            time_points = np.arange(len(rms_values))  # Simulated time points if not available
-            slope, _ = np.polyfit(time_points, rms_values, 1)  # Fit a straight line
-            slopes.append(slope)
-        else:
-            slopes.append(np.inf)  # If we can't fit, return an "infinite" slope
-
-    return np.array(slopes)
-
-
-def filter_flat_stars(comp_fluxes, airmass, comp_mags0, time_intervals, slope_threshold=0.01):
-    """
-    Filter comparison stars based on the flatness of the RMS trend.
-
-    Parameters:
-        comp_fluxes (numpy.ndarray): Fluxes of comparison stars.
-        airmass (numpy.ndarray): Airmass values.
-        comp_mags0 (numpy.ndarray): Magnitudes of comparison stars.
-        time_intervals (numpy.ndarray): Time points.
-        slope_threshold (float): Threshold for selecting flat stars based on slope.
-
-    Returns:
-        numpy.ndarray: Mask of stars with flat RMS trends.
-    """
-    comp_star_rms, time_rms = find_comp_star_rms(comp_fluxes, airmass)
-
-    # Fit linear models to the time-varying RMS data
-    slopes = fit_linear_model_to_rms(time_rms, time_intervals)
-    print(f"Slopes of RMS trends: {slopes}")
-
-    # Select stars with flat RMS trends (small absolute slope values)
-    flat_star_mask = np.abs(slopes) < slope_threshold
-    print(f"Number of flat stars: {np.sum(flat_star_mask)}")
-
-    return flat_star_mask, comp_star_rms, slopes
+    return np.array(comp_star_rms)
 
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
@@ -274,8 +201,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
     return comp_star_mask, comp_star_rms, i
 
 
-
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, time_intervals):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
     # Filter the table based on color/magnitude tolerance
     filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
     tic_ids = np.unique(filtered_table['tic_id'])
@@ -295,19 +221,24 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     comp_fluxes = np.array(comp_fluxes)
     comp_mags = np.array(comp_mags)
 
+    # Check if comp_mags is non-empty before proceeding
     if len(comp_mags) == 0:
         raise ValueError("No valid comparison stars found after filtering for flux and magnitude.")
 
-    # Call the function to filter flat comparison stars
-    flat_star_mask, comp_star_rms, slopes = filter_flat_stars(comp_fluxes, airmass, comp_mags, time_intervals)
+    # Call the function to find bad comparison stars
+    print(f'The dimensions of these two are: {comp_mags.shape}, {comp_fluxes.shape}')
+    comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
+
+    # Filter the table based on the mask
+    print(f'Star with the min rms: {np.min(comp_star_rms)} and tic_id: {tic_ids[np.argmin(comp_star_rms)]}')
 
     # Filter tic_ids based on the mask
-    good_tic_ids = tic_ids[flat_star_mask]
+    good_tic_ids = tic_ids[comp_star_mask]
 
     # Now filter the table based on these tic_ids
     good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
 
-    return good_comp_star_table  #
+    return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
 def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
@@ -409,8 +340,7 @@ def main():
                 print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
                 # Find the best comparison stars
-                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size,
-                                                   phot_table['jd_mid'])
+                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
