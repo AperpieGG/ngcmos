@@ -423,7 +423,6 @@ def main():
             target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
             RMS = np.std(target_fluxes_dt_unbinned)
             RMS_binned = np.std(target_fluxes_dt)
-            # print(f'RMS for Master: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
             print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
 
             plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
@@ -433,8 +432,10 @@ def main():
 
             # Save target_time_binned and target_fluxes_dt in a JSON file
             data_to_save = {
-                "time": target_time_binned.tolist(),
-                "flux": target_fluxes_dt.tolist(),
+                "TIC_ID": tic_id_to_plot,
+                "Time_BJD": target_time_binned.tolist(),
+                "Relative_Flux": target_fluxes_dt.tolist(),
+                "Relative_Flux_err": target_fluxerrs_binned.tolist(),
                 "RMS": RMS.tolist()
             }
 
