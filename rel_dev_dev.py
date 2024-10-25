@@ -307,7 +307,7 @@ def main():
     parser.add_argument('--cam', type=str, default='CMOS', help='Aperture number to use for photometry.')
     parser.add_argument('--pos', action='store_true', help='Plot comp stars positions on the image.')
     parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
-    parser.add_argument('--dmf', type=float, default=2.5, help='Fainter comparison star threshold (default: 1.5 mag)')
+    parser.add_argument('--dmf', type=float, default=1.5, help='Fainter comparison star threshold (default: 1.5 mag)')
     parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
