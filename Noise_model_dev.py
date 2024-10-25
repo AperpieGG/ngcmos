@@ -8,11 +8,77 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from utils import plot_images
+from utils import plot_images, read_phot_file
 
 plot_images()
 # TODO: find best stars for CMOS with the smaller RMS for each mag (use Ed's code for that - find bad comps)
 # TODO: add noise source script to also plot the total model for each camera
+
+
+def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
+    comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
+    print(comp_star_rms)
+    print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
+    comp_star_mask = np.array([True for _ in comp_star_rms])
+    i = 0
+    while True:
+        i += 1
+        comp_mags = np.copy(comp_mags0[comp_star_mask])
+        comp_rms = np.copy(comp_star_rms[comp_star_mask])
+        N1 = len(comp_mags)
+
+        if N1 == 0:
+            print("No valid comparison stars left after filtering.")
+            break
+
+        edges = np.arange(comp_mags.min(), comp_mags.max() + dmag, dmag)
+        dig = np.digitize(comp_mags, edges)
+        mag_nodes = (edges[:-1] + edges[1:]) / 2.
+
+        # Initialize std_medians and populate it based on bins
+        std_medians = []
+        for j in range(1, len(edges)):
+            in_bin = comp_rms[dig == j]
+            if len(in_bin) == 0:
+                std_medians.append(np.nan)  # No stars in this bin
+            else:
+                std_medians.append(np.median(in_bin))
+
+        std_medians = np.array(std_medians)
+
+        # Remove NaN entries from std_medians and mag_nodes
+        valid_mask = ~np.isnan(std_medians)
+        mag_nodes = mag_nodes[valid_mask]
+        std_medians = std_medians[valid_mask]
+
+        # Handle case with too few points for spline fitting
+        if len(mag_nodes) < 4 or len(std_medians) < 4:  # Less than 4 points
+            print("Too few valid points for spline fitting. Falling back to linear fit.")
+            if len(mag_nodes) > 1:
+                mod = np.interp(comp_mags, mag_nodes, std_medians)  # Use linear interpolation
+                mod0 = np.interp(comp_mags0, mag_nodes, std_medians)
+            else:
+                print("Not enough data for linear interpolation either. Skipping iteration.")
+                break
+        else:
+            # Fit a spline to the medians if enough data
+            spl = Spline(mag_nodes, std_medians)
+            mod = spl(comp_mags)
+            mod0 = spl(comp_mags0)
+
+        std = np.std(comp_rms - mod)
+        comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
+        N2 = np.sum(comp_star_mask)
+
+        # Print the number of stars included and excluded
+        print(f"Iteration {i}:")
+        print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
+
+        # Exit condition: no further changes or too many iterations
+        if N1 == N2 or i > 10:
+            break
+
+    return comp_star_mask, comp_star_rms, i
 
 
 def get_phot_files(directory):
@@ -24,29 +90,6 @@ def get_phot_files(directory):
     if len(files) == 0:
         raise FileNotFoundError("No FITS files found in the directory.")
     return files  # Return the list of FITS files found
-
-
-def read_phot_files(filename):
-    """
-    Read the photometry file.
-
-    Parameters
-    ----------
-    filename : str
-        Photometry file to read.
-
-    Returns
-    -------
-    astropy.table.table.Table
-        Table containing the photometry data.
-    """
-    try:
-        with fits.open(filename) as ff:
-            tab = ff[1].data
-            return tab
-    except Exception as e:
-        print(f"Error reading photometry file {filename}: {e}")
-        return None
 
 
 def find_stars(table, APERTURE):
@@ -148,7 +191,7 @@ def main():
 
     # Read and process the CMOS file to find stars, RMS, and Tmag
     print("Processing CMOS data...")
-    cmos_table = read_phot_files(os.path.join(directory, cmos_file))
+    cmos_table = read_phot_file(os.path.join(directory, cmos_file))
     cmos_rms, cmos_tmags, cmos_tic_ids = find_stars(cmos_table, APERTURE=5)
 
     # Plot the CMOS data first
@@ -157,7 +200,7 @@ def main():
 
     # Now, read the CCD data after having the CMOS tic_ids
     print("Processing CCD data...")
-    ccd_table = read_phot_files(os.path.join(directory, ccd_file))
+    ccd_table = read_phot_file(os.path.join(directory, ccd_file))
     ccd_mask = np.isin(ccd_table['tic_id'], cmos_tic_ids)
     ccd_rms, ccd_tmags, _ = find_stars(ccd_table[ccd_mask], APERTURE=4)
 
