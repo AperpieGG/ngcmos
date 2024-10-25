@@ -3,31 +3,32 @@
 import batman
 import numpy as np
 import matplotlib.pyplot as plt
-from astropy.io import fits
+from datashape import json
+
 from utils import plot_images, bin_time_flux_error
 
 plot_images()
 # Set up the transit parameters
 params = batman.TransitParams()
-params.t0 = 2458326.10418  # time of inferior conjunction (BJD)
-params.per = 0.98097110  # orbital period (days)
-params.rp = 0.287  # planet radius (in units of stellar radii)
-params.a = 5.289  # semi-major axis (in units of stellar radii)
-params.inc = 77.18  # orbital inclination (degrees)
+params.t0 = 2458356.963  # time of inferior conjunction (BJD)
+params.per = 4.156736  # orbital period (days)
+params.rp = 0.889  # planet radius (in units of stellar radii)
+params.a = 0.05325  # semi-major axis (in units of stellar radii)
+params.inc = 89.57  # orbital inclination (degrees)
 params.ecc = 0.  # eccentricity
 params.w = 178  # longitude of periastron (degrees)
 params.u = [0.545, 0.195]  # limb darkening coefficients [u1, u2]
 params.limb_dark = "quadratic"  # limb darkening model
 
-# Load the time and flux data from the FITS file
-with fits.open('rel_phot_HIP-65-A_1.fits') as hdul:
-    table = hdul[1].data
+# load data from json file
+with open('target_light_curve_9725627_CCD.json', 'r') as json_file:
+    data = json.load(json_file)
 
-# Filter for the specific TIC ID (if needed)
-tic_id_data = table[table['TIC_ID'] == 201248411]
-time = tic_id_data['Time_JD']
-flux = tic_id_data['Relative_Flux']
-flux_err = tic_id_data['Relative_Flux_err']
+tic_id = data['TIC_ID']
+time = np.array(data['Time_BJD'])
+flux = np.array(data['Relative_Flux'])
+flux_err = np.array(data['Relative_Flux_err'])
+
 
 time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 30)
 # Normalize the time array to be centered around the transit
