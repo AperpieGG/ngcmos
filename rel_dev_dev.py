@@ -11,7 +11,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 0.2  # Color index tolerance for comparison stars
+COLOR_TOLERANCE = 0.1  # Color index tolerance for comparison stars
 
 plot_images()
 
@@ -368,13 +368,11 @@ def main():
             for tic_id in tic_ids:
                 if args.comp_stars:
                     # If comparison stars are loaded from the file, do not call find_best_comps
-                    print(f'Using comparison stars from the given file.')
                     comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_mid']
                     comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                     comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
                 else:
                     # If no comp_stars file, use best_comps_table
-                    print(f'Using best_comps_table for comparison stars.')
                     comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
                     comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                     comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
