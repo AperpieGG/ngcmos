@@ -213,6 +213,7 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
+        print(f'TIC ID: {tic_id}, Flux Length: {len(flux)}')  # Add this line for debugging
 
         comp_fluxes.append(flux)
         comp_mags.append(tmag)
