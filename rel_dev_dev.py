@@ -368,13 +368,13 @@ def main():
             for tic_id in tic_ids:
                 if args.comp_stars:
                     # If comparison stars are loaded from the file, do not call find_best_comps
-                    print(f'Using comparison stars from the file for TIC ID = {tic_id}')
+                    print(f'Using comparison stars from the given file.')
                     comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_mid']
                     comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                     comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
                 else:
                     # If no comp_stars file, use best_comps_table
-                    print(f'Using best_comps_table for TIC ID = {tic_id}')
+                    print(f'Using best_comps_table for comparison stars.')
                     comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
                     comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                     comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
@@ -424,7 +424,7 @@ def main():
             target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
             RMS = np.std(target_fluxes_dt_unbinned)
             RMS_binned = np.std(target_fluxes_dt)
-            print(f'RMS for Master: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
+            # print(f'RMS for Master: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
             print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
 
             # remove outliers
