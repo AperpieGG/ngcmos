@@ -3,7 +3,7 @@
 import batman
 import numpy as np
 import matplotlib.pyplot as plt
-from datashape import json
+import json
 
 from utils import plot_images, bin_time_flux_error
 
