@@ -265,19 +265,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, EXPOSURE, comp_star
     plt.plot(time_clipped, fluxes_clipped, 'o', label='Target Star', color='red')
     plt.show()
 
-    for tic_id in filtered_tic_ids:
-        # divide each tic_id with the reference flux and plot them
-        comp_fluxes = master_star_data[master_star_data['tic_id'] == tic_id][f'flux_{APERTURE}']
-        comp_dt_fluxes = comp_fluxes / reference_fluxes
-        comp_rms = np.std(comp_dt_fluxes)
-        # use plot_lightcurves_in_subplots function to plot all the comparison stars
-        plt.plot(time_clipped, comp_dt_fluxes, 'o', label=f'RMS = {comp_rms:.4f}')
-        plt.title(f'Comp star: {tic_id}')
-        plt.xlabel(f'BJD time')
-        plt.ylabel(f'Flux ratio')
-        plt.legend(loc='best')
-        plt.show()
-
     # Calculate the flux ratio for the target star with respect the summation of the reference stars fluxes
     flux_ratio = fluxes_clipped / reference_fluxes
     # Calculate the average flux ratio of the target star
