@@ -11,7 +11,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 5
+COLOR_TOLERANCE = 10
 
 plot_images()
 
