@@ -81,16 +81,16 @@ def target_info(table, tic_id_to_plot, APERTURE):
     target_tmag = target_star['Tmag'][0]  # Extract the TESS magnitude of the target star
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
     airmass_list = target_star['airmass']  # Extract airmass_list from target star
-
     # Calculate mean flux for the target star (specific to the chosen aperture)
     target_flux_mean = target_star[f'flux_{APERTURE}'].mean()
+    target_rms = find_star_rms(target_star[f'flux_{APERTURE}'], airmass_list)
 
-    return target_tmag, target_color_index, airmass_list, target_flux_mean
+    return target_tmag, target_color_index, airmass_list, target_flux_mean, target_rms
 
 
 def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
     # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
+    target_tmag, target_color, airmass_list, target_flux_mean, target_rms = target_info(table, tic_id_to_plot, APERTURE)
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
@@ -123,7 +123,7 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
     return filtered_table, airmass_list
 
 
-def find_comp_star_rms(comp_fluxes, airmass):
+def find_star_rms(comp_fluxes, airmass):
     comp_star_rms = np.array([])
     Ncomps = comp_fluxes.shape[0]
     for i in range(Ncomps):
@@ -141,7 +141,7 @@ def find_comp_star_rms(comp_fluxes, airmass):
 
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
-    comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
+    comp_star_rms = find_star_rms(comp_fluxes, airmass)
     print(comp_star_rms)
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
 
@@ -426,10 +426,6 @@ def main():
             RMS_binned = np.std(target_fluxes_dt)
             # print(f'RMS for Master: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
             print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
-
-            # remove outliers
-            target_time_binned, target_fluxes_dt, target_fluxerrs_dt, _, _ = (
-                remove_outliers(target_time_binned, target_fluxes_dt, target_fluxerrs_binned))
 
             plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
             plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
