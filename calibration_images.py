@@ -161,8 +161,8 @@ def reduce_images(base_path, out_path, prefix_filenames):
 
     Returns
     -------
-    tuple
-        Tuple containing reduced data, reduced header information, and filenames.
+    list of numpy.ndarray
+        Reduced data.
     """
     master_bias = bias(base_path, out_path)
     master_dark = dark(base_path, out_path, master_bias)
@@ -189,7 +189,7 @@ def reduce_images(base_path, out_path, prefix_filenames):
             time_helio = time_jd.utc + ltt_helio
 
             # Reduce image
-            fd = (fd - master_bias - master_dark * hdr['EXPTIME'] / 10) / master_flat
+            fd = (fd - master_bias)  # - master_dark * hdr['EXPTIME'] / 10) / master_flat
             reduced_data.append(fd)  # Append the reduced image to the list
             reduced_header_info.append(hdr)
 
