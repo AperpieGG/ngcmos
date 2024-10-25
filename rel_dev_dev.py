@@ -139,14 +139,19 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1., dmag=0.5
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     print(comp_star_rms)
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
+
+    # Initialize mask for all stars to True
     comp_star_mask = np.array([True for _ in comp_star_rms])
     i = 0
+
+    # Loop until no changes or max iterations
     while True:
         i += 1
         comp_mags = np.copy(comp_mags0[comp_star_mask])
         comp_rms = np.copy(comp_star_rms[comp_star_mask])
         N1 = len(comp_mags)
 
+        # Exit if no valid stars
         if N1 == 0:
             print("No valid comparison stars left after filtering.")
             break
@@ -159,10 +164,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1., dmag=0.5
         std_medians = []
         for j in range(1, len(edges)):
             in_bin = comp_rms[dig == j]
-            if len(in_bin) == 0:
-                std_medians.append(np.nan)  # No stars in this bin
-            else:
-                std_medians.append(np.median(in_bin))
+            std_medians.append(np.nan if len(in_bin) == 0 else np.median(in_bin))
 
         std_medians = np.array(std_medians)
 
@@ -172,7 +174,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1., dmag=0.5
         std_medians = std_medians[valid_mask]
 
         # Handle case with too few points for spline fitting
-        if len(mag_nodes) < 4 or len(std_medians) < 4:  # Less than 4 points
+        if len(mag_nodes) < 4 or len(std_medians) < 4:
             print("Too few valid points for spline fitting. Falling back to linear fit.")
             if len(mag_nodes) > 1:
                 mod = np.interp(comp_mags, mag_nodes, std_medians)  # Use linear interpolation
@@ -187,12 +189,17 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1., dmag=0.5
             mod0 = spl(comp_mags0)
 
         std = np.std(comp_rms - mod)
-        comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
-        N2 = np.sum(comp_star_mask)
+
+        # Create new mask based on modified model
+        new_comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
+        N2 = np.sum(new_comp_star_mask)
 
         # Print the number of stars included and excluded
         print(f"Iteration {i}:")
         print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
+
+        # Update main mask
+        comp_star_mask &= new_comp_star_mask  # Combine current and new masks
 
         # Exit condition: no further changes or too many iterations
         if N1 == N2 or i > 10:
