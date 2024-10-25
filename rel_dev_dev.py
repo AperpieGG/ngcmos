@@ -151,8 +151,8 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
 
     while True:
         i += 1
-        comp_mags = comp_mags0[comp_star_mask]
-        comp_rms = comp_star_rms[comp_star_mask]
+        comp_mags = np.copy(comp_mags0[comp_star_mask])
+        comp_rms = np.copy(comp_star_rms[comp_star_mask])
         N1 = len(comp_mags)
 
         # Exit if no valid stars
@@ -192,21 +192,14 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
 
         std = np.std(comp_rms - mod)
 
-        # Create a new mask
-        new_comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
-
         # Make sure stars are only excluded once
-        comp_star_mask = comp_star_mask & new_comp_star_mask
+        # Make new mask
+        comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
         N2 = np.sum(comp_star_mask)
-
-        # Print the number of stars included and excluded
-        print(f"Iteration {i}:")
-        print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
-
-        # Exit condition: no further changes or too many iterations
-        if N1 == N2 or i > 10:
+        if N1 == N2:
             break
-
+        elif i > 10.:
+            break
     return comp_star_mask, comp_star_rms, i
 
 
