@@ -399,9 +399,9 @@ def main():
 
             # Create an Astropy table from the result
             data_list = [(tic_id_to_plot, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                          rms, sky_median, airmass_list, zero_point_list, magnitude)]
-            data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_JD', 'Relative_Flux', 'Relative_Flux_err',
-                                                      'RMS', 'Sky', 'Airmass', 'ZP', 'Magnitude'))
+                          rms, sky_median, airmass_list, zero_point_list)]
+            data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux', 'Relative_Flux_err',
+                                                      'RMS', 'Sky', 'Airmass', 'ZP'))
 
             expanded_data_table = expand_and_rename_table(data_table)
 
