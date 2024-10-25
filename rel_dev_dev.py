@@ -4,15 +4,77 @@ import os
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
+from astropy.io import fits
+from astropy.visualization import ZScaleInterval
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
-    remove_outliers  # Assuming read_phot_file is available in utils
+    remove_outliers
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2
 MAGNITUDE_TOLERANCE = 1
 
 plot_images()
+
+
+def get_image_data(frame_id):
+    """
+    Get the image data corresponding to the given frame_id.
+
+    Parameters:
+        frame_id (str): The frame_id of the image.
+
+    Returns:
+        numpy.ndarray or None: The image data if the image exists, otherwise None.
+    """
+    # Define the directory where the images are stored (use cwd if not explicitly defined)
+    image_directory = os.getcwd()  # You can change this to the desired image directory path
+    image_path_fits = os.path.join(image_directory, frame_id)
+
+    print(f"Looking for FITS image at: {image_path_fits}")
+
+    # Check if the uncompressed FITS file exists
+    if os.path.exists(image_path_fits):
+        print("FITS file found.")
+        with fits.open(image_path_fits) as hdul:
+            image_data = hdul[0].data  # Assuming the image data is in the primary HDU
+        return image_data
+
+
+def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids):
+    # load the fits image on this particular field.
+    image_data = get_image_data(table[table['tic_id'] == tic_id_to_plot]['frame_id'][0])
+
+    # Assuming x, y coordinates are already extracted for the target star and comparison stars
+    # Example: x_target, y_target for the target star
+    x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
+    y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+    print(f'Target star coordinates: x = {x_target}, y = {y_target}')
+
+    # Create a circle for the target star (in red)
+    interval = ZScaleInterval()
+    vmin, vmax = np.percentile(image_data, [5, 95])
+    target_circle = plt.Circle((x_target, y_target), radius=5, color='green', fill=False, linewidth=1.5)
+    plt.gca().add_patch(target_circle)
+
+    # Do the same for comparison stars (for example, x_comp, y_comp for each comparison star)
+    for tic_id in filtered_tic_ids:
+        x_comp = table[table['tic_id'] == tic_id]['x'][0]
+        y_comp = table[table['tic_id'] == tic_id]['y'][0]
+        comp_circle = plt.Circle((x_comp, y_comp), radius=5, color='blue', fill=False, linewidth=1.5)
+        plt.gca().add_patch(comp_circle)
+
+        # Add the TIC ID label for each comparison star
+        plt.text(x_comp, y_comp + 10, str(tic_id), color='blue', fontsize=10, ha='center')
+
+    plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
+    plt.tight_layout()
+    # Add labels and legend
+    plt.xlabel('X Pixel')
+    plt.ylabel('Y Pixel')
+    # plt.legend([target_circle, comp_circle], ['Target', 'Comp Stars'], loc='upper right')
+    plt.title(f'Target: {tic_id_to_plot}')
+    plt.show()
 
 
 def target_info(table, tic_id_to_plot, APERTURE):
@@ -191,11 +253,11 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
 
             # Calculate the sum of all fluxes except the current star's flux
             reference_fluxes_comp = np.sum(np.delete(flux_list, i, axis=0), axis=0)
-            reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
+            reference_fluxerrs_comp = np.sqrt(np.sum(np.delete(fluxerr_list, i, axis=0) ** 2, axis=0))
 
             # Normalize the current star's flux by the sum of the other comparison stars' fluxes
             comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
-            comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs ** 2)
+            comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs_comp ** 2)
 
             # Bin the data (optional, can be skipped if not needed)
             comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
@@ -228,6 +290,7 @@ def main():
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
     parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
     parser.add_argument('--cam', type=str, default='CMOS', help='Aperture number to use for photometry.')
+    parser.add_argument('--pos', type=str, help='Plot comp stars positions on the image.')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
@@ -294,6 +357,10 @@ def main():
             # Bin the master reference data
             time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
                 bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
+
+            if args.pos:
+                # Plot the comparison stars' positions on the image
+                plot_comps_position(phot_table, tic_id_to_plot, tic_ids)
 
             # Call the plot function
             plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
