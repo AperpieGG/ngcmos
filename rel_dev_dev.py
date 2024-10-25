@@ -218,9 +218,8 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
         comp_mags.append(tmag)
 
     # Convert lists to arrays for further processing
-    comp_fluxes = np.array(comp_fluxes)
-    print(comp_fluxes.shape)
-    comp_mags = np.array(comp_mags)
+    # comp_fluxes = np.array(comp_fluxes)
+    # comp_mags = np.array(comp_mags)
 
     # Check if comp_mags is non-empty before proceeding
     if len(comp_mags) == 0:
