@@ -89,7 +89,7 @@ def target_info(table, tic_id_to_plot, APERTURE):
     return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
@@ -105,6 +105,21 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf):
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
+
+    # Get target star coordinates
+    x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
+    y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+
+    # Apply crop filter based on coordinates
+    if crop_size:
+        x_min, x_max = x_target - crop_size // 2, x_target + crop_size // 2
+        y_min, y_max = y_target - crop_size // 2, y_target + crop_size // 2
+
+        # Further filter the comparison stars based on the crop region
+        filtered_table = filtered_table[
+            (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) &
+            (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
+        ]
 
     return filtered_table, airmass_list
 
@@ -187,9 +202,9 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
     return comp_star_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
     tic_ids = np.unique(filtered_table['tic_id'])
     print(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
@@ -293,6 +308,7 @@ def main():
     parser.add_argument('--pos', action='store_true', help='Plot comp stars positions on the image.')
     parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
     parser.add_argument('--dmf', type=float, default=2.5, help='Fainter comparison star threshold (default: 1.5 mag)')
+    parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
@@ -302,6 +318,7 @@ def main():
     DM_BRIGHT = args.dmb
     DM_FAINT = args.dmf
     camera = args.cam
+    crop_size = args.crop
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
@@ -324,7 +341,7 @@ def main():
                 print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
                 # Find the best comparison stars
-                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT)
+                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
@@ -364,7 +381,7 @@ def main():
 
             if args.pos:
                 # Plot the comparison stars' positions on the image
-                plot_comps_position(phot_table, tic_id_to_plot, tic_ids)
+                plot_comps_position(best_comps_table, tic_id_to_plot, tic_ids)
 
             # Call the plot function
             plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
