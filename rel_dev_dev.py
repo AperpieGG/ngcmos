@@ -11,7 +11,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 1
+COLOR_TOLERANCE = 0.2  # Color index tolerance for comparison stars
 
 plot_images()
 
@@ -124,14 +124,19 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
 
 
 def find_comp_star_rms(comp_fluxes, airmass):
-    comp_star_rms = []
-    for i, flux in enumerate(comp_fluxes):
-        airmass_cs = np.polyfit(airmass, flux, 1)
+    comp_star_rms = np.array([])
+    Ncomps = comp_fluxes.shape[0]
+    for i in range(Ncomps):
+        comp_flux = np.copy(comp_fluxes[i])
+        airmass_cs = np.polyfit(airmass, comp_flux, 1)
         airmass_mod = np.polyval(airmass_cs, airmass)
-        flux_corrected = flux / airmass_mod
-        flux_norm = flux_corrected / np.median(flux_corrected)
-        rms_val = np.std(flux_norm)
-        comp_star_rms.append(rms_val)
+        comp_flux_corrected = comp_flux / airmass_mod
+        comp_flux_norm = comp_flux_corrected / np.median(comp_flux_corrected)
+        comp_star_rms_val = np.std(comp_flux_norm)
+        if np.isfinite(comp_star_rms_val):
+            comp_star_rms = np.append(comp_star_rms, comp_star_rms_val)
+        else:
+            comp_star_rms = np.append(comp_star_rms, 99.)
     return np.array(comp_star_rms)
 
 
