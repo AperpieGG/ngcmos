@@ -83,14 +83,13 @@ def target_info(table, tic_id_to_plot, APERTURE):
     airmass_list = target_star['airmass']  # Extract airmass_list from target star
     # Calculate mean flux for the target star (specific to the chosen aperture)
     target_flux_mean = target_star[f'flux_{APERTURE}'].mean()
-    target_rms = find_star_rms(target_star[f'flux_{APERTURE}'], airmass_list)
 
-    return target_tmag, target_color_index, airmass_list, target_flux_mean, target_rms
+    return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
 def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
     # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean, target_rms = target_info(table, tic_id_to_plot, APERTURE)
+    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
