@@ -219,9 +219,8 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     # Find the maximum length of flux arrays
     max_length = max(len(f) for f in comp_fluxes)
 
-    # Filter out flux arrays that are shorter than the maximum length
-    comp_fluxes = [f for f in comp_fluxes if len(f) == max_length]
-    comp_mags = [comp_mags[i] for i in range(len(comp_mags)) if len(comp_fluxes[i]) == max_length]
+    # Filter out entries where flux arrays are shorter than max_length
+    comp_fluxes, comp_mags = zip(*[(f, m) for f, m in zip(comp_fluxes, comp_mags) if len(f) == max_length])
 
     # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
