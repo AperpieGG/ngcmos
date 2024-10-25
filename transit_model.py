@@ -12,8 +12,8 @@ plot_images()
 params = batman.TransitParams()
 params.t0 = 2458356.963  # time of inferior conjunction (BJD)
 params.per = 4.156736  # orbital period (days)
-params.rp = 0.889  # planet radius (in units of stellar radii)
-params.a = 0.05325  # semi-major axis (in units of stellar radii)
+params.rp = 0.893  # planet radius (in units of stellar radii)
+params.a = 11.43   # semi-major axis (in units of stellar radii)
 params.inc = 89.57  # orbital inclination (degrees)
 params.ecc = 0.  # eccentricity
 params.w = 90  # longitude of periastron (degrees)
@@ -30,7 +30,7 @@ flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
 
-time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 12)
+time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 18)
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
 
