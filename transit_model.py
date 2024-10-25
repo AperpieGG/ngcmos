@@ -30,7 +30,7 @@ flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
 
-time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 30)
+time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 2)
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
 
