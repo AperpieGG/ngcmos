@@ -11,7 +11,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 0.3
+COLOR_TOLERANCE = 0.1
 
 plot_images()
 
@@ -289,7 +289,7 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
             comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
             comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs_comp ** 2)
             # Normalize the star's flux by the mean flux
-            comp_fluxes_dt = comp_fluxes_dt / np.mean(comp_fluxes_dt)
+            # comp_fluxes_dt = comp_fluxes_dt / np.mean(comp_fluxes_dt)
 
             # Bin the data (optional, can be skipped if not needed)
             comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
