@@ -213,10 +213,15 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
-        print(f'TIC ID: {tic_id}, Flux Length: {len(flux)}')  # Add this line for debugging
-
         comp_fluxes.append(flux)
         comp_mags.append(tmag)
+
+    # Find the maximum length of flux arrays
+    max_length = max(len(f) for f in comp_fluxes)
+
+    # Filter out flux arrays that are shorter than the maximum length
+    comp_fluxes = [f for f in comp_fluxes if len(f) == max_length]
+    comp_mags = [comp_mags[i] for i in range(len(comp_mags)) if len(comp_fluxes[i]) == max_length]
 
     # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
