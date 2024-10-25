@@ -415,8 +415,8 @@ def main():
             flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
             flux_ratio = target_flux / reference_fluxes
             # Calculate the average flux ratio of the target star
-            flux_ratio_mean_binned = np.mean(flux_ratio_binned)
-            flux_ratio_mean = np.mean(flux_ratio)
+            flux_ratio_mean_binned = np.median(flux_ratio_binned)
+            flux_ratio_mean = np.median(flux_ratio)
             # Normalize the flux ratio (result around unity)
             target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
             target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
