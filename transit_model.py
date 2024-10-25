@@ -10,10 +10,10 @@ from utils import plot_images, bin_time_flux_error
 plot_images()
 # Set up the transit parameters
 params = batman.TransitParams()
-params.t0 = 2458356.963  # time of inferior conjunction (BJD)
-params.per = 4.156736  # orbital period (days)
-params.rp = 0.893  # planet radius (in units of stellar radii)
-params.a = 11.43   # semi-major axis (in units of stellar radii)
+params.t0 = 2455443.06132  # time of inferior conjunction (BJD)
+params.per = 4.1567758  # orbital period (days)
+params.rp = 0.00498  # planet radius (in units of stellar radii)
+params.a = 10.3  # semi-major axis (in units of stellar radii)
 params.inc = 89.57  # orbital inclination (degrees)
 params.ecc = 0.  # eccentricity
 params.w = 90  # longitude of periastron (degrees)
