@@ -89,7 +89,7 @@ def target_info(table, tic_id_to_plot, APERTURE):
     return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf):
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
@@ -98,8 +98,8 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE):
     color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
     color_data = table[color_mask]
 
-    # Further filter based on TESS magnitude within the tolerance
-    mag_mask = np.abs(color_data['Tmag'] - target_tmag) <= MAGNITUDE_TOLERANCE
+    # Filter stars brighter than the target within dmb and fainter than the target within dmf
+    mag_mask = (color_data['Tmag'] >= target_tmag - dmb) & (color_data['Tmag'] <= target_tmag + dmf)
     valid_color_mag_table = color_data[mag_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
@@ -187,9 +187,9 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
     return comp_star_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT)
     tic_ids = np.unique(filtered_table['tic_id'])
     print(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
@@ -291,12 +291,16 @@ def main():
     parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
     parser.add_argument('--cam', type=str, default='CMOS', help='Aperture number to use for photometry.')
     parser.add_argument('--pos', type=str, help='Plot comp stars positions on the image.')
+    parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
+    parser.add_argument('--dmf', type=float, default=2.5, help='Fainter comparison star threshold (default: 1.5 mag)')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
     args = parser.parse_args()
     tic_id_to_plot = args.tic_id
     APERTURE = args.aper
+    DM_BRIGHT = args.dmb
+    DM_FAINT = args.dmf
     camera = args.cam
     current_night_directory = os.getcwd()  # Change this if necessary
 
@@ -320,7 +324,7 @@ def main():
                 print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
                 # Find the best comparison stars
-                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE)
+                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
