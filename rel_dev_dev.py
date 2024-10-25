@@ -381,7 +381,7 @@ def main():
 
             if args.pos:
                 # Plot the comparison stars' positions on the image
-                plot_comps_position(best_comps_table, tic_id_to_plot, tic_ids)
+                plot_comps_position(phot_table, tic_id_to_plot, tic_ids)
 
             # Call the plot function
             plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
