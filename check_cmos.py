@@ -28,44 +28,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
-
-
-def find_current_night_directory(directory):
-    """
-    Find the directory for the current night based on the current date.
-    If not found, use the current working directory.
-
-    Parameters
-    ----------
-    directory : str
-        Base path for the directory.
-
-    Returns
-    -------
-    str
-        Path to the current night directory.
-    """
-    previous_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
-    current_date_directory = os.path.join(directory, previous_date)
-    return current_date_directory if os.path.isdir(current_date_directory) else os.getcwd()
-
-
 def filter_filenames(directory):
     """
     Filter filenames based on specific criteria.
@@ -119,6 +81,7 @@ def check_headers(directory, filenames):
     ----------
     directory : str
         Path to the directory.
+    filenames : list of str
     """
     no_wcs = os.path.join(directory, 'no_wcs')
     if not os.path.exists(no_wcs):
