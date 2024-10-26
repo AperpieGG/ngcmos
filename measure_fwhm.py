@@ -31,38 +31,71 @@ def calculate_airmass(altitude):
 
 # Function to calculate FWHM for stars in an image
 def calculate_fwhm(image_data, crop_size=800):
+    # Define the central region
     center_x, center_y = image_data.shape[1] // 2, image_data.shape[0] // 2
-    cropped_image_data = image_data[center_y - crop_size:center_y + crop_size,
-                         center_x - crop_size:center_x + crop_size]
+    cropped_image_data = image_data[center_y - crop_size:center_y + crop_size, center_x - crop_size:center_x + crop_size]
 
+    # Estimate background noise level
     mean, median, std = np.mean(cropped_image_data), np.median(cropped_image_data), mad_std(cropped_image_data)
     daofind = DAOStarFinder(fwhm=4, threshold=5. * std, brightest=250)
     selected_sources = daofind(cropped_image_data - median)
+    print(f"Number of sources found: {len(selected_sources)}")
 
-    fwhms_x, fwhms_y = [], []
-    for x_star, y_star in zip(selected_sources['xcentroid'], selected_sources['ycentroid']):
-        x_start, x_end = int(x_star) - 3, int(x_star) + 3
-        y_start, y_end = int(y_star) - 3, int(y_star) + 3
+    fwhms_x = []
+    fwhms_y = []
 
-        if x_end > x_start and y_end > y_start:
-            x = np.arange(x_end - x_start)
-            y = np.arange(y_end - y_start)
-            x, y = np.meshgrid(x, y)
-            sub_image = cropped_image_data[y_start:y_end, x_start:x_end]
-            initial_guess = (np.max(sub_image), (x_end - x_start) // 2, (y_end - y_start) // 2, 3, 3, 0, 0)
+    # Iterate over a subset of stars for FWHM calculation
+    for i, (x_star, y_star) in enumerate(zip(selected_sources['xcentroid'], selected_sources['ycentroid'])):
+        x_star, y_star = int(x_star), int(y_star)
+        # print(f"Star {i}: x_star = {x_star}, y_star = {y_star}")
 
-            try:
-                popt, _ = curve_fit(gaussian_2d, (x.ravel(), y.ravel()), sub_image.ravel(), p0=initial_guess)
-                sigma_x, sigma_y = popt[3], popt[4]
-                fwhms_x.append(2.355 * sigma_x)
-                fwhms_y.append(2.355 * sigma_y)
-            except Exception as e:
-                print(f"Error fitting Gaussian for star at ({x_star}, {y_star}): {e}")
-                continue
+        # Adjust star coordinates to match the original image
+        x_star_global = x_star + (center_x - crop_size)  # Global x-coordinate
+        y_star_global = y_star + (center_y - crop_size)  # Global y-coordinate
 
+        # Ensure star is within the image bounds
+        if (0 <= x_star_global < image_data.shape[1]) and (0 <= y_star_global < image_data.shape[0]):
+            # Ensure we don't go out of bounds when extracting the sub-image
+            x_start = max(0, x_star - 3)
+            x_end = min(cropped_image_data.shape[1], x_star + 3)
+            y_start = max(0, y_star - 3)
+            y_end = min(cropped_image_data.shape[0], y_star + 3)
+
+            # Check if the defined area is valid
+            if x_end > x_start and y_end > y_start:
+                # Create a meshgrid for the fitting
+                x = np.arange(x_end - x_start)
+                y = np.arange(y_end - y_start)
+                x, y = np.meshgrid(x, y)
+
+                # Extract the sub-image
+                sub_image = cropped_image_data[y_start:y_end, x_start:x_end]
+
+                # Create an initial guess for the Gaussian fit
+                initial_guess = (np.max(sub_image),
+                                 (x_end - x_start) // 2, (y_end - y_start) // 2, 3, 3, 0, 0)
+
+                try:
+                    popt, _ = curve_fit(gaussian_2d,
+                                        (x.ravel(), y.ravel()),  # Use the meshgrid coordinates
+                                        sub_image.ravel(),  # Flatten the sub-image
+                                        p0=initial_guess)
+
+                    # Extract the fitted parameters
+                    sigma_x, sigma_y = popt[3], popt[4]
+                    fwhm_x = 2.355 * sigma_x  # 2 * sqrt(2 * ln(2)) * sigma
+                    fwhm_y = 2.355 * sigma_y  # 2 * sqrt(2 * ln(2)) * sigma
+                    # print(f"Star {i}: FWHM_x = {fwhm_x:.2f}, FWHM_y = {fwhm_y:.2f}")
+
+                    # Append the FWHM values to the lists
+                    fwhms_x.append(fwhm_x)
+                    fwhms_y.append(fwhm_y)
+                except Exception as e:
+                    print(f"Error fitting star {i}: {e}")
+
+    # Return the average FWHM for the stars
     if fwhms_x and fwhms_y:
-        return np.median(fwhms_x + fwhms_y) / 2
-    return None
+        return np.mean(fwhms_x + fwhms_y) / 2
 
 
 # Process each FITS file in the directory
