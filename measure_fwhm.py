@@ -11,10 +11,15 @@ import astropy.units as u
 from utils import get_location, get_light_travel_times, plot_images
 import warnings
 import json
+import argparse
 
 plot_images()
 
 warnings.filterwarnings('ignore', category=UserWarning)
+parser = argparse.ArgumentParser(description='Measure FWHM from a FITS image.')
+parser.add_argument('--crop_size', type=int, default=800, help='CMOS = 800, CCD = 652')
+args = parser.parse_args()
+crop_size = args.crop_size
 
 
 # Function to fit a 2D Gaussian
@@ -33,11 +38,10 @@ def calculate_airmass(altitude):
 
 
 # Function to calculate FWHM for stars in an image
-def calculate_fwhm(image_data, crop_size=800):
+def calculate_fwhm(image_data, crop_size):
     # Define the central region
     center_x, center_y = image_data.shape[1] // 2, image_data.shape[0] // 2
-    cropped_image_data = image_data[center_y - crop_size:center_y + crop_size,
-                         center_x - crop_size:center_x + crop_size]
+    cropped_image_data = image_data[center_y - crop_size:center_y + crop_size, center_x - crop_size:center_x + crop_size]
 
     # Estimate background noise level
     mean, median, std = np.mean(cropped_image_data), np.median(cropped_image_data), mad_std(cropped_image_data)
