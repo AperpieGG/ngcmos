@@ -393,7 +393,7 @@ def main():
 
             # Bin the master reference data
             time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
-                bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 1))
+                bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
 
             if args.pos:
                 # Plot the comparison stars' positions on the image
@@ -408,24 +408,31 @@ def main():
             target_fluxerr = target_star[f'fluxerr_{APERTURE}']
             target_time = target_star['jd_mid']
 
-            # Bin the target star data
+            # Bin the target star data and do the relative photometry
             target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-                bin_time_flux_error(target_time, target_flux, target_fluxerr, 1))
+                bin_time_flux_error(target_time, target_flux, target_fluxerr, 12))
+            flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
+            flux_ratio_mean_binned = np.median(flux_ratio_binned)
+            target_fluxes_dt_binned = flux_ratio_binned / flux_ratio_mean_binned
+            RMS_binned = np.std(target_fluxes_dt_binned)
 
             # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
-            flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
             flux_ratio = target_flux / reference_fluxes
-            # Calculate the average flux ratio of the target star
-            flux_ratio_mean_binned = np.median(flux_ratio_binned)
-            flux_ratio_mean = np.median(flux_ratio)
-            # Normalize the flux ratio (result around unity)
-            target_fluxes_dt = flux_ratio_binned / flux_ratio_mean_binned
-            target_fluxes_dt_unbinned = flux_ratio / flux_ratio_mean
-            RMS = np.std(target_fluxes_dt_unbinned)
-            RMS_binned = np.std(target_fluxes_dt)
-            print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
+            flux_err_ratio = np.sqrt((target_fluxerr/target_flux**2) + (reference_fluxerrs/reference_fluxes**2))
+            flux_err = flux_ratio * flux_err_ratio
 
-            plt.plot(target_time_binned, target_fluxes_dt, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
+            # Calculate the average flux ratio of the target star
+            flux_ratio_mean = np.median(flux_ratio)
+
+            # Normalize the flux ratio (result around unity)
+            target_fluxes_dt = flux_ratio / flux_ratio_mean
+            target_flux_err_dt = flux_err / flux_ratio_mean
+
+            # Estimate the RMS of the target star
+            RMS = np.std(target_fluxes_dt)
+
+            print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
+            plt.plot(target_time_binned, target_fluxes_dt_binned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
             plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
             plt.legend(loc='best')
             plt.show()
@@ -433,9 +440,9 @@ def main():
             # Save target_time_binned and target_fluxes_dt in a JSON file
             data_to_save = {
                 "TIC_ID": tic_id_to_plot,
-                "Time_BJD": target_time_binned.tolist(),
+                "Time_BJD": target_time.tolist(),
                 "Relative_Flux": target_fluxes_dt.tolist(),
-                "Relative_Flux_err": target_fluxerrs_binned.tolist(),
+                "Relative_Flux_err": target_flux_err_dt.tolist(),
                 "RMS": RMS.tolist()
             }
 
