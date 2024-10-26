@@ -17,7 +17,7 @@ params.a = 10.3  # semi-major axis (in units of stellar radii)
 params.inc = 89.57  # orbital inclination (degrees)
 params.ecc = 0.  # eccentricity
 params.w = 0  # longitude of periastron (degrees)
-params.u = [0.545, 0.195]  # limb darkening coefficients [u1, u2]
+params.u = [0.3695, 0.2774]  # limb darkening coefficients [u1, u2]
 params.limb_dark = "quadratic"  # limb darkening model
 
 # load data from json file
