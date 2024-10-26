@@ -112,59 +112,63 @@ def calculate_fwhm(image_data, crop_size):
 directory = os.getcwd()
 times, fwhm_values, airmass_values = [], [], []
 
-for i, filename in enumerate(os.listdir(directory)):
-    if filename.endswith('.fits'):
-        # exclude files with specific words in the filename
-        exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog", "phot", "catalog_input"]
-        if any(word in filename.lower() for word in exclude_words):
-            continue
-        # sort the filenames
-        print(f"Processing file {i + 1}: {filename}")
-        with fits.open(filename, mode='update') as hdul:
-            header = hdul[0].header
-            image_data = hdul[0].data
+# List all FITS filenames and exclude those containing specific words
+filenames = [
+    f for f in os.listdir(directory)
+    if f.endswith('.fits') and not any(word in f.lower() for word in ["evening", "morning",
+                                                                      "flat", "bias", "dark",
+                                                                      "catalog", "phot", "catalog_input"])
+]
 
-            # Get BJD from header or calculate if missing
-            if 'BJD' not in header:
-                if 'EXPTIME' in header:
-                    exptime = float(header['EXPTIME'])
-                elif 'EXPOSURE' in header:
-                    exptime = float(header['EXPOSURE'])
-                else:
-                    exptime = 10  # Default exposure time if missing
-                time_isot = Time(header['DATE-OBS'], format='isot', scale='utc', location=get_location())
-                time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
-                time_jd += (exptime / 2.) * u.second
-                # Check if TELRAD and TELDECD are in the header; if not, use RA and DEC
-                if 'TELRAD' in header and 'TELDECD' in header:
-                    ra, dec = header['TELRAD'], header['TELDECD']
-                else:
-                    ra, dec = header.get('RA'), header.get('DEC')
+# Sort filenames alphabetically
+sorted_filenames = sorted(filenames)
+
+# Process each file in sorted order
+for i, filename in enumerate(sorted_filenames):
+    full_path = os.path.join(directory, filename)
+    print(f"Processing file {i + 1}: {filename}")
+    with fits.open(full_path, mode='update') as hdul:
+        header = hdul[0].header
+        image_data = hdul[0].data
+
+        # Get BJD from header or calculate if missing
+        if 'BJD' not in header:
+            exptime = float(header.get('EXPTIME', header.get('EXPOSURE', 10)))  # Default exposure time if missing
+            time_isot = Time(header['DATE-OBS'], format='isot', scale='utc', location=get_location())
+            time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+            time_jd += (exptime / 2.) * u.second
+
+            # Check if TELRAD and TELDECD are in the header; if not, use RA and DEC
+            ra = header.get('TELRAD', header.get('RA'))
+            dec = header.get('TELDECD', header.get('DEC'))
+            if ra and dec:
                 ltt_bary, _ = get_light_travel_times(ra, dec, time_jd)
                 time_bary = time_jd.tdb + ltt_bary
                 header['BJD'] = time_bary.value
                 print(f"Calculated BJD for {filename}: {time_bary.value}")
             else:
-                print(f"BJD found in header for {filename}: {header['BJD']}")
+                print(f"No RA/DEC information for {filename}. Skipping BJD calculation.")
 
-            # Get airmass from header or calculate if missing
-            if 'AIRMASS' not in header:
-                altitude = header.get('ALTITUDE', 45)  # Example: default to 45 if missing
-                header['AIRMASS'] = calculate_airmass(altitude)
-                print(f"Calculated airmass for {filename}: {header['AIRMASS']}")
-            else:
-                print(f"Airmass found in header for {filename}: {header['AIRMASS']}")
+        else:
+            print(f"BJD found in header for {filename}: {header['BJD']}")
 
-            # Calculate and store FWHM
-            fwhm = calculate_fwhm(image_data, crop_size)
-            if fwhm:
-                times.append(header['BJD'])
-                fwhm_values.append(fwhm)
-                airmass_values.append(header['AIRMASS'])
-                print(f"Calculated FWHM for {filename}: {fwhm:.2f}")
-                print()
-            else:
-                print(f"FWHM calculation failed for {filename}")
+        # Get airmass from header or calculate if missing
+        if 'AIRMASS' not in header:
+            altitude = header.get('ALTITUDE', 45)  # Default altitude if missing
+            header['AIRMASS'] = calculate_airmass(altitude)
+            print(f"Calculated airmass for {filename}: {header['AIRMASS']}")
+        else:
+            print(f"Airmass found in header for {filename}: {header['AIRMASS']}")
+
+        # Calculate and store FWHM
+        fwhm = calculate_fwhm(image_data, crop_size)
+        if fwhm:
+            times.append(header['BJD'])
+            fwhm_values.append(fwhm)
+            airmass_values.append(header['AIRMASS'])
+            print(f"Calculated FWHM for {filename}: {fwhm:.2f}\n")
+        else:
+            print(f"FWHM calculation failed for {filename}\n")
 
 # Sort by BJD for plotting
 sorted_data = sorted(zip(times, fwhm_values, airmass_values), key=lambda x: x[0])
