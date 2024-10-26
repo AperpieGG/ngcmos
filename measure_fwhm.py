@@ -163,6 +163,7 @@ for i, filename in enumerate(os.listdir(directory)):
                 fwhm_values.append(fwhm)
                 airmass_values.append(header['AIRMASS'])
                 print(f"Calculated FWHM for {filename}: {fwhm:.2f}")
+                print()
             else:
                 print(f"FWHM calculation failed for {filename}")
 
