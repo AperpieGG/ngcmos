@@ -117,9 +117,11 @@ for i, filename in enumerate(os.listdir(directory)):
                 time_isot = Time(header['DATE-OBS'], format='isot', scale='utc', location=get_location())
                 time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
                 time_jd += (exptime / 2.) * u.second
-                ra, dec = header['TELRAD'], header['TELDECD']
-                if not ra or not dec:
-                    ra, dec = header['RA'], header['DEC']
+                # Check if TELRAD and TELDECD are in the header; if not, use RA and DEC
+                if 'TELRAD' in header and 'TELDECD' in header:
+                    ra, dec = header['TELRAD'], header['TELDECD']
+                else:
+                    ra, dec = header.get('RA'), header.get('DEC')
                 ltt_bary, _ = get_light_travel_times(ra, dec, time_jd)
                 time_bary = time_jd.tdb + ltt_bary
                 header['BJD'] = time_bary.value
