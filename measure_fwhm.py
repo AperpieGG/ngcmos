@@ -10,6 +10,7 @@ from astropy.time import Time
 import astropy.units as u
 from utils import get_location, get_light_travel_times, plot_images
 import warnings
+import json
 
 plot_images()
 
@@ -182,3 +183,22 @@ ax2.set_xticklabels([f'{a:.2f}' for a in interpolated_airmass], rotation=45, ha=
 ax1.legend()
 plt.tight_layout()
 plt.show()
+
+
+# Prepare data in dictionary format for JSON output
+data_dict = {
+    "results": [
+        {
+            "BJD": bjd,
+            "Airmass": airmass,
+            "FWHM": fwhm
+        }
+        for bjd, airmass, fwhm in zip(times, airmass_values, fwhm_values)
+    ]
+}
+
+# Write data to JSON file
+with open("fwhm.json", "w") as json_file:
+    json.dump(data_dict, json_file, indent=4)
+
+print("Results saved to fwhm.json")
