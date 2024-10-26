@@ -410,7 +410,7 @@ def main():
 
             # Bin the target star data
             target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-                bin_time_flux_error(target_time, target_flux, target_fluxerr, 12))
+                bin_time_flux_error(target_time, target_flux, target_fluxerr, 1))
 
             # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
             flux_ratio_binned = target_fluxes_binned / reference_fluxes_binned
