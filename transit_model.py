@@ -38,7 +38,7 @@ m = batman.TransitModel(params, time_binned)
 model_flux = m.light_curve(params)
 
 # Plot both the observed flux and the model flux to compare
-plt.figure(figsize=(10, 6))
+plt.figure()
 plt.plot(time, flux, '.', label="Unbinned Flux", color="grey", alpha=0.5)
 plt.plot(time_binned, flux_binned, 'o', label="Binned 5 min", color="red")
 plt.plot(time_binned, model_flux, label="Transit Model", color="black", linestyle='-')
