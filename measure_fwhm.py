@@ -95,7 +95,9 @@ def calculate_fwhm(image_data, crop_size=800):
 
     # Return the average FWHM for the stars
     if fwhms_x and fwhms_y:
-        return np.mean(fwhms_x + fwhms_y) / 2
+        average_fwhms_x = np.median(fwhms_x)
+        average_fwhms_y = np.median(fwhms_y)
+        return (average_fwhms_x + average_fwhms_y) / 2
 
 
 # Process each FITS file in the directory
@@ -116,6 +118,8 @@ for i, filename in enumerate(os.listdir(directory)):
                 time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
                 time_jd += (exptime / 2.) * u.second
                 ra, dec = header['TELRAD'], header['TELDECD']
+                if not ra or not dec:
+                    ra, dec = header['RA'], header['DEC']
                 ltt_bary, _ = get_light_travel_times(ra, dec, time_jd)
                 time_bary = time_jd.tdb + ltt_bary
                 header['BJD'] = time_bary.value
