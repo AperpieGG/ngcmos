@@ -119,7 +119,6 @@ for i, filename in enumerate(os.listdir(directory)):
         if any(word in filename.lower() for word in exclude_words):
             continue
         # sort the filenames
-        filename = os.path.join(directory, filename)
         print(f"Processing file {i + 1}: {filename}")
         with fits.open(filename, mode='update') as hdul:
             header = hdul[0].header
