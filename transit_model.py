@@ -30,19 +30,17 @@ flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
 
-time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 18)
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
 
 # Initialize the transit model with the centered time array
-m = batman.TransitModel(params, time_binned)
+m = batman.TransitModel(params, time)
 model_flux = m.light_curve(params)
 
 # Plot both the observed flux and the model flux to compare
 plt.figure(figsize=(10, 6))
 plt.plot(time, flux, '.', label="Unbinned Flux", color="grey", alpha=0.5)
-plt.plot(time_binned, flux_binned, 'o', label="Binned 5 min", color="red")
-plt.plot(time_binned, model_flux, label="Transit Model", color="black", linestyle='-')
+plt.plot(time, model_flux, label="Transit Model", color="black", linestyle='-')
 plt.xlabel("Time (BJD)")
 plt.ylabel("Relative flux")
 plt.legend()
