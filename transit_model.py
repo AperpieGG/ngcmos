@@ -29,13 +29,21 @@ time = np.array(data['Time_BJD'])
 flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
-time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 30)
+# Normalize the flux to the out-of-transit baseline
+out_of_transit_mask = (time < (params.t0 - 0.1)) | (time > (params.t0 + 0.1))
+baseline_flux = np.median(flux[out_of_transit_mask])
+normalized_flux = flux / baseline_flux
+
+# Continue with binning the time and flux
+time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, normalized_flux, flux_err, 30)
+
 # Normalize the time array to be centered around the transit
-time_centered = time - params.t0
+time_centered = time_binned - params.t0  # Ensure you use binned time for modeling
 
 # Initialize the transit model with the centered time array
-m = batman.TransitModel(params, time_binned)
-model_flux = m.light_curve(params)
+m = batman.TransitModel(params, time_centered)
+model_flux = m.light_curve(params) + baseline_flux  # Add baseline flux to the model
+
 
 # Plot both the observed flux and the model flux to compare
 plt.figure()
