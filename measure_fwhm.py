@@ -36,7 +36,7 @@ def calculate_fwhm(image_data, crop_size=800):
                          center_x - crop_size:center_x + crop_size]
 
     mean, median, std = np.mean(cropped_image_data), np.median(cropped_image_data), mad_std(cropped_image_data)
-    daofind = DAOStarFinder(fwhm=4, threshold=5. * std, brightest=50)
+    daofind = DAOStarFinder(fwhm=4, threshold=5. * std, brightest=250)
     selected_sources = daofind(cropped_image_data - median)
 
     fwhms_x, fwhms_y = [], []
