@@ -106,6 +106,10 @@ times, fwhm_values, airmass_values = [], [], []
 
 for i, filename in enumerate(os.listdir(directory)):
     if filename.endswith('.fits'):
+        # exclude files with specific words in the filename
+        exclude_words = ["evening", "morning", "flat", "bias", "dark", "catalog", "phot", "catalog_input"]
+        if any(word in filename.lower() for word in exclude_words):
+            continue
         print(f"Processing file {i + 1}: {filename}")
         with fits.open(filename, mode='update') as hdul:
             header = hdul[0].header
@@ -113,7 +117,12 @@ for i, filename in enumerate(os.listdir(directory)):
 
             # Get BJD from header or calculate if missing
             if 'BJD' not in header:
-                exptime = float(header['EXPTIME'])
+                if 'EXPTIME' in header:
+                    exptime = float(header['EXPTIME'])
+                elif 'EXPOSURE' in header:
+                    exptime = float(header['EXPOSURE'])
+                else:
+                    exptime = 10  # Default exposure time if missing
                 time_isot = Time(header['DATE-OBS'], format='isot', scale='utc', location=get_location())
                 time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
                 time_jd += (exptime / 2.) * u.second
