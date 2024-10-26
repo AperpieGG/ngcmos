@@ -30,7 +30,7 @@ flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
 # Normalize the flux to the out-of-transit baseline
-out_of_transit_mask = (time < (params.t0 - 0.1)) | (time > (params.t0 + 0.1))
+out_of_transit_mask = (time < (params.t0 - 0.2)) | (time > (params.t0 + 0.2))
 baseline_flux = np.median(flux[out_of_transit_mask])
 normalized_flux = flux / baseline_flux
 
