@@ -8,8 +8,10 @@ from astropy.stats import mad_std
 from photutils.detection import DAOStarFinder
 from astropy.time import Time
 import astropy.units as u
-from utils import get_location, get_light_travel_times
+from utils import get_location, get_light_travel_times, plot_images
 import warnings
+
+plot_images()
 
 warnings.filterwarnings('ignore', category=UserWarning)
 
@@ -33,7 +35,8 @@ def calculate_airmass(altitude):
 def calculate_fwhm(image_data, crop_size=800):
     # Define the central region
     center_x, center_y = image_data.shape[1] // 2, image_data.shape[0] // 2
-    cropped_image_data = image_data[center_y - crop_size:center_y + crop_size, center_x - crop_size:center_x + crop_size]
+    cropped_image_data = image_data[center_y - crop_size:center_y + crop_size,
+                         center_x - crop_size:center_x + crop_size]
 
     # Estimate background noise level
     mean, median, std = np.mean(cropped_image_data), np.median(cropped_image_data), mad_std(cropped_image_data)
@@ -164,9 +167,9 @@ times, fwhm_values, airmass_values = zip(*sorted_data)
 print("Plotting results...")
 fig, ax1 = plt.subplots()
 
-ax1.plot(times, fwhm_values, 'o-', label="FWHM vs. BJD", color="blue")
+ax1.plot(times, fwhm_values, 'o', label=f'FWHM (median={np.median(fwhm_values):.2f})', color='blue')
 ax1.set_xlabel("BJD")
-ax1.set_ylabel("FWHM (pixels)", color="blue")
+ax1.set_ylabel("FWHM (pixels)")
 
 # Airmass on top x-axis
 ax2 = ax1.twiny()
