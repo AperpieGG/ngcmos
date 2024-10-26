@@ -155,7 +155,7 @@ for i, filename in enumerate(os.listdir(directory)):
                 print(f"Airmass found in header for {filename}: {header['AIRMASS']}")
 
             # Calculate and store FWHM
-            fwhm = calculate_fwhm(image_data)
+            fwhm = calculate_fwhm(image_data, crop_size)
             if fwhm:
                 times.append(header['BJD'])
                 fwhm_values.append(fwhm)
