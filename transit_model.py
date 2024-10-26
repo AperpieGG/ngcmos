@@ -39,8 +39,8 @@ model_flux = m.light_curve(params)
 
 # Plot both the observed flux and the model flux to compare
 plt.figure()
-plt.plot(time, flux, '.', label="Unbinned Flux", color="grey", alpha=0.5)
-plt.plot(time_binned, flux_binned, 'o', label="Binned 5 min", color="red")
+plt.errorbar(time, flux, yerr=flux_err, fmt='.', label="Unbinned", color="grey", alpha=0.5)
+plt.errorbar(time_binned, flux_binned, yerr=fluxerr_binned, fmt='o', label="5 min bin", color="red")
 plt.plot(time_binned, model_flux, label="Transit Model", color="black", linestyle='-')
 plt.xlabel("Time (BJD)")
 plt.ylabel("Relative flux")
