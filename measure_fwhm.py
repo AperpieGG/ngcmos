@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 import os
 import numpy as np
 from astropy.io import fits
@@ -56,7 +55,8 @@ def calculate_fwhm(image_data, crop_size=800):
                 sigma_x, sigma_y = popt[3], popt[4]
                 fwhms_x.append(2.355 * sigma_x)
                 fwhms_y.append(2.355 * sigma_y)
-            except:
+            except Exception as e:
+                print(f"Error fitting Gaussian for star at ({x_star}, {y_star}): {e}")
                 continue
 
     if fwhms_x and fwhms_y:
@@ -68,8 +68,9 @@ def calculate_fwhm(image_data, crop_size=800):
 directory = os.getcwd()
 times, fwhm_values, airmass_values = [], [], []
 
-for filename in os.listdir(directory):
+for i, filename in enumerate(os.listdir(directory)):
     if filename.endswith('.fits'):
+        print(f"Processing file {i + 1}: {filename}")
         with fits.open(filename, mode='update') as hdul:
             header = hdul[0].header
             image_data = hdul[0].data
@@ -84,27 +85,37 @@ for filename in os.listdir(directory):
                 ltt_bary, _ = get_light_travel_times(ra, dec, time_jd)
                 time_bary = time_jd.tdb + ltt_bary
                 header['BJD'] = time_bary.value
+                print(f"Calculated BJD for {filename}: {time_bary.value}")
+            else:
+                print(f"BJD found in header for {filename}: {header['BJD']}")
 
             # Get airmass from header or calculate if missing
             if 'AIRMASS' not in header:
                 altitude = header.get('ALTITUDE', 45)  # Example: default to 45 if missing
                 header['AIRMASS'] = calculate_airmass(altitude)
+                print(f"Calculated airmass for {filename}: {header['AIRMASS']}")
+            else:
+                print(f"Airmass found in header for {filename}: {header['AIRMASS']}")
 
-            # Append BJD, FWHM, and Airmass
-            times.append(header['BJD'])
+            # Calculate and store FWHM
             fwhm = calculate_fwhm(image_data)
             if fwhm:
+                times.append(header['BJD'])
                 fwhm_values.append(fwhm)
                 airmass_values.append(header['AIRMASS'])
+                print(f"Calculated FWHM for {filename}: {fwhm:.2f}")
+            else:
+                print(f"FWHM calculation failed for {filename}")
 
 # Sort by BJD for plotting
 sorted_data = sorted(zip(times, fwhm_values, airmass_values), key=lambda x: x[0])
 times, fwhm_values, airmass_values = zip(*sorted_data)
 
 # Plot FWHM vs Time and FWHM vs Airmass
+print("Plotting results...")
 fig, ax1 = plt.subplots()
 
-ax1.plot(times, fwhm_values, 'o', label="FWHM vs. BJD", color="blue")
+ax1.plot(times, fwhm_values, 'o-', label="FWHM vs. BJD", color="blue")
 ax1.set_xlabel("BJD")
 ax1.set_ylabel("FWHM (pixels)", color="blue")
 
