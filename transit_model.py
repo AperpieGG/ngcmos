@@ -9,7 +9,7 @@ from utils import plot_images, bin_time_flux_error
 import argparse
 
 parser = argparse.ArgumentParser(description='Plot the transit model for a given TIC ID and camera number.')
-parser.add_argument('cam', type=int, help='Camera number (CCD or CMOS)')
+parser.add_argument('cam', type=str, help='Camera number (CCD or CMOS)')
 parser.add_argument('target', type=str, help='Target name')
 args = parser.parse_args()
 cam = args.camera
