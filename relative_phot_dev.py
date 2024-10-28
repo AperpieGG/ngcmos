@@ -251,7 +251,6 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, DM_BRIGHT, DM_FAINT
 
     except Exception as e:
         logger.error(f"Error in relative photometry for TIC ID {tic_id_to_plot}: {str(e)}")
-        logger.error(f'The reults are: {target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass_list}')
         return None
 
 
