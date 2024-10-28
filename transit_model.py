@@ -42,7 +42,9 @@ time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_
 mean_dt_flux = np.mean(flux_binned)
 
 # Calculate the adjustment needed to bring it to a baseline of 1
-adjustment = mean_dt_flux - 0.998
+# adjustment = mean_dt_flux - 0.998 # CCD
+adjustment = mean_dt_flux - 1.002
+
 
 # Adjust the normalized flux data
 dt_flux_adjusted = flux_binned - adjustment
