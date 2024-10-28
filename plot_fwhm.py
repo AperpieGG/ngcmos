@@ -16,52 +16,38 @@ def load_and_normalize_fwhm(json_file):
     fwhm = [entry["FWHM"] for entry in data["results"]]
     median_fwhm = np.median(fwhm)
     normalized_fwhm = [f / median_fwhm for f in fwhm]
-    return np.array(bjds), np.array(airmass), np.array(normalized_fwhm)
+    return bjds, airmass, normalized_fwhm
+
 
 # Load and process data from both JSON files
 bjds1, airmass1, fwhm1 = load_and_normalize_fwhm('fwhm_CMOS.json')
 bjds2, airmass2, fwhm2 = load_and_normalize_fwhm('fwhm_CCD.json')
 
-# Identify common BJD values between both files
-common_indices1 = np.isin(bjds1, bjds2)
-common_indices2 = np.isin(bjds2, bjds1)
+# Plot FWHM vs BJD with airmass on secondary x-axis
+fig, ax1 = plt.subplots()
 
-# Filter data for common BJD values
-bjds1_common = bjds1[common_indices1]
-fwhm1_common = fwhm1[common_indices1]
-airmass1_common = airmass1[common_indices1]
-bjds2_common = bjds2[common_indices2]
-fwhm2_common = fwhm2[common_indices2]
+# Plot for the first file
+ax1.plot(bjds1, fwhm1, 'o', label=f'FWHM CMOS', color='red', alpha=0.5)
 
-# Calculate FWHM ratio
-fwhm_ratio = fwhm1_common / fwhm2_common
+# Plot for the second file
+ax1.plot(bjds2, fwhm2, 'o', label=f'FWHM CCD', color='blue', alpha=0.5)
 
-# Plotting FWHM vs BJD with Airmass as secondary x-axis, and FWHM ratio
-fig, (ax1, ax3) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]})
-
-# Plot FWHM for File 1 and File 2
-ax1.plot(bjds1_common, fwhm1_common, 'o', label='FWHM CMOS', color='red')
-ax1.plot(bjds2_common, fwhm2_common, 'o', label='FWHM CCD', color='blue')
-
-# Set labels for main plot
+# Set main x-axis and y-axis labels
+ax1.set_xlabel("BJD")
 ax1.set_ylabel("Normalized FWHM")
-ax1.legend()
 
-# Secondary x-axis for Airmass
+# Airmass on top x-axis
 ax2 = ax1.twiny()
 ax2.set_xlim(ax1.get_xlim())
 ax2.set_xlabel('Airmass')
-interpolated_airmass = np.interp(ax1.get_xticks(), bjds1_common, airmass1_common)
+
+# Interpolate airmass values based on ticks on the main x-axis
+# We use the airmass from the first file as they are the same for both
+interpolated_airmass = np.interp(ax1.get_xticks(), bjds1, airmass1)
 ax2.set_xticks(ax1.get_xticks())
 ax2.set_xticklabels([f'{a:.2f}' for a in interpolated_airmass], rotation=45, ha='right')
 
-# Plot the FWHM ratio
-ax3.plot(bjds1_common, fwhm_ratio, 'o', color='green', label='FWHM Ratio (CMOS / CCD)')
-ax3.set_xlabel("BJD")
-ax3.set_ylabel("FWHM Ratio")
-ax3.axhline(y=1, color='black', linestyle='--', linewidth=0.8)
-ax3.legend()
-
-# Show the plot
+# Show legend and plot
+ax1.legend()
 plt.tight_layout()
 plt.show()
