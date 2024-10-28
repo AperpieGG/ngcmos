@@ -38,6 +38,15 @@ flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
 time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 30)
+# Calculate the mean of the normalized data
+mean_dt_flux = np.mean(flux_binned)
+
+# Calculate the adjustment needed to bring it to a baseline of 1
+adjustment = mean_dt_flux - 1.005
+
+# Adjust the normalized flux data
+dt_flux_adjusted = flux_binned - adjustment
+
 # Normalize the time array to be centered around the transit
 time_centered = time - params.t0
 
@@ -50,7 +59,7 @@ plt.figure()
 # plt.errorbar(time, flux, yerr=flux_err, fmt='.', label="Unbinned", color="grey", alpha=0.5)
 plt.plot(time, flux, '.', label="Unbinned", color="grey", alpha=0.5)
 # plt.errorbar(time_binned, flux_binned, yerr=fluxerr_binned, fmt='o', label="5 min bin", color="red")
-plt.plot(time_binned, flux_binned, 'o', label="5 min bin", color="red")
+plt.plot(time_binned, dt_flux_adjusted, 'o', label="5 min bin", color="red")
 plt.plot(time_binned, model_flux, label="Transit Model", color="black", linestyle='-')
 plt.xlabel("Time (BJD)")
 plt.ylabel("Relative flux")
