@@ -23,31 +23,36 @@ def load_and_normalize_fwhm(json_file):
 bjds1, airmass1, fwhm1 = load_and_normalize_fwhm('fwhm_CMOS.json')
 bjds2, airmass2, fwhm2 = load_and_normalize_fwhm('fwhm_CCD.json')
 
-# Plot FWHM vs BJD with airmass on secondary x-axis
-fig, ax1 = plt.subplots()
+# Ensure BJD alignment (assuming they are identical across files)
+assert bjds1 == bjds2, "BJDs are not aligned between the two files."
 
-# Plot for the first file
-ax1.plot(bjds1, fwhm1, 'o', label=f'File 1 FWHM (median={np.median(fwhm1):.2f})', color='blue')
+# Calculate FWHM ratio
+fwhm_ratio = np.array(fwhm1) / np.array(fwhm2)
 
-# Plot for the second file
-ax1.plot(bjds2, fwhm2, 'x', label=f'File 2 FWHM (median={np.median(fwhm2):.2f})', color='green')
+# Plotting FWHM vs BJD with Airmass as secondary x-axis, and FWHM ratio
+fig, (ax1, ax3) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]})
 
-# Set main x-axis and y-axis labels
-ax1.set_xlabel("BJD")
+# Plot FWHM for File 1 and File 2
+ax1.plot(bjds1, fwhm1, 'o', label=f'FWHM CMOS', color='red')
+ax1.plot(bjds2, fwhm2, 'o', label=f'FWHM CCD', color='blue')
+
+# Set labels for main plot
 ax1.set_ylabel("Normalized FWHM")
+ax1.legend()
 
-# Airmass on top x-axis
+# Secondary x-axis for Airmass
 ax2 = ax1.twiny()
 ax2.set_xlim(ax1.get_xlim())
 ax2.set_xlabel('Airmass')
-
-# Interpolate airmass values based on ticks on the main x-axis
-# We use the airmass from the first file as they are the same for both
 interpolated_airmass = np.interp(ax1.get_xticks(), bjds1, airmass1)
 ax2.set_xticks(ax1.get_xticks())
 ax2.set_xticklabels([f'{a:.2f}' for a in interpolated_airmass], rotation=45, ha='right')
 
-# Show legend and plot
-ax1.legend()
+# Plot the FWHM ratio
+ax3.plot(bjds1, fwhm_ratio, 'o', color='green', label='FWHM Ratio (CMOS / CCD)')
+ax3.set_xlabel("BJD")
+ax3.set_ylabel("FWHM Ratio")
+ax3.legend()
+# Show the plot
 plt.tight_layout()
 plt.show()
