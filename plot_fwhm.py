@@ -25,6 +25,8 @@ bjds2, airmass2, fwhm2 = load_and_normalize_fwhm('fwhm_CCD.json')
 
 
 # Calculate FWHM ratio
+# exclude data points for fwhm1 so that they have the same dimensions
+fwhm1 = fwhm1[:len(fwhm2)]
 fwhm_ratio = np.array(fwhm1) / np.array(fwhm2)
 
 # Plotting FWHM vs BJD with Airmass as secondary x-axis, and FWHM ratio
