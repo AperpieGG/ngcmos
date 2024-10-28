@@ -107,12 +107,14 @@ def calculate_fwhm(image_data, crop_size):
     if fwhms_x and fwhms_y:
         average_fwhms_x = np.median(fwhms_x)
         average_fwhms_y = np.median(fwhms_y)
-        return (average_fwhms_x + average_fwhms_y) / 2
+        ratio_each = [fwhms_x[i] / fwhms_y[i] for i in range(len(fwhms_x))]
+        ratio = np.median(ratio_each)
+        return (average_fwhms_x + average_fwhms_y) / 2, ratio
 
 
 # Process each FITS file in the directory
 directory = os.getcwd()
-times, fwhm_values, airmass_values = [], [], []
+times, fwhm_values, airmass_values, ratio_values = [], [], [], []
 
 # List all FITS filenames and exclude those containing specific words
 filenames = [
@@ -163,18 +165,19 @@ for i, filename in enumerate(sorted_filenames):
             print(f"Airmass found in header for {filename}: {header['AIRMASS']}")
 
         # Calculate and store FWHM
-        fwhm = calculate_fwhm(image_data, crop_size)
-        if fwhm:
+        fwhm, ratio = calculate_fwhm(image_data, crop_size)
+        if fwhm and ratio:
             times.append(header['BJD'])
             fwhm_values.append(fwhm)
             airmass_values.append(header['AIRMASS'])
-            print(f"Calculated FWHM for {filename}: {fwhm:.2f}\n")
+            ratio_values.append(ratio)
+            print(f"Calculated FWHM for {filename}: {fwhm:.2f} pixels, ratio: {ratio:.2f}\n")
         else:
             print(f"FWHM calculation failed for {filename}\n")
 
 # Sort by BJD for plotting
-sorted_data = sorted(zip(times, fwhm_values, airmass_values), key=lambda x: x[0])
-times, fwhm_values, airmass_values = zip(*sorted_data)
+sorted_data = sorted(zip(times, fwhm_values, airmass_values, ratio_values))
+times, fwhm_values, airmass_values, ratio_values = zip(*sorted_data)
 
 # Plot FWHM vs Time and FWHM vs Airmass
 print("Plotting results...")
@@ -215,6 +218,26 @@ ax1.legend()
 plt.tight_layout()
 plt.show()
 
+# plot the ratio
+fig, ax1 = plt.subplots()
+
+ax1.plot(times, ratio_values, 'o', label=f'FWHM (median={np.median(ratio_values):.2f})', color='blue')
+ax1.set_xlabel("BJD")
+ax1.set_ylabel("Ratio FWHM_X, FWHM_Y")
+
+# Airmass on top x-axis
+ax2 = ax1.twiny()
+ax2.set_xlim(ax1.get_xlim())
+ax2.set_xlabel('Airmass')
+interpolated_airmass = np.interp(ax1.get_xticks(), times, airmass_values)
+ax2.set_xticks(ax1.get_xticks())
+ax2.set_xticklabels([f'{a:.2f}' for a in interpolated_airmass], rotation=45, ha='right')
+
+ax1.legend()
+plt.tight_layout()
+plt.show()
+
+
 # Prepare data in dictionary format for JSON output
 data_dict = {
     "results": [
@@ -222,9 +245,12 @@ data_dict = {
             "BJD": bjd,
             "Airmass": airmass,
             "FWHM": fwhm,
-            "FWHM_microns": fwhm * size
+            "FWHM_microns": fwhm * size,
+            "Ratio": ratio
+
         }
-        for bjd, airmass, fwhm, fwhm_microns in zip(times, airmass_values, fwhm_values, fwhm_values * size)
+        for bjd, airmass, fwhm, fwhm_microns, ratio in zip(times, airmass_values, fwhm_values,
+                                                           fwhm_values * size, ratio_values)
     ]
 }
 
