@@ -18,8 +18,10 @@ plot_images()
 warnings.filterwarnings('ignore', category=UserWarning)
 parser = argparse.ArgumentParser(description='Measure FWHM from a FITS image.')
 parser.add_argument('--crop_size', type=int, default=800, help='CMOS = 800, CCD = 652')
+parser.add_argument('--size', type=float, default=11, help='pixel size to convert to microns')
 args = parser.parse_args()
 crop_size = args.crop_size
+size = args.size
 
 
 # Function to fit a 2D Gaussian
@@ -195,15 +197,34 @@ plt.tight_layout()
 plt.show()
 
 
+fig, ax1 = plt.subplots()
+
+ax1.plot(times, fwhm_values * size, 'o', label=f'FWHM (median={np.median(fwhm_values * size):.2f})', color='blue')
+ax1.set_xlabel("BJD")
+ax1.set_ylabel("FWHM (pixels)")
+
+# Airmass on top x-axis
+ax2 = ax1.twiny()
+ax2.set_xlim(ax1.get_xlim())
+ax2.set_xlabel('Airmass')
+interpolated_airmass = np.interp(ax1.get_xticks(), times, airmass_values)
+ax2.set_xticks(ax1.get_xticks())
+ax2.set_xticklabels([f'{a:.2f}' for a in interpolated_airmass], rotation=45, ha='right')
+
+ax1.legend()
+plt.tight_layout()
+plt.show()
+
 # Prepare data in dictionary format for JSON output
 data_dict = {
     "results": [
         {
             "BJD": bjd,
             "Airmass": airmass,
-            "FWHM": fwhm
+            "FWHM": fwhm,
+            "FWHM_microns": fwhm * size
         }
-        for bjd, airmass, fwhm in zip(times, airmass_values, fwhm_values)
+        for bjd, airmass, fwhm, fwhm_microns in zip(times, airmass_values, fwhm_values, fwhm_values * size)
     ]
 }
 
