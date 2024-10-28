@@ -1,9 +1,11 @@
+#! /usr/bin/env python
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import plot_images
 
 plot_images()
+
 
 # Function to load and process data from JSON file
 def load_and_normalize_fwhm(json_file):
