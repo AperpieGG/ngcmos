@@ -6,6 +6,14 @@ import matplotlib.pyplot as plt
 import json
 
 from utils import plot_images, bin_time_flux_error
+import argparse
+
+parser = argparse.ArgumentParser(description='Plot the transit model for a given TIC ID and camera number.')
+parser.add_argument('cam', type=int, help='Camera number (CCD or CMOS)')
+parser.add_argument('target', type=str, help='Target name')
+args = parser.parse_args()
+cam = args.camera
+target = args.target
 
 plot_images()
 # Set up the transit parameters
@@ -21,7 +29,7 @@ params.u = [0.3695, 0.2774]  # limb darkening coefficients [u1, u2]
 params.limb_dark = "quadratic"  # limb darkening model
 
 # load data from json file
-with open('target_light_curve_9725627_CCD.json', 'r') as json_file:
+with open(f'target_light_curve_{target}_{cam}.json', 'r') as json_file:
     data = json.load(json_file)
 
 tic_id = data['TIC_ID']
