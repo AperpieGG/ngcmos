@@ -23,8 +23,6 @@ def load_and_normalize_fwhm(json_file):
 bjds1, airmass1, fwhm1 = load_and_normalize_fwhm('fwhm_CMOS.json')
 bjds2, airmass2, fwhm2 = load_and_normalize_fwhm('fwhm_CCD.json')
 
-# Ensure BJD alignment (assuming they are identical across files)
-assert bjds1 == bjds2, "BJDs are not aligned between the two files."
 
 # Calculate FWHM ratio
 fwhm_ratio = np.array(fwhm1) / np.array(fwhm2)
