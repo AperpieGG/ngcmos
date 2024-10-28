@@ -304,6 +304,7 @@ def main():
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 # Perform relative photometry
                 result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
+                print("Relative Photometry Result:", result)
 
                 # Check if result is None
                 if result is None:
