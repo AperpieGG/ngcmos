@@ -204,7 +204,7 @@ fig, ax1 = plt.subplots()
 fwhm_values = np.array(fwhm_values)
 ax1.plot(times, fwhm_values * size, 'o', label=f'FWHM (median={np.median(fwhm_values * size):.2f})', color='blue')
 ax1.set_xlabel("BJD")
-ax1.set_ylabel("FWHM (pixels)")
+ax1.set_ylabel("FWHM (microns)")
 
 # Airmass on top x-axis
 ax2 = ax1.twiny()
@@ -223,7 +223,7 @@ fig, ax1 = plt.subplots()
 
 ax1.plot(times, ratio_values, 'o', label=f'FWHM (median={np.median(ratio_values):.2f})', color='blue')
 ax1.set_xlabel("BJD")
-ax1.set_ylabel("Ratio FWHM_X, FWHM_Y")
+ax1.set_ylabel("FWHM X / FWHM Y")
 
 # Airmass on top x-axis
 ax2 = ax1.twiny()
