@@ -803,10 +803,16 @@ def expand_and_rename_table(phot_table):
 
             expanded_rows.append(expanded_row)
 
-    # Create a new table with the expanded rows, excluding Airmass and ZP
-    # Define the names you want to keep in the new table
+    # Define the base column names
     column_names = ['TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux', 'Relative_Flux_err', 'Sky', 'RMS']
-    # Add 'Airmass' and 'ZP' if needed, otherwise skip them
+
+    # Add 'Airmass' and 'ZP' if they exist in phot_table
+    if 'Airmass' in phot_table.colnames:
+        column_names.append('Airmass')
+    if 'ZP' in phot_table.colnames:
+        column_names.append('ZP')
+
+    # Create a new table with the expanded rows and dynamically set column names
     new_table = Table(rows=expanded_rows, names=column_names)
 
     return new_table
