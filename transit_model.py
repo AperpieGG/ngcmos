@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(description='Plot the transit model for a given
 parser.add_argument('cam', type=str, help='Camera number (CCD or CMOS)')
 parser.add_argument('target', type=str, help='Target name')
 args = parser.parse_args()
-cam = args.camera
+cam = args.cam
 target = args.target
 
 plot_images()
