@@ -201,7 +201,7 @@ plt.show()
 
 
 fig, ax1 = plt.subplots()
-
+fwhm_values = np.array(fwhm_values)
 ax1.plot(times, fwhm_values * size, 'o', label=f'FWHM (median={np.median(fwhm_values * size):.2f})', color='blue')
 ax1.set_xlabel("BJD")
 ax1.set_ylabel("FWHM (pixels)")
@@ -245,7 +245,7 @@ data_dict = {
             "BJD": bjd,
             "Airmass": airmass,
             "FWHM": fwhm,
-            "FWHM_microns": fwhm * size,
+            "FWHM_microns": fwhm_microns,
             "Ratio": ratio
 
         }
