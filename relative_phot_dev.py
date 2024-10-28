@@ -66,22 +66,37 @@ def target_info(table, tic_id_to_plot, APERTURE):
             target_sky, target_flux, target_fluxerr, target_time)
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=1000):
     # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _ = target_info(table, tic_id_to_plot, APERTURE)
+    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
     color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
     color_data = table[color_mask]
 
-    # Further filter based on TESS magnitude within the tolerance
-    mag_mask = np.abs(color_data['Tmag'] - target_tmag) <= MAGNITUDE_TOLERANCE
+    # Filter stars brighter than the target within dmb and fainter than the target within dmf
+    mag_mask = (color_data['Tmag'] >= target_tmag - dmb) & (color_data['Tmag'] <= target_tmag + dmf)
     valid_color_mag_table = color_data[mag_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
+
+    # Get target star coordinates
+    x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
+    y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+
+    # Apply crop filter based on coordinates
+    if crop_size:
+        x_min, x_max = x_target - crop_size // 2, x_target + crop_size // 2
+        y_min, y_max = y_target - crop_size // 2, y_target + crop_size // 2
+
+        # Further filter the comparison stars based on the crop region
+        filtered_table = filtered_table[
+            (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) &
+            (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
+        ]
 
     return filtered_table, airmass_list
 
@@ -163,9 +178,9 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
     return comp_star_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
     tic_ids = np.unique(filtered_table['tic_id'])
     logger.info(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
@@ -204,9 +219,9 @@ def find_best_comps(table, tic_id_to_plot, APERTURE):
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
-def relative_phot(table, tic_id_to_plot, bin_size, APERTURE):
+def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
     try:
-        filtered_table = find_best_comps(table, tic_id_to_plot, APERTURE)
+        filtered_table = find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
         if filtered_table is None or len(filtered_table) == 0:
             logger.warning(f"No valid comparison stars found for TIC ID {tic_id_to_plot}. Skipping.")
@@ -244,10 +259,16 @@ def main():
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--aper', type=int, default=5, help='Aperture radius for photometry')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
+    parser.add_argument('--crop_size', type=int, default=1000, help='Size of the crop region around the target star')
+    parser.add_argument('--dmb', type=float, default=0.5, help='Magnitude difference for comparison stars')
+    parser.add_argument('--dmf', type=float, default=1.5, help='Magnitude difference for comparison stars')
     args = parser.parse_args()
     bin_size = args.bin_size
     APERTURE = args.aper
     EXPOSURE = args.exposure
+    crop_size = args.crop_size
+    DM_BRIGHT = args.dmb
+    DM_FAINT = args.dmf
 
     # Set plot parameters
     plot_images()
@@ -282,7 +303,7 @@ def main():
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 # Perform relative photometry
-                result = relative_phot(phot_table, tic_id, bin_size, APERTURE)
+                result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
                 # Check if result is None
                 if result is None:
