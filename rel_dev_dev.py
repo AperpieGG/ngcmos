@@ -139,7 +139,7 @@ def find_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def exclude_variable_stars(comp_fluxes, threshold=0.01):
+def exclude_variable_stars(comp_fluxes, threshold=0.1):
     excluded_stars = []
     N = len(comp_fluxes)
 
