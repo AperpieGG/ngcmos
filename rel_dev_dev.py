@@ -242,6 +242,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
                     variability_index = 0  # Handle the case where mean is zero
 
                 # Check if variability index exceeds the threshold
+                var_threshold = 0.1  # Set the threshold for variability index
                 if variability_index > var_threshold:
                     cumulative_mask[i] = False  # Exclude this star if it's variable
                     excluded_count += 1
