@@ -22,7 +22,7 @@ def plot_rms_time(table, num_stars, tic_id=None):
         # Get data for the current Tmag
         Tmag_data = table[table['Tmag'] == Tmag]
         # Extract relevant data
-        jd_mid = Tmag_data['Time_JD']
+        jd_mid = Tmag_data['Time_BJD']
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         current_tic_id = Tmag_data['TIC_ID'][0]
