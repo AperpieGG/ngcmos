@@ -229,7 +229,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, DM_BRIGHT, DM_FAINT
             return None
 
         (target_tmag, target_color_index, airmass_list, target_flux_mean,
-         target_sky, target_flux, target_fluxerr, target_time) = target_info(table, tic_id_to_plot, APERTURE)
+         target_sky, target_flux, target_fluxerr, target_time, zp_list) = target_info(table, tic_id_to_plot, APERTURE)
 
         # Calculate the median sky value for our star
         sky_median = np.median(target_sky)
@@ -248,7 +248,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, DM_BRIGHT, DM_FAINT
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(target_time, dt_flux,
                                                                              dt_fluxerr, bin_size)
 
-        return target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass_list
+        return target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass_list, zp_list
 
     except Exception as e:
         logger.error(f"Error in relative photometry for TIC ID {tic_id_to_plot}: {str(e)}")
