@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, get_rel_phot_files, read_phot_file, bin_time_flux_error
 
 
-def plot_rms_time(table, num_stars, lower_limit, upper_limit, tic_id=None):
+def plot_rms_time(table, num_stars, lower_limit, upper_limit):
     # Filter by Tmag range
     filtered_table = table[(table['Tmag'] >= lower_limit) & (table['Tmag'] <= upper_limit)]
     unique_tmags = np.unique(filtered_table['Tmag'])
@@ -34,7 +34,8 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit, tic_id=None):
     max_binning = 151
 
     for Tmag_data, initial_rms in sorted_stars:
-        jd_mid = Tmag_data['Time_BJD']
+        # Check if 'Time_BJD' exists; use 'BJD' if it does not
+        jd_mid = Tmag_data['Time_BJD'] if 'Time_BJD' in Tmag_data else Tmag_data['Time_JD']
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         current_tic_id = Tmag_data['TIC_ID'][0]
@@ -52,8 +53,7 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit, tic_id=None):
         times_binned.append(time_seconds)
 
         # Print details for each selected star
-        print(f'Star TIC_ID = {current_tic_id}, Tmag = {Tmag_data["Tmag"][0]}, '
-              f'Initial RMS = {initial_rms:.4f}, Final RMS = {RMS_values[0]:.4f}')
+        print(f'Star TIC_ID = {current_tic_id}, Tmag = {Tmag_data["Tmag"][0]}, RMS = {RMS_values[0]:.4f}')
 
     if not average_rms_values:
         print("No stars found. Skipping this photometry file.")
@@ -80,7 +80,7 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit, tic_id=None):
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
-    
+
     plt.legend()
     plt.tight_layout()
     plt.show()
