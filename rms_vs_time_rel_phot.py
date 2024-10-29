@@ -76,6 +76,11 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit, tic_id=None):
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
     plt.ylabel('RMS (ppm)')
+
+    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().tick_params(axis='y', which='minor', length=4)
+    
     plt.legend()
     plt.tight_layout()
     plt.show()
