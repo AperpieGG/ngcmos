@@ -225,8 +225,8 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
                 if cumulative_mask[j] and j != i:  # Exclude the current star
                     sum_fluxes += comp_fluxes[j]
 
-            # Now divide the sum of the fluxes by the current star's flux
-            if comp_fluxes[i] != 0:  # Avoid division by zero
+            # Check if all elements in the array are not zero
+            if np.all(comp_fluxes[i] != 0):  # Avoid division by zero
                 normalized_flux = sum_fluxes / comp_fluxes[i]
 
                 # Check for flatness
