@@ -127,7 +127,7 @@ def find_star_rms(comp_fluxes, airmass):
     Ncomps = comp_fluxes.shape[0]
     for i in range(Ncomps):
         comp_flux = np.copy(comp_fluxes[i])
-        airmass_cs = np.polyfit(airmass, comp_flux, 1)
+        airmass_cs = np.polyfit(airmass, comp_flux, 2)
         airmass_mod = np.polyval(airmass_cs, airmass)
         comp_flux_corrected = comp_flux / airmass_mod
         comp_flux_norm = comp_flux_corrected / np.median(comp_flux_corrected)
