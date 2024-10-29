@@ -219,12 +219,16 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
     # Loop through all comparison stars
     for i in range(len(comp_star_rms)):
         if cumulative_mask[i]:  # Only consider stars that are included
-            # Sum the fluxes of all stars except the current one
+            # Initialize sum_fluxes to zero
             sum_fluxes = np.zeros_like(comp_fluxes[0])
+
+            # Sum the fluxes of all stars except the current one
             for j in range(len(comp_star_rms)):
                 if cumulative_mask[j] and j != i:  # Exclude the current star
                     sum_fluxes += comp_fluxes[j]
-            print(f'Sum of fluxes: {sum_fluxes}')
+
+            # Output the sum of fluxes for the current star being considered
+            print(f'Sum of fluxes excluding star {i}: {sum_fluxes}')
             # Check if all elements in the array are not zero
             if np.all(comp_fluxes[i] != 0):  # Avoid division by zero
                 normalized_flux = sum_fluxes / comp_fluxes[i]
@@ -233,7 +237,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
                 std_dev = np.std(normalized_flux)  # Standard deviation of the normalized flux
 
                 # Define a threshold for flatness
-                flatness_threshold = 0.01  # You can adjust this threshold based on your needs
+                flatness_threshold = 0.1 # You can adjust this threshold based on your needs
 
                 if std_dev > flatness_threshold:
                     # If the light curve is not flat, exclude this star
