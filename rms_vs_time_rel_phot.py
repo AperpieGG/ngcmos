@@ -6,8 +6,9 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images,  get_rel_phot_files, read_phot_file, bin_time_flux_error
 
 
-def plot_rms_time(table, num_stars, tic_id=None):
-    filtered_table = table[(table['Tmag'] >= 10.5) & (table['Tmag'] <= 11)]
+def plot_rms_time(table, num_stars, lower_limit, upper_limit, tic_id=None):
+    # add lower and upper limits for Tmag and pass them as argument
+    filtered_table = table[(table['Tmag'] >= lower_limit) & (table['Tmag'] <= upper_limit)]
     unique_tmags = np.unique(filtered_table['Tmag'])
     print('The bright stars are: ', len(unique_tmags))
 
@@ -93,11 +94,11 @@ def run_for_one(phot_file, tic_id=None):
     plot_rms_time(phot_table, 5, tic_id)
 
 
-def run_for_more(phot_file, num_stars):
+def run_for_more(phot_file, num_stars, lower_limit, upper_limit):
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, num_stars)
+    plot_rms_time(phot_table, num_stars, lower_limit, upper_limit)
 
 
 if __name__ == "__main__":
@@ -112,6 +113,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
     parser.add_argument('--num_stars', type=int, default=0, help='Number of stars to plot')
     parser.add_argument('--tic_id', type=int, help='plot the time vs. binned RMS for a particular star')
+    parser.add_argument('--lower_limit', type=float, default=10.5, help='Lower limit for Tmag')
+    parser.add_argument('--upper_limit', type=float, default=11.5, help='Upper limit for Tmag')
     args = parser.parse_args()
 
     # Run the main function for each photometry file
@@ -122,4 +125,4 @@ if __name__ == "__main__":
     else:
         for phot_file in phot_files:
             # main(phot_file, args.num_stars)
-            run_for_more(phot_file, args.num_stars)
+            run_for_more(phot_file, args.num_stars, args.lower_limit, args.upper_limit)
