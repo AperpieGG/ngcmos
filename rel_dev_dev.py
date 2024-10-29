@@ -227,28 +227,31 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
                 if cumulative_mask[j] and j != i:  # Exclude the current star
                     sum_fluxes += comp_fluxes[j]
 
-            # Output the sum of fluxes for the current star being considered
-            print(f'Sum of fluxes excluding star {i}: {sum_fluxes}')
-            # Check if all elements in the array are not zero
-            if np.all(comp_fluxes[i] != 0):  # Avoid division by zero
+            # Now divide the sum of the fluxes by the current star's flux
+            if np.any(comp_fluxes[i] != 0):  # Avoid division by zero
                 normalized_flux = sum_fluxes / comp_fluxes[i]
 
-                # Check for flatness
-                std_dev = np.std(normalized_flux)  # Standard deviation of the normalized flux
+                # Calculate mean and standard deviation of normalized flux
+                mean_flux = np.mean(normalized_flux)
+                std_dev_flux = np.std(normalized_flux)
 
-                # Define a threshold for flatness
-                flatness_threshold = 0.1 # You can adjust this threshold based on your needs
+                # Calculate variability index
+                if mean_flux != 0:  # Avoid division by zero
+                    variability_index = (std_dev_flux ** 2) / mean_flux
+                else:
+                    variability_index = 0  # Handle the case where mean is zero
 
-                if std_dev > flatness_threshold:
-                    # If the light curve is not flat, exclude this star
-                    cumulative_mask[i] = False
+                # Check if variability index exceeds the threshold
+                if variability_index > var_threshold:
+                    cumulative_mask[i] = False  # Exclude this star if it's variable
                     excluded_count += 1
                     excluded_rms_values.append(comp_star_rms[i])  # Store the excluded star's RMS
 
     # Print the number of stars excluded due to variability
     print(f'Stars excluded due to variability: {excluded_count}')
+    print(f'Excluded RMS values: {excluded_rms_values}')
 
-    return cumulative_mask, comp_star_rms, i
+    return cumulative_mask, comp_star_rms
 
 
 def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
