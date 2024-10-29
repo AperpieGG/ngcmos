@@ -139,9 +139,9 @@ def find_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5):
+def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2):
     comp_star_rms = find_star_rms(comp_fluxes, airmass)
-    print(comp_star_rms)
+    print(f'RMS of comparison stars: {comp_star_rms}')
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
 
     # Initialize mask for all stars to True
@@ -200,7 +200,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.5
         # Exit condition: no further changes or too many iterations
         if N1 == N2 or i > 10:
             break
-
+        print(f'RMS of comparison stars RMS after filtering: {(comp_star_rms[comp_star_mask])}')
     return comp_star_mask, comp_star_rms, i
 
 
