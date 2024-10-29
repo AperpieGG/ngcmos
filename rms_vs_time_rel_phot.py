@@ -52,7 +52,8 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit, tic_id=None):
         times_binned.append(time_seconds)
 
         # Print details for each selected star
-        print(f'Star TIC_ID = {current_tic_id}, Tmag = {Tmag_data["Tmag"].iloc[0]}, Initial RMS = {initial_rms:.4f}')
+        print(f'Star TIC_ID = {current_tic_id}, Tmag = {Tmag_data["Tmag"][0]}, '
+              f'Initial RMS = {initial_rms:.4f}, Final RMS = {RMS_values[0]:.4f}')
 
     if not average_rms_values:
         print("No stars found. Skipping this photometry file.")
