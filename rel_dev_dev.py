@@ -216,42 +216,6 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
     print(f'RMS values after filtering: {(comp_star_rms[cumulative_mask])}')
 
-    # Loop through all comparison stars
-    for i in range(len(comp_star_rms)):
-        if cumulative_mask[i]:  # Only consider stars that are included
-            # Initialize sum_fluxes to zero
-            sum_fluxes = np.zeros_like(comp_fluxes[0])
-
-            # Sum the fluxes of all stars except the current one
-            for j in range(len(comp_star_rms)):
-                if cumulative_mask[j] and j != i:  # Exclude the current star
-                    sum_fluxes += comp_fluxes[j]
-
-            # Now divide the sum of the fluxes by the current star's flux
-            if np.any(comp_fluxes[i] != 0):  # Avoid division by zero
-                normalized_flux = sum_fluxes / comp_fluxes[i]
-
-                # Calculate mean and standard deviation of normalized flux
-                mean_flux = np.mean(normalized_flux)
-                std_dev_flux = np.std(normalized_flux)
-
-                # Calculate variability index
-                if mean_flux != 0:  # Avoid division by zero
-                    variability_index = (std_dev_flux ** 2) / mean_flux
-                else:
-                    variability_index = 0  # Handle the case where mean is zero
-
-                # Check if variability index exceeds the threshold
-                var_threshold = 0.1  # Set the threshold for variability index
-                if variability_index > var_threshold:
-                    cumulative_mask[i] = False  # Exclude this star if it's variable
-                    excluded_count += 1
-                    excluded_rms_values.append(comp_star_rms[i])  # Store the excluded star's RMS
-
-    # Print the number of stars excluded due to variability
-    print(f'Stars excluded due to variability: {excluded_count}')
-    print(f'Excluded RMS values: {excluded_rms_values}')
-
     return cumulative_mask, comp_star_rms, i
 
 
