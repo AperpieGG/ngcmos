@@ -139,7 +139,7 @@ def find_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2):
+def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.1):
     comp_star_rms = find_star_rms(comp_fluxes, airmass)
     print(f'RMS of comparison stars: {comp_star_rms}')
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
@@ -161,31 +161,56 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
             print("No valid comparison stars left after filtering.")
             break
 
-        # Calculate the master flux (median of the comparison stars' fluxes)
-        master_flux = np.median(comp_fluxes[comp_star_mask], axis=0)
+        edges = np.arange(comp_mags.min(), comp_mags.max() + dmag, dmag)
+        dig = np.digitize(comp_mags, edges)
+        mag_nodes = (edges[:-1] + edges[1:]) / 2.
 
-        # Perform flux division and check for flatness
-        for idx, flux in enumerate(comp_fluxes):
-            normalized_flux = flux / master_flux
-            residual_std = np.std(normalized_flux - 1)  # Flat if close to zero
+        # Calculate std_medians based on bins
+        std_medians = []
+        for j in range(1, len(edges)):
+            in_bin = comp_rms[dig == j]
+            std_medians.append(np.nan if len(in_bin) == 0 else np.median(in_bin))
 
-            # Exclude star if residual std exceeds threshold (e.g., variability check)
-            if residual_std > sig_level:
-                comp_star_mask[idx] = False
-                excluded_rms_values.append(comp_star_rms[idx])
-                excluded_count += 1
+        std_medians = np.array(std_medians)
+        valid_mask = ~np.isnan(std_medians)
+        mag_nodes = mag_nodes[valid_mask]
+        std_medians = std_medians[valid_mask]
 
-        # Update comp_mags, comp_rms and repeat until stable
-        comp_mags = np.copy(comp_mags0[comp_star_mask])
-        comp_rms = np.copy(comp_star_rms[comp_star_mask])
+        # Handle case with too few points for fitting
+        if len(mag_nodes) < 4:
+            print("Too few valid points for fitting. Falling back to linear fit.")
+            if len(mag_nodes) > 1:
+                mod = np.interp(comp_mags, mag_nodes, std_medians)
+                mod0 = np.interp(comp_mags0, mag_nodes, std_medians)
+            else:
+                print("Not enough data for interpolation. Skipping iteration.")
+                break
+        else:
+            # Fit a spline to the medians
+            spl = Spline(mag_nodes, std_medians)
+            mod = spl(comp_mags)
+            mod0 = spl(comp_mags0)
 
+        std = np.std(comp_rms - mod)
+        new_comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
+
+        # Identify excluded stars and increment the counter
+        excluded_in_this_iteration = comp_star_rms[comp_star_mask & ~new_comp_star_mask]
+        excluded_count += len(excluded_in_this_iteration)
+        excluded_rms_values.extend(excluded_in_this_iteration)
+
+        # Print the number of stars included and excluded
+        N2 = np.sum(new_comp_star_mask)
         print(f"Iteration {i}:")
-        print(f"Stars included: {np.sum(comp_star_mask)}, Stars excluded: {N1 - np.sum(comp_star_mask)}")
+        print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
+        print(f'The RMS of the excluded stars: {excluded_in_this_iteration}')
 
-        # Exit if no further changes
-        if N1 == np.sum(comp_star_mask) or i > 10:
+        # Update the mask and exit condition
+        comp_star_mask = new_comp_star_mask
+        if N1 == N2 or i > 10:
             break
 
+    print(f'RMS of comparison stars RMS after filtering: {len(comp_star_rms[comp_star_mask])}')
     print(f'Total RMS values excluded: {excluded_count}')
     print(f'Excluded RMS values: {excluded_rms_values}')
 
