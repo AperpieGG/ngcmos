@@ -322,9 +322,6 @@ def main():
                 data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
                                   sky_median, rms, airmass, zp))
 
-                # Print data list to verify length consistency
-                print(f"Data list for {tic_id}: {data_list[-1]}")  # Diagnostic print
-
                 # Check the length of each data row before table creation
                 for index, row in enumerate(data_list):
                     if len(row) != 9:
