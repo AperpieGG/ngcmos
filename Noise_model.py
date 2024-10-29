@@ -5,7 +5,9 @@ import os
 import json
 import numpy as np
 from astropy.io import fits
-from utils import noise_sources 
+from utils import noise_sources
+
+
 # Constants for noise calculations
 
 
@@ -98,7 +100,8 @@ def main():
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
-        mags_list.append(tic_data['Magnitude'][0])
+        if tic_data['Magnitude'][0] is not None:
+            mags_list.append(tic_data['Magnitude'][0])
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
