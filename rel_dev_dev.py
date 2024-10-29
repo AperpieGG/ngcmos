@@ -139,6 +139,24 @@ def find_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
+def exclude_variable_stars(comp_fluxes, threshold=0.01):
+    excluded_stars = []
+    N = len(comp_fluxes)
+
+    for i in range(N):
+        # Create the average light curve excluding star i
+        avg_lc = np.mean(np.delete(comp_fluxes, i, axis=0), axis=0)
+
+        # Calculate the difference and its standard deviation
+        diff = comp_fluxes[i] - avg_lc
+        std_dev = np.std(diff)
+
+        if std_dev > threshold:
+            excluded_stars.append(i)  # Exclude star i
+
+    return excluded_stars
+
+
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2):
     comp_star_rms = find_star_rms(comp_fluxes, airmass)
     print(f'RMS of comparison stars: {comp_star_rms}')
@@ -150,6 +168,10 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
     i = 0
     excluded_count = 0  # Counter for excluded RMS values
     excluded_rms_values = []  # List to store excluded RMS values
+
+    # Step 1: Exclude variable stars
+    variable_exclusions = exclude_variable_stars(comp_fluxes)
+    cumulative_mask[variable_exclusions] = False
 
     while True:
         i += 1
