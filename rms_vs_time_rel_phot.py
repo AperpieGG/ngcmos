@@ -34,8 +34,14 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit):
     max_binning = 151
 
     for Tmag_data, initial_rms in sorted_stars:
-        # Check if 'Time_BJD' exists; use 'BJD' if it does not
-        jd_mid = Tmag_data['Time_BJD'] if 'Time_BJD' in Tmag_data else Tmag_data['Time_JD']
+        # Check for the column name in the dtype of the structured array
+        if 'Time_BJD' in Tmag_data.dtype.names:
+            jd_mid = Tmag_data['Time_BJD']
+        elif 'BJD' in Tmag_data.dtype.names:
+            jd_mid = Tmag_data['BJD']
+        else:
+            raise ValueError("Neither 'Time_BJD' nor 'BJD' found in Tmag_data columns.")
+
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         current_tic_id = Tmag_data['TIC_ID'][0]
