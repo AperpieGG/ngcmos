@@ -37,8 +37,8 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit):
         # Check for the column name in the dtype of the structured array
         if 'Time_BJD' in Tmag_data.dtype.names:
             jd_mid = Tmag_data['Time_BJD']
-        elif 'BJD' in Tmag_data.dtype.names:
-            jd_mid = Tmag_data['BJD']
+        elif 'Time_JD' in Tmag_data.dtype.names:
+            jd_mid = Tmag_data['Time_JD']
         else:
             raise ValueError("Neither 'Time_BJD' nor 'BJD' found in Tmag_data columns.")
 
