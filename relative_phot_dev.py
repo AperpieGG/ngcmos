@@ -318,19 +318,25 @@ def main():
                 rms = np.std(dt_flux_binned)
                 logger.info(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
-                # Append data to the list
+                # Append data to the list with a check
                 data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
                                   sky_median, rms, airmass, zp))
-                logger.info('')
-            else:
-                logger.info(f"TIC ID {tic_id} is not included in the analysis because "
-                            f"the Tmag = {phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]} "
-                            f"and is dimmer than 12 mags.")
-                logger.info('')
 
-        # Create an Astropy table from the data list
-        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
-                                                  'Relative_Flux_err', 'Sky', 'RMS', 'Airmass', 'ZP'))
+                # Print data list to verify length consistency
+                print(f"Data list for {tic_id}: {data_list[-1]}")  # Diagnostic print
+
+                # Check the length of each data row before table creation
+                for index, row in enumerate(data_list):
+                    if len(row) != 9:
+                        print(f"Row {index} has {len(row)} columns: {row}")
+
+                # Create the table if all rows have correct length
+                try:
+                    data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
+                                                              'Relative_Flux_err', 'Sky', 'RMS', 'Airmass', 'ZP'))
+                except ValueError as e:
+                    print("Error creating Astropy table:", e)
+                    raise
 
         expanded_data_table = expand_and_rename_table(data_table)
 
