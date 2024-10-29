@@ -58,17 +58,18 @@ def target_info(table, tic_id_to_plot, APERTURE):
     target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
     airmass_list = target_star['airmass']  # Extract airmass_list from target star
-
+    zp_list = target_star['ZP']  # Extract the zero point of the target star
     # Calculate mean flux for the target star (specific to the chosen aperture)
     target_flux_mean = target_star[f'flux_{APERTURE}'].mean()
 
     return (target_tmag, target_color_index, airmass_list, target_flux_mean,
-            target_sky, target_flux, target_fluxerr, target_time)
+            target_sky, target_flux, target_fluxerr, target_time, zp_list)
 
 
 def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size):
     # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _ = target_info(table, tic_id_to_plot, APERTURE)
+    target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _, _ = (
+        target_info(table, tic_id_to_plot, APERTURE))
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
@@ -311,7 +312,7 @@ def main():
                     continue
 
                 # Unpack the result if it's not None
-                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass) = result
+                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass, zp) = result
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
@@ -319,7 +320,7 @@ def main():
 
                 # Append data to the list
                 data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  sky_median, rms, airmass))
+                                  sky_median, rms, airmass, zp))
                 logger.info('')
             else:
                 logger.info(f"TIC ID {tic_id} is not included in the analysis because "
@@ -329,7 +330,7 @@ def main():
 
         # Create an Astropy table from the data list
         data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
-                                                  'Relative_Flux_err', 'Sky', 'RMS', 'Airmass'))
+                                                  'Relative_Flux_err', 'Sky', 'RMS', 'Airmass', 'ZP'))
 
         expanded_data_table = expand_and_rename_table(data_table)
 
