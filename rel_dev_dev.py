@@ -252,7 +252,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
     print(f'Stars excluded due to variability: {excluded_count}')
     print(f'Excluded RMS values: {excluded_rms_values}')
 
-    return cumulative_mask, comp_star_rms
+    return cumulative_mask, comp_star_rms, i
 
 
 def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
