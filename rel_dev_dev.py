@@ -139,24 +139,6 @@ def find_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def exclude_variable_stars(comp_fluxes, threshold=0.1):
-    excluded_stars = []
-    N = len(comp_fluxes)
-
-    for i in range(N):
-        # Create the average light curve excluding star i
-        avg_lc = np.mean(np.delete(comp_fluxes, i, axis=0), axis=0)
-
-        # Calculate the difference and its standard deviation
-        diff = comp_fluxes[i] - avg_lc
-        std_dev = np.std(diff)
-
-        if std_dev > threshold:
-            excluded_stars.append(i)  # Exclude star i
-
-    return excluded_stars
-
-
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2):
     comp_star_rms = find_star_rms(comp_fluxes, airmass)
     print(f'RMS of comparison stars: {comp_star_rms}')
@@ -168,10 +150,6 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
     i = 0
     excluded_count = 0  # Counter for excluded RMS values
     excluded_rms_values = []  # List to store excluded RMS values
-
-    # Step 1: Exclude variable stars
-    variable_exclusions = exclude_variable_stars(comp_fluxes)
-    cumulative_mask[variable_exclusions] = False
 
     while True:
         i += 1
@@ -237,6 +215,34 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
 
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
     print(f'RMS values after filtering: {(comp_star_rms[cumulative_mask])}')
+
+    # Loop through all comparison stars
+    for i in range(len(comp_star_rms)):
+        if cumulative_mask[i]:  # Only consider stars that are included
+            # Sum the fluxes of all stars except the current one
+            sum_fluxes = np.zeros_like(comp_fluxes[0])
+            for j in range(len(comp_star_rms)):
+                if cumulative_mask[j] and j != i:  # Exclude the current star
+                    sum_fluxes += comp_fluxes[j]
+
+            # Now divide the sum of the fluxes by the current star's flux
+            if comp_fluxes[i] != 0:  # Avoid division by zero
+                normalized_flux = sum_fluxes / comp_fluxes[i]
+
+                # Check for flatness
+                std_dev = np.std(normalized_flux)  # Standard deviation of the normalized flux
+
+                # Define a threshold for flatness
+                flatness_threshold = 0.01  # You can adjust this threshold based on your needs
+
+                if std_dev > flatness_threshold:
+                    # If the light curve is not flat, exclude this star
+                    cumulative_mask[i] = False
+                    excluded_count += 1
+                    excluded_rms_values.append(comp_star_rms[i])  # Store the excluded star's RMS
+
+    # Print the number of stars excluded due to variability
+    print(f'Stars excluded due to variability: {excluded_count}')
 
     return cumulative_mask, comp_star_rms, i
 
