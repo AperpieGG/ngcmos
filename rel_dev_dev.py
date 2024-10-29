@@ -214,8 +214,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
             break
 
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
-    print(f'Total RMS values excluded: {excluded_count}')
-    print(f'Excluded RMS values: {excluded_rms_values}')
+    print(f'RMS values after filtering: {(comp_star_rms[cumulative_mask])}')
 
     return cumulative_mask, comp_star_rms, i
 
