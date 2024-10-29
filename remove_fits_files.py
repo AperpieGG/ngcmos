@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 import os
 import glob
+import sys
+
 from astropy.io import fits
 
 
@@ -112,6 +114,12 @@ def delete_png_files(directory):
 
 def main(directory):
     delete_png_files(directory)
+
+    # check if phot files exist, if they do proceed if not exit the script
+    phot_files = [os.path.join(directory, f) for f in os.listdir(directory) if f.startswith('phot')]
+    if not phot_files:
+        print("No .phot files found in the specified directory.")
+        sys.exit(0)
 
     filenames = get_fits_filenames(directory)
     if not filenames:
