@@ -127,7 +127,7 @@ def find_star_rms(comp_fluxes, airmass):
     Ncomps = comp_fluxes.shape[0]
     for i in range(Ncomps):
         comp_flux = np.copy(comp_fluxes[i])
-        airmass_cs = np.polyfit(airmass, comp_flux, 2)
+        airmass_cs = np.polyfit(airmass, comp_flux, 1)
         airmass_mod = np.polyval(airmass_cs, airmass)
         comp_flux_corrected = comp_flux / airmass_mod
         comp_flux_norm = comp_flux_corrected / np.median(comp_flux_corrected)
@@ -146,14 +146,15 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
 
     # Initialize mask for all stars to True
     comp_star_mask = np.array([True] * len(comp_star_rms))
+    cumulative_mask = np.array([True] * len(comp_star_rms))  # Cumulative mask
     i = 0
     excluded_count = 0  # Counter for excluded RMS values
     excluded_rms_values = []  # List to store excluded RMS values
 
     while True:
         i += 1
-        comp_mags = np.copy(comp_mags0[comp_star_mask])
-        comp_rms = np.copy(comp_star_rms[comp_star_mask])
+        comp_mags = np.copy(comp_mags0[cumulative_mask])
+        comp_rms = np.copy(comp_star_rms[cumulative_mask])
         N1 = len(comp_mags)
 
         # Exit if no valid stars
@@ -194,27 +195,29 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
         std = np.std(comp_rms - mod)
         new_comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
 
+        # Update cumulative mask
+        cumulative_mask = cumulative_mask & new_comp_star_mask
+
         # Identify excluded stars and increment the counter
-        excluded_in_this_iteration = comp_star_rms[comp_star_mask & ~new_comp_star_mask]
+        excluded_in_this_iteration = comp_star_rms[~cumulative_mask]
         excluded_count += len(excluded_in_this_iteration)
         excluded_rms_values.extend(excluded_in_this_iteration)
 
         # Print the number of stars included and excluded
-        N2 = np.sum(new_comp_star_mask)
+        N2 = np.sum(cumulative_mask)
         print(f"Iteration {i}:")
         print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
         print(f'The RMS of the excluded stars: {excluded_in_this_iteration}')
 
-        # Update the mask and exit condition
-        comp_star_mask = new_comp_star_mask
+        # Exit condition
         if N1 == N2 or i > 10:
             break
 
-    print(f'RMS of comparison stars RMS after filtering: {len(comp_star_rms[comp_star_mask])}')
+    print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
     print(f'Total RMS values excluded: {excluded_count}')
     print(f'Excluded RMS values: {excluded_rms_values}')
 
-    return comp_star_mask, comp_star_rms, i
+    return cumulative_mask, comp_star_rms, i
 
 
 def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
