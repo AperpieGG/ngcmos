@@ -196,7 +196,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.2
         # Print the number of stars included and excluded
         print(f"Iteration {i}:")
         print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
-        print(f'Stars with RMS below the threshold: {len((comp_star_rms[comp_star_mask]))}')
+        print(f'The RMS of the excluded stars: {comp_star_rms[~comp_star_mask]}')
 
         # Exit condition: no further changes or too many iterations
         if N1 == N2 or i > 10:
