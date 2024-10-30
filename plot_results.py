@@ -58,7 +58,6 @@ def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
     tic_ids = data['TIC_IDs']
-    mags_list = data['mags_list']
     Tmag_list = data['Tmag_list']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
@@ -113,33 +112,33 @@ def linear_model(x, m, b):
     return m * x + b
 
 
-def plot_tmag_vs_mag(data):
-    fig, ax = plt.subplots(figsize=(10, 8))
-
-    mags_list = data['mags_list']
-    print('The length of mags_list is:', len(mags_list))
-    tmag_list = data['Tmag_list']
-    print('The length of tmag_list is:', len(tmag_list))
-    RMS_list = data['RMS_list']
-
-    # Filter data points based on magnitude and RMS
-    filtered_indices_bright, filtered_indices_dim = filter_data(mags_list, RMS_list)
-
-    filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
-
-    # # Exclude outliers from the total data
-    tmag_list = [tmag_list[i] for i in range(len(tmag_list)) if i not in filtered_indices]
-    mags_list = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
-
-    ax.plot(tmag_list, mags_list, 'o', color='red', alpha=0.5)
-    ax.set_xlabel('Tmag')
-    ax.set_ylabel('Apparent Magnitude')
-    ax.set_xlim(7.5, 16)
-    ax.set_ylim(7.5, 16)
-    plt.tight_layout()
-    plt.gca().invert_xaxis()
-    plt.gca().invert_yaxis()
-    plt.show()
+# def plot_tmag_vs_mag(data):
+#     fig, ax = plt.subplots(figsize=(10, 8))
+#
+#     mags_list = data['mags_list']
+#     print('The length of mags_list is:', len(mags_list))
+#     tmag_list = data['Tmag_list']
+#     print('The length of tmag_list is:', len(tmag_list))
+#     RMS_list = data['RMS_list']
+#
+#     # Filter data points based on magnitude and RMS
+#     filtered_indices_bright, filtered_indices_dim = filter_data(mags_list, RMS_list)
+#
+#     filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
+#
+#     # # Exclude outliers from the total data
+#     tmag_list = [tmag_list[i] for i in range(len(tmag_list)) if i not in filtered_indices]
+#     mags_list = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
+#
+#     ax.plot(tmag_list, mags_list, 'o', color='red', alpha=0.5)
+#     ax.set_xlabel('Tmag')
+#     ax.set_ylabel('Apparent Magnitude')
+#     ax.set_xlim(7.5, 16)
+#     ax.set_ylim(7.5, 16)
+#     plt.tight_layout()
+#     plt.gca().invert_xaxis()
+#     plt.gca().invert_yaxis()
+#     plt.show()
 
 
 def main(json_file):
