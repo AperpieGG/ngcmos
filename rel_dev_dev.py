@@ -5,6 +5,7 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 from astropy.io import fits
+import json
 from astropy.visualization import ZScaleInterval
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
@@ -87,7 +88,17 @@ def target_info(table, tic_id_to_plot, APERTURE):
     return target_tmag, target_color_index, airmass_list, target_flux_mean
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
+def extract_region_coordinates(region):
+    # Assuming region is a dictionary that has 'x_min', 'x_max', 'y_min', 'y_max' keys
+    x_min = region['x_min']
+    x_max = region['x_max']
+    y_min = region['y_min']
+    y_max = region['y_max']
+
+    return x_min, x_max, y_min, y_max
+
+
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, json_file):
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
@@ -104,20 +115,31 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size=None):
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
 
-    # Get target star coordinates
-    x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
-    y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+    # Load the JSON data
+    with open('fwhm_positions.json', 'r') as file:
+        regions_data = json.load(file)
 
-    # Apply crop filter based on coordinates
-    if crop_size:
-        x_min, x_max = x_target - crop_size // 2, x_target + crop_size // 2
-        y_min, y_max = y_target - crop_size // 2, y_target + crop_size // 2
+    # Extract coordinates for central and similar regions
+    region_coordinates = []
 
-        # Further filter the comparison stars based on the crop region
-        filtered_table = filtered_table[
-            (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) &
-            (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
-        ]
+    # Central region
+    central = regions_data['central_region']['position']
+    region_coordinates.append((central['x_start'], central['x_end'], central['y_start'], central['y_end']))
+
+    # Similar regions
+    for similar_region in regions_data['central_region']['similar_regions']:
+        position = similar_region['position']
+        region_coordinates.append((position['x_start'], position['x_end'], position['y_start'], position['y_end']))
+
+    # Filter stars based on the defined regions
+    combined_mask = np.zeros(len(filtered_table), dtype=bool)
+    for (x_min, x_max, y_min, y_max) in region_coordinates:
+        region_mask = (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) & \
+                      (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
+        combined_mask |= region_mask  # Combine masks
+
+    # Apply combined mask to filtered_table
+    filtered_table = filtered_table[combined_mask]
 
     return filtered_table, airmass_list
 
