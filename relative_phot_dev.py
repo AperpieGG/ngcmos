@@ -300,7 +300,7 @@ def main():
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
-            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12):
+            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
                 # Perform relative photometry
