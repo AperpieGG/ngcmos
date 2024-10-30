@@ -87,7 +87,6 @@ def main():
     airmass_list = []
     zp_list = []
     RMS_list = []
-    mags_list = []
     Tmags_list = []
 
     # Iterate over each unique TIC ID
@@ -100,8 +99,6 @@ def main():
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
-        if tic_data['Magnitude'][0] is not None:
-            mags_list.append(tic_data['Magnitude'][0])
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
@@ -129,7 +126,6 @@ def main():
     output_data = {
         "TIC_IDs": unique_tic_ids.tolist(),
         "RMS_list": RMS_list,
-        "mags_list": mags_list,
         "Tmag_list": Tmags_list,
         "synthetic_mag": synthetic_mag_list,
         "photon_shot_noise": photon_shot_noise_list,
