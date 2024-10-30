@@ -25,7 +25,7 @@ def filter_data(mags_list, RMS_list):
     """
     filtered_indices_bright = []
     filtered_indices_bright = \
-        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9.5) & (np.array(RMS_list) >= 5000))[0]
+        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9) & (np.array(RMS_list) >= 5000))[0]
 
     filtered_indices_dim = []
     filtered_indices_dim = np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 20000))[0]
@@ -149,7 +149,7 @@ def main(json_file):
 
     # Plot RMS vs magnitudes
     plot_noise_model(data)
-    plot_tmag_vs_mag(data)
+    # plot_tmag_vs_mag(data)
 
     # Identify outliers
     deviation_threshold = 2
