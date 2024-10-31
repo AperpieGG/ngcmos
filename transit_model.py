@@ -18,7 +18,7 @@ target = args.target
 plot_images()
 # Set up the transit parameters
 params = batman.TransitParams()
-params.t0 = 2456338.45851  # time of inferior conjunction (BJD)
+params.t0 = 2456338.43851  # time of inferior conjunction (BJD)
 params.per = 2.1846730  # orbital period (days)
 params.rp = 0.1076  # planet radius (in units of stellar radii)
 params.a = 6.47  # semi-major axis (in units of stellar radii)
