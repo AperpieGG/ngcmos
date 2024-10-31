@@ -60,6 +60,7 @@ def main():
     parser.add_argument('--aper', type=float, default=4, help='Aperture size in meters')
     parser.add_argument('--rn', type=float, default=1.56, help='Read noise in electrons')
     parser.add_argument('--dc', type=float, default=1.6, help='Dark current in electrons per second')
+    parser.add_argument('--gain', type=float, default=1.13, help='Gain in electrons per ADU')
     args = parser.parse_args()
     filename = args.filename
     bin_size = args.bin_size
@@ -67,6 +68,7 @@ def main():
     APERTURE = args.aper  # Aperture size for the telescope
     READ_NOISE = args.rn  # Read noise in electrons
     DARK_CURRENT = args.dc  # Dark current in electrons per second
+    GAIN = args.gain  # Gain in electrons per ADU
 
     # Get the current working directory
     current_dir = os.getcwd()
@@ -110,7 +112,7 @@ def main():
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
         noise_sources(sky_list, bin_size, airmass_array, zp_array, APERTURE,
-                      READ_NOISE, DARK_CURRENT, EXPOSURE))
+                      READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN))
 
     # Convert lists to JSON serializable lists
     synthetic_mag_list = synthetic_mag.tolist()
