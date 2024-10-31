@@ -25,7 +25,7 @@ params.a = 6.47  # semi-major axis (in units of stellar radii)
 params.inc = 88.4  # orbital inclination (degrees)
 params.ecc = 0.  # eccentricity
 params.w = 0  # longitude of periastron (degrees)
-params.u = [0.4412, 0.2312]  # limb darkening coefficients [u1, u2]
+params.u = [0.4830, 0.2023]  # limb darkening coefficients [u1, u2]
 params.limb_dark = "quadratic"  # limb darkening model
 
 # load data from json file
@@ -43,7 +43,7 @@ mean_dt_flux = np.mean(flux_binned)
 
 # Calculate the adjustment needed to bring it to a baseline of 1
 # adjustment = mean_dt_flux - 0.998 # CCD
-adjustment = mean_dt_flux - 0.997  # CMOS
+adjustment = mean_dt_flux - 0.9996  # CMOS
 
 
 # Adjust the normalized flux data
