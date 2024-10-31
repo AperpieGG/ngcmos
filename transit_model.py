@@ -37,13 +37,13 @@ time = np.array(data['Time_BJD'])
 flux = np.array(data['Relative_Flux'])
 flux_err = np.array(data['Relative_Flux_err'])
 
-time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 30)
+time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 60)
 # Calculate the mean of the normalized data
 mean_dt_flux = np.mean(flux_binned)
 
 # Calculate the adjustment needed to bring it to a baseline of 1
 # adjustment = mean_dt_flux - 0.998 # CCD
-adjustment = mean_dt_flux - 0.9995  # CMOS
+adjustment = mean_dt_flux - 0.9990  # CMOS
 
 
 # Adjust the normalized flux data
