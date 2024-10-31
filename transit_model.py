@@ -18,14 +18,14 @@ target = args.target
 plot_images()
 # Set up the transit parameters
 params = batman.TransitParams()
-params.t0 = 2455443.06132  # time of inferior conjunction (BJD)
-params.per = 4.1567758  # orbital period (days)
-params.rp = 0.069  # planet radius (in units of stellar radii)
-params.a = 8.84  # semi-major axis (in units of stellar radii)
-params.inc = 89.57  # orbital inclination (degrees)
+params.t0 = 2456338.45851  # time of inferior conjunction (BJD)
+params.per = 2.1846730  # orbital period (days)
+params.rp = 0.1076  # planet radius (in units of stellar radii)
+params.a = 6.47  # semi-major axis (in units of stellar radii)
+params.inc = 88.4  # orbital inclination (degrees)
 params.ecc = 0.  # eccentricity
 params.w = 0  # longitude of periastron (degrees)
-params.u = [0.3695, 0.2774]  # limb darkening coefficients [u1, u2]
+params.u = [0.4412, 0.2312]  # limb darkening coefficients [u1, u2]
 params.limb_dark = "quadratic"  # limb darkening model
 
 # load data from json file
