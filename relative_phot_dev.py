@@ -289,7 +289,7 @@ def main():
 
         # Check if the output file already exists
         base_filename = phot_file.split('.')[0]  # Remove the file extension
-        fits_filename = f"rel_{base_filename}_{bin_size}.fits"
+        fits_filename = f"rel_{base_filename}_{APERTURE}_{bin_size}.fits"
         if os.path.exists(fits_filename):
             logger.info(f"Data for {phot_file} already saved to {fits_filename}. Skipping analysis.")
             continue
