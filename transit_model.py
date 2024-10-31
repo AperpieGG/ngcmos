@@ -43,7 +43,7 @@ mean_dt_flux = np.mean(flux_binned)
 
 # Calculate the adjustment needed to bring it to a baseline of 1
 # adjustment = mean_dt_flux - 0.998 # CCD
-adjustment = mean_dt_flux - 0.99  # CMOS
+adjustment = mean_dt_flux - 0.995  # CMOS
 
 
 # Adjust the normalized flux data
