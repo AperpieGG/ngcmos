@@ -20,7 +20,7 @@ plot_images()
 params = batman.TransitParams()
 params.t0 = 2456338.44251  # time of inferior conjunction (BJD)
 params.per = 2.1846730  # orbital period (days)
-params.rp = 0.0105  # planet radius (in units of stellar radii)
+params.rp = 0.1024  # planet radius (in units of stellar radii)
 params.a = 6.47  # semi-major axis (in units of stellar radii)
 params.inc = 88.4  # orbital inclination (degrees)
 params.ecc = 0  # eccentricity
