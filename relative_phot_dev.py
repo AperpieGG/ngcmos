@@ -195,16 +195,30 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     comp_mags = []
     reference_shape = None
 
+    # Get the flux for the target TIC ID to compare later
+    target_flux = filtered_table[filtered_table['tic_id'] == tic_id_to_plot][f'flux_{APERTURE}']
+
+    if target_flux.size == 0:
+        logger.warning(f"No flux data available for target TIC ID {tic_id_to_plot}.")
+        return None
+
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
 
+        # Check shape consistency
         if reference_shape is None:
             reference_shape = flux.shape
         elif flux.shape != reference_shape:
             logger.error(f"Shape mismatch detected for TIC ID {tic_id}: expected {reference_shape}, got {flux.shape}")
-            continue
+            continue  # Skip this flux array if shape does not match
 
+        # If this is the first flux added, check against the target
+        if len(comp_fluxes) == 0 and target_flux.shape[0] < flux.shape[0]:
+            logger.error(f"Not enough data points for target TIC ID {tic_id_to_plot} compared to comp TIC ID {tic_id}.")
+            continue  # Skip this TIC ID since the target has fewer data points
+
+        # If checks pass, add to lists
         comp_fluxes.append(flux)
         comp_mags.append(tmag)
 
@@ -212,9 +226,15 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     comp_fluxes = np.array(comp_fluxes)
     comp_mags = np.array(comp_mags)
 
-    # Call the function to find bad comparison stars
+    # Log dimensions before calling find_bad_comp_stars
     logger.info(f'The dimensions of these two are: {comp_mags.shape}, {comp_fluxes.shape}')
-    comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
+
+    # Call the function to find bad comparison stars
+    try:
+        comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
+    except Exception as e:
+        logger.error(f"Error in find_bad_comp_stars for TIC ID {tic_id_to_plot}: {str(e)}")
+        return None  # Handle errors from the function
 
     if len(comp_star_mask) == 0:
         logger.warning(f"No valid comparison stars remaining for TIC ID {tic_id_to_plot} after sigma clipping.")
@@ -311,13 +331,14 @@ def main():
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
+                logger.info("")
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
-                logger.info("")
                 # Perform relative photometry
                 result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
                 # Check if result is None
+                # TODO fix this
                 if result is None:
                     logger.info(f"Skipping TIC ID {tic_id} due to missing color information.")
                     continue
