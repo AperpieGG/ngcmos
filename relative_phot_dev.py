@@ -307,7 +307,7 @@ def main():
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
-                logger.info()
+                logger.info("")
                 # Perform relative photometry
                 result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
