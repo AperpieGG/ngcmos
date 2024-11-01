@@ -255,7 +255,8 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
 
     # Now filter the table based on these tic_ids
     good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
-
+    # print the number of good comparison stars within the table
+    logger.info(f'Number of good comparison stars: {len(good_tic_ids)}')
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
