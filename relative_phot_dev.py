@@ -210,7 +210,8 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
         if reference_shape is None:
             reference_shape = flux.shape
         elif flux.shape != reference_shape:
-            logger.error(f"Shape mismatch detected for TIC ID {tic_id}: expected {reference_shape}, got {flux.shape}")
+            logger.error(f"Shape mismatch for TIC ID {tic_id}: expected {reference_shape}, got {flux.shape}"
+                         f", skipping this comp star.")
             continue  # Skip this flux array if shape does not match
 
         # If this is the first flux added, check against the target
@@ -335,12 +336,11 @@ def main():
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
                 # Perform relative photometry
-                result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
+                result = relative_phot(phot_table, 143009127, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
                 # Check if result is None
-                # TODO fix this
                 if result is None:
-                    logger.info(f"Skipping TIC ID {tic_id} due to missing color information.")
+                    logger.info(f"TIC ID {tic_id} skipped due to an error.")
                     continue
 
                 # Unpack the result if it's not None
