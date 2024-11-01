@@ -187,7 +187,7 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     # Filter the table based on color/magnitude tolerance
     filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
     tic_ids = np.unique(filtered_table['tic_id'])
-    logger.info(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
+    logger.info(f'Number of comparison stars after filtering: {len(tic_ids)}')
 
     if len(tic_ids) == 0:
         logger.warning(f"No valid comparison stars found for TIC ID {tic_id_to_plot}.")
@@ -210,16 +210,21 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
 
         # Check shape consistency
-        if reference_shape is None:
-            reference_shape = flux.shape
-        elif flux.shape != reference_shape:
-            logger.warning(f"Shape mismatch for TIC ID {tic_id}: expected {reference_shape}, "
-                           f"got {flux.shape}, skipping this comp star.")
-            continue  # Skip this flux array if shape does not match
+        try:
+            if reference_shape is None:
+                reference_shape = flux.shape
+            elif flux.shape != reference_shape:
+                logger.warning(f"Shape mismatch for TIC ID {tic_id}: expected {reference_shape}, "
+                               f"got {flux.shape}, skipping this comparison star.")
+                continue  # Skip this flux array if shape does not match
 
-        # If checks pass, add to lists
-        comp_fluxes.append(flux)
-        comp_mags.append(tmag)
+            # If checks pass, add to lists
+            comp_fluxes.append(flux)
+            comp_mags.append(tmag)
+
+        except Exception as e:
+            logger.error(f"Error processing TIC ID {tic_id}: {str(e)}")
+            continue  # Skip to the next TIC ID if there is an error
 
     # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
@@ -359,6 +364,7 @@ def main():
             if tic_id == specific_tic_id:
                 # Check if all the Tmag values for the tic_id are less than 14
                 if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
+                    logger.info("")
                     logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                                 f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
 
