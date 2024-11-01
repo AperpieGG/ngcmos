@@ -107,7 +107,9 @@ def delete_png_files(directory):
     directory : str
         Directory to search for .png files to delete.
     """
-    png_files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.png') and os.path.isfile(os.path.join(directory, f))]
+    png_files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.png') and
+                 os.path.isfile(os.path.join(directory, f))]
+    png_files = [f for f in png_files if 'fwhm' not in f]
     for filename in png_files:
         os.remove(filename)
 
