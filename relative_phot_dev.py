@@ -196,7 +196,7 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     reference_shape = None
 
     # Get the flux for the target TIC ID to compare later
-    target_flux = filtered_table[filtered_table['tic_id'] == tic_id_to_plot][f'flux_{APERTURE}']
+    target_flux = table[table['tic_id'] == tic_id_to_plot][f'flux_{APERTURE}']
 
     if target_flux.size == 0:
         logger.warning(f"No flux data available for target TIC ID {tic_id_to_plot}.")
