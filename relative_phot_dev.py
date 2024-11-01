@@ -380,5 +380,6 @@ def main():
         else:
             logger.warning(f"No data to save for TIC ID {specific_tic_id} in {phot_file}.")
 
-    if __name__ == "__main__":
-        main()
+
+if __name__ == "__main__":
+    main()
