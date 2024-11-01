@@ -116,7 +116,7 @@ def find_comp_star_rms(comp_fluxes, airmass):
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
-    logger.info(f"Initial RMS values for comparison stars: {comp_star_rms}")
+    # logger.info(f"Initial RMS values for comparison stars: {comp_star_rms}")
     logger.info(f"Initial number of comparison stars: {len(comp_star_rms)}")
     comp_star_mask = np.array([True for _ in comp_star_rms])
     i = 0
@@ -172,6 +172,8 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
         # the number of stars included and excluded
         logger.info(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}")
 
+        logger.info(f'Final stars included: {N2}')
+
         # Exit condition: no further changes or too many iterations
         if N1 == N2 or i > 10:
             break
@@ -195,6 +197,7 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
+        logger.info(f"Flux shape for TIC ID {tic_id}: {flux.shape}")
 
         comp_fluxes.append(flux)
         comp_mags.append(tmag)
@@ -238,6 +241,7 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, DM_BRIGHT, DM_FAINT
 
         reference_fluxes = np.sum([filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                                    for tic_id in tic_ids], axis=0)
+        logger.info(f"reference_fluxes shape after sum: {reference_fluxes.shape}")
 
         flux_ratio = target_flux / reference_fluxes
         flux_ratio_mean = np.mean(flux_ratio)
@@ -302,7 +306,8 @@ def main():
             # Check if all the Tmag values for the tic_id are less than 14
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
-                            f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]}")
+                            f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
+                logger.info()
                 # Perform relative photometry
                 result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
