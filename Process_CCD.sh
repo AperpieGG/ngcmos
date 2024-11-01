@@ -5,6 +5,24 @@ start_time=$(date +%s)
 
 echo "Starting processing..."
 
+# Create directories.json with the specified paths
+cat <<EOF > directories.json
+{
+  "calibration_paths": [
+    "/Users/u5500483/Downloads/DATA_MAC/CMOS/20231212/",
+    "/home/ops/data/20231212/"
+  ],
+  "base_paths": [
+    "/Users/u5500483/Downloads/DATA_MAC/CMOS/",
+    "/home/ops/data/"
+  ],
+  "out_paths": [
+    "/Users/u5500483/Downloads/DATA_MAC/CMOS/calibration_images/",
+    "/home/ops/data/calibration_images/"
+  ]
+}
+EOF
+
 # Run the Python scripts
 python /home/ops/ngcmos/unzip_fits.py # unzipped the fits files and delete the bz2 extension
 python /home/ops/ngcmos/trim_ccd.py
