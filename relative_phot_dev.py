@@ -328,51 +328,57 @@ def main():
         # Create an empty list to store data for all TIC IDs
         data_list = []
 
+        # run this for a specific target that has error
+        specific_tic_id = 143009127
+
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
-            # Check if all the Tmag values for the tic_id are less than 14
-            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
-                logger.info("")
-                logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
-                            f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
-                # Perform relative photometry
-                result = relative_phot(phot_table, 143009127, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
+            # Perform relative photometry only for the specific TIC ID
+            if tic_id == specific_tic_id:
+                # Check if all the Tmag values for the tic_id are less than 14
+                if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
+                    logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
+                                f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
 
-                # Check if result is None
-                if result is None:
-                    logger.info(f"TIC ID {tic_id} skipped due to an error.")
-                    continue
+                    # Perform relative photometry
+                    result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
-                # Unpack the result if it's not None
-                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass, zp) = result
+                    # Check if result is None
+                    if result is None:
+                        logger.info(f"TIC ID {tic_id} skipped due to an error.")
+                        continue
 
-                # Calculate RMS
-                rms = np.std(dt_flux_binned)
-                logger.info(f"RMS for TIC ID {tic_id} = {rms:.4f}")
+                    # Unpack the result if it's not None
+                    (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass, zp) = result
 
-                # Append data to the list with a check
-                data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  sky_median, rms, airmass, zp))
+                    # Calculate RMS
+                    rms = np.std(dt_flux_binned)
+                    logger.info(f"RMS for TIC ID {tic_id} = {rms:.4f}")
 
-                # Check the length of each data row before table creation
-                for index, row in enumerate(data_list):
-                    if len(row) != 9:
-                        print(f"Row {index} has {len(row)} columns: {row}")
+                    # Append data to the list with a check
+                    data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
+                                      sky_median, rms, airmass, zp))
 
-                # Create the table if all rows have correct length
-                try:
-                    data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
-                                                              'Relative_Flux_err', 'Sky', 'RMS', 'Airmass', 'ZP'))
-                except ValueError as e:
-                    print("Error creating Astropy table:", e)
-                    raise
+                    # Check the length of each data row before table creation
+                    for index, row in enumerate(data_list):
+                        if len(row) != 9:
+                            print(f"Row {index} has {len(row)} columns: {row}")
 
-        expanded_data_table = expand_and_rename_table(data_table)
+                    # Create the table if all rows have correct length
+                    try:
+                        data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
+                                                                  'Relative_Flux_err', 'Sky', 'RMS', 'Airmass', 'ZP'))
+                    except ValueError as e:
+                        print("Error creating Astropy table:", e)
+                        raise
 
-        expanded_data_table.write(fits_filename, format='fits', overwrite=True)
+        # Check if data_list is empty before trying to expand
+        if data_list:
+            expanded_data_table = expand_and_rename_table(data_table)
+            expanded_data_table.write(fits_filename, format='fits', overwrite=True)
+            logger.info(f"Data for {phot_file} saved to {fits_filename}.")
+        else:
+            logger.warning(f"No data to save for TIC ID {specific_tic_id} in {phot_file}.")
 
-        logger.info(f"Data for {phot_file} saved to {fits_filename}.")
-
-
-if __name__ == "__main__":
-    main()
+    if __name__ == "__main__":
+        main()
