@@ -193,11 +193,17 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
 
     comp_fluxes = []
     comp_mags = []
+    reference_shape = None
 
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
-        logger.info(f"Flux shape for TIC ID {tic_id}: {flux.shape}")
+
+        if reference_shape is None:
+            reference_shape = flux.shape
+        elif flux.shape != reference_shape:
+            logger.error(f"Shape mismatch detected for TIC ID {tic_id}: expected {reference_shape}, got {flux.shape}")
+            continue
 
         comp_fluxes.append(flux)
         comp_mags.append(tmag)
