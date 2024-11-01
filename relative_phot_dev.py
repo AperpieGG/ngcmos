@@ -244,15 +244,15 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     except Exception as e:
         logger.error(f"Error in find_bad_comp_stars for TIC ID {tic_id_to_plot}: {str(e)}")
         return None  # Handle errors from the function
-    print(f"HERE ALL GOOD")
     # Filter tic_ids based on the mask
     if len(comp_star_mask) == 0 or np.sum(comp_star_mask) == 0:
         logger.warning(f"No valid comparison stars remaining for TIC ID {tic_id_to_plot} after sigma clipping.")
         return None
-    print(f"HERE ALL GOOD 2")
+
     # Filter tic_ids based on the mask
+    logger.info(f"tic_ids length: {len(tic_ids)}, comp_star_mask length: {len(comp_star_mask)}")
     good_tic_ids = tic_ids[comp_star_mask]
-    print('HERE ALL GOOD 3')
+
     # Now filter the table based on these tic_ids
     good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
 
