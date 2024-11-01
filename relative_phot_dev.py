@@ -13,6 +13,8 @@
 """
 import argparse
 import os
+from collections import Counter
+
 import numpy as np
 import logging
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
@@ -115,14 +117,33 @@ def find_comp_star_rms(comp_fluxes, airmass):
 
 
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
-    comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
-    # logger.info(f"Initial RMS values for comparison stars: {comp_star_rms}")
-    logger.info(f"Initial number of comparison stars: {len(comp_star_rms)}")
+    # Determine the most common shape among the comparison stars' fluxes
+    flux_shapes = [flux.shape for flux in comp_fluxes]  # Assuming comp_fluxes is a list of arrays
+    shape_counts = Counter(flux_shapes)
+    most_common_shape, most_common_count = shape_counts.most_common(1)[0]
+
+    # Log the most common shape
+    logger.info(f"Most common flux shape: {most_common_shape} with {most_common_count} occurrences")
+
+    # Create a mask for comparison stars that have the most common shape
+    shape_mask = np.array([flux.shape == most_common_shape for flux in comp_fluxes])
+
+    # Log the number of comparison stars before applying the shape filter
+    logger.info(f"Initial number of comparison stars: {len(comp_fluxes)}")
+    logger.info(f"Number of stars with the most common shape: {np.sum(shape_mask)}")
+
+    # Filter comp_fluxes and comp_mags0 based on the shape mask
+    filtered_comp_fluxes = comp_fluxes[shape_mask]
+    filtered_comp_mags0 = comp_mags0[shape_mask]
+
+    comp_star_rms = find_comp_star_rms(filtered_comp_fluxes, airmass)  # Update to use filtered fluxes
+    logger.info(f"Number of comparison stars after shape filtering: {len(comp_star_rms)}")
+
     comp_star_mask = np.array([True for _ in comp_star_rms])
     i = 0
     while True:
         i += 1
-        comp_mags = np.copy(comp_mags0[comp_star_mask])
+        comp_mags = np.copy(filtered_comp_mags0[comp_star_mask])
         comp_rms = np.copy(comp_star_rms[comp_star_mask])
         N1 = len(comp_mags)
 
@@ -155,7 +176,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
             logger.info("Not enough data for spline fitting. Trying linear interpolation.")
             if len(mag_nodes) > 1:
                 mod = np.interp(comp_mags, mag_nodes, std_medians)  # Use linear interpolation
-                mod0 = np.interp(comp_mags0, mag_nodes, std_medians)
+                mod0 = np.interp(filtered_comp_mags0, mag_nodes, std_medians)
             else:
                 logger.info("Only one point available. Exiting.")
                 break
@@ -163,7 +184,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
             # Fit a spline to the medians if enough data
             spl = Spline(mag_nodes, std_medians)
             mod = spl(comp_mags)
-            mod0 = spl(comp_mags0)
+            mod0 = spl(filtered_comp_mags0)
 
         std = np.std(comp_rms - mod)
         comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
@@ -171,7 +192,6 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
 
         # the number of stars included and excluded
         logger.info(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}")
-
         logger.info(f'Final stars included: {N2}')
 
         # Exit condition: no further changes or too many iterations
