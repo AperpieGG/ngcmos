@@ -204,31 +204,30 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
         logger.warning(f"No flux data available for target TIC ID {tic_id_to_plot}.")
         return None
 
-    # Collect flux and magnitude for comparison stars
+    # Initialize a list to track the valid TIC IDs after initial filtering
+    valid_tic_ids = []
+
     for tic_id in tic_ids:
         flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
         tmag = filtered_table[filtered_table['tic_id'] == tic_id]['Tmag'][0]
 
         # Check shape consistency
-        try:
-            if reference_shape is None:
-                reference_shape = flux.shape
-            elif flux.shape != reference_shape:
-                logger.warning(f"Shape mismatch for TIC ID {tic_id}: expected {reference_shape}, "
-                               f"got {flux.shape}, skipping this comparison star.")
-                continue  # Skip this flux array if shape does not match
+        if reference_shape is None:
+            reference_shape = flux.shape
+        elif flux.shape != reference_shape:
+            logger.warning(f"Shape mismatch for TIC ID {tic_id}: expected {reference_shape}, "
+                           f"got {flux.shape}, skipping this comparison star.")
+            continue  # Skip this flux array if shape does not match
 
-            # If checks pass, add to lists
-            comp_fluxes.append(flux)
-            comp_mags.append(tmag)
-
-        except Exception as e:
-            logger.error(f"Error processing TIC ID {tic_id}: {str(e)}")
-            continue  # Skip to the next TIC ID if there is an error
+        # If checks pass, add to lists and valid_tic_ids
+        comp_fluxes.append(flux)
+        comp_mags.append(tmag)
+        valid_tic_ids.append(tic_id)  # Track only valid TIC IDs here
 
     # Convert lists to arrays for further processing
     comp_fluxes = np.array(comp_fluxes)
     comp_mags = np.array(comp_mags)
+    tic_ids = np.array(valid_tic_ids)  # Update tic_ids to contain only valid IDs
 
     # Log dimensions before calling find_bad_comp_stars
     logger.info(f'The dimensions of these two are: {comp_mags.shape}, {comp_fluxes.shape}')
@@ -243,15 +242,10 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
         comp_star_mask, comp_star_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass, comp_mags)
     except Exception as e:
         logger.error(f"Error in find_bad_comp_stars for TIC ID {tic_id_to_plot}: {str(e)}")
-        return None  # Handle errors from the function
-    # Filter tic_ids based on the mask
-    if len(comp_star_mask) == 0 or np.sum(comp_star_mask) == 0:
-        logger.warning(f"No valid comparison stars remaining for TIC ID {tic_id_to_plot} after sigma clipping.")
         return None
 
-    # Filter tic_ids based on the mask
-    logger.info(f"tic_ids length: {len(tic_ids)}, comp_star_mask length: {len(comp_star_mask)}")
-    good_tic_ids = tic_ids[comp_star_mask]
+    # Now, apply comp_star_mask to the already-filtered `tic_ids`
+    good_tic_ids = tic_ids[comp_star_mask]  # `tic_ids` is already filtered, so dimensions will match
 
     # Now filter the table based on these tic_ids
     good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
@@ -371,7 +365,7 @@ def main():
                     # Perform relative photometry
                     result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
 
-                    # Check if result is None
+                    # Check if result is None else skip this target
                     if result is None:
                         logger.info(f"TIC ID {tic_id} skipped due to an error.")
                         continue
