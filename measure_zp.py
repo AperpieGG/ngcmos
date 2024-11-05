@@ -20,7 +20,7 @@ def measure_zp(table, APERTURE, GAIN, EXPOSURE):
         tic_Tmag = table[table['TIC_ID'] == tic_id]['Tmag'][0]
 
         # Calculate zero point for the current TIC ID
-        zp = tic_Tmag - 2.5 * np.log10(tic_flux / EXPOSURE)
+        zp = tic_Tmag + 2.5 * np.log10(tic_flux / EXPOSURE)
         print(f'TIC ID: {tic_id}, Zero Point: {zp}')
         zp_list.append(zp)
 
