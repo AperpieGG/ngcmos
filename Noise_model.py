@@ -45,6 +45,29 @@ def read_data(filename):
     return data
 
 
+def extract_zero_point(json_file_path):
+    """
+    Extracts the zero point value from a JSON file.
+
+    Parameters:
+        json_file_path (str): Path to the JSON file containing the zero point value.
+
+    Returns:
+        float: The extracted zero point value.
+    """
+    try:
+        with open(json_file_path, 'r') as json_file:
+            zero_point = json.load(json_file)
+        print(f"Extracted zero point: {zero_point}")
+        return zero_point
+    except FileNotFoundError:
+        print(f"File {json_file_path} not found.")
+        return None
+    except json.JSONDecodeError:
+        print("Error decoding JSON from file.")
+        return None
+
+
 def main():
     """ Main function to parse arguments, read data, calculate noise sources, and save results to a JSON file """
     # Parse command-line arguments
@@ -95,7 +118,6 @@ def main():
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
         airmass_list.extend(tic_data['Airmass'])
-        zp_list.extend(tic_data['ZP'])
 
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
@@ -104,7 +126,8 @@ def main():
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
-    zp_array = np.array(zp_list)
+    # the file has the form phot_prefix.fits, I want to extract only the prefix
+    zp_array = extract_zero_point(f'zp.json')
     print('The average airmass and zero point are: ', np.mean(airmass_array), np.mean(zp_array))
     print('The average sky brightness is: ', np.mean(sky_list))
     print('The length of the sky_list is:', len(sky_list))
