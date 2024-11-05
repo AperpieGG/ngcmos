@@ -29,14 +29,12 @@ def measure_zp(table, APERTURE, GAIN, EXPOSURE):
 
 
 def main():
-    """ Main function to parse arguments, read data, calculate noise sources, and save results to a JSON file """
     # Parse command-line arguments
-    if __name__ == '__main__':
-        parser = argparse.ArgumentParser(
-            description='Read and organize TIC IDs with associated '
-                        'RMS, Sky, Airmass, ZP, and Magnitude from FITS table.'
-                        'Example usage if you have CMOS: RN=1.56, DC=1.6, Aper=4, Exp=10.0, Bin=1'
-                        'Example usage if you have CCD: RN=12.6, DC=0.00515, Aper=4, Exp=10.0, Bin=1')
+    parser = argparse.ArgumentParser(
+        description='Read and organize TIC IDs with associated '
+                    'RMS, Sky, Airmass, ZP, and Magnitude from FITS table.'
+                    'Example usage if you have CMOS: RN=1.56, DC=1.6, Aper=4, Exp=10.0, Bin=1'
+                    'Example usage if you have CCD: RN=12.6, DC=0.00515, Aper=4, Exp=10.0, Bin=1')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--aper', type=float, default=6, help='Aperture size in meters')
     parser.add_argument('--gain', type=float, default=1.13, help='Gain in electrons per ADU')
@@ -71,4 +69,5 @@ def main():
         plt.show()
 
 
-
+if __name__ == "__main__":
+    main()
