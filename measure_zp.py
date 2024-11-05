@@ -64,6 +64,7 @@ def main():
         plt.hist(zp_list, bins=100, label=f"Avg: {np.mean(zp_list):.2f}")
         plt.xlabel('Zero Point')
         plt.ylabel('Frequency')
+        plt.yscale('log')
         plt.title('Zero Point Histogram')
         plt.show()
 
