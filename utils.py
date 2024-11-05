@@ -741,8 +741,8 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, rn, dc, exposure, 
     N_sc = (N * synthetic_flux) ** 2
     N = N / np.sqrt(bin_size) * 1000000  # Convert to ppm
 
-    total_noise = np.sqrt(synthetic_flux + sky_flux + dark_current + read_signal + N_sc)
-    RNS = total_noise / synthetic_flux / np.sqrt(bin_size)
+    total_noise = np.sqrt(synthetic_mag + sky_flux + dark_current + read_signal + N_sc)
+    RNS = total_noise / synthetic_mag / np.sqrt(bin_size)
     RNS = RNS * 1000000  # Convert to ppm
 
     return synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS
