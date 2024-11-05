@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import argparse
+import json
+
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -69,6 +71,10 @@ def main():
         plt.yscale('log')
         plt.legend(loc='upper right')
         plt.show()
+
+        # save the results to a json file
+        with open(f'zero_point_{phot_file}.json', 'w') as json_file:
+            json.dump(np.mean(zp_list), json_file, indent=4)
 
 
 if __name__ == "__main__":
