@@ -59,13 +59,12 @@ def main():
 
         # Measure zero point
         zp_list = measure_zp(phot_table, APERTURE, GAIN, EXPOSURE)
-
-        print(f"Zero point average: {np.mean(zp_list)}")
+        print(f"Zero point average: {np.nanmean(zp_list)}")
 
         # plot zp_list on a histogram
-        plt.hist(zp_list, bins=100, label=f"Avg: {np.mean(zp_list):.2f}")
-        plt.axvline(np.mean(zp_list), color='r', linestyle='--', label=f"Mean: {np.mean(zp_list):.2f}")
-        plt.axvline(np.median(zp_list), color='g', linestyle='--', label= f"Median: {np.median(zp_list):.2f}")
+        plt.hist(zp_list, bins=100, label=f"Avg: {np.nanmean(zp_list):.2f}")
+        plt.axvline(np.nanmean(zp_list), color='r', linestyle='--', label=f"Mean: {np.nanmean(zp_list):.2f}")
+        plt.axvline(np.nanmedian(zp_list), color='g', linestyle='--', label= f"Median: {np.nanmedian(zp_list):.2f}")
         plt.xlabel('Zero Point')
         plt.ylabel('Frequency')
         plt.yscale('log')
