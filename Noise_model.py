@@ -80,7 +80,7 @@ def main():
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('--bin_size', type=int, default=1, help='Bin size for noise calculations')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
-    parser.add_argument('--aper', type=float, default=4, help='Aperture size in meters')
+    parser.add_argument('--aper', type=float, default=6, help='Aperture size in meters')
     parser.add_argument('--rn', type=float, default=1.56, help='Read noise in electrons')
     parser.add_argument('--dc', type=float, default=1.6, help='Dark current in electrons per second')
     parser.add_argument('--gain', type=float, default=1.13, help='Gain in electrons per ADU')
@@ -110,7 +110,6 @@ def main():
     # Prepare lists for noise_sources function
     sky_list = []
     airmass_list = []
-    zp_list = []
     RMS_list = []
     Tmags_list = []
 
@@ -127,14 +126,14 @@ def main():
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
     # the file has the form phot_prefix.fits, I want to extract only the prefix
-    zp_array = extract_zero_point(f'zp.json')
-    print('The average airmass and zero point are: ', np.mean(airmass_array), np.mean(zp_array))
+    zp = extract_zero_point(f'zp.json')
+    print('The average airmass and zero point are: ', np.mean(airmass_array), np.mean(zp))
     print('The average sky brightness is: ', np.mean(sky_list))
     print('The length of the sky_list is:', len(sky_list))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_array, zp_array, APERTURE,
+        noise_sources(sky_list, bin_size, airmass_array, zp, APERTURE,
                       READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN))
 
     # Convert lists to JSON serializable lists
