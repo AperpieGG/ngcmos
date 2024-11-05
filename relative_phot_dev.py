@@ -378,7 +378,7 @@ def main():
 
                 # Check the length of each data row before table creation
                 for index, row in enumerate(data_list):
-                    if len(row) != 9:
+                    if len(row) != 10:
                         print(f"Row {index} has {len(row)} columns: {row}")
 
                 # Create the table if all rows have correct length
