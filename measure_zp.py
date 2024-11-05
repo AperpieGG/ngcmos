@@ -73,7 +73,7 @@ def main():
 
         # save the results to a json file
         with open(f'zp.json', 'w') as json_file:
-            json.dump(np.mean(zp_list), json_file, indent=4)
+            json.dump(np.nanmean(zp_list), json_file, indent=4)
 
 
 if __name__ == "__main__":
