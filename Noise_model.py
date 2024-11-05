@@ -110,6 +110,7 @@ def main():
     # Prepare lists for noise_sources function
     sky_list = []
     airmass_list = []
+    zp_list = []
     RMS_list = []
     Tmags_list = []
 
@@ -117,6 +118,7 @@ def main():
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
         airmass_list.extend(tic_data['Airmass'])
+        zp_list.extend(tic_data['ZP'])
 
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
@@ -127,13 +129,12 @@ def main():
     airmass_array = np.array(airmass_list)
     # the file has the form phot_prefix.fits, I want to extract only the prefix
     zp = extract_zero_point(f'zp.json')
-    print('The average airmass and zero point are: ', np.mean(airmass_array), np.mean(zp))
+    print('Calculate zp and header zp avg is: ', np.mean(zp), np.mean(zp_list))
     print('The average sky brightness is: ', np.mean(sky_list))
-    print('The length of the sky_list is:', len(sky_list))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_array, zp, APERTURE,
+        noise_sources(sky_list, bin_size, airmass_array, zp_list, APERTURE,
                       READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN))
 
     # Convert lists to JSON serializable lists
