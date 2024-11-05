@@ -113,6 +113,7 @@ def main():
     zp_list = []
     RMS_list = []
     Tmags_list = []
+    color_list = []
 
     # Iterate over each unique TIC ID
     for tic_id in unique_tic_ids:
@@ -124,6 +125,7 @@ def main():
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
+        color_list.extend(tic_data['COLOR'][0])
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
@@ -146,6 +148,7 @@ def main():
     N_list = N.tolist()
     RNS_list = RNS.tolist()
     Tmags_list = [float(x) for x in Tmags_list]
+    color_list = [float(x) for x in color_list]
 
     # Save RMS_list, mags_list, and other lists to a JSON file
     output_data = {
@@ -158,7 +161,8 @@ def main():
         "read_noise": read_noise_list,
         "dc_noise": dc_noise_list,
         "N": N_list,
-        "RNS": RNS_list
+        "RNS": RNS_list,
+        "COLOR": color_list
     }
 
     # Construct output file name
