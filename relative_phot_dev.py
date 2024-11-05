@@ -300,7 +300,8 @@ def relative_phot(table, tic_id_to_plot, bin_size, APERTURE, DM_BRIGHT, DM_FAINT
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(target_time, dt_flux,
                                                                              dt_fluxerr, bin_size)
 
-        return target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass_list, zp_list
+        return (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median,
+                airmass_list, zp_list, target_color_index)
 
     except Exception as e:
         logger.error(f"Error in relative photometry for TIC ID {tic_id_to_plot}: {str(e)}")
@@ -365,7 +366,7 @@ def main():
                     continue
 
                 # Unpack the result if it's not None
-                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass, zp) = result
+                (target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned, sky_median, airmass, zp, color) = result
 
                 # Calculate RMS
                 rms = np.std(dt_flux_binned)
@@ -373,7 +374,7 @@ def main():
 
                 # Append data to the list with a check
                 data_list.append((tic_id, target_tmag, time_binned, dt_flux_binned, dt_fluxerr_binned,
-                                  sky_median, rms, airmass, zp))
+                                  sky_median, rms, airmass, zp, color))
 
                 # Check the length of each data row before table creation
                 for index, row in enumerate(data_list):
@@ -383,7 +384,8 @@ def main():
                 # Create the table if all rows have correct length
                 try:
                     data_table = Table(rows=data_list, names=('TIC_ID', 'Tmag', 'Time_BJD', 'Relative_Flux',
-                                                              'Relative_Flux_err', 'Sky', 'RMS', 'Airmass', 'ZP'))
+                                                              'Relative_Flux_err', 'Sky', 'RMS', 'Airmass',
+                                                              'ZP', 'COLOR'))
                 except ValueError as e:
                     print("Error creating Astropy table:", e)
                     raise
