@@ -717,7 +717,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, rn, dc, exposure, 
 
     # set exposure time and and random flux
     exposure_time = exposure
-    synthetic_flux = np.arange(100, 1e6, 1000)
+    synthetic_flux = np.arange(100, 1e7, 1000)
     synthetic_mag = zp - 2.5 * np.log10(synthetic_flux/exposure_time)
 
     # set dark current rate from cmos characterisation
