@@ -72,7 +72,7 @@ def main():
         plt.show()
 
         # save the results to a json file
-        with open(f'zero_point_{phot_file}.json', 'w') as json_file:
+        with open(f'zp.json', 'w') as json_file:
             json.dump(np.mean(zp_list), json_file, indent=4)
 
 
