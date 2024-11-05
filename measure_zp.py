@@ -67,7 +67,7 @@ def main():
         plt.xlabel('Zero Point')
         plt.ylabel('Frequency')
         plt.yscale('log')
-        plt.title('Zero Point Histogram')
+        plt.legend(loc='upper right')
         plt.show()
 
 
