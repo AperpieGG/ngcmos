@@ -12,22 +12,19 @@ def measure_zp(table, APERTURE, GAIN, EXPOSURE):
     tic_ids = np.unique(table['TIC_ID'])
     print(f'Found {len(tic_ids)} unique TIC IDs')
     zp_list = []
-    for tic_id in tic_ids:
-        # average fluxes for each TIC ID
-        tic_fluxes = np.mean(table[table['TIC_ID'] == tic_id][f'flux_{APERTURE}'])
-        # first Tmag for each TIC ID, it's the same for all fluxes
-        tic_Tmags = table[table['TIC_ID'] == tic_id]['Tmag'][0]
 
-    for i, tic_flux in enumerate(tic_fluxes):
-        # calculate zero point for each TIC ID
-        zp = tic_Tmags[i] - 2.5 * np.log10(tic_flux / EXPOSURE)
+    for tic_id in tic_ids:
+        # Average flux for the current TIC ID
+        tic_flux = np.mean(table[table['TIC_ID'] == tic_id][f'flux_{APERTURE}'])
+        # First Tmag value for the current TIC ID
+        tic_Tmag = table[table['TIC_ID'] == tic_id]['Tmag'][0]
+
+        # Calculate zero point for the current TIC ID
+        zp = tic_Tmag - 2.5 * np.log10(tic_flux / EXPOSURE)
         print(f'TIC ID: {tic_id}, Zero Point: {zp}')
         zp_list.append(zp)
 
-    # average the zero points
-    zp_avg = np.mean(zp_list)
-
-    return zp_avg, zp_list
+    return zp_list
 
 
 def main():
@@ -59,12 +56,12 @@ def main():
         print(f"Photometry file: {phot_file}")
 
         # Measure zero point
-        zp_avg, zp_list = measure_zp(phot_table, APERTURE, GAIN, EXPOSURE)
+        zp_list = measure_zp(phot_table, APERTURE, GAIN, EXPOSURE)
 
-        print(f"Zero point average: {zp_avg}")
+        print(f"Zero point average: {np.mean(zp_list)}")
 
         # plot zp_list on a histogram
-        plt.hist(zp_list, bins=100)
+        plt.hist(zp_list, bins=100, label=f"Avg: {np.mean(zp_list):.2f}")
         plt.xlabel('Zero Point')
         plt.ylabel('Frequency')
         plt.title('Zero Point Histogram')
