@@ -10,6 +10,7 @@ plot_images()
 
 def measure_zp(table, APERTURE, GAIN, EXPOSURE):
     tic_ids = np.unique(table['TIC_ID'])
+    print(f'Found {len(tic_ids)} unique TIC IDs')
     zp_list = []
     for tic_id in tic_ids:
         # average fluxes for each TIC ID
@@ -20,6 +21,7 @@ def measure_zp(table, APERTURE, GAIN, EXPOSURE):
     for i, tic_flux in enumerate(tic_fluxes):
         # calculate zero point for each TIC ID
         zp = tic_Tmags[i] - 2.5 * np.log10(tic_flux / EXPOSURE)
+        print(f'TIC ID: {tic_id}, Zero Point: {zp}')
         zp_list.append(zp)
 
     # average the zero points
