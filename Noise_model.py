@@ -80,7 +80,7 @@ def main():
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('--bin_size', type=int, default=1, help='Bin size for noise calculations')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
-    parser.add_argument('--aper', type=float, default=6, help='Aperture size in meters')
+    parser.add_argument('--aper', type=str, default=6, help='Aperture size in meters')
     parser.add_argument('--rn', type=float, default=1.56, help='Read noise in electrons')
     parser.add_argument('--dc', type=float, default=1.6, help='Dark current in electrons per second')
     parser.add_argument('--gain', type=float, default=1.13, help='Gain in electrons per ADU')
