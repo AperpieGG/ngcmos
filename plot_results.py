@@ -54,10 +54,17 @@ def identify_outliers(data, deviation_threshold):
     return outliers
 
 
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
+
+
 def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
     tic_ids = data['TIC_IDs']
+    color_list = data['COLOR']
     Tmag_list = data['Tmag_list']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
@@ -70,16 +77,23 @@ def plot_noise_model(data):
 
     # Filter data points based on magnitude and RMS
     filtered_indices_bright, filtered_indices_dim = filter_data(Tmag_list, RMS_list)
-
-    # append the indices of the outliers
     filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
-    
-    # # Exclude outliers from the total data
+
+    # Exclude outliers from the total data
     total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
     total_mags = [Tmag_list[i] for i in range(len(Tmag_list)) if i not in filtered_indices]
+    total_colors = [color_list[i] for i in range(len(color_list)) if i not in filtered_indices]
 
-    ax.plot(total_mags, total_RMS, 'o', color='black', label='total data', alpha=0.5)
+    # Normalize the color list to map it to the coolwarm colormap
+    norm = mcolors.Normalize(vmin=min(total_colors), vmax=max(total_colors))
+    cmap = cm.coolwarm
 
+    # Scatter plot with color map
+    scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap=cmap, norm=norm, alpha=0.5)
+    cbar = plt.colorbar(scatter, ax=ax)
+    cbar.set_label('Color Metric')  # Label for colorbar, can be adjusted
+
+    # Plot various noise sources
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
     ax.plot(synthetic_mag, read_noise, color='red', label='read noise', linestyle='--')
@@ -87,6 +101,8 @@ def plot_noise_model(data):
     ax.plot(synthetic_mag, sky_noise, color='blue', label='sky bkg', linestyle='--')
     ax.plot(synthetic_mag, np.ones(len(synthetic_mag)) * N, color='orange', label='scintillation noise',
             linestyle='--')
+
+    # Plot formatting
     ax.set_xlabel('TESS Magnitude')
     ax.set_ylabel('RMS (ppm)')
     ax.set_yscale('log')
@@ -96,15 +112,6 @@ def plot_noise_model(data):
     plt.legend(loc='best')
     plt.tight_layout()
 
-    # # if binning 30min
-    # ax.set_ylim(100, 4000)
-    # plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    # plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    # plt.gca().tick_params(axis='y', which='minor', length=4)
-    # ax.set_ylabel('RMS (ppm per 30 min)')
-    # plt.tight_layout()
-    # path = '/home/ops/ngcmos/'
-    # plt.savefig(path + 'rms_vs_mag_180.pdf', bbox_inches='tight')
     plt.show()
 
 
