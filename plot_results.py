@@ -67,7 +67,7 @@ def plot_noise_model(data):
         raise ValueError("Mismatch in sizes: total_mags, total_RMS, and total_colors should be the same length.")
 
     # Scatter plot with remaining stars
-    scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0)
+    scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm')
     cbar = plt.colorbar(scatter, ax=ax)
     cbar.set_label('Color Scale')
 
