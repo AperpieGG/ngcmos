@@ -40,9 +40,8 @@ def mask_outliers_by_model(Tmag_list, RMS_list, color_list, synthetic_mag, RNS, 
 def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
-    tic_ids = data['TIC_IDs']
-    color_list = np.unique(data['COLOR'])
     Tmag_list = data['Tmag_list']
+    color_list = data['COLOR']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
     photon_shot_noise = data['photon_shot_noise']
@@ -55,10 +54,13 @@ def plot_noise_model(data):
     # Mask stars that deviate significantly from the model
     masked_indices = mask_outliers_by_model(Tmag_list, RMS_list, color_list, synthetic_mag, RNS)
 
-    # Exclude masked stars from the total data
-    total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in masked_indices]
-    total_mags = [Tmag_list[i] for i in range(len(Tmag_list)) if i not in masked_indices]
-    total_colors = [color_list[i] for i in range(len(color_list)) if i not in masked_indices]
+    # Filter out stars with missing color information and exclude masked stars
+    total_mags, total_RMS, total_colors = [], [], []
+    for i in range(len(Tmag_list)):
+        if i not in masked_indices and color_list[i] is not None:
+            total_mags.append(Tmag_list[i])
+            total_RMS.append(RMS_list[i])
+            total_colors.append(color_list[i])
 
     # Verify sizes match
     if len(total_mags) != len(total_RMS) or len(total_mags) != len(total_colors):
@@ -66,11 +68,6 @@ def plot_noise_model(data):
         print(f'The length of total_RMS is {len(total_RMS)}')
         print(f'The length of total_colors is {len(total_colors)}')
         raise ValueError("Mismatch in sizes: total_mags, total_RMS, and total_colors should be the same length.")
-
-    # exclude stars that don't have color info, basically make sure that the color is not None
-    total_colors = [color for color in total_colors if color is not None]
-    total_RMS = [rms for i, rms in enumerate(total_RMS) if Tmag_list[i] not in masked_indices]
-    total_mags = [mag for i, mag in enumerate(total_mags) if Tmag_list[i] not in masked_indices]
 
     # Scatter plot with remaining stars
     scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0.7)
