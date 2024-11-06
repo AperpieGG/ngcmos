@@ -54,12 +54,6 @@ def identify_outliers(data, deviation_threshold):
     return outliers
 
 
-import matplotlib.pyplot as plt
-import numpy as np
-import matplotlib.cm as cm
-import matplotlib.colors as mcolors
-
-
 def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
