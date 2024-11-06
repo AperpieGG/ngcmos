@@ -70,8 +70,8 @@ def plot_noise_model(data):
     # Scatter plot with remaining stars
     scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm')
     cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label('G_$\mathrm{BP}$ - G_$\mathrm{RP}$', rotation=270, labelpad=20)
-
+    cbar.set_label(r'$\mathrm{G_{BP} - G_{RP}}$')
+    
     # Plot various noise sources
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
     ax.plot(synthetic_mag, photon_shot_noise, color='green', label='photon shot', linestyle='--')
