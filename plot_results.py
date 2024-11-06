@@ -78,14 +78,9 @@ def plot_noise_model(data):
     total_mags = [Tmag_list[i] for i in range(len(Tmag_list)) if i not in filtered_indices]
     total_colors = [color_list[i] for i in range(len(color_list)) if i not in filtered_indices]
 
-    # Normalize the color list to map it to the coolwarm colormap
-    norm = mcolors.Normalize(vmin=min(total_colors), vmax=max(total_colors))
-    cmap = cm.coolwarm
-
-    # Scatter plot with color map
-    scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap=cmap, norm=norm, alpha=0.5)
+    scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0.7)
     cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label('Color Metric')  # Label for colorbar, can be adjusted
+    cbar.set_label('Color Scale')  # Adjust label as needed
 
     # Plot various noise sources
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
