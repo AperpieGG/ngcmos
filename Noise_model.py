@@ -117,13 +117,10 @@ def main():
         airmass_list.extend(tic_data['Airmass'])
         zp_list.extend(tic_data['ZP'])
 
-        # Ensure color is unique to each TIC ID
-        if 'COLOR' in tic_data.columns and not tic_data['COLOR'].isna().all():
-            color_list.append(tic_data['COLOR'][0])
-
         # Append other data points as before
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
+            color_list.append(tic_data['COLOR'][0])
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
 
