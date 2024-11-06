@@ -37,7 +37,7 @@ def main():
                     'Example usage if you have CMOS: RN=1.56, DC=1.6, Aper=4, Exp=10.0, Bin=1'
                     'Example usage if you have CCD: RN=12.6, DC=0.00515, Aper=4, Exp=10.0, Bin=1')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
-    parser.add_argument('--aper', type=float, default=6, help='Aperture size in meters')
+    parser.add_argument('--aper', type=str, default=6, help='Aperture size in meters')
     args = parser.parse_args()
     EXPOSURE = args.exp
     APERTURE = args.aper  # Aperture size for the telescope
