@@ -6,52 +6,39 @@ import numpy as np
 from utils import plot_images
 
 
-# dark background
-# plt.style.use('dark_background')
-
-
 def load_rms_mags_data(filename):
     """
-    Load RMS and magnitude data from JSON file
+    Load RMS and magnitude data from JSON file.
     """
     with open(filename, 'r') as file:
         data = json.load(file)
     return data
 
 
-def filter_data(mags_list, RMS_list):
+def mask_outliers_by_model(Tmag_list, RMS_list, color_list, synthetic_mag, RNS, deviation_factor=2):
     """
-    Filter data points based on magnitude and RMS criteria
+    Mask stars that have an RMS significantly higher than the model.
+    Args:
+        Tmag_list (list): List of magnitudes (Tmag).
+        RMS_list (list): List of RMS values.
+        color_list (list): List of color values.
+        synthetic_mag (list): Synthetic magnitude values for the model.
+        RNS (list): Model noise values (RMS as a function of magnitude).
+        deviation_factor (float): Factor to define significant deviation from model.
+
+    Returns:
+        masked_indices (list): Indices of stars that deviate from the model.
     """
-    filtered_indices_bright = []
-    filtered_indices_bright = \
-        np.where((np.array(mags_list) > 4) & (np.array(mags_list) < 9) & (np.array(RMS_list) >= 5000))[0]
+    # Interpolate model RMS values to match Tmag_list
+    model_rms_interp = np.interp(Tmag_list, synthetic_mag, RNS)
+    masked_indices = [i for i, (rms, model_rms) in enumerate(zip(RMS_list, model_rms_interp))
+                      if rms > model_rms * deviation_factor]
 
-    filtered_indices_dim = []
-    filtered_indices_dim = np.where((np.array(mags_list) < 12) & (np.array(RMS_list) >= 20000))[0]
+    print("Masked Stars:")
+    for i in masked_indices:
+        print(f"Index: {i}, Tmag: {Tmag_list[i]}, RMS: {RMS_list[i]}, Color: {color_list[i]}")
 
-    return filtered_indices_bright, filtered_indices_dim
-
-
-def identify_outliers(data, deviation_threshold):
-    tmag_list = data['Tmag_list']
-    mags_list = data['mags_list']
-    tic_ids = data['TIC_IDs']
-    RMS_list = data['RMS_list']  # Assuming RMS data is available in 'data'
-
-    outliers = []
-
-    for tmag, mag, tic_id in zip(tmag_list, mags_list, tic_ids):
-        deviation = abs(tmag - mag)
-        if deviation > deviation_threshold:
-            # Find the index of the outlier using TIC_IDs
-            outlier_index = np.where(np.array(data['TIC_IDs']) == tic_id)[0][0]
-            outliers.append((tic_id, tmag, mag, RMS_list[outlier_index]))
-    print("Outliers:")
-    for tic_id, tmag, mag, RMS in outliers:
-        print(f"TIC ID: {tic_id}, Tmag: {np.round(tmag, 2)}, Mag: {np.round(mag, 2)}, RMS: {RMS}")
-
-    return outliers
+    return masked_indices
 
 
 def plot_noise_model(data):
@@ -69,21 +56,18 @@ def plot_noise_model(data):
     N = data['N']
     print(f'The average scintillation noise is: {np.mean(N)}')
 
-    # Filter data points based on magnitude and RMS
-    filtered_indices_bright, filtered_indices_dim = filter_data(Tmag_list, RMS_list)
-    filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
+    # Mask stars that deviate significantly from the model
+    masked_indices = mask_outliers_by_model(Tmag_list, RMS_list, color_list, synthetic_mag, RNS)
 
-    # Exclude outliers from the total data
-    total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in filtered_indices]
-    total_mags = [Tmag_list[i] for i in range(len(Tmag_list)) if i not in filtered_indices]
-    total_colors = [color_list[i] for i in range(len(color_list)) if i not in filtered_indices]
+    # Exclude masked stars from the total data
+    total_RMS = [RMS_list[i] for i in range(len(RMS_list)) if i not in masked_indices]
+    total_mags = [Tmag_list[i] for i in range(len(Tmag_list)) if i not in masked_indices]
+    total_colors = [color_list[i] for i in range(len(color_list)) if i not in masked_indices]
 
-    # Ensure the filtered lists are the same length
-    assert len(total_RMS) == len(total_mags) == len(total_colors), "Mismatch in filtered data lengths"
-
+    # Scatter plot with remaining stars
     scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0.7)
     cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label('Color Scale')  # Adjust label as needed
+    cbar.set_label('Color Scale')
 
     # Plot various noise sources
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
@@ -103,41 +87,7 @@ def plot_noise_model(data):
     ax.invert_xaxis()
     plt.legend(loc='best')
     plt.tight_layout()
-
     plt.show()
-
-
-def linear_model(x, m, b):
-    return m * x + b
-
-
-# def plot_tmag_vs_mag(data):
-#     fig, ax = plt.subplots(figsize=(10, 8))
-#
-#     mags_list = data['mags_list']
-#     print('The length of mags_list is:', len(mags_list))
-#     tmag_list = data['Tmag_list']
-#     print('The length of tmag_list is:', len(tmag_list))
-#     RMS_list = data['RMS_list']
-#
-#     # Filter data points based on magnitude and RMS
-#     filtered_indices_bright, filtered_indices_dim = filter_data(mags_list, RMS_list)
-#
-#     filtered_indices = np.append(filtered_indices_bright, filtered_indices_dim)
-#
-#     # # Exclude outliers from the total data
-#     tmag_list = [tmag_list[i] for i in range(len(tmag_list)) if i not in filtered_indices]
-#     mags_list = [mags_list[i] for i in range(len(mags_list)) if i not in filtered_indices]
-#
-#     ax.plot(tmag_list, mags_list, 'o', color='red', alpha=0.5)
-#     ax.set_xlabel('Tmag')
-#     ax.set_ylabel('Apparent Magnitude')
-#     ax.set_xlim(7.5, 16)
-#     ax.set_ylim(7.5, 16)
-#     plt.tight_layout()
-#     plt.gca().invert_xaxis()
-#     plt.gca().invert_yaxis()
-#     plt.show()
 
 
 def main(json_file):
@@ -148,11 +98,6 @@ def main(json_file):
 
     # Plot RMS vs magnitudes
     plot_noise_model(data)
-    # plot_tmag_vs_mag(data)
-
-    # Identify outliers
-    deviation_threshold = 2
-    identify_outliers(data, deviation_threshold)
 
 
 if __name__ == "__main__":
