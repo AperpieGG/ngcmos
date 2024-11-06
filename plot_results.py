@@ -51,13 +51,10 @@ def plot_noise_model(data):
     N = data['N']
     print(f'The average scintillation noise is: {np.mean(N)}')
 
-    # Mask stars that deviate significantly from the model
-    masked_indices = mask_outliers_by_model(Tmag_list, RMS_list, color_list, synthetic_mag, RNS)
-
-    # Filter out stars with missing color information and exclude masked stars
+    # Filter out stars with missing color information
     total_mags, total_RMS, total_colors = [], [], []
     for i in range(len(Tmag_list)):
-        if i not in masked_indices and color_list[i] is not None:
+        if color_list[i] is not None:  # Include only stars with color information
             total_mags.append(Tmag_list[i])
             total_RMS.append(RMS_list[i])
             total_colors.append(color_list[i])
@@ -70,7 +67,7 @@ def plot_noise_model(data):
         raise ValueError("Mismatch in sizes: total_mags, total_RMS, and total_colors should be the same length.")
 
     # Scatter plot with remaining stars
-    scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0, vmin=0, vmax=2)
+    scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0)
     cbar = plt.colorbar(scatter, ax=ax)
     cbar.set_label('Color Scale')
 
