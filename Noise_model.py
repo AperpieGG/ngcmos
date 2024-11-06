@@ -107,28 +107,29 @@ def main():
     # Extract unique TIC IDs
     unique_tic_ids = np.unique(data['TIC_ID'])
 
-    # Prepare lists for noise_sources function
-    sky_list = []
-    airmass_list = []
-    zp_list = []
-    RMS_list = []
-    Tmags_list = []
-    color_list = []
+    # Initialize lists for each variable
+    airmass_list, zp_list, color_list = [], [], []
+    RMS_list, sky_list, Tmags_list = [], [], []
 
     # Iterate over each unique TIC ID
     for tic_id in unique_tic_ids:
         tic_data = data[data['TIC_ID'] == tic_id]
         airmass_list.extend(tic_data['Airmass'])
         zp_list.extend(tic_data['ZP'])
-        color_list.extend(tic_data['COLOR'])
 
+        # Ensure color is unique to each TIC ID
+        if 'COLOR' in tic_data.columns and not tic_data['COLOR'].isna().all():
+            color_list.append(tic_data['COLOR'][0])
+
+        # Append other data points as before
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
 
-    # Convert lists to numpy arrays for noise calculation
+    # Convert lists to numpy arrays for calculations
     airmass_array = np.array(airmass_list)
+
     # the file has the form phot_prefix.fits, I want to extract only the prefix
     zp = extract_zero_point(f'zp.json')
     print('Calculate zp and header zp avg is: ', np.mean(zp), np.mean(zp_list))
