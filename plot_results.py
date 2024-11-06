@@ -34,10 +34,6 @@ def mask_outliers_by_model(Tmag_list, RMS_list, color_list, synthetic_mag, RNS, 
     masked_indices = [i for i, (rms, model_rms) in enumerate(zip(RMS_list, model_rms_interp))
                       if rms > model_rms * deviation_factor]
 
-    print("Masked Stars:")
-    for i in masked_indices:
-        print(f"Index: {i}, Tmag: {Tmag_list[i]}, RMS: {RMS_list[i]}, Color: {color_list[i]}")
-
     return masked_indices
 
 
@@ -66,8 +62,10 @@ def plot_noise_model(data):
 
     # Verify sizes match
     if len(total_mags) != len(total_RMS) or len(total_mags) != len(total_colors):
+        print(f'The length of total_mags is {len(total_mags)}')
+        print(f'The length of total_RMS is {len(total_RMS)}')
+        print(f'The length of total_colors is {len(total_colors)}')
         raise ValueError("Mismatch in sizes: total_mags, total_RMS, and total_colors should be the same length.")
-
 
     # Scatter plot with remaining stars
     scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0.7)
