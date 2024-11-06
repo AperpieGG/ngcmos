@@ -10,7 +10,7 @@ from utils import get_phot_files, read_phot_file, plot_images
 plot_images()
 
 
-def measure_zp(table, APERTURE, GAIN, EXPOSURE):
+def measure_zp(table, APERTURE, EXPOSURE):
     tic_ids = np.unique(table['TIC_ID'])
     print(f'Found {len(tic_ids)} unique TIC IDs')
     zp_list = []
@@ -58,7 +58,7 @@ def main():
         print(f"Photometry file: {phot_file}")
 
         # Measure zero point
-        zp_list = measure_zp(phot_table, APERTURE, GAIN, EXPOSURE)
+        zp_list = measure_zp(phot_table, APERTURE, EXPOSURE)
         print(f"Zero point average: {np.nanmean(zp_list)}")
 
         # plot zp_list on a histogram
