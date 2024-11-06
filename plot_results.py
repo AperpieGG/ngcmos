@@ -78,6 +78,9 @@ def plot_noise_model(data):
     total_mags = [Tmag_list[i] for i in range(len(Tmag_list)) if i not in filtered_indices]
     total_colors = [color_list[i] for i in range(len(color_list)) if i not in filtered_indices]
 
+    # Ensure the filtered lists are the same length
+    assert len(total_RMS) == len(total_mags) == len(total_colors), "Mismatch in filtered data lengths"
+
     scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0.7)
     cbar = plt.colorbar(scatter, ax=ax)
     cbar.set_label('Color Scale')  # Adjust label as needed
