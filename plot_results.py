@@ -64,6 +64,11 @@ def plot_noise_model(data):
     total_mags = [Tmag_list[i] for i in range(len(Tmag_list)) if i not in masked_indices]
     total_colors = [color_list[i] for i in range(len(color_list)) if i not in masked_indices]
 
+    # Verify sizes match
+    if len(total_mags) != len(total_RMS) or len(total_mags) != len(total_colors):
+        raise ValueError("Mismatch in sizes: total_mags, total_RMS, and total_colors should be the same length.")
+
+
     # Scatter plot with remaining stars
     scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm', alpha=0.7)
     cbar = plt.colorbar(scatter, ax=ax)
