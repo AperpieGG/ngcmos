@@ -29,7 +29,7 @@ python /home/ops/ngcmos/check_cmos.py
 python /home/ops/ngcmos/adding_headers.py
 python /home/ops/ngcmos/create_flats.py
 python /home/ops/ngcmos/process_cmos.py
-python /home/ops/fwhm_stars/fwhm_batches.py --size 11 # make plot and save to fwhm_results.json
+python /home/ops/fwhm_stars/fwhm_batches.py --size 11 --cam CMOS # make plot and save to fwhm_results.json
 python /home/ops/ngcmos/relative_phot_dev.py --aper 5
 python /home/ops/fwhm_stars/best_fwhm.py --size 11 # save to fwhm_positions.json
 python /home/ops/ngcmos/remove_fits_files.py
