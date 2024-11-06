@@ -58,7 +58,7 @@ def plot_noise_model(data):
             total_mags.append(Tmag_list[i])
             total_RMS.append(RMS_list[i])
             total_colors.append(color_list[i])
-            print(f'Tmag: {Tmag_list[i]}, RMS: {RMS_list[i]}, Color: {color_list[i]}')
+            # print(f'Tmag: {Tmag_l ist[i]}, RMS: {RMS_list[i]}, Color: {color_list[i]}')
 
     # Verify sizes match
     if len(total_mags) != len(total_RMS) or len(total_mags) != len(total_colors):
