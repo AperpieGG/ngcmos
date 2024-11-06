@@ -41,7 +41,7 @@ def plot_noise_model(data):
     fig, ax = plt.subplots(figsize=(10, 8))
     RMS_list = data['RMS_list']
     Tmag_list = data['Tmag_list']
-    color_list = data['COLOR'][0]
+    color_list = data['COLOR']
     synthetic_mag = data['synthetic_mag']
     RNS = data['RNS']
     photon_shot_noise = data['photon_shot_noise']
