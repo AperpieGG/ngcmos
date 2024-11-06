@@ -120,12 +120,12 @@ def main():
         tic_data = data[data['TIC_ID'] == tic_id]
         airmass_list.extend(tic_data['Airmass'])
         zp_list.extend(tic_data['ZP'])
+        color_list.extend(tic_data['COLOR'])
 
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
-        color_list.extend(tic_data['COLOR'][0])
 
     # Convert lists to numpy arrays for noise calculation
     airmass_array = np.array(airmass_list)
