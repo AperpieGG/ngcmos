@@ -70,7 +70,7 @@ def plot_noise_model(data):
     # Scatter plot with remaining stars
     scatter = ax.scatter(total_mags, total_RMS, c=total_colors, cmap='coolwarm')
     cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label('Color Scale')
+    cbar.set_label('G_$\mathrm{BP}$ - G_$\mathrm{RP}$', rotation=270, labelpad=20)
 
     # Plot various noise sources
     ax.plot(synthetic_mag, RNS, color='black', label='total noise')
