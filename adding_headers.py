@@ -70,12 +70,19 @@ def update_header(directory):
                 time_isot = Time(hdul[0].header['DATE-OBS'], format='isot', scale='utc', location=get_location())
                 time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
                 time_jd += half_exptime * u.second
-                if 'TELRAD' and 'TELDECD' not in hdul[0].header:
-                    ra = hdul[0].header['CMD_RA']
-                    dec = hdul[0].header['CMD_DEC']
-                else:
-                    ra = hdul[0].header['TELRAD']
-                    dec = hdul[0].header['TELDECD']
+                try:
+                    # Check for 'TELRAD' and 'TELDECD' in the header
+                    if 'TELRAD' in hdul[0].header and 'TELDECD' in hdul[0].header:
+                        ra = hdul[0].header['TELRAD']
+                        dec = hdul[0].header['TELDECD']
+                    else:
+                        # Fallback to 'CMD_RA' and 'CMD_DEC' if 'TELRAD' or 'TELDECD' is missing
+                        ra = hdul[0].header['CMD_RA']
+                        dec = hdul[0].header['CMD_DEC']
+                except KeyError as e:
+                    print(f"Error: Missing expected header key {e}.")
+                    ra, dec = None, None  # Or set default values, if appropriate
+                    
                 ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
                 time_bary = time_jd.tdb + ltt_bary
                 time_helio = time_jd.utc + ltt_helio
