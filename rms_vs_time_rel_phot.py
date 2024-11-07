@@ -31,7 +31,7 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit):
     # Prepare data for plotting
     average_rms_values = []
     times_binned = []
-    max_binning = 151
+    max_binning = 60
 
     for Tmag_data, initial_rms in sorted_stars:
         # Check for the column name in the dtype of the structured array
