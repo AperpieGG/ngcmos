@@ -5,14 +5,6 @@ start_time=$(date +%s)
 
 echo "Starting processing..."
 
-# Run the initial Python scripts
-python /home/ops/ngcmos/unzip_fits.py     # unzips the FITS files and deletes the bz2 extension
-python /home/ops/ngcmos/trim_ccd.py
-python /home/ops/refcatpipe2/cmos/simple_wrapper_ccd.py
-python /home/ops/ngcmos/check_ccd.py
-python /home/ops/ngcmos/calibration_images_ccd.py
-python /home/ops/ngcmos/process_ccd.py
-
 # Loop through each subdirectory that matches "action*_observeField"
 # shellcheck disable=SC2044
 for observe_dir in $(find . -maxdepth 1 -type d -name "action*_observeField"); do
@@ -21,6 +13,14 @@ for observe_dir in $(find . -maxdepth 1 -type d -name "action*_observeField"); d
     # Change to the directory
     cd "$observe_dir" || continue
     echo "Changed to directory: $(pwd)"
+
+    # Run the initial Python scripts
+    python /home/ops/ngcmos/unzip_fits.py     # unzips the FITS files and deletes the bz2 extension
+    python /home/ops/ngcmos/trim_ccd.py
+    python /home/ops/refcatpipe2/cmos/simple_wrapper.py --camer ccd
+    python /home/ops/ngcmos/check_ccd.py
+    python /home/ops/ngcmos/calibration_images_ccd.py
+    python /home/ops/ngcmos/process_ccd.py
 
     # Run the additional Python scripts within this subdirectory
     python /home/ops/fwhm_stars/fwhm_batches.py --size 13.5 --cam CCD   # make plot and save to fwhm_results.json
