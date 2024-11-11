@@ -1,26 +1,7 @@
 #! /usr/bin/env python
 import os
-import json
 from astropy.io import fits
 import numpy as np
-
-
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
 
 
 def filter_filenames(directory):
@@ -71,25 +52,7 @@ def trim_images(directory):
 
 
 def main():
-    # get the current working directory
-    parent_directory = os.getcwd()
-
-    # get a list of subdirectories inside the parent directory
-    subdirectories = [name for name in os.listdir(parent_directory) if
-                      os.path.isdir(os.path.join(parent_directory, name))]
-
-    print('The subdirectories are:', subdirectories)
-
-    for subdirectory in subdirectories:
-        if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
-            # form the full path to the subdirectory
-            subdirectory_path = os.path.join(parent_directory, subdirectory)
-
-            # set directory for the current subdirectory
-            directory = subdirectory_path
-            print(f"Directory: {directory}")
-
-            trim_images(directory)
+    trim_images(os.getcwd())
 
 
 if __name__ == '__main__':
