@@ -223,12 +223,21 @@ def main():
         time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))], format='isot', scale='utc')
         time_jd = time_isot + half_exptime * u.second
         ra, dec = phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr']
+        ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
+        time_bary = time_jd.tdb + ltt_bary
+        time_helio = time_jd.utc + ltt_helio
+        
         frame_ids = [filename] * len(phot_x)
         logging.info(f"Found {len(frame_ids)} sources")
 
-        # Create the photometry table
-        frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'], phot_x, phot_y],
-                               names=("frame_id", "gaia_id", "Tmag", "tic_id", "x", "y"))
+        # create the photometry table
+        frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
+                                phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, time_bary.value,
+                                time_helio.value, phot_x, phot_y,
+                                [airmass] * len(phot_x), [zp] * len(phot_x)],
+                               names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
+                                      "jd_bary", "jd_helio", "x", "y", "airmass", "zp"))
+
         frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
 
         frame_output = hstack([frame_preamble, frame_phot])
