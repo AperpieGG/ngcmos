@@ -21,24 +21,6 @@ from astropy.time import Time
 warnings.simplefilter('ignore', category=UserWarning)
 
 
-def load_config(filename):
-    with open(filename, 'r') as file:
-        config = json.load(file)
-    return config
-
-
-# Load paths from the configuration file
-config = load_config('directories.json')
-calibration_paths = config["calibration_paths"]
-base_paths = config["base_paths"]
-out_paths = config["out_paths"]
-
-# Select directory based on existence
-for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, out_paths):
-    if os.path.exists(base_path):
-        break
-
-
 def filter_filenames(directory):
     """
     Filter filenames based on specific criteria.
@@ -200,37 +182,21 @@ def check_donuts(directory, filenames):
 
 
 def main():
-    # get the current working directory
-    parent_directory = os.getcwd()
+    directory = os.getcwd()
+    print(f"Directory: {directory}")
 
-    # get a list of subdirectories inside the parent directory
-    subdirectories = [name for name in os.listdir(parent_directory) if
-                      os.path.isdir(os.path.join(parent_directory, name))]
+    # filter filenames only for .fits data files
+    filenames = filter_filenames(directory)
+    print(f"Number of files: {len(filenames)}")
 
-    print('The subdirectories are:', subdirectories)
+    # Check headers for CTYPE1 and CTYPE2
+    check_headers(directory, filenames)
 
-    # iterate over each subdirectory
-    for subdirectory in subdirectories:
-        if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
-            # form the full path to the subdirectory
-            subdirectory_path = os.path.join(parent_directory, subdirectory)
+    # Update headers with BJD and HJD
+    update_header(directory)  # Uncomment this line to update headers
 
-            # set directory for the current subdirectory
-            directory = subdirectory_path
-            print(f"Directory: {directory}")
-
-            # filter filenames only for .fits data files
-            filenames = filter_filenames(directory)
-            print(f"Number of files: {len(filenames)}")
-            
-            # Check headers for CTYPE1 and CTYPE2
-            check_headers(subdirectory, filenames)
-
-            # Update headers with BJD and HJD
-            # update_header(subdirectory) # Uncomment this line to update headers
-
-            # Check donuts for the current subdirectory
-            check_donuts(subdirectory, filenames)
+    # Check donuts for the current subdirectory
+    check_donuts(directory, filenames)
 
     print("Done.")
 
