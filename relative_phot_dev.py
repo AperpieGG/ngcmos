@@ -313,7 +313,7 @@ def main():
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--aper', type=int, default=5, help='Aperture radius for photometry')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
-    parser.add_argument('--crop_size', type=int, default=2000, help='Size of the crop region around the target star')
+    parser.add_argument('--crop_size', type=int, default=None, help='Size of the crop region around the target star')
     parser.add_argument('--dmb', type=float, default=0.5, help='Magnitude difference for comparison stars')
     parser.add_argument('--dmf', type=float, default=1.5, help='Magnitude difference for comparison stars')
     args = parser.parse_args()
