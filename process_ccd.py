@@ -214,20 +214,26 @@ def main():
             logging.info(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!\n")
             continue
 
-        # Load the photometry catalog
+            # Load the photometry catalog
         phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+        logging.info(f"Found catalog with name {prefix}_catalog_input.fits")
+        # Convert RA and DEC to pixel coordinates using the WCS information from the header
         phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
-        # Time and frame data
+        # Do time conversions - one time value per format per target
         half_exptime = frame_hdr['EXPTIME'] / 2.
-        time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))], format='isot', scale='utc')
-        time_jd = time_isot + half_exptime * u.second
-        ra, dec = phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr']
+        time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
+                         format='isot', scale='utc', location=get_location())
+        time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+        # Correct to mid-exposure time
+        time_jd = time_jd + half_exptime * u.second
+        ra = phot_cat['ra_deg_corr']
+        dec = phot_cat['dec_deg_corr']
         ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
         time_bary = time_jd.tdb + ltt_bary
         time_helio = time_jd.utc + ltt_helio
-        
-        frame_ids = [filename] * len(phot_x)
+
+        frame_ids = [filename for i in range(len(phot_x))]
         logging.info(f"Found {len(frame_ids)} sources")
 
         # create the photometry table
