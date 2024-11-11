@@ -17,7 +17,7 @@ for observe_dir in $(find . -maxdepth 1 -type d -name "action*_observeField"); d
     # Run the initial Python scripts
     python /home/ops/ngcmos/unzip_fits.py     # unzips the FITS files and deletes the bz2 extension
     python /home/ops/ngcmos/trim_ccd.py
-    python /home/ops/refcatpipe2/cmos/simple_wrapper.py --camer ccd
+    python /home/ops/refcatpipe2/cmos/simple_wrapper.py --camera ccd
     python /home/ops/ngcmos/check_ccd.py
     python /home/ops/ngcmos/calibration_images_ccd.py
     python /home/ops/ngcmos/process_ccd.py
