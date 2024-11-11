@@ -13,7 +13,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2  # Color index tolerance for comparison stars
-
+#TODO pass fwhm_positions.json as arguments
 plot_images()
 
 
@@ -98,7 +98,7 @@ def extract_region_coordinates(region):
     return x_min, x_max, y_min, y_max
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, json_file):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json):
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
@@ -116,30 +116,46 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, json_file):
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
 
     # Load the JSON data
-    with open('fwhm_positions.json', 'r') as file:
-        regions_data = json.load(file)
+    if json:
+        with open('fwhm_positions.json', 'r') as file:
+            regions_data = json.load(file)
 
-    # Extract coordinates for central and similar regions
-    region_coordinates = []
+        # Extract coordinates for central and similar regions
+        region_coordinates = []
 
-    # Central region
-    central = regions_data['central_region']['position']
-    region_coordinates.append((central['x_start'], central['x_end'], central['y_start'], central['y_end']))
+        # Central region
+        central = regions_data['central_region']['position']
+        region_coordinates.append((central['x_start'], central['x_end'], central['y_start'], central['y_end']))
 
-    # Similar regions
-    for similar_region in regions_data['central_region']['similar_regions']:
-        position = similar_region['position']
-        region_coordinates.append((position['x_start'], position['x_end'], position['y_start'], position['y_end']))
+        # Similar regions
+        for similar_region in regions_data['central_region']['similar_regions']:
+            position = similar_region['position']
+            region_coordinates.append((position['x_start'], position['x_end'], position['y_start'], position['y_end']))
 
-    # Filter stars based on the defined regions
-    combined_mask = np.zeros(len(filtered_table), dtype=bool)
-    for (x_min, x_max, y_min, y_max) in region_coordinates:
-        region_mask = (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) & \
-                      (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
-        combined_mask |= region_mask  # Combine masks
+        # Filter stars based on the defined regions
+        combined_mask = np.zeros(len(filtered_table), dtype=bool)
+        for (x_min, x_max, y_min, y_max) in region_coordinates:
+            region_mask = (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) & \
+                          (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
+            combined_mask |= region_mask  # Combine masks
 
-    # Apply combined mask to filtered_table
-    filtered_table = filtered_table[combined_mask]
+        # Apply combined mask to filtered_table
+        filtered_table = filtered_table[combined_mask]
+
+    if crop_size:
+        # Get target star coordinates
+        x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
+        y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+
+        # Apply crop filter based on coordinates
+        x_min, x_max = x_target - crop_size // 2, x_target + crop_size // 2
+        y_min, y_max = y_target - crop_size // 2, y_target + crop_size // 2
+
+        # Further filter the comparison stars based on the crop region
+        filtered_table = filtered_table[
+            (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) &
+            (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
+            ]
 
     return filtered_table, airmass_list
 
@@ -241,9 +257,9 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
     return cumulative_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json)
     tic_ids = np.unique(filtered_table['tic_id'])
     print(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
@@ -362,6 +378,7 @@ def main():
     parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
     parser.add_argument('--dmf', type=float, default=1.5, help='Fainter comparison star threshold (default: 1.5 mag)')
     parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
+    parser.add_argument('--json', action='store_true', help='Use JSON file for region filtering (optional)')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
@@ -372,6 +389,7 @@ def main():
     DM_FAINT = args.dmf
     camera = args.cam
     crop_size = args.crop
+    json = args.json
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
@@ -394,7 +412,8 @@ def main():
                 print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
                 # Find the best comparison stars
-                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
+                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
+                                                   crop_size, json)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
