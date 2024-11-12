@@ -7,6 +7,7 @@ import os
 from astropy.io import fits
 import numpy as np
 
+
 def filter_filenames(directory):
     """
     Filter filenames based on specific criteria.
@@ -110,29 +111,35 @@ if __name__ == '__main__':
     os.chdir(parent_directory)
     print(f"Changed to parent directory: {parent_directory}")
 
-    # Search for subdirectories in the parent directory
-    subdirectories = [name for name in os.listdir(parent_directory) if
-                      os.path.isdir(os.path.join(parent_directory, name))]
+    # Check if master_bias.fits exists in the parent directory before any processing
+    master_bias_path = os.path.join(parent_directory, 'master_bias.fits')
+    if os.path.exists(master_bias_path):
+        print("Master bias file already exists in the parent directory. Skipping processing.")
+    else:
+        # Search for subdirectories in the parent directory
+        subdirectories = [name for name in os.listdir(parent_directory) if
+                          os.path.isdir(os.path.join(parent_directory, name))]
 
-    for subdirectory in subdirectories:
-        if subdirectory.startswith("action") and subdirectory.endswith("_biasFrames"):
-            subdirectory_path = os.path.join(parent_directory, subdirectory)
-            directory = subdirectory_path
-            print(f"Processing directory: {directory}")
+        for subdirectory in subdirectories:
+            if subdirectory.startswith("action") and subdirectory.endswith("_biasFrames"):
+                subdirectory_path = os.path.join(parent_directory, subdirectory)
+                directory = subdirectory_path
+                print(f"Processing directory: {directory}")
 
-            # Unzip the files
-            os.system(f"bzip2 -d {directory}/*.bz2")
-            print(f"Unzipped files in {directory}")
+                # Unzip the files
+                os.system(f"bzip2 -d {directory}/*.bz2")
+                print(f"Unzipped files in {directory}")
 
-            # Trim the bias images
-            trim_bias(directory)
+                # Trim the bias images
+                trim_bias(directory)
 
-            # Generate the master bias
-            bias(directory)
+                # Generate the master bias
+                bias(directory)
 
-            # Move master_bias to the parent directory
-            os.system(f"mv {directory}/master_bias.fits {parent_directory}")
-            print(f"Moved master_bias to {parent_directory}")
+                # Move master_bias to the parent directory
+                os.system(f"mv {directory}/master_bias.fits {parent_directory}")
+                print(f"Moved master_bias to {parent_directory}")
+                break  # Stop processing other subdirectories once master_bias is created
 
     # Return to the initial directory
     os.chdir(initial_directory)
