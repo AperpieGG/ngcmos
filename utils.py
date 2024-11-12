@@ -48,7 +48,7 @@ def plot_images():
     plt.rcParams['ytick.minor.left'] = True
 
     # Font and fontsize
-    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['font.size'] = 12
 
     # Legend
