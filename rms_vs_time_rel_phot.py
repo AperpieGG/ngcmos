@@ -96,7 +96,7 @@ def run_for_one(phot_file, tic_id=None):
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, 5, tic_id)
+    plot_rms_time(phot_table, tic_id, lower_limit=0, upper_limit=20)
 
 
 def run_for_more(phot_file, num_stars, lower_limit, upper_limit):
