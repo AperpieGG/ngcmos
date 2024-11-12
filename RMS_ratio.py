@@ -53,11 +53,11 @@ def plot_rms_ratio(tmag_values, rms_ratio, color_values):
     plt.figure(figsize=(8, 5))
     scatter = plt.scatter(tmag_values, rms_ratio, c=color_values, cmap='coolwarm', vmin=0.5, vmax=1.5)
     plt.colorbar(scatter, label='Color')  # Add colorbar for the COLOR field
-
+    plt.axhline(y=1, color='green', linestyle='--')
     plt.xlabel('Tmag')
     plt.ylabel('CCD / CMOS RMS Ratio')
     plt.grid(True)
-    plt.ylim(-1, 10)
+    plt.ylim(-0.5, 6)
     plt.gca().invert_xaxis()
     plt.show()
 
