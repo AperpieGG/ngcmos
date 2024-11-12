@@ -19,22 +19,26 @@ def load_json_files():
 
 
 def compute_rms_ratios(data1, data2):
-    # Create dictionaries to map TIC_ID to RMS and Tmag for easier access
+    # Extract fields as lists
+    tic_ids1 = data1["TIC_IDs"]
+    rms1 = data1["RMS_list"]
+    tmag1 = data1["Tmag_list"]
+
+    tic_ids2 = data2["TIC_IDs"]
+    rms2 = data2["RMS_list"]
+
+    if len(tic_ids1) != len(tic_ids2) or len(rms1) != len(rms2):
+        raise ValueError("Mismatched data lengths between JSON files. Ensure both files have the same TIC_IDs.")
+
+    # Compute RMS ratio and collect Tmag values
     rms_ratio = []
     tmag_values = []
 
-    # Ensure the data files have the same TIC_IDs
-    for entry1, entry2 in zip(data1, data2):
-        if entry1['TIC_IDs'] == entry2['TIC_IDs']:
-            rms1 = entry1['RMS_list']
-            rms2 = entry2['RMS_list']
-            tmag = entry1['Tmag_list']
-            if rms2 != 0:  # Avoid division by zero
-                ratio = rms1 / rms2
-                rms_ratio.append(ratio)
-                tmag_values.append(tmag)
-        else:
-            raise ValueError(f"Mismatched TIC_IDs: {entry1['TIC_IDs']} and {entry2['TIC_IDs']}")
+    for i in range(len(tic_ids1)):
+        if rms2[i] != 0:  # Avoid division by zero
+            ratio = rms1[i] / rms2[i]
+            rms_ratio.append(ratio)
+            tmag_values.append(tmag1[i])
 
     return tmag_values, rms_ratio
 
