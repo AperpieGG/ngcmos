@@ -57,7 +57,7 @@ def plot_rms_ratio(tmag_values, rms_ratio, color_values):
     plt.xlabel('Tmag')
     plt.ylabel('CCD / CMOS RMS Ratio')
     plt.grid(True)
-    plt.ylim(-0.5, 5)
+    plt.ylim(-0.5, 3)
     plt.gca().invert_xaxis()
     plt.show()
 
