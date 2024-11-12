@@ -49,14 +49,14 @@ def plot_images():
 
     # Font and fontsize
     plt.rcParams['font.family'] = 'Times New Roman'
-    plt.rcParams['font.size'] = 12
+    plt.rcParams['font.size'] = 14
 
     # Legend
     plt.rcParams['legend.frameon'] = True
     plt.rcParams['legend.framealpha'] = 0.8
     plt.rcParams['legend.loc'] = 'best'
     plt.rcParams['legend.fancybox'] = True
-    plt.rcParams['legend.fontsize'] = 12
+    plt.rcParams['legend.fontsize'] = 14
 
 
 def get_location():
@@ -660,7 +660,8 @@ def scintilation_noise(airmass_list, exposure):
     h = 2400  # height of Paranal
     H = 8000  # height of atmospheric scale
     airmass = np.mean(airmass_list)  # airmass
-    C_y = 1.56  # constant
+    C_y = 1.52  # constant
+    C_y = 1.45
     N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / exposure) * (airmass ** 3) * np.exp((-2. * h) / H))
     print('Scintilation noise: ', N)
     return N
