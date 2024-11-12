@@ -38,7 +38,7 @@ def mask_outliers_by_model(Tmag_list, RMS_list, color_list, synthetic_mag, RNS, 
 
 
 def plot_noise_model(data):
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots()
     RMS_list = data['RMS_list']
     Tmag_list = data['Tmag_list']
     color_list = data['COLOR']
