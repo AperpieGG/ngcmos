@@ -61,14 +61,6 @@ def plot_rms_ratio(tmag_values, rms_ratio, color_values):
     plt.gca().invert_xaxis()
     plt.show()
 
-    # plot histogram distribution of RMS ratios
-    plt.figure(figsize=(8, 5))
-    plt.hist(rms_ratio, bins=50, color='blue', alpha=0.7)
-    plt.xlabel('RMS Ratio (CCD / CMOS)')
-    plt.ylabel('Frequency')
-    plt.grid(True)
-    plt.show()
-
 
 def main():
     data1, data2 = load_json_files()
