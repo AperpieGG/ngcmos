@@ -34,24 +34,26 @@ def compute_rms_ratios(data1, data2):
     if len(tic_ids1) != len(tic_ids2) or len(rms1) != len(rms2):
         raise ValueError("Mismatched data lengths between JSON files. Ensure both files have the same TIC_IDs.")
 
-    # Compute RMS ratio and collect Tmag values
+    # Compute RMS ratio and collect Tmag and color values
     rms_ratio = []
     tmag_values = []
+    color_values = []
 
     for i in range(len(tic_ids1)):
         if rms2[i] != 0:  # Avoid division by zero
             ratio = rms1[i] / rms2[i]
             rms_ratio.append(ratio)
             tmag_values.append(tmag1[i])
+            color_values.append(color[i])
 
-    return tmag_values, rms_ratio, color
+    return tmag_values, rms_ratio, color_values
 
 
-def plot_rms_ratio(tmag_values, rms_ratio):
+def plot_rms_ratio(tmag_values, rms_ratio, color_values):
     plt.figure(figsize=(8, 5))
-    # add colorbar based on color
+    scatter = plt.scatter(tmag_values, rms_ratio, c=color_values, cmap='viridis', alpha=0.7)
+    plt.colorbar(scatter, label='Color')  # Add colorbar for the COLOR field
 
-    plt.scatter(tmag_values, rms_ratio, color='blue', alpha=0.7)
     plt.xlabel('Tmag')
     plt.ylabel('CCD / CMOS RMS Ratio')
     plt.grid(True)
@@ -62,8 +64,8 @@ def plot_rms_ratio(tmag_values, rms_ratio):
 
 def main():
     data1, data2 = load_json_files()
-    tmag_values, rms_ratio = compute_rms_ratios(data1, data2)
-    plot_rms_ratio(tmag_values, rms_ratio)
+    tmag_values, rms_ratio, color_values = compute_rms_ratios(data1, data2)
+    plot_rms_ratio(tmag_values, rms_ratio, color_values)
 
 
 if __name__ == "__main__":
