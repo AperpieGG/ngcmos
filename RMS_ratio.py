@@ -26,6 +26,7 @@ def compute_rms_ratios(data1, data2):
     tic_ids1 = data1["TIC_IDs"]
     rms1 = data1["RMS_list"]
     tmag1 = data1["Tmag_list"]
+    color = data1["COLOR"]
 
     tic_ids2 = data2["TIC_IDs"]
     rms2 = data2["RMS_list"]
@@ -43,15 +44,16 @@ def compute_rms_ratios(data1, data2):
             rms_ratio.append(ratio)
             tmag_values.append(tmag1[i])
 
-    return tmag_values, rms_ratio
+    return tmag_values, rms_ratio, color
 
 
 def plot_rms_ratio(tmag_values, rms_ratio):
     plt.figure(figsize=(8, 5))
+    # add colorbar based on color
+
     plt.scatter(tmag_values, rms_ratio, color='blue', alpha=0.7)
     plt.xlabel('Tmag')
-    plt.ylabel('RMS Ratio')
-    plt.title('RMS Ratio as a function of Tmag')
+    plt.ylabel('CCD / CMOS RMS Ratio')
     plt.grid(True)
     plt.ylim(-1, 10)
     plt.gca().invert_xaxis()
