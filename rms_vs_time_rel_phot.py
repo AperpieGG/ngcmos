@@ -6,35 +6,43 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, get_rel_phot_files, read_phot_file, bin_time_flux_error
 
 
-def plot_rms_time(table, num_stars, lower_limit, upper_limit):
-    # Filter by Tmag range
-    filtered_table = table[(table['Tmag'] >= lower_limit) & (table['Tmag'] <= upper_limit)]
-    unique_tmags = np.unique(filtered_table['Tmag'])
-    print('Total stars in brightness range:', len(unique_tmags))
+def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit=20):
+    # If a specific TIC ID is provided, filter for that star
+    if tic_id is not None:
+        table = table[table['TIC_ID'] == tic_id]
+        if len(table) == 0:
+            print(f"No data found for TIC ID {tic_id}.")
+            return
+        print(f"Plotting RMS for single star with TIC ID {tic_id}")
+    else:
+        # Filter for the specified Tmag range for multiple stars
+        table = table[(table['Tmag'] >= lower_limit) & (table['Tmag'] <= upper_limit)]
+        unique_tmags = np.unique(table['Tmag'])
+        print('Total stars in brightness range:', len(unique_tmags))
 
-    # Initialize arrays to hold star data
-    stars_rms_list = []
+        # Initialize arrays to hold star data
+        stars_rms_list = []
 
-    # Iterate over each Tmag to calculate the initial RMS for each star
-    for Tmag in unique_tmags:
-        Tmag_data = filtered_table[filtered_table['Tmag'] == Tmag]
-        rel_flux = Tmag_data['Relative_Flux']
+        # Calculate the initial RMS for each star in the filtered range
+        for Tmag in unique_tmags:
+            Tmag_data = table[table['Tmag'] == Tmag]
+            rel_flux = Tmag_data['Relative_Flux']
+            initial_rms = np.std(rel_flux)
+            stars_rms_list.append((Tmag_data, initial_rms))
 
-        # Calculate initial RMS and append it to list
-        initial_rms = np.std(rel_flux)
-        stars_rms_list.append((Tmag_data, initial_rms))
-
-    # Sort stars by initial RMS value and select top `num_stars`
-    sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:num_stars]
-    print(f'Selected {len(sorted_stars)} stars with lowest RMS values.')
+        # Sort stars by initial RMS and select top `num_stars`
+        sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:num_stars]
+        print(f'Selected {len(sorted_stars)} stars with lowest RMS values.')
 
     # Prepare data for plotting
     average_rms_values = []
     times_binned = []
     max_binning = 60
 
-    for Tmag_data, initial_rms in sorted_stars:
-        # Check for the column name in the dtype of the structured array
+    # Select stars for plotting based on `num_stars` or single star with `tic_id`
+    star_data = sorted_stars if tic_id is None else [(table, None)]
+
+    for Tmag_data, initial_rms in star_data:
         if 'Time_BJD' in Tmag_data.dtype.names:
             jd_mid = Tmag_data['Time_BJD']
         elif 'Time_JD' in Tmag_data.dtype.names:
@@ -58,14 +66,13 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit):
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
 
-        # Print details for each selected star
         print(f'Star TIC_ID = {current_tic_id}, Tmag = {Tmag_data["Tmag"][0]}, RMS = {RMS_values[0]:.4f}')
 
     if not average_rms_values:
         print("No stars found. Skipping this photometry file.")
         return
 
-    # Calculate average RMS across all selected stars
+    # Calculate average RMS across selected stars
     average_rms_values = np.mean(average_rms_values, axis=0) * 1e6  # Convert to ppm
 
     # Generate binning times
@@ -92,18 +99,18 @@ def plot_rms_time(table, num_stars, lower_limit, upper_limit):
     plt.show()
 
 
-def run_for_one(phot_file, tic_id=None):
+def run_for_one(phot_file, tic_id):
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, tic_id, lower_limit=0, upper_limit=20)
+    plot_rms_time(phot_table, tic_id=tic_id, lower_limit=0, upper_limit=20)
 
 
 def run_for_more(phot_file, num_stars, lower_limit, upper_limit):
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, num_stars, lower_limit, upper_limit)
+    plot_rms_time(phot_table, num_stars=num_stars, lower_limit=lower_limit, upper_limit=upper_limit)
 
 
 if __name__ == "__main__":
@@ -111,9 +118,9 @@ if __name__ == "__main__":
     phot_files = get_rel_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
-    parser.add_argument('--num_stars', type=int, default=0, help='Number of stars to plot')
-    parser.add_argument('--tic_id', type=int, help='plot the time vs. binned RMS for a particular star')
+    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID or multiple stars')
+    parser.add_argument('--num_stars', type=int, help='Number of stars to plot (only if tic_id is not provided)')
+    parser.add_argument('--tic_id', type=int, help='Plot the time vs. binned RMS for a particular star')
     parser.add_argument('--lower_limit', type=float, default=10.5, help='Lower limit for Tmag')
     parser.add_argument('--upper_limit', type=float, default=11.5, help='Upper limit for Tmag')
     args = parser.parse_args()
@@ -121,6 +128,8 @@ if __name__ == "__main__":
     if args.tic_id is not None:
         for phot_file in phot_files:
             run_for_one(phot_file, args.tic_id)
-    else:
+    elif args.num_stars is not None:
         for phot_file in phot_files:
             run_for_more(phot_file, args.num_stars, args.lower_limit, args.upper_limit)
+    else:
+        print("Please specify either --tic_id for a single star or --num_stars for multiple stars.")
