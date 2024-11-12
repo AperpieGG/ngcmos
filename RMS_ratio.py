@@ -2,6 +2,9 @@
 import json
 import glob
 import matplotlib.pyplot as plt
+from utils import plot_images
+
+plot_images()
 
 
 def load_json_files():
@@ -50,6 +53,8 @@ def plot_rms_ratio(tmag_values, rms_ratio):
     plt.ylabel('RMS Ratio')
     plt.title('RMS Ratio as a function of Tmag')
     plt.grid(True)
+    plt.ylim(-1, 10)
+    plt.gca().invert_xaxis()
     plt.show()
 
 
