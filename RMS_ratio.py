@@ -25,16 +25,16 @@ def compute_rms_ratios(data1, data2):
 
     # Ensure the data files have the same TIC_IDs
     for entry1, entry2 in zip(data1, data2):
-        if entry1['TIC_ID'] == entry2['TIC_ID']:
-            rms1 = entry1['RMS']
-            rms2 = entry2['RMS']
-            tmag = entry1['Tmag']
+        if entry1['TIC_IDs'] == entry2['TIC_IDs']:
+            rms1 = entry1['RMS_list']
+            rms2 = entry2['RMS_list']
+            tmag = entry1['Tmag_list']
             if rms2 != 0:  # Avoid division by zero
                 ratio = rms1 / rms2
                 rms_ratio.append(ratio)
                 tmag_values.append(tmag)
         else:
-            raise ValueError(f"Mismatched TIC_IDs: {entry1['TIC_ID']} and {entry2['TIC_ID']}")
+            raise ValueError(f"Mismatched TIC_IDs: {entry1['TIC_IDs']} and {entry2['TIC_IDs']}")
 
     return tmag_values, rms_ratio
 
