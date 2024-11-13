@@ -27,28 +27,25 @@ def delete_uncompressed_images(directory):
         print(f"{file} deleted.")
 
 
+def delete_png_files(directory):
+    # Get a list of all .png files in the directory
+    png_files = [f for f in os.listdir(directory) if f.startswith('IMAGE') and f.endswith('.png')]
+
+    # Delete each .png file
+    for file in png_files:
+        os.remove(os.path.join(directory, file))
+        print(f"{file} deleted.")
+
+
 def main():
     # Get the current working directory
-    parent_directory = os.getcwd()
+    directory = os.getcwd()
 
-    # Get a list of subdirectories inside the parent directory
-    subdirectories = [name for name in os.listdir(parent_directory) if
-                      os.path.isdir(os.path.join(parent_directory, name))]
+    print('The directory is:', directory)
 
-    print('The subdirectories are:', subdirectories)
-
-    # Iterate over each subdirectory
-    for subdirectory in subdirectories:
-        if subdirectory.startswith("action") and subdirectory.endswith("_observeField"):
-            # Form the full path to the subdirectory
-            subdirectory_path = os.path.join(parent_directory, subdirectory)
-
-            # Change the working directory to the subdirectory
-            os.chdir(subdirectory_path)
-
-            print(f"Processing subdirectory: {subdirectory_path}")
-            compress_fits_files(subdirectory_path)
-            delete_uncompressed_images(subdirectory_path)
+    compress_fits_files(directory)
+    delete_uncompressed_images(directory)
+    delete_png_files(directory)
 
 
 if __name__ == "__main__":
