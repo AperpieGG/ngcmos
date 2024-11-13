@@ -257,9 +257,10 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
     return cumulative_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json_file):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size,
+                                               json_file)
     tic_ids = np.unique(filtered_table['tic_id'])
     print(f'Number of comparison stars after the filter table in terms of color/mag: {len(tic_ids)}')
 
@@ -413,7 +414,7 @@ def main():
             else:
                 # Find the best comparison stars
                 best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
-                                                   crop_size, json)
+                                                   crop_size, json_file)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
