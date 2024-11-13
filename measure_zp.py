@@ -67,7 +67,7 @@ def main():
         plt.ylabel('Frequency')
         plt.yscale('log')
         plt.legend(loc='upper right')
-        plt.show()
+        # plt.show()
 
         # save the results to a json file
         with open(f'zp{APERTURE}.json', 'w') as json_file:
