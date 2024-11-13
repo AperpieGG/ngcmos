@@ -182,12 +182,14 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
     print(f'RMS of comparison stars: {comp_star_rms}')
     print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
 
-    # Initialize mask for all stars to True
+    # Initialize mask and storage for good and bad stars' data
     comp_star_mask = np.array([True] * len(comp_star_rms))
-    cumulative_mask = np.array([True] * len(comp_star_rms))  # Cumulative mask
+    cumulative_mask = np.array([True] * len(comp_star_rms))
     i = 0
-    excluded_count = 0  # Counter for excluded RMS values
-    excluded_rms_values = []  # List to store excluded RMS values
+
+    # Containers to store final good/bad RMS and magnitudes for plotting
+    final_good_rms, final_good_mags = [], []
+    final_bad_rms, final_bad_mags = [], []
 
     while True:
         i += 1
@@ -195,7 +197,6 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
         comp_rms = np.copy(comp_star_rms[cumulative_mask])
         N1 = len(comp_mags)
 
-        # Exit if no valid stars
         if N1 == 0:
             print("No valid comparison stars left after filtering.")
             break
@@ -204,7 +205,6 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
         dig = np.digitize(comp_mags, edges)
         mag_nodes = (edges[:-1] + edges[1:]) / 2.
 
-        # Calculate std_medians based on bins
         std_medians = []
         for j in range(1, len(edges)):
             in_bin = comp_rms[dig == j]
@@ -215,9 +215,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
         mag_nodes = mag_nodes[valid_mask]
         std_medians = std_medians[valid_mask]
 
-        # Handle case with too few points for fitting
         if len(mag_nodes) < 4:
-            print("Too few valid points for fitting. Falling back to linear fit.")
             if len(mag_nodes) > 1:
                 mod = np.interp(comp_mags, mag_nodes, std_medians)
                 mod0 = np.interp(comp_mags0, mag_nodes, std_medians)
@@ -225,50 +223,37 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
                 print("Not enough data for interpolation. Skipping iteration.")
                 break
         else:
-            # Fit a spline to the medians
             spl = Spline(mag_nodes, std_medians)
             mod = spl(comp_mags)
             mod0 = spl(comp_mags0)
 
         std = np.std(comp_rms - mod)
         new_comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
-
-        # Update cumulative mask
         cumulative_mask = cumulative_mask & new_comp_star_mask
 
-        # Identify excluded stars and increment the counter
-        excluded_in_this_iteration = comp_star_rms[~cumulative_mask]
-        excluded_count += len(excluded_in_this_iteration)
-        excluded_rms_values.extend(excluded_in_this_iteration)
+        # Store final good/bad data for plotting after the iterations finish
+        final_good_rms = comp_star_rms[cumulative_mask]
+        final_good_mags = comp_mags0[cumulative_mask]
+        final_bad_rms = comp_star_rms[~cumulative_mask]
+        final_bad_mags = comp_mags0[~cumulative_mask]
 
-        # Print the number of stars included and excluded
-        N2 = np.sum(cumulative_mask)
-        print(f"Iteration {i}:")
-        print(f"Stars included: {N2}, Stars excluded: {N1 - N2}")
-        print(f'The RMS of the excluded stars: {excluded_in_this_iteration}')
-
-        # Exit condition
-        if N1 == N2 or i > 10:
+        if N1 == np.sum(cumulative_mask) or i > 10:
             break
 
-        # Collect RMS and magnitude data for plotting after the iterations finish
-        good_rms = comp_star_rms[cumulative_mask]
-        good_mags = comp_mags0[cumulative_mask]
-        bad_rms = comp_star_rms[~cumulative_mask]
-        bad_mags = comp_mags0[~cumulative_mask]
-
-        # Plot RMS vs. magnitude for good and bad comparison stars
-        plt.figure(figsize=(10, 6))
-        plt.scatter(good_mags, good_rms, color='black', label='Good comparison stars')
-        plt.scatter(bad_mags, bad_rms, color='red', label='Bad comparison stars')
-        plt.xlabel('Magnitude')
-        plt.ylabel('RMS')
-        plt.legend()
-        plt.title('RMS vs. Magnitude of Comparison Stars')
-        plt.show()
+    # Plot RMS vs. magnitude for good and bad comparison stars after all iterations
+    plt.figure(figsize=(10, 6))
+    plt.scatter(final_good_mags, final_good_rms, color='black', label='Good comparison stars')
+    plt.scatter(final_bad_mags, final_bad_rms, color='red', label='Bad comparison stars')
+    plt.xlabel('Magnitude')
+    plt.ylabel('RMS')
+    dimmest_mag = comp_mags0[cumulative_mask].min()
+    plt.legend()
+    plt.ylim(0, 1.5 * comp_star_rms[comp_mags0 == dimmest_mag].max())
+    plt.title('RMS vs. Magnitude of Comparison Stars')
+    plt.show()
 
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
-    print(f'RMS values after filtering: {(comp_star_rms[cumulative_mask])}')
+    print(f'RMS values after filtering: {comp_star_rms[cumulative_mask]}')
 
     return cumulative_mask, comp_star_rms, i
 
