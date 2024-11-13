@@ -98,7 +98,7 @@ def extract_region_coordinates(region):
     return x_min, x_max, y_min, y_max
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file):
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
 
@@ -115,10 +115,10 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json)
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
 
-    # Load the JSON data
-    if json:
+    # Then in your main code, make these changes:
+    if json_file:  # Check if json_file is set (instead of json)
         with open('fwhm_positions.json', 'r') as file:
-            regions_data = json.load(file)
+            regions_data = json.load(file)  # Use `json.load` with the module, not the boolean
 
         # Extract coordinates for central and similar regions
         region_coordinates = []
@@ -378,7 +378,7 @@ def main():
     parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
     parser.add_argument('--dmf', type=float, default=1.5, help='Fainter comparison star threshold (default: 1.5 mag)')
     parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
-    parser.add_argument('--json', action='store_true', help='Use JSON file for region filtering (optional)')
+    parser.add_argument('--json_file', action='store_true', help='Use JSON file for region filtering (optional)')
     # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
 
