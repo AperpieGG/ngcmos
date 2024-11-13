@@ -246,9 +246,9 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
     plt.scatter(final_bad_mags, final_bad_rms, color='red', label='Bad comparison stars')
     plt.xlabel('Magnitude')
     plt.ylabel('RMS')
-    dimmest_mag = comp_mags0[cumulative_mask].min()
+    rms_dim_mag = comp_mags0[cumulative_mask].min()
     plt.legend()
-    plt.ylim(0, 1.5 * comp_star_rms[comp_mags0 == dimmest_mag].max())
+    plt.ylim(rms_dim_mag - 0.01, rms_dim_mag + 0.01)
     plt.title('RMS vs. Magnitude of Comparison Stars')
     plt.show()
 
