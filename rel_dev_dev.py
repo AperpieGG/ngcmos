@@ -251,6 +251,22 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
         if N1 == N2 or i > 10:
             break
 
+        # Collect RMS and magnitude data for plotting after the iterations finish
+        good_rms = comp_star_rms[cumulative_mask]
+        good_mags = comp_mags0[cumulative_mask]
+        bad_rms = comp_star_rms[~cumulative_mask]
+        bad_mags = comp_mags0[~cumulative_mask]
+
+        # Plot RMS vs. magnitude for good and bad comparison stars
+        plt.figure(figsize=(10, 6))
+        plt.scatter(good_mags, good_rms, color='black', label='Good comparison stars')
+        plt.scatter(bad_mags, bad_rms, color='red', label='Bad comparison stars')
+        plt.xlabel('Magnitude')
+        plt.ylabel('RMS')
+        plt.legend()
+        plt.title('RMS vs. Magnitude of Comparison Stars')
+        plt.show()
+
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
     print(f'RMS values after filtering: {(comp_star_rms[cumulative_mask])}')
 
