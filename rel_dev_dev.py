@@ -389,7 +389,7 @@ def main():
     DM_FAINT = args.dmf
     camera = args.cam
     crop_size = args.crop
-    json = args.json
+    json = args.json_file
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
