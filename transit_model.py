@@ -4,6 +4,9 @@ import batman
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+
+from panel import GridSpec
+
 from utils import plot_images, bin_time_flux_error
 import argparse
 
@@ -69,22 +72,27 @@ time1, flux_adjusted1, flux_err1, time_binned1, dt_flux_adjusted1, fluxerr_binne
 time2, flux_adjusted2, flux_err2, time_binned2, dt_flux_adjusted2, fluxerr_binned2, model_flux2 = process_camera(cam2, target)
 
 # Plotting
-fig, axes = plt.subplots(1, 2, sharey=True, hsapce=0.0, figsize=(12, 6))
-axes[0].plot(time1, flux_adjusted1, '.', label=f"{cam1} Unbinned", color="grey", alpha=0.5)
-axes[0].plot(time_binned1, dt_flux_adjusted1, 'o', label=f"{cam1} 5 min bin", color="red")
-axes[0].plot(time_binned1, model_flux1, label=f"{cam1} Transit Model", color="black", linestyle='-')
-axes[0].set_xlabel("Time (BJD)")
-axes[0].set_ylabel("Relative flux")
-# axes[0].legend()
-axes[0].set_title(f"{cam1} Data")
+# Create figure and gridspec with no spacing between subplots
+fig = plt.figure()
+gs = GridSpec(1, 2, width_ratios=[1, 1], wspace=0)  # `wspace=0` removes horizontal space
+# Create subplots
+ax1 = fig.add_subplot(gs[0, 0])
+ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)  # Share the y-axis with the first subplot
+# Plot data for cam1
+ax1.plot(time1, flux_adjusted1, '.', label=f"{cam1} Unbinned", color="grey", alpha=0.5)
+ax1.plot(time_binned1, dt_flux_adjusted1, 'o', label=f"{cam1} 5 min bin", color="red")
+ax1.plot(time_binned1, model_flux1, label=f"{cam1} Transit Model", color="black", linestyle='-')
+ax1.set_xlabel("Time (BJD)")
+ax1.set_ylabel("Relative flux")
+ax1.set_title(f"{cam1} Data")
+# Plot data for cam2
+ax2.plot(time2, flux_adjusted2, '.', label=f"{cam2} Unbinned", color="grey", alpha=0.5)
+ax2.plot(time_binned2, dt_flux_adjusted2, 'o', label=f"{cam2} 5 min bin", color="blue")
+ax2.plot(time_binned2, model_flux2, label=f"{cam2} Transit Model", color="black", linestyle='-')
+ax2.set_xlabel("Time (BJD)")
+ax2.set_title(f"{cam2} Data")
 
-axes[1].plot(time2, flux_adjusted2, '.', label=f"{cam2} Unbinned", color="grey", alpha=0.5)
-axes[1].plot(time_binned2, dt_flux_adjusted2, 'o', label=f"{cam2} 5 min bin", color="red")
-axes[1].plot(time_binned2, model_flux2, label=f"{cam2} Transit Model", color="black", linestyle='-')
-axes[1].set_xlabel("Time (BJD)")
-# axes[1].legend()
-axes[1].set_title(f"{cam2} Data")
-
-# Adjust layout and show
-plt.tight_layout()
+# Adjust layout
+plt.subplots_adjust(wspace=0)  # Ensures no space between the plots
+# Show the plot
 plt.show()
