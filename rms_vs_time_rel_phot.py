@@ -59,7 +59,7 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
         times_binned.append(time_seconds)
 
         print(
-            f'Star TIC_ID = {Tmag_data["TIC_ID"][0]}, Tmag = {Tmag_data["Tmag"][0]}, Initial RMS = {initial_rms:.3f}')
+            f'Star TIC_ID = {Tmag_data["TIC_ID"][0]}, Tmag = {Tmag_data["Tmag"][0]}, Initial RMS = {initial_rms:.4f}')
 
     # Check if data is empty
     if not average_rms_values:
