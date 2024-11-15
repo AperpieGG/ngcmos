@@ -130,9 +130,9 @@ if __name__ == "__main__":
 
     if args.tic_id is not None:
         for phot_file in phot_files:
-            run_for_one(phot_file, args.tic_id, args.EXP, args.bin)
+            run_for_one(phot_file, args.tic_id, args.exp, args.bin)
     elif args.num_stars is not None:
         for phot_file in phot_files:
-            run_for_more(phot_file, args.num_stars, args.lower_limit, args.upper_limit, args.EXP, args.bin)
+            run_for_more(phot_file, args.num_stars, args.bl, args.fl, args.exp, args.bin)
     else:
         print("Please specify either --tic_id for a single star or --num_stars for multiple stars.")
