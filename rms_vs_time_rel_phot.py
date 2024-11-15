@@ -40,11 +40,12 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
     star_data = sorted_stars if tic_id is None else [(table, None)]
 
     for Tmag_data, initial_rms in star_data:
-        jd_mid = Tmag_data.get('Time_BJD') or Tmag_data.get('Time_JD')
-        if jd_mid is None:
-            print("Neither 'Time_BJD' nor 'Time_JD' found in data.")
-            continue
-
+        if 'Time_BJD' in Tmag_data.dtype.names:
+            jd_mid = Tmag_data['Time_BJD']
+        elif 'Time_JD' in Tmag_data.dtype.names:
+            jd_mid = Tmag_data['Time_JD']
+        else:
+            raise ValueError("Neither 'Time_BJD' nor 'Time_JD' found in Tmag_data columns.")
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         RMS_values, time_seconds = [], []
