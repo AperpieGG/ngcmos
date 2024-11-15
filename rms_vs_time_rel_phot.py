@@ -36,7 +36,7 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
 
     # Prepare arrays
     average_rms_values, times_binned = [], []
-    max_binning = bin_factor
+    max_binning = int(bin_factor)
     star_data = sorted_stars if tic_id is None else [(table, None)]
 
     for Tmag_data, initial_rms in star_data:
