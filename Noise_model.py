@@ -123,7 +123,18 @@ def main():
         # Append other data points as before
         if tic_data['RMS'][0] is not None:
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
-            color_list.append(tic_data['COLOR'][0])
+
+        # Handle COLOR column
+        if 'COLOR' in data.columns.names:  # Check if COLOR column exists
+            try:
+                color_list.append(tic_data['COLOR'][0])
+            except (IndexError, TypeError):
+                print(f"Missing or invalid COLOR value for TIC_ID {tic_id}. Defaulting to black.")
+                color_list.append("black")  # Default to black if COLOR is missing
+        else:
+            print(f"'COLOR' column missing in FITS file. Defaulting all data to black.")
+            color_list.append("black")  # Default to black for all if column is missing
+
         sky_list.append(tic_data['Sky'][0])
         Tmags_list.append(tic_data['Tmag'][0])
 
