@@ -73,7 +73,7 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
         return
 
     # Calculate average RMS across selected stars
-    average_rms_values = np.mean(average_rms_values, axis=0) * 1e6  # Convert to ppm
+    average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
 
     # Generate binning times
     binning_times = [i for i in range(1, max_binning)]
