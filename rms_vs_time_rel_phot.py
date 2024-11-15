@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, get_rel_phot_files, read_phot_file, bin_time_flux_error
 
 
-def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit=20, EXPOSURE=10):
+def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit=20, EXPOSURE=10, bin_factor=60):
     # If a specific TIC ID is provided, filter for that star
     if tic_id is not None:
         table = table[table['TIC_ID'] == tic_id]
@@ -37,7 +37,7 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
     # Prepare data for plotting
     average_rms_values = []
     times_binned = []
-    max_binning = 60
+    max_binning = int(bin_factor / EXPOSURE)
 
     # Select stars for plotting based on `num_stars` or single star with `tic_id`
     star_data = sorted_stars if tic_id is None else [(table, None)]
@@ -99,18 +99,19 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
     plt.show()
 
 
-def run_for_one(phot_file, tic_id, EXPOSURE):
+def run_for_one(phot_file, tic_id, EXPOSURE, bin_factor):
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, tic_id=tic_id, lower_limit=0, upper_limit=20, EXPOSURE=EXPOSURE)
+    plot_rms_time(phot_table, tic_id=tic_id, lower_limit=0, upper_limit=20, EXPOSURE=EXPOSURE, bin_factor=bin_factor)
 
 
-def run_for_more(phot_file, num_stars, lower_limit, upper_limit, EXPOSURE):
+def run_for_more(phot_file, num_stars, lower_limit, upper_limit, EXPOSURE, bin_factor):
     plot_images()
     current_night_directory = '.'
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-    plot_rms_time(phot_table, num_stars=num_stars, lower_limit=lower_limit, upper_limit=upper_limit, EXPOSURE=EXPOSURE)
+    plot_rms_time(phot_table, num_stars=num_stars, lower_limit=lower_limit, upper_limit=upper_limit,
+                  EXPOSURE=EXPOSURE, bin_factor=bin_factor)
 
 
 if __name__ == "__main__":
@@ -121,16 +122,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID or multiple stars')
     parser.add_argument('--num_stars', type=int, help='Number of stars to plot (only if tic_id is not provided)')
     parser.add_argument('--tic_id', type=int, help='Plot the time vs. binned RMS for a particular star')
-    parser.add_argument('--lower_limit', type=float, default=10.5, help='Lower limit for Tmag')
-    parser.add_argument('--upper_limit', type=float, default=11.5, help='Upper limit for Tmag')
-    parser.add_argument('--EXP', type=float, default=10.0, help='Exposure time in seconds')
+    parser.add_argument('--bl', type=float, default=10.5, help='Lower limit for Tmag')
+    parser.add_argument('--fl', type=float, default=11.5, help='Upper limit for Tmag')
+    parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
+    parser.add_argument('--bin', type=float, default=60, help='Maximum binning time in seconds')
     args = parser.parse_args()
 
     if args.tic_id is not None:
         for phot_file in phot_files:
-            run_for_one(phot_file, args.tic_id, args.EXP)
+            run_for_one(phot_file, args.tic_id, args.EXP, args.bin)
     elif args.num_stars is not None:
         for phot_file in phot_files:
-            run_for_more(phot_file, args.num_stars, args.lower_limit, args.upper_limit, args.EXP)
+            run_for_more(phot_file, args.num_stars, args.lower_limit, args.upper_limit, args.EXP, args.bin)
     else:
         print("Please specify either --tic_id for a single star or --num_stars for multiple stars.")
