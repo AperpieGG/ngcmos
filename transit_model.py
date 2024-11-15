@@ -69,7 +69,7 @@ time1, flux_adjusted1, flux_err1, time_binned1, dt_flux_adjusted1, fluxerr_binne
 time2, flux_adjusted2, flux_err2, time_binned2, dt_flux_adjusted2, fluxerr_binned2, model_flux2 = process_camera(cam2, target)
 
 # Plotting
-fig, axes = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
+fig, axes = plt.subplots(1, 2, sharey=True, hsapce=0.0, figsize=(12, 6))
 axes[0].plot(time1, flux_adjusted1, '.', label=f"{cam1} Unbinned", color="grey", alpha=0.5)
 axes[0].plot(time_binned1, dt_flux_adjusted1, 'o', label=f"{cam1} 5 min bin", color="red")
 axes[0].plot(time_binned1, model_flux1, label=f"{cam1} Transit Model", color="black", linestyle='-')
