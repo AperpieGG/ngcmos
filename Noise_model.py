@@ -79,19 +79,22 @@ def main():
                         'Example usage if you have CCD: RN=12.6, DC=0.00515, Aper=4, Exp=10.0, Bin=1')
     parser.add_argument('filename', type=str, help='Name of the FITS file containing photometry data')
     parser.add_argument('--bin_size', type=int, default=1, help='Bin size for noise calculations')
-    parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
-    parser.add_argument('--aper', type=int, default=6, help='Aperture size in meters')
-    parser.add_argument('--rn', type=float, default=1.56, help='Read noise in electrons')
-    parser.add_argument('--dc', type=float, default=1.6, help='Dark current in electrons per second')
-    parser.add_argument('--gain', type=float, default=1.13, help='Gain in electrons per ADU')
+    parser.add_argument('--cam', type=str, default='CMOS', help='Camera type (CMOS or CCD)')
     args = parser.parse_args()
     filename = args.filename
     bin_size = args.bin_size
-    EXPOSURE = args.exp
-    APERTURE = args.aper  # Aperture size for the telescope
-    READ_NOISE = args.rn  # Read noise in electrons
-    DARK_CURRENT = args.dc  # Dark current in electrons per second
-    GAIN = args.gain  # Gain in electrons per ADU
+    if args.cam == 'CMOS':
+        READ_NOISE = 1.56
+        DARK_CURRENT = 1.6
+        GAIN = 1.13
+        APERTURE = 5
+        EXPOSURE = 10.0
+    else:
+        READ_NOISE = 12.9
+        DARK_CURRENT = 0.00515
+        GAIN = 2
+        APERTURE = 4
+        EXPOSURE = 10.0
 
     # Get the current working directory
     current_dir = os.getcwd()
