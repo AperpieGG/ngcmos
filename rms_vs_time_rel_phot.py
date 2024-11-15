@@ -82,8 +82,8 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
     # Plot RMS over time
-    plt.figure(figsize=(6, 10))
-    plt.plot(times_binned[0], average_rms_values, 'bo')
+    plt.figure(figsize=(4, 8))
+    plt.plot(times_binned[0], average_rms_values, 'o', color='black')
     plt.plot(times_binned[0], RMS_model, '--', color='black')
     plt.axvline(x=900, color='red', linestyle='-')
     plt.xscale('log')
@@ -95,7 +95,7 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
 
-    plt.legend()
+    # plt.legend()
     plt.tight_layout()
     plt.show()
 
