@@ -83,8 +83,9 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
 
     # Plot RMS over time
     plt.figure(figsize=(6, 10))
-    plt.plot(times_binned[0], average_rms_values, 'o', label='Actual RMS')
-    plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
+    plt.plot(times_binned[0], average_rms_values, 'bo')
+    plt.plot(times_binned[0], RMS_model, '--', color='black')
+    plt.axvline(x=900, color='red', linestyle='-')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
