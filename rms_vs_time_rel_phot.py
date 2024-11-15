@@ -37,7 +37,7 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
     # Prepare data for plotting
     average_rms_values = []
     times_binned = []
-    max_binning = bin_factor
+    max_binning = int(bin_factor)
 
     # Select stars for plotting based on `num_stars` or single star with `tic_id`
     star_data = sorted_stars if tic_id is None else [(table, None)]
