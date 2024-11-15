@@ -44,11 +44,11 @@ def process_camera(cam, target):
     flux_err = np.array(data['Relative_Flux_err'])
 
     # Bin the data
-    time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 12)
+    time_binned, flux_binned, fluxerr_binned = bin_time_flux_error(time, flux, flux_err, 30)
 
     # Calculate mean of normalised data
     mean_dt_flux = np.mean(flux_binned)
-    adjustment = mean_dt_flux - (0.9968 if cam == "CMOS" else 0.998)  # Adjust for CMOS or CCD
+    adjustment = mean_dt_flux - (0.9968)  # Adjust for CMOS or CCD
 
     # Adjust flux
     dt_flux_adjusted = flux_binned - adjustment
@@ -79,7 +79,7 @@ axes[0].set_ylabel("Relative flux")
 axes[0].set_title(f"{cam1} Data")
 
 axes[1].plot(time2, flux_adjusted2, '.', label=f"{cam2} Unbinned", color="grey", alpha=0.5)
-axes[1].plot(time_binned2, dt_flux_adjusted2, 'o', label=f"{cam2} 5 min bin", color="blue")
+axes[1].plot(time_binned2, dt_flux_adjusted2, 'o', label=f"{cam2} 5 min bin", color="red")
 axes[1].plot(time_binned2, model_flux2, label=f"{cam2} Transit Model", color="black", linestyle='-')
 axes[1].set_xlabel("Time (BJD)")
 # axes[1].legend()
