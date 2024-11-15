@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 
-from panel import GridSpec
+from matplotlib.gridspec import GridSpec
 
 from utils import plot_images, bin_time_flux_error
 import argparse
