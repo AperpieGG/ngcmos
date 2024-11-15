@@ -7,7 +7,7 @@ from utils import plot_images, get_rel_phot_files, read_phot_file, bin_time_flux
 
 
 def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit=20, EXPOSURE=10, bin_factor=60):
-    # If a specific TIC ID is provided, filter for that star
+    # Filter based on TIC_ID if specified
     if tic_id is not None:
         table = table[table['TIC_ID'] == tic_id]
         if len(table) == 0:
@@ -15,76 +15,65 @@ def plot_rms_time(table, num_stars=None, tic_id=None, lower_limit=0, upper_limit
             return
         print(f"Plotting RMS for single star with TIC ID {tic_id}")
     else:
-        # Filter for the specified Tmag range for multiple stars
+        # Filter for Tmag range
         table = table[(table['Tmag'] >= lower_limit) & (table['Tmag'] <= upper_limit)]
         unique_tmags = np.unique(table['Tmag'])
         print('Total stars in brightness range:', len(unique_tmags))
 
-        # Initialize arrays to hold star data
+        # Calculate initial RMS per star
         stars_rms_list = []
-
-        # Calculate the initial RMS for each star in the filtered range
         for Tmag in unique_tmags:
             Tmag_data = table[table['Tmag'] == Tmag]
-            rel_flux = Tmag_data['Relative_Flux']
-            initial_rms = np.std(rel_flux)
+            initial_rms = np.std(Tmag_data['Relative_Flux'])
             stars_rms_list.append((Tmag_data, initial_rms))
 
-        # Sort stars by initial RMS and select top `num_stars`
+        # Sort and select stars with lowest RMS values
         sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:num_stars]
+        if not sorted_stars:
+            print("No stars found in specified range.")
+            return
         print(f'Selected {len(sorted_stars)} stars with lowest RMS values.')
 
-    # Prepare data for plotting
-    average_rms_values = []
-    times_binned = []
-    max_binning = int(bin_factor / EXPOSURE)
-
-    # Select stars for plotting based on `num_stars` or single star with `tic_id`
+    # Prepare arrays
+    average_rms_values, times_binned = [], []
+    max_binning = bin_factor
     star_data = sorted_stars if tic_id is None else [(table, None)]
 
     for Tmag_data, initial_rms in star_data:
-        if 'Time_BJD' in Tmag_data.dtype.names:
-            jd_mid = Tmag_data['Time_BJD']
-        elif 'Time_JD' in Tmag_data.dtype.names:
-            jd_mid = Tmag_data['Time_JD']
-        else:
-            raise ValueError("Neither 'Time_BJD' nor 'BJD' found in Tmag_data columns.")
+        jd_mid = Tmag_data.get('Time_BJD') or Tmag_data.get('Time_JD')
+        if jd_mid is None:
+            print("Neither 'Time_BJD' nor 'Time_JD' found in data.")
+            continue
 
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
-        current_tic_id = Tmag_data['TIC_ID'][0]
+        RMS_values, time_seconds = [], []
 
-        RMS_values = []
-        time_seconds = []
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            exposure_time_seconds = i * EXPOSURE  # 10 seconds per bin
-            RMS = np.std(dt_flux_binned)
-            RMS_values.append(RMS)
-            time_seconds.append(exposure_time_seconds)
+            RMS_values.append(np.std(dt_flux_binned))
+            time_seconds.append(i * EXPOSURE)
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
 
-        print(f'Star TIC_ID = {current_tic_id}, Tmag = {Tmag_data["Tmag"][0]}, RMS = {RMS_values[0]:.4f}')
+        print(
+            f'Star TIC_ID = {Tmag_data["TIC_ID"].iloc[0]}, Tmag = {Tmag_data["Tmag"].iloc[0]}, Initial RMS = {initial_rms:.4f}')
 
+    # Check if data is empty
     if not average_rms_values:
-        print("No stars found. Skipping this photometry file.")
+        print("No stars with valid data found for plotting.")
         return
 
-    # Calculate average RMS across selected stars
-    average_rms_values = np.mean(average_rms_values, axis=0) * 1e6  # Convert to ppm
-
-    # Generate binning times
-    binning_times = [i for i in range(1, max_binning)]
-
-    # Expected RMS decrease model
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+    # Calculate mean RMS values across stars
+    mean_rms = np.mean(average_rms_values, axis=0) * 1e6  # ppm conversion
+    binning_times = np.arange(1, max_binning)
+    rms_model = mean_rms[0] / np.sqrt(binning_times)
 
     # Plot RMS over time
     plt.figure(figsize=(6, 10))
-    plt.plot(times_binned[0], average_rms_values, 'o', color='blue', label='Actual RMS')
-    plt.plot(times_binned[0], RMS_model, '--', color='red', label='Model RMS')
+    plt.plot(times_binned[0], mean_rms, 'o', label='Actual RMS')
+    plt.plot(times_binned[0], rms_model, '--', label='Expected RMS Model')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
