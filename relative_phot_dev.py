@@ -86,9 +86,9 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size):
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
 
-    # If the target star is 12 mags or fainter, limit the comparison stars to 1000
-    if target_tmag >= 12:
-        filtered_table = filtered_table[:1000]  # Limit to the first 1000 rows
+    # # If the target star is 12 mags or fainter, limit the comparison stars to 1000
+    # if target_tmag >= 12:
+    #     filtered_table = filtered_table[:1000]  # Limit to the first 1000 rows
 
     # Get target star coordinates
     x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
@@ -357,7 +357,7 @@ def main():
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
             # Check if all the Tmag values for the tic_id are less than 14
-            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 14):
+            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12.5):
                 logger.info("")
                 logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
