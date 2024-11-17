@@ -355,11 +355,11 @@ def main():
         data_list = []
 
         # Loop through all tic_ids in the photometry file
-        for tic_id in np.unique(phot_table['tic_id'] and phot_table['Tmag'] <= 12.5):
-            # Check if all the Tmag values for the tic_id are less than 14
-            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12.5):
+        for tic_id in np.unique(phot_table['tic_id']):
+            # Check if all the Tmag values for the tic_id are less than or equal to 12.5
+            if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 12.5):  # Adjusted threshold
                 logger.info("")
-                logger.info(f"Performing relative photometry for TIC ID = {tic_id} and with Tmag = "
+                logger.info(f"Performing relative photometry for TIC ID = {tic_id} with Tmag = "
                             f"{phot_table['Tmag'][phot_table['tic_id'] == tic_id][0]:.3f}")
                 # Perform relative photometry
                 result = relative_phot(phot_table, tic_id, bin_size, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
