@@ -355,7 +355,7 @@ def main():
         data_list = []
 
         # Loop through all tic_ids in the photometry file
-        for tic_id in np.unique(phot_table['tic_id']):
+        for tic_id in np.unique(phot_table['tic_id'] and phot_table['Tmag'] <= 12.5):
             # Check if all the Tmag values for the tic_id are less than 14
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] <= 12.5):
                 logger.info("")
