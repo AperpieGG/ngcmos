@@ -7,7 +7,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error
 
 
 def filter_to_common_targets(phot_table1, phot_table2):
-    """Filter both photometry tables to include only common targets and print their TIC_IDs."""
+    """Filter both photometry tables to include only common targets and return their TIC_IDs."""
     # Find the common targets based on TIC_ID
     common_targets = np.intersect1d(phot_table1['TIC_ID'], phot_table2['TIC_ID'])
     print(f"Number of common targets: {len(common_targets)}")
@@ -16,24 +16,20 @@ def filter_to_common_targets(phot_table1, phot_table2):
     phot_table1 = phot_table1[np.isin(phot_table1['TIC_ID'], common_targets)]
     phot_table2 = phot_table2[np.isin(phot_table2['TIC_ID'], common_targets)]
 
-    # Print the common TIC_IDs
-    print("Common TIC_IDs:")
-    print(common_targets)
-
-    # Print TIC_IDs for file 1 and file 2 for verification
-    print("\nTIC_IDs in file 1 after filtering:")
-    print(phot_table1['TIC_ID'])
-
-    print("\nTIC_IDs in file 2 after filtering:")
-    print(phot_table2['TIC_ID'])
-
-    return phot_table1, phot_table2
+    return phot_table1, phot_table2, common_targets
 
 
 def plot_two_rms(phot_table1, phot_table2, label1, label2, args):
     """Generate two RMS plots in a single figure with one row and two columns."""
-    def compute_rms_values(phot_table):
+
+    def compute_rms_values(phot_table, common_targets, args):
+        """Compute RMS values for the provided photometry table using common targets."""
+        # Filter to include only common targets
+        phot_table = phot_table[np.isin(phot_table['TIC_ID'], common_targets)]
+
+        # Apply magnitude filter
         phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
+
         unique_tmags = np.unique(phot_table['Tmag'])
         print(f"Total stars in brightness range: {len(unique_tmags)}")
 
@@ -75,6 +71,10 @@ def plot_two_rms(phot_table1, phot_table2, label1, label2, args):
 
         # Expected RMS decrease model
         RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+
+        # Print selected TIC_IDs for verification
+        print("TIC_IDs used for RMS calculation:")
+        print(phot_table['TIC_ID'])
 
         return times_binned, average_rms_values, RMS_model
 
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
     parser.add_argument('file1', type=str, help='Path to the first photometry file')
     parser.add_argument('file2', type=str, help='Path to the second photometry file')
-    parser.add_argument('--num_stars', type=int, default=10, help='Number of stars to plot')
+    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot (only if tic_id is not provided)')
     parser.add_argument('--bl', type=float, default=9.5, help='Lower limit for Tmag')
     parser.add_argument('--fl', type=float, default=10.5, help='Upper limit for Tmag')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
@@ -132,7 +132,12 @@ if __name__ == "__main__":
     phot_table1 = process_file(args.file1, args)
     phot_table2 = process_file(args.file2, args)
 
-    phot_table1, phot_table2 = filter_to_common_targets(phot_table1, phot_table2)
+    # Filter to common targets and get their TIC_IDs
+    phot_table1, phot_table2, common_targets = filter_to_common_targets(phot_table1, phot_table2)
 
-    # Generate plots in a single figure
+    # Compute RMS values for both files using the same targets
+    times1, avg_rms1 = compute_rms_values(phot_table1, common_targets, args)
+    times2, avg_rms2 = compute_rms_values(phot_table2, common_targets, args)
+
+    # Plot results
     plot_two_rms(phot_table1, phot_table2, label1=args.file1, label2=args.file2, args=args)
