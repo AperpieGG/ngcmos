@@ -8,82 +8,72 @@ from utils import plot_images, read_phot_file, bin_time_flux_error
 
 def filter_to_common_targets(phot_table1, phot_table2):
     """Filter both photometry tables to include only common targets and return their TIC_IDs."""
-    # Find the common targets based on TIC_ID
     common_targets = np.intersect1d(phot_table1['TIC_ID'], phot_table2['TIC_ID'])
     print(f"Number of common targets: {len(common_targets)}")
 
-    # Filter each table to include only common targets
     phot_table1 = phot_table1[np.isin(phot_table1['TIC_ID'], common_targets)]
     phot_table2 = phot_table2[np.isin(phot_table2['TIC_ID'], common_targets)]
+
+    print("Common TIC_IDs:")
+    print(common_targets)
 
     return phot_table1, phot_table2, common_targets
 
 
-def plot_two_rms(phot_table1, phot_table2, label1, label2, args):
+def compute_rms_values(phot_table, common_targets, args):
+    """Compute RMS values for the provided photometry table using common targets."""
+    phot_table = phot_table[np.isin(phot_table['TIC_ID'], common_targets)]
+    phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
+
+    unique_tmags = np.unique(phot_table['Tmag'])
+    print(f"Total stars in brightness range: {len(unique_tmags)}")
+
+    stars_rms_list = []
+    for Tmag in unique_tmags:
+        Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
+        rel_flux = Tmag_data['Relative_Flux']
+        initial_rms = np.std(rel_flux)
+        stars_rms_list.append((Tmag_data, initial_rms))
+
+    sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:args.num_stars]
+    print(f"Selected {len(sorted_stars)} stars with lowest RMS values.")
+
+    average_rms_values = []
+    times_binned = []
+    max_binning = int(args.bin)
+
+    for Tmag_data, initial_rms in sorted_stars:
+        jd_mid = Tmag_data['Time_BJD']
+        rel_flux = Tmag_data['Relative_Flux']
+        rel_fluxerr = Tmag_data['Relative_Flux_err']
+        RMS_values = []
+        time_seconds = []
+        for i in range(1, max_binning):
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
+            exposure_time_seconds = i * args.exp
+            RMS = np.std(dt_flux_binned)
+            RMS_values.append(RMS)
+            time_seconds.append(exposure_time_seconds)
+
+        average_rms_values.append(RMS_values)
+        times_binned.append(time_seconds)
+
+    average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
+    times_binned = times_binned[0]  # Use the first time bin set
+
+    binning_times = [i for i in range(1, max_binning)]
+    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+
+    print("TIC_IDs used for RMS calculation:")
+    print(phot_table['TIC_ID'])
+
+    return times_binned, average_rms_values, RMS_model
+
+
+def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """Generate two RMS plots in a single figure with one row and two columns."""
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
 
-    def compute_rms_values(phot_table, common_targets, args):
-        """Compute RMS values for the provided photometry table using common targets."""
-        # Filter to include only common targets
-        phot_table = phot_table[np.isin(phot_table['TIC_ID'], common_targets)]
-
-        # Apply magnitude filter
-        phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
-
-        unique_tmags = np.unique(phot_table['Tmag'])
-        print(f"Total stars in brightness range: {len(unique_tmags)}")
-
-        stars_rms_list = []
-        for Tmag in unique_tmags:
-            Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
-            rel_flux = Tmag_data['Relative_Flux']
-            initial_rms = np.std(rel_flux)
-            stars_rms_list.append((Tmag_data, initial_rms))
-
-        sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:args.num_stars]
-        print(f"Selected {len(sorted_stars)} stars with lowest RMS values.")
-
-        average_rms_values = []
-        times_binned = []
-        max_binning = int(args.bin)
-
-        for Tmag_data, initial_rms in sorted_stars:
-            jd_mid = Tmag_data['Time_BJD']
-            rel_flux = Tmag_data['Relative_Flux']
-            rel_fluxerr = Tmag_data['Relative_Flux_err']
-            RMS_values = []
-            time_seconds = []
-            for i in range(1, max_binning):
-                time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-                exposure_time_seconds = i * args.exp
-                RMS = np.std(dt_flux_binned)
-                RMS_values.append(RMS)
-                time_seconds.append(exposure_time_seconds)
-
-            average_rms_values.append(RMS_values)
-            times_binned.append(time_seconds)
-
-        average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
-        times_binned = times_binned[0]  # Use the first time bin set
-
-        # Generate binning times
-        binning_times = [i for i in range(1, max_binning)]
-
-        # Expected RMS decrease model
-        RMS_model = average_rms_values[0] / np.sqrt(binning_times)
-
-        # Print selected TIC_IDs for verification
-        print("TIC_IDs used for RMS calculation:")
-        print(phot_table['TIC_ID'])
-
-        return times_binned, average_rms_values, RMS_model
-
-    # Compute RMS values for both files
-    times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1)
-    times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2)
-
-    # Create subplots
-    fig, axs = plt.subplots(1, 2, figsize=(6, 8), sharey=True)
     axs[0].plot(times1, avg_rms1, 'o', label=label1, color='black')
     axs[0].plot(times1, RMS_model1, '--', color='black')
     axs[0].axvline(x=900, color='red', linestyle='-')
@@ -91,18 +81,17 @@ def plot_two_rms(phot_table1, phot_table2, label1, label2, args):
     axs[0].set_yscale('log')
     axs[0].set_xlabel('Exposure time (s)')
     axs[0].set_ylabel('RMS (ppm)')
+    axs[0].set_title(f"RMS Plot for {label1}")
+    axs[0].legend()
 
     axs[1].plot(times2, avg_rms2, 'o', label=label2, color='black')
     axs[1].plot(times2, RMS_model2, '--', color='black')
     axs[1].axvline(x=900, color='red', linestyle='-')
     axs[1].set_xscale('log')
     axs[1].set_xlabel('Exposure time (s)')
+    axs[1].set_title(f"RMS Plot for {label2}")
+    axs[1].legend()
 
-    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().tick_params(axis='y', which='minor', length=4)
-
-    # Adjust the layout and show the plot
     plt.tight_layout()
     plt.show()
 
@@ -128,16 +117,12 @@ if __name__ == "__main__":
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     args = parser.parse_args()
 
-    # Process files sequentially
     phot_table1 = process_file(args.file1, args)
     phot_table2 = process_file(args.file2, args)
 
-    # Filter to common targets and get their TIC_IDs
     phot_table1, phot_table2, common_targets = filter_to_common_targets(phot_table1, phot_table2)
 
-    # Compute RMS values for both files using the same targets
-    times1, avg_rms1 = compute_rms_values(phot_table1, common_targets, args)
-    times2, avg_rms2 = compute_rms_values(phot_table2, common_targets, args)
+    times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, common_targets, args)
+    times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, common_targets, args)
 
-    # Plot results
-    plot_two_rms(phot_table1, phot_table2, label1=args.file1, label2=args.file2, args=args)
+    plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
