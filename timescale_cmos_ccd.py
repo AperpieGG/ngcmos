@@ -82,17 +82,18 @@ def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
     axs[0].set_yscale('log')
     axs[0].set_xlabel('Exposure time (s)')
     axs[0].set_ylabel('RMS (ppm)')
+    axs[0].set_title(f'Model for {label1}')
 
     axs[1].plot(times2, avg_rms2, 'o', label=label2, color='black')
     axs[1].plot(times2, RMS_model2, '--', color='black')
     axs[1].axvline(x=900, color='red', linestyle='-')
     axs[1].set_xscale('log')
     axs[1].set_xlabel('Exposure time (s)')
+    axs[1].set_title(f'Model for {label2}')
 
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
-    plt.legend()
     plt.tight_layout()
     plt.show()
 
