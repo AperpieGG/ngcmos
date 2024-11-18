@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import argparse
+import json
 import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
@@ -85,20 +86,40 @@ def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
     axs[0].set_yscale('log')
     axs[0].set_xlabel('Exposure time (s)')
     axs[0].set_ylabel('RMS (ppm)')
-    axs[0].set_title(f'Model for {label1}')
 
     axs[1].plot(times2, avg_rms2, 'o', label=label2, color='black')
     axs[1].plot(times2, RMS_model2, '--', color='black')
     axs[1].axvline(x=900, color='red', linestyle='-')
     axs[1].set_xscale('log')
     axs[1].set_xlabel('Exposure time (s)')
-    axs[1].set_title(f'Model for {label2}')
 
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
     plt.tight_layout()
     plt.show()
+
+    # Save results to a JSON file
+    results = {
+        "file1": {
+            "label": 'CMOS',
+            "times": list(times1),
+            "avg_rms": list(avg_rms1),
+            "rms_model": list(RMS_model1)
+        },
+        "file2": {
+            "label": 'CCD',
+            "times": list(times2),
+            "avg_rms": list(avg_rms2),
+            "rms_model": list(RMS_model2)
+        }
+    }
+
+    with open("rms_vs_timescale.json", "w") as outfile:
+        json.dump(results, outfile, indent=4)
+    print("RMS vs Timescale results saved to rms_vs_timescale.json")
+
+
 
 
 def process_file(phot_file, args):
