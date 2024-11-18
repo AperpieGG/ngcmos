@@ -6,6 +6,15 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 
 
+def filter_to_common_targets(phot_table1, phot_table2):
+    """Filter both photometry tables to include only common targets."""
+    common_targets = np.intersect1d(phot_table1['TIC_ID'], phot_table2['TIC_ID'])
+    print(f"Number of common targets: {len(common_targets)}")
+    phot_table1 = phot_table1[np.isin(phot_table1['TIC_ID'], common_targets)]
+    phot_table2 = phot_table2[np.isin(phot_table2['TIC_ID'], common_targets)]
+    return phot_table1, phot_table2
+
+
 def plot_two_rms(phot_table1, phot_table2, label1, label2, args):
     """Generate two RMS plots in a single figure with one row and two columns."""
     def compute_rms_values(phot_table):
@@ -107,6 +116,8 @@ if __name__ == "__main__":
     # Process files sequentially
     phot_table1 = process_file(args.file1, args)
     phot_table2 = process_file(args.file2, args)
+
+    phot_table1, phot_table2 = filter_to_common_targets(phot_table1, phot_table2)
 
     # Generate plots in a single figure
     plot_two_rms(phot_table1, phot_table2, label1=args.file1, label2=args.file2, args=args)
