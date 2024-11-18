@@ -59,7 +59,7 @@ def plot_two_rms(phot_table1, phot_table2, label1, label2, args):
     times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2)
 
     # Create subplots
-    fig, axs = plt.subplots(1, 2, figsize=(6, 12), sharey=True)
+    fig, axs = plt.subplots(1, 2, figsize=(6, 10), sharey=True)
     axs[0].plot(times1, avg_rms1, 'o', label=label1, color='black')
     axs[0].plot(times1, RMS_model1, '--', color='black')
     axs[0].axvline(x=900, color='red', linestyle='-')
@@ -73,6 +73,10 @@ def plot_two_rms(phot_table1, phot_table2, label1, label2, args):
     axs[1].axvline(x=900, color='red', linestyle='-')
     axs[1].set_xscale('log')
     axs[1].set_xlabel('Exposure time (s)')
+
+    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().tick_params(axis='y', which='minor', length=4)
 
     # Adjust the layout and show the plot
     plt.tight_layout()
