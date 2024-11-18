@@ -44,10 +44,6 @@ def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids, camera):
     # load the fits image on this particular field.
     image_data = get_image_data(table[table['tic_id'] == tic_id_to_plot]['frame_id'][0])
 
-    # Invert the image if the camera is 'CCD'.
-    if camera == 'CCD':
-        image_data = -image_data
-
     # Assuming x, y coordinates are already extracted for the target star and comparison stars
     # Example: x_target, y_target for the target star
     x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
@@ -70,7 +66,10 @@ def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids, camera):
         # Add the TIC ID label for each comparison star
         plt.text(x_comp, y_comp + 10, str(tic_id), color='blue', fontsize=10, ha='center')
 
-    plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
+    if camera == 'CMOS':
+        plt.imshow(image_data, cmap='hot', origin='lower', vmin=vmin, vmax=vmax)
+    else:
+        plt.imshow(image_data, cmap='hot', vmin=vmin, vmax=vmax)
     plt.tight_layout()
     # Add labels and legend
     plt.xlabel('X Pixel')
