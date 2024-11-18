@@ -180,7 +180,6 @@ if __name__ == "__main__":
 
     # Process both files
     phot_table1 = process_file(args.file1, args)
-    phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
 
     # Select best TIC_IDs from the first file
