@@ -167,6 +167,13 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     plt.show()
 
 
+def filter_by_color(phot_table, cl, ch):
+    """
+    Filter the photometry table by the color index range.
+    """
+    return phot_table[(phot_table['COLOR'] >= cl) & (phot_table['COLOR'] <= ch)]
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
     parser.add_argument('file1', type=str, help='Path to the first photometry file')
@@ -174,6 +181,8 @@ if __name__ == "__main__":
     parser.add_argument('--num_stars', type=int, default=10, help='Number of stars to select')
     parser.add_argument('--bl', type=float, default=9.5, help='Lower limit for Tmag')
     parser.add_argument('--fl', type=float, default=10.5, help='Upper limit for Tmag')
+    parser.add_argument('--cl', type=float, default=None, help='Lower limit for color index')
+    parser.add_argument('--ch', type=float, default=None, help='Upper limit for color index')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     args = parser.parse_args()
@@ -182,6 +191,13 @@ if __name__ == "__main__":
     phot_table1 = process_file(args.file1, args)
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
+
+    # Apply color filtering if limits are provided
+    if args.cl is not None and args.ch is not None:
+        phot_table1 = filter_by_color(phot_table1, args.cl, args.ch)
+        phot_table2 = filter_by_color(phot_table2, args.cl, args.ch)
+
+
 
     # Select best TIC_IDs from the first file
     best_tic_ids = select_best_tic_ids(phot_table1, args)
