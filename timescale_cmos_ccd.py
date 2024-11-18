@@ -140,7 +140,7 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     rel_flux2 = phot_table2['Relative_Flux']
 
     # Create the histogram plot
-    plt.figure(figsize=(8, 6))
+    plt.figure()
     plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1} Relative Flux', color='blue')
     plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2} Relative Flux', color='red')
 
