@@ -154,8 +154,8 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
 
     # Create the histogram plot
     plt.figure()
-    plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1}', color='blue')
-    plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2}', color='red')
+    plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1}', color='blue', density=True)
+    plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2}', color='red', density=True)
 
     plt.xlabel('Relative Flux')
     plt.ylabel('Frequency')
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
     # Process both files
     phot_table1 = process_file(args.file1, args)
-    phot_table1 = downsample_phot_table(phot_table1, step=5)
+    # phot_table1 = downsample_phot_table(phot_table1, step=5)
     phot_table2 = process_file(args.file2, args)
 
     # Select best TIC_IDs from the first file
