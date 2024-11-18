@@ -56,6 +56,7 @@ def compute_rms_values(phot_table, args):
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         RMS_data = Tmag_data['RMS']
         color = Tmag_data['COLOR']
+        print(f'The number of data points are: {len(rel_flux)}')
         print(f'The color for the star is: {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
         RMS_values = []
         time_seconds = []
