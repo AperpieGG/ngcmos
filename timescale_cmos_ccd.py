@@ -79,7 +79,7 @@ def compute_rms_values(phot_table, args):
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """Generate two RMS plots in a single figure with one row and two columns."""
-    fig, axs = plt.subplots(1, 2, figsize=(6, 8), sharey=True)
+    fig, axs = plt.subplots(1, 2, figsize=(6, 6), sharey=True)
 
     axs[0].plot(times1, avg_rms1, 'o', label=label1, color='black')
     axs[0].plot(times1, RMS_model1, '--', color='black')
@@ -122,8 +122,6 @@ def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
     print("RMS vs Timescale results saved to rms_vs_timescale.json")
 
 
-
-
 def process_file(phot_file, args):
     """Process a single photometry file."""
     print(f"Processing {phot_file}...")
@@ -132,6 +130,25 @@ def process_file(phot_file, args):
     phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
     print(f"Completed processing {phot_file}.")
     return phot_table
+
+
+def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
+    """Plot overlaid histograms of relative flux distributions for the two photometry files."""
+    # Extract relative flux values
+    rel_flux1 = phot_table1['Relative_Flux']
+    rel_flux2 = phot_table2['Relative_Flux']
+
+    # Create the histogram plot
+    plt.figure(figsize=(8, 6))
+    plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1} Relative Flux', color='blue')
+    plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2} Relative Flux', color='green')
+
+    plt.xlabel('Relative Flux')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of Relative Fluxes')
+    plt.legend(loc='upper right')
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -160,5 +177,8 @@ if __name__ == "__main__":
     times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, args)
     times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, args)
 
+    plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
+    
     # Plot the results
     plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
+
