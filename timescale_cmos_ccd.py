@@ -55,7 +55,7 @@ def compute_rms_values(phot_table, args):
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         RMS_data = Tmag_data['RMS']
-        print(f'The Tmag for the star is: {Tmag[0]} and RMS: {RMS_data[0]}')
+        print(f'The Tmag for the star is: {Tmag} and RMS: {RMS_data[0]}')
         RMS_values = []
         time_seconds = []
         for i in range(1, max_binning):
