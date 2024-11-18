@@ -7,11 +7,26 @@ from utils import plot_images, read_phot_file, bin_time_flux_error
 
 
 def filter_to_common_targets(phot_table1, phot_table2):
-    """Filter both photometry tables to include only common targets."""
+    """Filter both photometry tables to include only common targets and print their TIC_IDs."""
+    # Find the common targets based on TIC_ID
     common_targets = np.intersect1d(phot_table1['TIC_ID'], phot_table2['TIC_ID'])
     print(f"Number of common targets: {len(common_targets)}")
+
+    # Filter each table to include only common targets
     phot_table1 = phot_table1[np.isin(phot_table1['TIC_ID'], common_targets)]
     phot_table2 = phot_table2[np.isin(phot_table2['TIC_ID'], common_targets)]
+
+    # Print the common TIC_IDs
+    print("Common TIC_IDs:")
+    print(common_targets)
+
+    # Print TIC_IDs for file 1 and file 2 for verification
+    print("\nTIC_IDs in file 1 after filtering:")
+    print(phot_table1['TIC_ID'])
+
+    print("\nTIC_IDs in file 2 after filtering:")
+    print(phot_table2['TIC_ID'])
+
     return phot_table1, phot_table2
 
 
