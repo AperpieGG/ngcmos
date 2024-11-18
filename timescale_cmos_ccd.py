@@ -134,19 +134,35 @@ def process_file(phot_file, args):
     return phot_table
 
 
+def downsample_phot_table(phot_table, step):
+    """
+    Downsample the photometry table by removing one data point for every `step` images.
+    """
+    indices_to_keep = [i for i in range(len(phot_table)) if (i + 1) % step != 0]
+    return phot_table[indices_to_keep]
+
+
 def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
-    """Plot overlaid histograms of relative flux distributions for the two photometry files."""
+    """
+    Plot overlaid histograms of relative flux distributions for the two photometry files.
+    """
+    # Downsample the first photometry table
+    phot_table1 = downsample_phot_table(phot_table1, step=5)
+
     # Extract relative flux values
     rel_flux1 = phot_table1['Relative_Flux']
     rel_flux2 = phot_table2['Relative_Flux']
 
+    print(f'The size of rel flux1 and rel_flux2: {len(rel_flux1)}, {len(rel_flux2)}')
+
     # Create the histogram plot
-    plt.figure()
+    plt.figure(figsize=(8, 6))
     plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1}', color='blue')
     plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2}', color='red')
 
     plt.xlabel('Relative Flux')
     plt.ylabel('Frequency')
+    plt.title('Relative Flux Histogram Distribution')
     plt.legend(loc='upper right')
     plt.tight_layout()
     plt.show()
