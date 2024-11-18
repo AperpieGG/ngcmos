@@ -72,7 +72,7 @@ def compute_rms_values(phot_table, common_targets, args):
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """Generate two RMS plots in a single figure with one row and two columns."""
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
+    fig, axs = plt.subplots(1, 2, figsize=(6, 8), sharey=True)
 
     axs[0].plot(times1, avg_rms1, 'o', label=label1, color='black')
     axs[0].plot(times1, RMS_model1, '--', color='black')
@@ -81,16 +81,16 @@ def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
     axs[0].set_yscale('log')
     axs[0].set_xlabel('Exposure time (s)')
     axs[0].set_ylabel('RMS (ppm)')
-    axs[0].set_title(f"RMS Plot for {label1}")
-    axs[0].legend()
 
     axs[1].plot(times2, avg_rms2, 'o', label=label2, color='black')
     axs[1].plot(times2, RMS_model2, '--', color='black')
     axs[1].axvline(x=900, color='red', linestyle='-')
     axs[1].set_xscale('log')
     axs[1].set_xlabel('Exposure time (s)')
-    axs[1].set_title(f"RMS Plot for {label2}")
-    axs[1].legend()
+
+    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    plt.gca().tick_params(axis='y', which='minor', length=4)
 
     plt.tight_layout()
     plt.show()
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
     parser.add_argument('file1', type=str, help='Path to the first photometry file')
     parser.add_argument('file2', type=str, help='Path to the second photometry file')
-    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot (only if tic_id is not provided)')
+    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
     parser.add_argument('--bl', type=float, default=9.5, help='Lower limit for Tmag')
     parser.add_argument('--fl', type=float, default=10.5, help='Upper limit for Tmag')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
