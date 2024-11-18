@@ -14,9 +14,6 @@ def filter_to_common_targets(phot_table1, phot_table2):
     phot_table1 = phot_table1[np.isin(phot_table1['TIC_ID'], common_targets)]
     phot_table2 = phot_table2[np.isin(phot_table2['TIC_ID'], common_targets)]
 
-    print("Common TIC_IDs:")
-    print(common_targets)
-
     return phot_table1, phot_table2, common_targets
 
 
