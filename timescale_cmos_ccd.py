@@ -55,7 +55,8 @@ def compute_rms_values(phot_table, args):
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         RMS_data = Tmag_data['RMS']
-        print(f'The Tmag for the star is: {Tmag} and RMS: {RMS_data[0]}')
+        color = Tmag_data['COLOR']
+        print(f'The color for the star is: {color}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
         RMS_values = []
         time_seconds = []
         for i in range(1, max_binning):
@@ -141,7 +142,7 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     # Create the histogram plot
     plt.figure(figsize=(8, 6))
     plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1} Relative Flux', color='blue')
-    plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2} Relative Flux', color='green')
+    plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2} Relative Flux', color='red')
 
     plt.xlabel('Relative Flux')
     plt.ylabel('Frequency')
