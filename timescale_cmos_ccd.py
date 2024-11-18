@@ -65,6 +65,7 @@ def compute_rms_values(phot_table, args):
             exposure_time_seconds = i * args.exp
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
+            print(f'The RMS_values are: {RMS_values}')
             time_seconds.append(exposure_time_seconds)
 
         average_rms_values.append(RMS_values)
@@ -196,8 +197,6 @@ if __name__ == "__main__":
     if args.cl is not None and args.ch is not None:
         phot_table1 = filter_by_color(phot_table1, args.cl, args.ch)
         phot_table2 = filter_by_color(phot_table2, args.cl, args.ch)
-
-
 
     # Select best TIC_IDs from the first file
     best_tic_ids = select_best_tic_ids(phot_table1, args)
