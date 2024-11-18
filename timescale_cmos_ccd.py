@@ -147,7 +147,7 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     Plot overlaid histograms of relative flux distributions for the two photometry files.
     """
     # Downsample the first photometry table
-    phot_table1 = downsample_phot_table(phot_table1, step=5)
+    phot_table1 = downsample_phot_table(phot_table1, step=4.5)
 
     # Extract relative flux values
     rel_flux1 = phot_table1['Relative_Flux']
