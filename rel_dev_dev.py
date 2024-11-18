@@ -257,6 +257,18 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
     plt.tight_layout()
     plt.show()
 
+    # save the data for the plot in a json file
+
+    output_data = {
+        "good_rms": final_good_rms.tolist(),
+        "good_mags": final_good_mags.tolist(),
+        "bad_rms": final_bad_rms.tolist(),
+        "bad_mags": final_bad_mags.tolist()
+    }
+
+    with open(f'rms_vs_mag_comps.json', 'w') as json_file:
+        json.dump(output_data, json_file, indent=4)
+
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
     print(f'RMS values after filtering: {comp_star_rms[cumulative_mask]}')
 
