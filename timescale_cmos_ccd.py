@@ -148,14 +148,16 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     """
     # Extract relative flux values
     rel_flux1 = phot_table1['Relative_Flux']
+    rms1 = phot_table1['RMS']
     rel_flux2 = phot_table2['Relative_Flux']
+    rms2 = phot_table2['RMS']
 
     print(f'The size of rel flux1 and rel_flux2: {len(rel_flux1)}, {len(rel_flux2)}')
 
     # Create the histogram plot
     plt.figure()
-    plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1}', color='blue', density=True)
-    plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2}', color='red', density=True)
+    plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1}, RMS={rms1:.4f}', color='blue', density=True)
+    plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2}, RMS={rms2:.4f} ', color='red', density=True)
 
     plt.xlabel('Relative Flux')
     plt.ylabel('Frequency')
