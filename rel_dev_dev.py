@@ -40,9 +40,13 @@ def get_image_data(frame_id):
         return image_data
 
 
-def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids):
+def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids, camera):
     # load the fits image on this particular field.
     image_data = get_image_data(table[table['tic_id'] == tic_id_to_plot]['frame_id'][0])
+
+    # Invert the image if the camera is 'CCD'.
+    if camera == 'CCD':
+        image_data = -image_data
 
     # Assuming x, y coordinates are already extracted for the target star and comparison stars
     # Example: x_target, y_target for the target star
@@ -471,7 +475,7 @@ def main():
 
             if args.pos:
                 # Plot the comparison stars' positions on the image
-                plot_comps_position(phot_table, tic_id_to_plot, tic_ids)
+                plot_comps_position(phot_table, tic_id_to_plot, tic_ids, camera)
 
             # Call the plot function
             plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
