@@ -242,8 +242,8 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
     # Plot RMS vs. magnitude for good and bad comparison stars after all iterations
     # Find RMS of the dimmest star among the good stars to set the y-axis limit
     dimmest_good_star_rms = final_good_rms[final_good_mags.argmax()]
-    y_limit_high = 1.5 * dimmest_good_star_rms  # Adjust multiplier as needed for clarity
-    y_limit_low = 0.1 * dimmest_good_star_rms  # Adjust multiplier as needed for clarity
+    y_limit_high = 2 * dimmest_good_star_rms  # Adjust multiplier as needed for clarity
+    y_limit_low = 0.01 * dimmest_good_star_rms  # Adjust multiplier as needed for clarity
 
     plt.figure()
     plt.scatter(final_good_mags, final_good_rms, color='black')
