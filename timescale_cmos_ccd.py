@@ -148,9 +148,9 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     """
     # Extract relative flux values
     rel_flux1 = phot_table1['Relative_Flux']
-    rms1 = phot_table1['RMS']
+    rms1 = phot_table1['RMS'][0]
     rel_flux2 = phot_table2['Relative_Flux']
-    rms2 = phot_table2['RMS']
+    rms2 = phot_table2['RMS'][0]
 
     print(f'The size of rel flux1 and rel_flux2: {len(rel_flux1)}, {len(rel_flux2)}')
 
