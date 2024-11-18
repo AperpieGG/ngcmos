@@ -146,9 +146,6 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     """
     Plot overlaid histograms of relative flux distributions for the two photometry files.
     """
-    # Downsample the first photometry table
-    phot_table1 = downsample_phot_table(phot_table1, step=3)
-
     # Extract relative flux values
     rel_flux1 = phot_table1['Relative_Flux']
     rel_flux2 = phot_table2['Relative_Flux']
@@ -156,7 +153,7 @@ def plot_flux_histogram(phot_table1, phot_table2, label1, label2):
     print(f'The size of rel flux1 and rel_flux2: {len(rel_flux1)}, {len(rel_flux2)}')
 
     # Create the histogram plot
-    plt.figure(figsize=(8, 6))
+    plt.figure()
     plt.hist(rel_flux1, bins=50, alpha=0.5, label=f'{label1}', color='blue')
     plt.hist(rel_flux2, bins=50, alpha=0.5, label=f'{label2}', color='red')
 
@@ -181,6 +178,7 @@ if __name__ == "__main__":
 
     # Process both files
     phot_table1 = process_file(args.file1, args)
+    phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
 
     # Select best TIC_IDs from the first file
