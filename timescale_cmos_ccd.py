@@ -23,7 +23,10 @@ def select_best_tic_ids(phot_table, args):
     # Sort by RMS and select the top `num_stars`
     sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:args.num_stars]
     best_tic_ids = [star[0] for star in sorted_stars]
-    print(f"Selected best TIC_IDs: {best_tic_ids}")
+    # Print each selected star along with its RMS
+    print("\nSelected Stars with RMS values:")
+    for star_id, rms_value in sorted_stars:
+        print(f"TIC_ID: {star_id}, RMS: {rms_value:.6f}")
 
     return best_tic_ids
 
