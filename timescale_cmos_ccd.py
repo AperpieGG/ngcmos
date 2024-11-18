@@ -72,6 +72,7 @@ def compute_rms_values(phot_table, args):
 
     average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
     times_binned = times_binned[0]  # Use the first time bin set
+    print(f'The times binned is: {times_binned}')
 
     binning_times = [i for i in range(1, max_binning)]
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
