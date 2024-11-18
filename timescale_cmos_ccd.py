@@ -6,20 +6,8 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 
 
-def filter_to_common_targets(phot_table1, phot_table2):
-    """Filter both photometry tables to include only common targets and return their TIC_IDs."""
-    common_targets = np.intersect1d(phot_table1['TIC_ID'], phot_table2['TIC_ID'])
-    print(f"Number of common targets: {len(common_targets)}")
-
-    phot_table1 = phot_table1[np.isin(phot_table1['TIC_ID'], common_targets)]
-    phot_table2 = phot_table2[np.isin(phot_table2['TIC_ID'], common_targets)]
-
-    return phot_table1, phot_table2, common_targets
-
-
-def compute_rms_values(phot_table, common_targets, args):
-    """Compute RMS values for the provided photometry table using common targets."""
-    phot_table = phot_table[np.isin(phot_table['TIC_ID'], common_targets)]
+def select_best_tic_ids(phot_table, args):
+    """Select the best TIC_IDs based on the lowest RMS for the first photometry file."""
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
     unique_tmags = np.unique(phot_table['Tmag'])
@@ -30,16 +18,35 @@ def compute_rms_values(phot_table, common_targets, args):
         Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
         rel_flux = Tmag_data['Relative_Flux']
         initial_rms = np.std(rel_flux)
-        stars_rms_list.append((Tmag_data, initial_rms))
+        stars_rms_list.append((Tmag_data['TIC_ID'][0], initial_rms))  # Store TIC_ID and RMS
 
+    # Sort by RMS and select the top `num_stars`
     sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:args.num_stars]
-    print(f"Selected {len(sorted_stars)} stars with lowest RMS values.")
+    best_tic_ids = [star[0] for star in sorted_stars]
+    print(f"Selected best TIC_IDs: {best_tic_ids}")
+
+    return best_tic_ids
+
+
+def filter_to_tic_ids(phot_table, tic_ids):
+    """Filter the photometry table to include only the specified TIC_IDs."""
+    phot_table = phot_table[np.isin(phot_table['TIC_ID'], tic_ids)]
+    return phot_table
+
+
+def compute_rms_values(phot_table, args):
+    """Compute RMS values for the provided photometry table."""
+    phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
+
+    unique_tmags = np.unique(phot_table['Tmag'])
+    print(f"Total stars in brightness range: {len(unique_tmags)}")
 
     average_rms_values = []
     times_binned = []
     max_binning = int(args.bin)
 
-    for Tmag_data, initial_rms in sorted_stars:
+    for Tmag in unique_tmags:
+        Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
         jd_mid = Tmag_data['Time_BJD']
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
@@ -60,9 +67,6 @@ def compute_rms_values(phot_table, common_targets, args):
 
     binning_times = [i for i in range(1, max_binning)]
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
-
-    print("TIC_IDs used for RMS calculation:")
-    print(phot_table['TIC_ID'])
 
     return times_binned, average_rms_values, RMS_model
 
@@ -107,19 +111,27 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
     parser.add_argument('file1', type=str, help='Path to the first photometry file')
     parser.add_argument('file2', type=str, help='Path to the second photometry file')
-    parser.add_argument('--num_stars', type=int, default=5, help='Number of stars to plot')
+    parser.add_argument('--num_stars', type=int, default=10, help='Number of stars to select')
     parser.add_argument('--bl', type=float, default=9.5, help='Lower limit for Tmag')
     parser.add_argument('--fl', type=float, default=10.5, help='Upper limit for Tmag')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     args = parser.parse_args()
 
+    # Process both files
     phot_table1 = process_file(args.file1, args)
     phot_table2 = process_file(args.file2, args)
 
-    phot_table1, phot_table2, common_targets = filter_to_common_targets(phot_table1, phot_table2)
+    # Select best TIC_IDs from the first file
+    best_tic_ids = select_best_tic_ids(phot_table1, args)
 
-    times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, common_targets, args)
-    times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, common_targets, args)
+    # Filter both files to include only the best TIC_IDs
+    phot_table1 = filter_to_tic_ids(phot_table1, best_tic_ids)
+    phot_table2 = filter_to_tic_ids(phot_table2, best_tic_ids)
 
+    # Compute RMS values for both files
+    times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, args)
+    times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, args)
+
+    # Plot the results
     plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
