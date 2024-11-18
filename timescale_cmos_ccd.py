@@ -65,7 +65,6 @@ def compute_rms_values(phot_table, args):
             exposure_time_seconds = i * args.exp
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
-            print(f'The RMS_values are: {RMS_values}')
             time_seconds.append(exposure_time_seconds)
 
         average_rms_values.append(RMS_values)
