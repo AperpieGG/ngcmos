@@ -194,22 +194,16 @@ def trim_target_data(phot_table, trim_count):
             continue
 
         # Trim data points for the target
-        jd_mid = Tmag_data['Time_BJD'][trim_count:-trim_count]
-        rel_flux = Tmag_data['Relative_Flux'][trim_count:-trim_count]
-        rel_fluxerr = Tmag_data['Relative_Flux_err'][trim_count:-trim_count]
-        RMS_data = Tmag_data['RMS'][trim_count:-trim_count]
-        color = Tmag_data['COLOR'][trim_count:-trim_count]
-
-        # Combine the trimmed data back into a structured format
-        trimmed_data = np.rec.fromarrays(
-            [jd_mid, rel_flux, rel_fluxerr, RMS_data, color],
-            names=('Time_BJD', 'Relative_Flux', 'Relative_Flux_err', 'RMS', 'COLOR')
-        )
+        trimmed_data = Tmag_data[trim_count:-trim_count]
 
         trimmed_table_list.append(trimmed_data)
 
     # Combine all trimmed targets back into a single table
-    trimmed_table = np.hstack(trimmed_table_list)
+    if len(trimmed_table_list) > 0:
+        trimmed_table = np.hstack(trimmed_table_list)
+    else:
+        raise ValueError("No valid data points after trimming. Check your trim count.")
+
     return trimmed_table
 
 
