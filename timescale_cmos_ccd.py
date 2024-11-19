@@ -176,6 +176,22 @@ def filter_by_color(phot_table, cl, ch):
     return phot_table[(phot_table['COLOR'] >= cl) & (phot_table['COLOR'] <= ch)]
 
 
+def trim_data(phot_table, trim_count):
+    """
+    Trim the specified number of data points from the beginning and end of the photometry table.
+    :param phot_table: Input photometry table
+    :param trim_count: Number of data points to remove from the beginning and the end
+    :return: Trimmed photometry table
+    """
+    # Ensure the table has enough data points
+    if len(phot_table) <= 2 * trim_count:
+        raise ValueError("Not enough data points to trim the specified amount from both ends.")
+
+    # Trim the table
+    trimmed_table = phot_table[trim_count:-trim_count]
+    return trimmed_table
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
     parser.add_argument('file1', type=str, help='Path to the first photometry file')
@@ -193,6 +209,10 @@ if __name__ == "__main__":
     phot_table1 = process_file(args.file1, args)
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
+
+    # Trim data points
+    phot_table1 = trim_data(phot_table1, args.trim)
+    phot_table2 = trim_data(phot_table2, args.trim)
 
     # Apply color filtering if limits are provided
     if args.cl is not None and args.ch is not None:
