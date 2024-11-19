@@ -176,20 +176,40 @@ def filter_by_color(phot_table, cl, ch):
     return phot_table[(phot_table['COLOR'] >= cl) & (phot_table['COLOR'] <= ch)]
 
 
-def trim_data(phot_table, trim_count):
+def trim_target_data(phot_table, trim_count):
     """
-    Trim the specified number of data points from the beginning and end of the photometry table.
+    Trim the specified number of data points from the beginning and end for each target's data.
     :param phot_table: Input photometry table
     :param trim_count: Number of data points to remove from the beginning and the end
     :return: Trimmed photometry table
     """
-    # Ensure the table has enough data points
-    if len(phot_table) <= 2 * trim_count:
-        raise ValueError("Not enough data points to trim the specified amount from both ends.")
+    unique_tmags = np.unique(phot_table['Tmag'])
+    trimmed_table_list = []
 
-    # Trim the table
-    trimmed_table = phot_table[trim_count:-trim_count]
-    print(f"Length of Relative_Flux after trimming: {len(trimmed_table['Relative_Flux'])}")  
+    for Tmag in unique_tmags:
+        # Select data for the current target
+        Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
+        if len(Tmag_data) <= 2 * trim_count:
+            print(f"Skipping target with Tmag {Tmag} due to insufficient data points.")
+            continue
+
+        # Trim data points for the target
+        jd_mid = Tmag_data['Time_BJD'][trim_count:-trim_count]
+        rel_flux = Tmag_data['Relative_Flux'][trim_count:-trim_count]
+        rel_fluxerr = Tmag_data['Relative_Flux_err'][trim_count:-trim_count]
+        RMS_data = Tmag_data['RMS'][trim_count:-trim_count]
+        color = Tmag_data['COLOR'][trim_count:-trim_count]
+
+        # Combine the trimmed data back into a structured format
+        trimmed_data = np.rec.fromarrays(
+            [jd_mid, rel_flux, rel_fluxerr, RMS_data, color],
+            names=('Time_BJD', 'Relative_Flux', 'Relative_Flux_err', 'RMS', 'COLOR')
+        )
+
+        trimmed_table_list.append(trimmed_data)
+
+    # Combine all trimmed targets back into a single table
+    trimmed_table = np.hstack(trimmed_table_list)
     return trimmed_table
 
 
@@ -212,9 +232,11 @@ if __name__ == "__main__":
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
 
-    # Trim data points
-    phot_table1 = trim_data(phot_table1, args.trim)
-    phot_table2 = trim_data(phot_table2, args.trim)
+    # Trim data for each target in both photometry tables
+    print("Trimming data in phot_table1:")
+    phot_table1 = trim_target_data(phot_table1, args.trim)
+    print("Trimming data in phot_table2:")
+    phot_table2 = trim_target_data(phot_table2, args.trim)
 
     # Apply color filtering if limits are provided
     if args.cl is not None and args.ch is not None:
