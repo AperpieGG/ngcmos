@@ -189,6 +189,7 @@ def trim_data(phot_table, trim_count):
 
     # Trim the table
     trimmed_table = phot_table[trim_count:-trim_count]
+    print(f"Length of Relative_Flux after trimming: {len(trimmed_table['Relative_Flux'])}")  
     return trimmed_table
 
 
