@@ -104,7 +104,7 @@ def compute_rms_values(phot_table, args):
         red_noise = total_covariance / (n ** 2)
 
         # Total RMS
-        total_rms = np.sqrt(white_noise + red_noise)
+        total_rms = np.sqrt(white_noise**2 + red_noise**2)
         RMS_model.append(total_rms)
 
     # Convert model to numpy array for easy scaling
@@ -119,7 +119,7 @@ def compute_rms_values(phot_table, args):
 
     # Apply scaling to the model
     RMS_model = RMS_model * scaling_factor
-    RMS_model = np.array(RMS_model) 
+    RMS_model = np.array(RMS_model)
 
     return times_binned, average_rms_values, RMS_model
 
