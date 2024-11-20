@@ -104,7 +104,7 @@ def compute_rms_values(phot_table, args):
 
         # Total RMS
         total_rms = np.sqrt(white_noise + red_noise)
-        RMS_model.append(total_rms)
+        RMS_model.append(total_rms) * 1e6
 
     return times_binned, average_rms_values, np.array(RMS_model)
 
