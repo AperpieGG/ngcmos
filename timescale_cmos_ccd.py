@@ -82,11 +82,11 @@ def compute_rms_values(phot_table, args):
     # # Step 1: Demean the flux
     flux_mean = np.mean(rel_flux)
     demeaned_flux = rel_flux - flux_mean
-    print(f'The flux is demeaned!')
-    #
-    # # Step 2: Compute the covariance matrix
-    # covariance_matrix = np.cov(demeaned_flux, rowvar=False)
-    #
+
+    # Step 2: Compute the covariance matrix
+    covariance_matrix = np.cov(demeaned_flux, rowvar=False)
+    print(f'The covariance has been found!')
+
     # # Step 3: Extract covariance (off-diagonal terms)
     # total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Sum of off-diagonal terms
     #
