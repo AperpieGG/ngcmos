@@ -59,7 +59,7 @@ def compute_rms_values(phot_table):
     # Combine white and red noise
     RMS_model_combined = np.sqrt((RMS[0] ** 2 / binning_values) + red_noise)
 
-    return times_binned, RMS, RMS_model_white, RMS_model_combined
+    return times_binned, RMS, RMS_model_combined
 
 
 def plot_two_rms(times, avg_rms, RMS_model):
