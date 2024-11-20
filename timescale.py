@@ -109,12 +109,8 @@ if __name__ == "__main__":
 
     if phot_table1 is not None:
         # Compute RMS values
-        times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1)
+        times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined = compute_rms_values(phot_table1)
+        plot_two_rms(times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined)
 
-        if times1 is not None and avg_rms1 is not None and RMS_model1 is not None:
-            # Plot the results
-            plot_two_rms(times1, avg_rms1, RMS_model1)
-        else:
-            print("Error: RMS computation failed.")
     else:
         print("Error: Failed to process photometry file.")
