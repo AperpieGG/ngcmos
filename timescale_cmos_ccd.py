@@ -80,8 +80,9 @@ def compute_rms_values(phot_table, args):
     RMS_model = (average_rms_values[0] / np.sqrt(binning_times))
 
     # # Step 1: Demean the flux
-    # flux_mean = np.mean(rel_flux)
-    # demeaned_flux = rel_flux - flux_mean
+    flux_mean = np.mean(rel_flux)
+    demeaned_flux = rel_flux - flux_mean
+    print(f'The flux is demeaned!')
     #
     # # Step 2: Compute the covariance matrix
     # covariance_matrix = np.cov(demeaned_flux, rowvar=False)
