@@ -7,17 +7,14 @@ from utils import plot_images, read_phot_file, bin_time_flux_error
 
 def compute_rms_values(phot_table):
     """Compute RMS values for the provided photometry table."""
-    phot_table = phot_table[(phot_table['Tmag'] >= 10.35) & (phot_table['Tmag'] <= 10.37)]
-
-    unique_tmags = np.unique(phot_table['Tmag'])
-    print(f"Total stars in brightness range: {len(unique_tmags)}")
+    phot_table = phot_table[(phot_table['TIC_ID'] >= 269218084)]
 
     average_rms_values = []
     times_binned = []
     max_binning = 600
 
-    for Tmag in unique_tmags:
-        Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
+    for TIC_ID in phot_table:
+        Tmag_data = phot_table[(phot_table['TIC_ID'] >= 269218084)]
         jd_mid = Tmag_data['Time_BJD']
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
