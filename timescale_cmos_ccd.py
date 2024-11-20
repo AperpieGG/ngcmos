@@ -59,10 +59,22 @@ def compute_rms_values(phot_table, args):
         print(f'The number of data points are: {len(rel_flux)}')
         print(f'The color for the star is: {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
 
-        # Compute covariance matrix for red noise
-        if len(rel_flux.shape) == 1:  # Ensure rel_flux is 2D
+        # Skip if there are insufficient data points
+        if len(rel_flux) < 2:
+            print("Insufficient data points for covariance calculation. Skipping this star.")
+            continue
+
+        # Ensure rel_flux is a 2D array
+        if rel_flux.ndim == 1:
             rel_flux = rel_flux[:, np.newaxis]
+
+        # Compute covariance matrix
         covariance_matrix = np.cov(rel_flux, rowvar=False)
+
+        # Handle cases where covariance_matrix is not 2D
+        if covariance_matrix.ndim < 2:
+            print("Covariance matrix is not valid. Skipping this star.")
+            continue
 
         # Compute white noise and red noise components
         sigma_0_squared = np.var(rel_flux)  # Variance of unbinned light curve (white noise)
