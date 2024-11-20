@@ -47,9 +47,11 @@ def compute_rms_values(phot_table):
 
     # Combine time and flux into a 2D array
     time_flux_array = np.column_stack((jd_mid, demeaned_flux))
+    print(f'The time flux array is:\n{time_flux_array}')
 
     # Compute covariance matrix
-    covariance_matrix = np.cov(time_flux_array, rowvar=True)
+    covariance_matrix = np.cov(time_flux_array, rowvar=False)
+    print(f'The shape of the covariance matrix is: {covariance_matrix.shape}')
     print(f"The covariance matrix is:\n{covariance_matrix}")
 
     # Extract red noise (off-diagonal terms)
