@@ -71,7 +71,7 @@ def compute_rms_values(phot_table):
     RMS_model_red *= scaling_factor_red
 
     scaling_factor_combined = RMS[0] / RMS_model_combined[0]
-    RMS_model_combined = RMS_model_red + RMS_model_white
+    RMS_model_combined = (RMS_model_red + RMS_model_white) * scaling_factor_combined
 
     # Return values
     return times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined
