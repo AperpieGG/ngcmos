@@ -61,6 +61,7 @@ def compute_rms_values(phot_table):
     # RMS_model_red = np.sqrt((RMS[0] ** 2) + red_noise)
     # scaling_factor_red = RMS[0] / RMS_model_red[0]
     # RMS_model_red *= scaling_factor_red
+    RMS_model_red = 0.0001
 
     # Combine white and red noise
     # RMS_model_combined = np.sqrt((RMS[0]**2 * white_noise) + red_noise)
