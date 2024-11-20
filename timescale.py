@@ -15,10 +15,10 @@ def compute_rms_values(phot_table):
         print(f"No data found for TIC_ID: {target_tic_id}")
         return None, None, None
 
-    # Extract data for the specific TIC_ID
-    jd_mid = phot_table['Time_BJD'].values
-    rel_flux = phot_table['Relative_Flux'].values
-    rel_fluxerr = phot_table['Relative_Flux_err'].values
+    jd_mid = phot_table['Time_BJD']
+    rel_flux = phot_table['Relative_Flux']
+    rel_fluxerr = phot_table['Relative_Flux_err']
+    RMS_data = phot_table['RMS']
 
     print(f"The number of data points for TIC_ID {target_tic_id} is: {len(rel_flux)}")
 
