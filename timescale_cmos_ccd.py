@@ -39,7 +39,7 @@ def filter_to_tic_ids(phot_table, tic_ids):
 
 
 def compute_rms_values(phot_table, args):
-    """Compute RMS values accounting for white and red noise."""
+    """Compute RMS values for the provided photometry table, including red noise."""
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
     unique_tmags = np.unique(phot_table['Tmag'])
@@ -62,7 +62,7 @@ def compute_rms_values(phot_table, args):
         RMS_values = []
         time_seconds = []
 
-        # Compute the covariance matrix
+        # Covariance matrix for red noise
         covariance_matrix = np.cov(rel_flux, rowvar=False)
         sigma_0_squared = np.diag(covariance_matrix).mean()  # Mean variance (white noise)
         red_noise_component = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
@@ -91,7 +91,12 @@ def compute_rms_values(phot_table, args):
     print(f'The shape of the rms values is: {average_rms_values.shape}')
     print(f'The times binned is: {times_binned[0]}')
 
-    return times_binned, average_rms_values
+    binning_times = [i for i in range(1, max_binning)]
+    RMS_model_white = average_rms_values[0] / np.sqrt(binning_times)
+    RMS_model_red = red_noise_component / (binning_times**2)
+    RMS_model = np.sqrt(RMS_model_white**2 + RMS_model_red**2)
+
+    return times_binned, average_rms_values, RMS_model
 
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
