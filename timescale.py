@@ -46,7 +46,7 @@ def compute_rms_values(phot_table):
     demeaned_flux = rel_flux - flux_mean
 
     # Combine time and flux into a 2D array
-    time_flux_array = np.column_stack((jd_mid, demeaned_flux))
+    time_flux_array = np.column_stack((jd_mid, rel_flux))
     print(f'The time flux array is:\n{time_flux_array}')
 
     # Compute covariance matrix
