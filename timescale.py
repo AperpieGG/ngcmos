@@ -49,15 +49,14 @@ def compute_rms_values(phot_table):
 
 def plot_two_rms(times1, avg_rms1, RMS_model1):
     """Generate two RMS plots in a single figure with one row and two columns."""
-    fig, axs = plt.subplots(1, 1, figsize=(6, 6), sharey=True)
 
-    axs[0].plot(times1, avg_rms1, 'o', color='black')
-    axs[0].plot(times1, RMS_model1, '--', color='black')
-    axs[0].axvline(x=900, color='red', linestyle='-')
-    axs[0].set_xscale('log')
-    axs[0].set_yscale('log')
-    axs[0].set_xlabel('Exposure time (s)')
-    axs[0].set_ylabel('RMS (ppm)')
+    plt.plot(times1, avg_rms1, 'o', color='black')
+    plt.plot(times1, RMS_model1, '--', color='black')
+    plt.axvline(x=900, color='red', linestyle='-')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('RMS (ppm)')
 
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
