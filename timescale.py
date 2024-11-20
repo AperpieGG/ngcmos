@@ -52,9 +52,10 @@ def compute_rms_values(phot_table):
 
     # Extract red noise (off-diagonal terms)
     total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)
+    print(f'Total covariance is: {total_covariance}')
 
     # Scale the red noise appropriately
-    red_noise = RMS[0] / (binning_values ** 2)
+    red_noise = total_covariance / (binning_values ** 2)
 
     # Adjust the red noise model
     RMS_model_red = np.sqrt((RMS[0] ** 2) + red_noise)
