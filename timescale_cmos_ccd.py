@@ -93,14 +93,14 @@ def compute_rms_values(phot_table, args):
     # Step 4: Extract covariance (off-diagonal terms)
     total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Sum of off-diagonal terms
     print(f'The total covariance (off-diagonal terms) is: {total_covariance}')
-    
-    # # Step 5: Calculate RMS model including red noise
-    # RMS_model = []
-    # for n in binning_times:
-    #     white_noise = (rms_unbinned / np.sqrt(n))**2  # White noise contribution
-    #     red_noise = total_covariance / (n**2)  # Red noise contribution
-    #     total_rms = np.sqrt(white_noise + red_noise)  # Total RMS
-    #     RMS_model.append(total_rms)
+
+    # Step 5: Calculate RMS model including red noise
+    RMS_model = []
+    for n in binning_times:
+        white_noise = (average_rms_values[0] / np.sqrt(n))**2  # White noise contribution
+        red_noise = total_covariance / (n**2)  # Red noise contribution
+        total_rms = np.sqrt(white_noise + red_noise)  # Total RMS
+        RMS_model.append(total_rms)
 
     return times_binned, average_rms_values, RMS_model
 
