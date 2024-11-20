@@ -89,26 +89,12 @@ def compute_rms_values(phot_table, args):
     print(f'The covariance matrix is:\n{covariance_matrix}')
 
     # Step 4: Extract covariance components
-    sigma_0_squared = RMS_values[0]  # Diagonal terms (white noise component)
+    white_noise = 1 / np.sqrt(binning_times)  # Diagonal terms (white noise component)
     total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms (red noise)
+    red_noise = (1 / binning_times) * np.sqrt(total_covariance)
     print(f'The total covariance (off-diagonal terms) is: {total_covariance}')
 
-    # Step 5: Calculate RMS model including white and red noise
-    # Compute the RMS model with white + red noise as before
-    RMS_model = []
-    for n in binning_times:
-        # White noise contribution
-        white_noise = (sigma_0_squared / n)
-
-        # Red noise contribution
-        red_noise = (total_covariance / (n ** 2))
-
-        # Total RMS
-        total_rms = np.sqrt(white_noise + red_noise)
-        RMS_model.append(total_rms)
-
-    # Convert model to numpy array for easy scaling
-    RMS_model = np.array(RMS_model)
+    RMS_model = np.array(white_noise + red_noise)
 
     # Scale the model to match the data's initial value
     initial_data_rms = average_rms_values[0]  # First RMS value from data
