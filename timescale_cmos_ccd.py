@@ -40,11 +40,12 @@ def filter_to_tic_ids(phot_table, tic_ids):
 
 def compute_rms_values(phot_table, args):
     """Compute RMS values for the provided photometry table."""
+    # Filter stars by magnitude range
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
-
     unique_tmags = np.unique(phot_table['Tmag'])
     print(f"Total stars in brightness range: {len(unique_tmags)}")
 
+    # Initialize containers
     average_rms_values = []
     times_binned = []
     max_binning = int(args.bin)
@@ -53,46 +54,40 @@ def compute_rms_values(phot_table, args):
         Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
         jd_mid = Tmag_data['Time_BJD']
         rel_flux = Tmag_data['Relative_Flux']
-        rel_fluxerr = Tmag_data['Relative_Flux_err']
-        RMS_data = Tmag_data['RMS']
-        color = Tmag_data['COLOR']
-        print(f'The number of data points are: {len(rel_flux)}')
-        print(f'The color for the star is: {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
-        RMS_values = []
-        time_seconds = []
-        for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            exposure_time_seconds = i * args.exp
-            RMS = np.std(dt_flux_binned)
-            RMS_values.append(RMS)
-            time_seconds.append(exposure_time_seconds)
+        print(f"The number of data points are: {len(rel_flux)}")
 
-        average_rms_values.append(RMS_values)
-        times_binned.append(time_seconds)
+        # Step 1: Compute RMS for unbinned data
+        sigma_0_squared = np.std(rel_flux) ** 2  # White noise variance
 
+        # Step 2: Generate binning times
+        binning_times = np.array([i for i in range(1, max_binning)])
+
+        # Step 3: Combine time and flux into 2D array
+        time_flux_array = np.column_stack((jd_mid, rel_flux))
+
+        # Step 4: Compute the covariance matrix
+        covariance_matrix = np.cov(time_flux_array, rowvar=False)
+        print(f"The covariance matrix is:\n{covariance_matrix}")
+
+        # Step 5: Compute covariance components
+        total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Sum of off-diagonal terms
+        print(f"The total covariance (off-diagonal terms) is: {total_covariance}")
+
+        # Step 6: Calculate the RMS model
+        white_noise = sigma_0_squared / binning_times  # White noise term
+        red_noise = total_covariance / (binning_times ** 2)  # Red noise term
+
+        # Combine white and red noise contributions
+        RMS_model = np.sqrt(white_noise + red_noise)
+
+        # Step 7: Collect times and RMS values for plotting
+        average_rms_values.append(np.sqrt(sigma_0_squared) / np.sqrt(binning_times))  # Scale RMS by binning
+        times_binned.append(binning_times)
+
+    # Convert lists to arrays
     average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
-    times_binned = times_binned[0]  # Use the first time bin set
-    print(f'The shape of the rms values is: {average_rms_values.shape}')
-    print(f'The times binned is: {times_binned[0]}')
-
-    binning_times = np.array([i for i in range(1, max_binning)])
-
-    # Step 2: Combine time and flux into a 2D array
-    time_flux_array = np.column_stack((jd_mid, rel_flux))  # Pair time and demeaned flux
-
-    # Step 3: Compute the covariance matrix
-    covariance_matrix = np.cov(time_flux_array, rowvar=False)  # Compute covariance matrix
-    print(f'The covariance matrix is:\n{covariance_matrix}')
-
-    # Step 4: Extract covariance components
-    white_noise = 1 / np.sqrt(binning_times)  # Diagonal terms (white noise component)
-    total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms (red noise)
-    red_noise = (1 / binning_times) * total_covariance
-    print(f'The total covariance (off-diagonal terms) is: {total_covariance}')
-
-    RMS_model = np.array(average_rms_values[0] * white_noise + red_noise)
-
-    RMS_model = np.sqrt(RMS_model)
+    times_binned = times_binned[0]  # Use first time bin set for uniformity
+    RMS_model = RMS_model * 1e6  # Convert model to ppm
 
     return times_binned, average_rms_values, RMS_model
 
