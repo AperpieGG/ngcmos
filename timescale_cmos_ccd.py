@@ -85,11 +85,11 @@ def compute_rms_values(phot_table, args):
     time_flux_array = np.column_stack((jd_mid, demeaned_flux))  # Pair time and demeaned flux
 
     # Step 3: Compute the covariance matrix
-    covariance_matrix = np.cov(demeaned_flux, rowvar=False)  # Compute covariance matrix
+    covariance_matrix = np.cov(time_flux_array, rowvar=False)  # Compute covariance matrix
     print(f'The covariance matrix is:\n{covariance_matrix}')
 
     # Step 4: Extract covariance components
-    sigma_0_squared = np.var(demeaned_flux)  # Diagonal terms (white noise component)
+    sigma_0_squared = np.var(rel_flux)  # Diagonal terms (white noise component)
     total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms (red noise)
     print(f'The total covariance (off-diagonal terms) is: {total_covariance}')
 
