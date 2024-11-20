@@ -19,6 +19,7 @@ def compute_rms_values(phot_table):
     rel_flux = phot_table['Relative_Flux']
     rel_fluxerr = phot_table['Relative_Flux_err']
     RMS_data = phot_table['RMS']
+    print(f'The RMS data is: {RMS_data[0]}')
 
     print(f"The number of data points for TIC_ID {target_tic_id} is: {len(rel_flux)}")
 
@@ -37,6 +38,7 @@ def compute_rms_values(phot_table):
 
     # Convert RMS values to ppm
     average_rms_values = np.array(RMS_values)   # Convert to ppm
+    print(f'The first rms calculated is: {average_rms_values[0]}')
 
     # Define binning times
     binning_times = np.array([i for i in range(1, max_binning)])
