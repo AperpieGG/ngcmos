@@ -79,20 +79,21 @@ def compute_rms_values(phot_table, args):
 
     RMS_model = (average_rms_values[0] / np.sqrt(binning_times))
 
-    # # Step 1: Demean the flux
+    # Step 1: Demean the flux
     flux_mean = np.mean(rel_flux)
     demeaned_flux = rel_flux - flux_mean
 
-    # Step 2: Compute the covariance matrix
-    covariance_matrix = np.cov(demeaned_flux, rowvar=False)
-    print(f'The covariance is: {covariance_matrix}')
+    # Step 2: Combine time and flux into a 2D array
+    time_flux_array = np.column_stack((jd_mid, demeaned_flux))  # Pair time and demeaned flux
 
-    # # Step 3: Extract covariance (off-diagonal terms)
-    # total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Sum of off-diagonal terms
-    #
-    # # Step 4: Compute white noise contribution
-    # rms_unbinned = np.std(rel_flux)  # Standard deviation of the unbinned flux (white noise)
-    #
+    # Step 3: Compute the covariance matrix
+    covariance_matrix = np.cov(time_flux_array, rowvar=False)  # Compute covariance matrix
+    print(f'The covariance matrix is:\n{covariance_matrix}')
+
+    # Step 4: Extract covariance (off-diagonal terms)
+    total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Sum of off-diagonal terms
+    print(f'The total covariance (off-diagonal terms) is: {total_covariance}')
+    
     # # Step 5: Calculate RMS model including red noise
     # RMS_model = []
     # for n in binning_times:
