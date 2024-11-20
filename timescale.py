@@ -58,7 +58,6 @@ def compute_rms_values(phot_table):
     # Scale models to the first data point
     scaling_factor_combined = RMS[0] / RMS_model_combined[0]
     RMS_model_combined *= scaling_factor_combined
-
     # Return values
     return times_binned, RMS, RMS_model_white, RMS_model_combined
 
