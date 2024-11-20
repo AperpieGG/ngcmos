@@ -119,7 +119,7 @@ def compute_rms_values(phot_table, args):
 
     # Apply scaling to the model
     RMS_model = RMS_model * scaling_factor
-    RMS_model = np.array(RMS_model) * 1e6
+    RMS_model = np.array(RMS_model) 
 
     return times_binned, average_rms_values, RMS_model
 
