@@ -57,16 +57,17 @@ def compute_rms_values(phot_table):
     # Scale the red noise appropriately
     red_noise = total_covariance / (binning_values ** 2)
 
-    # Adjust the red noise model
-    RMS_model_red = np.sqrt((RMS[0] ** 2) + red_noise)
-    scaling_factor_red = RMS[0] / RMS_model_red[0]
-    RMS_model_red *= scaling_factor_red
+    # # Adjust the red noise model
+    # RMS_model_red = np.sqrt((RMS[0] ** 2) + red_noise)
+    # scaling_factor_red = RMS[0] / RMS_model_red[0]
+    # RMS_model_red *= scaling_factor_red
 
     # Combine white and red noise
-    RMS_model_combined = np.sqrt((RMS[0]**2 * white_noise) + red_noise)
+    # RMS_model_combined = np.sqrt((RMS[0]**2 * white_noise) + red_noise)
+    RMS_model_combined = ((RMS[0]**2 * white_noise) + red_noise)
     scaling_factor_comb = RMS[0] / RMS_model_combined[0]
     RMS_model_combined *= scaling_factor_comb
-
+    RMS_model_combined = np.sqrt(RMS_model_combined)
     # Return values
     return times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined
 
