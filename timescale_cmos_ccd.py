@@ -98,13 +98,13 @@ def compute_rms_values(phot_table, args):
     RMS_model = []
     for n in binning_times:
         # White noise contribution
-        white_noise = sigma_0_squared / n
+        white_noise = np.sqrt(sigma_0_squared / n)
 
         # Red noise contribution
-        red_noise = total_covariance / (n ** 2)
+        red_noise = np.sqrt(total_covariance / (n ** 2))
 
         # Total RMS
-        total_rms = np.sqrt(white_noise**2 + red_noise**2)
+        total_rms = np.sqrt(white_noise + red_noise)
         RMS_model.append(total_rms)
 
     # Convert model to numpy array for easy scaling
