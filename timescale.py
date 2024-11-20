@@ -6,42 +6,48 @@ from utils import plot_images, read_phot_file, bin_time_flux_error
 
 
 def compute_rms_values(phot_table):
-    """Compute RMS values for the provided photometry table."""
-    phot_table = phot_table[(phot_table['TIC_ID'] >= 269218084)]
+    """Compute RMS values for the provided photometry table for a specific TIC_ID target."""
+    # Filter the table for the specific TIC_ID target
+    target_tic_id = 269218084
+    phot_table = phot_table[phot_table['TIC_ID'] == target_tic_id]
 
-    average_rms_values = []
-    times_binned = []
+    if phot_table.empty:
+        print(f"No data found for TIC_ID: {target_tic_id}")
+        return None, None, None
+
+    # Extract data for the specific TIC_ID
+    jd_mid = phot_table['Time_BJD'].values
+    rel_flux = phot_table['Relative_Flux'].values
+    rel_fluxerr = phot_table['Relative_Flux_err'].values
+
+    print(f"The number of data points for TIC_ID {target_tic_id} is: {len(rel_flux)}")
+
+    # Parameters for binning
     max_binning = 600
+    RMS_values = []
+    times_binned = []
 
-    for TIC_ID in phot_table:
-        jd_mid = TIC_ID['Time_BJD']
-        rel_flux = TIC_ID['Relative_Flux']
-        rel_fluxerr = TIC_ID['Relative_Flux_err']
-        RMS_data = TIC_ID['RMS']
-        print(f'The number of data points are: {len(rel_flux)}')
-        RMS_values = []
-        time_seconds = []
-        for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            exposure_time_seconds = i * 10
-            RMS = np.std(dt_flux_binned)
-            RMS_values.append(RMS)
-            time_seconds.append(exposure_time_seconds)
+    # Compute RMS values for different binning times
+    for i in range(1, max_binning):
+        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
+        exposure_time_seconds = i * 10  # Assuming 10s per bin
+        RMS = np.std(dt_flux_binned)
+        RMS_values.append(RMS)
+        times_binned.append(exposure_time_seconds)
 
-        average_rms_values.append(RMS_values)
-        times_binned.append(time_seconds)
+    # Convert RMS values to ppm and use median if needed
+    average_rms_values = np.array(RMS_values) * 1e6  # Convert to ppm
 
-    average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
-    times_binned = times_binned[0]  # Use the first time bin set
-    print(f'The shape of the rms values is: {average_rms_values.shape}')
-    print(f'The times binned is: {times_binned[0]}')
-
+    # Define binning times
     binning_times = np.array([i for i in range(1, max_binning)])
 
+    # Compute RMS model
     RMS_model = average_rms_values[0] / np.sqrt(binning_times)
 
-    return times_binned, average_rms_values, RMS_model
+    print(f"The shape of the RMS values is: {average_rms_values.shape}")
+    print(f"The times binned start with: {times_binned[0]}")
 
+    return times_binned, average_rms_values, RMS_model
 
 def plot_two_rms(times1, avg_rms1, RMS_model1):
     """Generate two RMS plots in a single figure with one row and two columns."""
