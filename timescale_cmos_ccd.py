@@ -59,23 +59,14 @@ def compute_rms_values(phot_table, args):
         print(f'The number of data points are: {len(rel_flux)}')
         print(f'The color for the star is: {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
 
-        # Skip if there are no data points
-        if len(rel_flux) < 2:
-            print("Insufficient data points for covariance calculation. Skipping this star.")
-            continue
-
-        # Ensure rel_flux is a 2D array
-        if rel_flux.ndim == 1:
+        # Compute covariance matrix for red noise
+        if len(rel_flux.shape) == 1:  # Ensure rel_flux is 2D
             rel_flux = rel_flux[:, np.newaxis]
+        covariance_matrix = np.cov(rel_flux, rowvar=False)
 
-        # Compute covariance matrix
-        try:
-            covariance_matrix = np.cov(rel_flux, rowvar=False)
-            sigma_0_squared = np.diag(covariance_matrix).mean()  # Mean variance (white noise)
-            red_noise_component = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
-        except Exception as e:
-            print(f"Error computing covariance matrix: {e}")
-            continue
+        # Compute white noise and red noise components
+        sigma_0_squared = np.var(rel_flux)  # Variance of unbinned light curve (white noise)
+        red_noise_sum = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
 
         RMS_values = []
         time_seconds = []
@@ -87,10 +78,10 @@ def compute_rms_values(phot_table, args):
             # White noise contribution
             white_noise_rms = sigma_0_squared / i
 
-            # Correlated noise contribution
-            red_noise_rms = red_noise_component / (i**2)
+            # Correlated noise (red noise) contribution
+            red_noise_rms = red_noise_sum / (i**2)
 
-            # Total RMS
+            # Total RMS (white + red noise)
             total_rms = np.sqrt(white_noise_rms + red_noise_rms)
 
             RMS_values.append(total_rms)
@@ -108,12 +99,14 @@ def compute_rms_values(phot_table, args):
     print(f'The shape of the rms values is: {average_rms_values.shape}')
     print(f'The times binned is: {times_binned[0]}')
 
-    binning_times = [i for i in range(1, max_binning)]
-    RMS_model_white = average_rms_values[0] / np.sqrt(binning_times)
-    RMS_model_red = red_noise_component / (binning_times**2)
-    RMS_model = np.sqrt(RMS_model_white**2 + RMS_model_red**2)
+    # Compute the RMS model (white noise + red noise)
+    binning_times = np.array([i for i in range(1, max_binning)])
+    RMS_model_white = average_rms_values[0] / np.sqrt(binning_times)  # White noise component
+    RMS_model_red = red_noise_sum / (binning_times**2)  # Red noise component
+    RMS_model = np.sqrt(RMS_model_white**2 + RMS_model_red)  # Combine both components
 
     return times_binned, average_rms_values, RMS_model
+
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """Generate two RMS plots in a single figure with one row and two columns."""
