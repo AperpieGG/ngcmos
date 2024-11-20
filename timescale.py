@@ -36,7 +36,7 @@ def compute_rms_values(phot_table):
         times_binned.append(exposure_time_seconds)
 
     # Convert RMS values to ppm
-    average_rms_values = np.array(RMS_values) * 1e6  # Convert to ppm
+    average_rms_values = np.array(RMS_values)   # Convert to ppm
 
     # Define binning times
     binning_times = np.array([i for i in range(1, max_binning)])
