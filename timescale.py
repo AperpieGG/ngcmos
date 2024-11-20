@@ -24,30 +24,24 @@ def compute_rms_values(phot_table):
 
     # Parameters for binning
     max_binning = 600
-    RMS_values = []
+    RMS = []
     times_binned = []
 
     # Compute RMS values for different binning times
     for i in range(1, max_binning):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-        exposure_time_seconds = i * 10  # Assuming 10s per bin
-        RMS = np.std(dt_flux_binned)
-        RMS_values.append(RMS)
-        times_binned.append(exposure_time_seconds)
-
-    # Convert RMS values to ppm
-    average_rms_values = np.array(RMS_values)   # Convert to ppm
+        RMS.append(np.array(np.std(dt_flux_binned)))
+        times_binned.append(i * 10)
 
     # Define binning times
-    binning_times = np.array([i for i in range(1, max_binning)])
+    binning_values = np.array([i for i in range(1, max_binning)])
 
-    # Compute RMS model
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+    # Compute white model
+    white_noise = 1 / np.sqrt(binning_values)
+    RMS_model_white = RMS[0] * white_noise ** 2
 
-    print(f"The shape of the RMS values is: {average_rms_values.shape}")
-    print(f"The times binned start with: {times_binned[0]}")
 
-    return times_binned, average_rms_values, RMS_model
+    return times_binned, RMS, RMS_model_white
 
 
 def plot_two_rms(times, avg_rms, RMS_model):
