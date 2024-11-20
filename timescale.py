@@ -55,6 +55,11 @@ def compute_rms_values(phot_table):
     # Extract red noise (off-diagonal terms)
     total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)
     red_noise = total_covariance / (binning_values ** 2)
+    RMS_model_red = np.sqrt(red_noise)
+
+    # Scale red noise model to align with the first data point
+    scaling_factor_red = RMS[0] / RMS_model_red[0]
+    RMS_model_red *= scaling_factor_red
 
     # Combine white and red noise
     RMS_model_combined = np.sqrt((RMS[0] ** 2 / binning_values) + red_noise)
@@ -63,13 +68,15 @@ def compute_rms_values(phot_table):
     scaling_factor = RMS[0] / RMS_model_combined[0]
     RMS_model_combined *= scaling_factor
 
-    return times_binned, RMS, RMS_model_combined
+    return times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined
 
 
-def plot_two_rms(times, avg_rms, RMS_model):
+def plot_two_rms(times, avg_rms, RMS_white, RMS_red, RMS_model):
     """Generate RMS plot with data and model."""
     plt.figure(figsize=(8, 6))
     plt.plot(times, avg_rms, 'o', color='black', label='Data')
+    plt.plot(times, RMS_white, '--', color='grey', label='Data')
+    plt.plot(times, RMS_red, '--', color='red', label='Data')
     plt.plot(times, RMS_model, '--', color='black', label='Model')
     plt.axvline(x=900, color='red', linestyle='-', label='Reference Line')
     plt.xscale('log')
