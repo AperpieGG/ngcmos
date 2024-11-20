@@ -105,7 +105,7 @@ def process_file():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
-    parser.add_argument('tic_id', type=str, help='tic_id to ran statistics')
+    parser.add_argument('tic_id', type=int, help='tic_id to ran statistics')
     args = parser.parse_args()
 
     # Process the photometry file
