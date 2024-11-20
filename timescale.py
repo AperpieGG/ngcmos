@@ -54,6 +54,12 @@ def compute_rms_values(phot_table):
     total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)
     print(f'Total covariance is: {total_covariance}')
 
+    # Clamp total covariance to zero if it's negative
+    if total_covariance < 0:
+        total_covariance = 0
+        print("Total covariance is negative. Clamping to zero.")
+
+
     # Scale the red noise appropriately
     red_noise = total_covariance / (binning_values ** 2)
 
