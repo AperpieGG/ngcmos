@@ -14,12 +14,11 @@ def compute_rms_values(phot_table):
     if len(phot_table) == 0:
         print(f"No data found for TIC_ID: {target_tic_id}")
         return None, None, None
-
     tmag = phot_table['Tmag']
-    print(f'The target has Tmag: {tmag.iloc[0]}')
-    jd_mid = phot_table['Time_BJD'].values
-    rel_flux = phot_table['Relative_Flux'].values
-    rel_fluxerr = phot_table['Relative_Flux_err'].values
+    print(f'The target has Tmag: {tmag[0]}')
+    jd_mid = phot_table['Time_BJD']
+    rel_flux = phot_table['Relative_Flux']
+    rel_fluxerr = phot_table['Relative_Flux_err']
 
     print(f"The number of data points for TIC_ID {target_tic_id} is: {len(rel_flux)}")
 
@@ -31,35 +30,45 @@ def compute_rms_values(phot_table):
     # Compute RMS values for different binning times
     for i in range(1, max_binning):
         time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-        RMS.append(np.std(dt_flux_binned))
+        RMS.append(np.array(np.std(dt_flux_binned)))
         times_binned.append(i * 10)
 
     # Define binning times
     binning_values = np.array([i for i in range(1, max_binning)])
 
     # Step 1: Compute white noise model
-    sigma_0_squared = np.var(rel_flux)  # Variance of unbinned flux
-    white_noise = sigma_0_squared / binning_values
-    RMS_model_white = np.sqrt(white_noise)
+    white_noise = 1 / np.sqrt(binning_values)
+    RMS_model_white = RMS[0] * white_noise
 
     # Step 2: Compute red noise model
-    # Combine time and flux into a 2D array for covariance computation
-    demeaned_flux = rel_flux - np.mean(rel_flux)
-    covariance_matrix = np.cov(demeaned_flux, rowvar=False)
+    # Combine time and flux into a 2D array
+    time_flux_array = np.column_stack((jd_mid, rel_flux))
+    print(f'The time flux array is:\n{time_flux_array}')
+
+    # Compute covariance matrix
+    covariance_matrix = np.cov(time_flux_array, rowvar=False)
+    print(f'The shape of the covariance matrix is: {covariance_matrix.shape}')
     print(f"The covariance matrix is:\n{covariance_matrix}")
 
-    # Compute red noise contribution (off-diagonal terms of covariance matrix)
-    red_noise_contribution = total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)
-    red_noise = (1 / (binning_values ** 2)) * red_noise_contribution
+    # Extract red noise (off-diagonal terms)
+    total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)
+    print(f'Total covariance is: {total_covariance}')
 
-    # Combine white noise and red noise into the final model
-    RMS_model_combined = np.sqrt(white_noise + red_noise)
+    # Scale the red noise appropriately
+    red_noise = total_covariance / (binning_values ** 2)
 
-    # Scale models to the first data point
-    scaling_factor_combined = RMS[0] / RMS_model_combined[0]
-    RMS_model_combined *= scaling_factor_combined
+    # Adjust the red noise model
+    RMS_model_red = np.sqrt((RMS[0] ** 2) + red_noise)
+    scaling_factor_red = RMS[0] / RMS_model_red[0]
+    RMS_model_red *= scaling_factor_red
+
+    # Combine white and red noise
+    RMS_model_combined = np.sqrt((RMS[0]**2 * white_noise) + red_noise)
+    scaling_factor_comb = RMS[0] / RMS_model_combined[0]
+    RMS_model_combined *= scaling_factor_comb
+
     # Return values
-    return times_binned, RMS, RMS_model_white, RMS_model_combined
+    return times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined
 
 
 def plot_two_rms(times, avg_rms, RMS_white, RMS_red, RMS_model):
