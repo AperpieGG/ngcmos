@@ -104,9 +104,11 @@ def compute_rms_values(phot_table, args):
 
         # Total RMS
         total_rms = np.sqrt(white_noise + red_noise)
-        RMS_model.append(total_rms) * 1e6
+        RMS_model.append(total_rms)
 
-    return times_binned, average_rms_values, np.array(RMS_model)
+    RMS_model = np.array(RMS_model) * 1e6
+
+    return times_binned, average_rms_values, RMS_model
 
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
