@@ -39,7 +39,7 @@ def filter_to_tic_ids(phot_table, tic_ids):
 
 
 def compute_rms_values(phot_table, args):
-    """Compute RMS values for the provided photometry table, including red noise."""
+    """Compute RMS values for the provided photometry table."""
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
     unique_tmags = np.unique(phot_table['Tmag'])
@@ -58,64 +58,29 @@ def compute_rms_values(phot_table, args):
         color = Tmag_data['COLOR']
         print(f'The number of data points are: {len(rel_flux)}')
         print(f'The color for the star is: {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
-
-        # Skip if there are insufficient data points
-        if len(rel_flux) < 2:
-            print("Insufficient data points for covariance calculation. Skipping this star.")
-            continue
-
-        # Ensure rel_flux is a 2D array
-        if rel_flux.ndim == 1:
-            rel_flux = rel_flux[:, np.newaxis]
-
-        # Compute covariance matrix
-        covariance_matrix = np.cov(rel_flux, rowvar=False)
-
-        # Handle cases where covariance_matrix is not 2D
-        if covariance_matrix.ndim < 2:
-            print("Covariance matrix is not valid. Skipping this star.")
-            continue
-
-        # Compute white noise and red noise components
-        sigma_0_squared = np.var(rel_flux)  # Variance of unbinned light curve (white noise)
-        red_noise_sum = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
-
         RMS_values = []
         time_seconds = []
-
         for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux.flatten(), rel_fluxerr, i)
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
             exposure_time_seconds = i * args.exp
-
-            # White noise contribution
-            white_noise_rms = sigma_0_squared / i
-
-            # Correlated noise (red noise) contribution
-            red_noise_rms = red_noise_sum / (i**2)
-
-            # Total RMS (white + red noise)
-            total_rms = np.sqrt(white_noise_rms + red_noise_rms)
-
-            RMS_values.append(total_rms)
+            RMS = np.std(dt_flux_binned)
+            RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
-
-    if len(average_rms_values) == 0:
-        print("No valid stars with sufficient data for RMS calculation.")
-        return None, None, None
 
     average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
     times_binned = times_binned[0]  # Use the first time bin set
     print(f'The shape of the rms values is: {average_rms_values.shape}')
     print(f'The times binned is: {times_binned[0]}')
 
-    # Compute the RMS model (white noise + red noise)
-    binning_times = np.array([i for i in range(1, max_binning)])
-    RMS_model_white = average_rms_values[0] / np.sqrt(binning_times)  # White noise component
-    RMS_model_red = red_noise_sum / (binning_times**2)  # Red noise component
-    RMS_model = np.sqrt(RMS_model_white**2 + RMS_model_red)  # Combine both components
+    binning_times = [i for i in range(1, max_binning)]
+    covariance_matrix = np.cov(rel_flux, rowvar=False)
+    sigma_0_squared = np.var(rel_flux)  # Variance of unbinned light curve (white noise)
+    red_noise_sum = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
+    print(f'The covariance of red noise is: {red_noise_sum}')
+    RMS_model = (average_rms_values[0] / np.sqrt(binning_times))
 
     return times_binned, average_rms_values, RMS_model
 
@@ -257,7 +222,8 @@ if __name__ == "__main__":
     parser.add_argument('--ch', type=float, default=None, help='Upper limit for color index')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
-    parser.add_argument('--trim', type=int, default=50, help='Number of data points to trim from the beginning and end')
+    parser.add_argument('--trim', type=int, default=None, help='Number of data points to '
+                                                               'trim from the beginning and end')
     args = parser.parse_args()
 
     # Process both files
