@@ -42,7 +42,7 @@ def compute_rms_values(phot_table):
 
     # Step 2: Compute red noise model
     # Combine time and flux into a 2D array
-    time_flux_array = np.column_stack((rel_flux, jd_mid))
+    time_flux_array = np.column_stack((jd_mid, rel_flux))
     print(f'The time flux array is:\n{time_flux_array}')
 
     # Compute covariance matrix
