@@ -59,6 +59,9 @@ def compute_rms_values(phot_table):
     # Combine white and red noise
     RMS_model_combined = np.sqrt((RMS[0] ** 2 / binning_values) + red_noise)
 
+    # adjust the script with respect the first point
+    RMS_mode_combined = RMS[0] * RMS_model_combined
+
     return times_binned, RMS, RMS_model_combined
 
 
