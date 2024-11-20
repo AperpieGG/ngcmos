@@ -95,7 +95,7 @@ def compute_rms_values(phot_table, args):
     print(f'The total covariance (off-diagonal terms) is: {total_covariance}')
 
     # Step 5: Calculate RMS model including red noise
-    RMS_model = np.sqrt((average_rms_values[0] ** 2 / binning_times) + (np.ones() / binning_times**2 * np.sqrt(total_covariance)))
+    RMS_model = np.sqrt((average_rms_values[0] ** 2 / binning_times) + (np.ones(len(binning_times)) / binning_times**2 * np.sqrt(total_covariance)))
 
     return times_binned, average_rms_values, RMS_model
 
