@@ -38,7 +38,7 @@ def filter_to_tic_ids(phot_table, tic_ids):
     return phot_table
 
 
-def compute_rms_with_red_noise(phot_table, args):
+def compute_rms_values(phot_table, args):
     """Compute RMS values accounting for white and red noise."""
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
