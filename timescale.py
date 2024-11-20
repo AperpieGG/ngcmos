@@ -36,12 +36,30 @@ def compute_rms_values(phot_table):
     # Define binning times
     binning_values = np.array([i for i in range(1, max_binning)])
 
-    # Compute white model
+    # Step 1: Compute white noise model
     white_noise = 1 / np.sqrt(binning_values)
-    RMS_model_white = RMS[0] * white_noise ** 2
+    RMS_model_white = RMS[0] * white_noise
 
+    # Step 2: Compute red noise model
+    # Demean the flux
+    flux_mean = np.mean(rel_flux)
+    demeaned_flux = rel_flux - flux_mean
 
-    return times_binned, RMS, RMS_model_white
+    # Combine time and flux into a 2D array
+    time_flux_array = np.column_stack((jd_mid, demeaned_flux))
+
+    # Compute covariance matrix
+    covariance_matrix = np.cov(time_flux_array, rowvar=False)
+    print(f"The covariance matrix is:\n{covariance_matrix}")
+
+    # Extract red noise (off-diagonal terms)
+    total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)
+    red_noise = total_covariance / (binning_values ** 2)
+
+    # Combine white and red noise
+    RMS_model_combined = np.sqrt((RMS[0] ** 2 / binning_values) + red_noise)
+
+    return times_binned, RMS, RMS_model_white, RMS_model_combined
 
 
 def plot_two_rms(times, avg_rms, RMS_model):
