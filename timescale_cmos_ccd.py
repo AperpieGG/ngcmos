@@ -240,8 +240,8 @@ if __name__ == "__main__":
     parser.add_argument('--ch', type=float, default=None, help='Upper limit for color index')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
-    parser.add_argument('--trim', type=int, default=0, help='Number of data points to '
-                                                               'trim from the beginning and end')
+    parser.add_argument('--trim', type=int, action='store_true',
+                        help='Number of data points to trim from the beginning and end')
     args = parser.parse_args()
 
     # Process both files
@@ -250,10 +250,11 @@ if __name__ == "__main__":
     phot_table2 = process_file(args.file2, args)
 
     # Trim data for each target in both photometry tables
-    print("Trimming data in phot_table1:")
-    phot_table1 = trim_target_data(phot_table1, args.trim)
-    print("Trimming data in phot_table2:")
-    phot_table2 = trim_target_data(phot_table2, args.trim)
+    if args.trim:
+        print("Trimming data in phot_table1")
+        phot_table1 = trim_target_data(phot_table1, args.trim)
+        print("Trimming data in phot_table2")
+        phot_table2 = trim_target_data(phot_table2, args.trim)
 
     # Apply color filtering if limits are provided
     if args.cl is not None and args.ch is not None:
