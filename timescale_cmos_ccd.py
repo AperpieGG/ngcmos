@@ -76,11 +76,29 @@ def compute_rms_values(phot_table, args):
     print(f'The times binned is: {times_binned[0]}')
 
     binning_times = [i for i in range(1, max_binning)]
-    covariance_matrix = np.cov(rel_flux, rowvar=False)
-    sigma_0_squared = np.var(rel_flux)  # Variance of unbinned light curve (white noise)
-    red_noise_sum = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
-    print(f'The covariance of red noise is: {red_noise_sum}')
-    RMS_model = (average_rms_values[0] / np.sqrt(binning_times))
+
+    # RMS_model = (average_rms_values[0] / np.sqrt(binning_times))
+    
+    # Step 1: Demean the flux
+    flux_mean = np.mean(rel_flux)
+    demeaned_flux = rel_flux - flux_mean
+
+    # Step 2: Compute the covariance matrix
+    covariance_matrix = np.cov(demeaned_flux, rowvar=False)
+
+    # Step 3: Extract covariance (off-diagonal terms)
+    total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Sum of off-diagonal terms
+
+    # Step 4: Compute white noise contribution
+    rms_unbinned = np.std(rel_flux)  # Standard deviation of the unbinned flux (white noise)
+
+    # Step 5: Calculate RMS model including red noise
+    RMS_model = []
+    for n in binning_times:
+        white_noise = (rms_unbinned / np.sqrt(n))**2  # White noise contribution
+        red_noise = total_covariance / (n**2)  # Red noise contribution
+        total_rms = np.sqrt(white_noise + red_noise)  # Total RMS
+        RMS_model.append(total_rms)
 
     return times_binned, average_rms_values, RMS_model
 
