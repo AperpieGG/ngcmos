@@ -76,7 +76,7 @@ def compute_rms_values(phot_table, args):
     print(f'The times binned is: {times_binned[0]}')
 
     binning_times = [i for i in range(1, max_binning)]
-    RMS_model = (average_rms_values[0] / np.sqrt(binning_times)) + average_rms_values[0] / binning_times
+    RMS_model = (average_rms_values[0] / np.sqrt(binning_times)) + binning_times
 
     return times_binned, average_rms_values, RMS_model
 
