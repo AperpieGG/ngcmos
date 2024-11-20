@@ -49,7 +49,7 @@ def compute_rms_values(phot_table):
     time_flux_array = np.column_stack((jd_mid, demeaned_flux))
 
     # Compute covariance matrix
-    covariance_matrix = np.cov(time_flux_array, rowvar=False)
+    covariance_matrix = np.cov(time_flux_array, rowvar=True)
     print(f"The covariance matrix is:\n{covariance_matrix}")
 
     # Extract red noise (off-diagonal terms)
@@ -83,7 +83,7 @@ def plot_two_rms(times, avg_rms, RMS_white, RMS_red, RMS_model):
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
     plt.ylabel('RMS (ppm)')
-    plt.legend()
+    # plt.legend()
 
     # Format y-axis tick labels
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
