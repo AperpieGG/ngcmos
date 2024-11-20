@@ -69,6 +69,8 @@ def compute_rms_values(phot_table):
 
     # Combine white and red noise
     RMS_model_combined = np.sqrt((RMS[0] ** 2 / binning_values) + red_noise)
+    scaling_factor_comb = RMS[0] / RMS_model_combined[0]
+    RMS_model_combined *= scaling_factor_comb
 
     # Return values
     return times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined
