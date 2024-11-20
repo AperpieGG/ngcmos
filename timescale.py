@@ -41,10 +41,6 @@ def compute_rms_values(phot_table):
     RMS_model_white = RMS[0] * white_noise
 
     # Step 2: Compute red noise model
-    # Demean the flux
-    flux_mean = np.mean(rel_flux)
-    demeaned_flux = rel_flux - flux_mean
-
     # Combine time and flux into a 2D array
     time_flux_array = np.column_stack((jd_mid, rel_flux))
     print(f'The time flux array is:\n{time_flux_array}')
@@ -61,8 +57,7 @@ def compute_rms_values(phot_table):
     red_noise = total_covariance / (binning_values ** 2)
 
     # Adjust the red noise model
-    RMS_model_red = np.sqrt((RMS[0] ** 2) + red_noise)
-
+    RMS_model_red = (RMS[0] ** 2 + red_noise)
 
     # Combine white and red noise
     RMS_model_combined = np.sqrt((RMS[0] ** 2 / binning_values) + red_noise)
