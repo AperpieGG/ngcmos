@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
@@ -11,7 +11,7 @@ def compute_rms_values(phot_table):
     target_tic_id = 269218084
     phot_table = phot_table[phot_table['TIC_ID'] == target_tic_id]
 
-    if phot_table.empty:
+    if len(phot_table) == 0:
         print(f"No data found for TIC_ID: {target_tic_id}")
         return None, None, None
 
@@ -35,7 +35,7 @@ def compute_rms_values(phot_table):
         RMS_values.append(RMS)
         times_binned.append(exposure_time_seconds)
 
-    # Convert RMS values to ppm and use median if needed
+    # Convert RMS values to ppm
     average_rms_values = np.array(RMS_values) * 1e6  # Convert to ppm
 
     # Define binning times
@@ -49,39 +49,49 @@ def compute_rms_values(phot_table):
 
     return times_binned, average_rms_values, RMS_model
 
-def plot_two_rms(times1, avg_rms1, RMS_model1):
-    """Generate two RMS plots in a single figure with one row and two columns."""
 
-    plt.plot(times1, avg_rms1, 'o', color='black')
-    plt.plot(times1, RMS_model1, '--', color='black')
-    plt.axvline(x=900, color='red', linestyle='-')
+def plot_two_rms(times, avg_rms, RMS_model):
+    """Generate RMS plot with data and model."""
+    plt.figure(figsize=(8, 6))
+    plt.plot(times, avg_rms, 'o', color='black', label='Data')
+    plt.plot(times, RMS_model, '--', color='black', label='Model')
+    plt.axvline(x=900, color='red', linestyle='-', label='Reference Line')
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Exposure time (s)')
     plt.ylabel('RMS (ppm)')
+    plt.legend()
 
+    # Format y-axis tick labels
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().tick_params(axis='y', which='minor', length=4)
+
     plt.tight_layout()
     plt.show()
 
 
 def process_file():
     """Process a single photometry file."""
-    plot_images()
+    plot_images()  # Optional: Displays images, ensure this function works correctly.
     current_night_directory = '.'
-    phot_table = read_phot_file(os.path.join(current_night_directory, 'rel_phot_NG1858-4651_5_1.fits'))
+    file_path = os.path.join(current_night_directory, 'rel_phot_NG1858-4651_5_1.fits')
+    phot_table = read_phot_file(file_path)
     return phot_table
 
 
 if __name__ == "__main__":
-    # Process both files
+    # Process the photometry file
     phot_table1 = process_file()
 
-    # Compute RMS values for both files
-    times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1)
+    if phot_table1 is not None:
+        # Compute RMS values
+        times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1)
 
-    # Plot the results
-    plot_two_rms(times1, avg_rms1, RMS_model1)
-
+        if times1 is not None and avg_rms1 is not None and RMS_model1 is not None:
+            # Plot the results
+            plot_two_rms(times1, avg_rms1, RMS_model1)
+        else:
+            print("Error: RMS computation failed.")
+    else:
+        print("Error: Failed to process photometry file.")
