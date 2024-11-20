@@ -77,10 +77,6 @@ def compute_rms_values(phot_table, args):
 
     binning_times = np.array([i for i in range(1, max_binning)])
 
-    # Step 1: Demean the flux
-    flux_mean = np.mean(rel_flux)
-    demeaned_flux = rel_flux - flux_mean
-
     # Step 2: Combine time and flux into a 2D array
     time_flux_array = np.column_stack((jd_mid, rel_flux))  # Pair time and demeaned flux
 
@@ -91,21 +87,12 @@ def compute_rms_values(phot_table, args):
     # Step 4: Extract covariance components
     white_noise = 1 / np.sqrt(binning_times)  # Diagonal terms (white noise component)
     total_covariance = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms (red noise)
-    red_noise = (1 / binning_times) * np.sqrt(total_covariance)
+    red_noise = (1 / binning_times) * total_covariance
     print(f'The total covariance (off-diagonal terms) is: {total_covariance}')
 
-    RMS_model = np.array(white_noise + red_noise)
+    RMS_model = np.array(average_rms_values[0] * white_noise + red_noise)
 
-    # Scale the model to match the data's initial value
-    initial_data_rms = average_rms_values[0]  # First RMS value from data
-    initial_model_rms = RMS_model[0]  # First RMS value from model
-
-    # Compute the scaling factor
-    scaling_factor = initial_data_rms / initial_model_rms
-
-    # Apply scaling to the model
-    RMS_model = RMS_model * scaling_factor
-    RMS_model = np.array(RMS_model)
+    RMS_model = np.sqrt(RMS_model)
 
     return times_binned, average_rms_values, RMS_model
 
