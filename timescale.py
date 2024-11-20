@@ -8,7 +8,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error
 def compute_rms_values(phot_table):
     """Compute RMS values for the provided photometry table for a specific TIC_ID target."""
     # Filter the table for the specific TIC_ID target
-    target_tic_id = 269218084
+    target_tic_id = 269217040
     phot_table = phot_table[phot_table['TIC_ID'] == target_tic_id]
 
     if len(phot_table) == 0:
