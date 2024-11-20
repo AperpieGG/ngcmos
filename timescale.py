@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import os
+import argparse
 import numpy as np
 from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 
 
-def compute_rms_values(phot_table):
+def compute_rms_values(phot_table, target_tic_id):
     """Compute RMS values for the provided photometry table for a specific TIC_ID target."""
     # Filter the table for the specific TIC_ID target
-    target_tic_id = 201532876
     phot_table = phot_table[phot_table['TIC_ID'] == target_tic_id]
 
     if len(phot_table) == 0:
@@ -104,12 +104,17 @@ def process_file():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
+    parser.add_argument('tic_id', type=str, help='tic_id to ran statistics')
+    args = parser.parse_args()
+
     # Process the photometry file
     phot_table1 = process_file()
 
     if phot_table1 is not None:
         # Compute RMS values
-        times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined = compute_rms_values(phot_table1)
+        times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined = (
+            compute_rms_values(phot_table1, args.tic_id))
         plot_two_rms(times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined)
 
     else:
