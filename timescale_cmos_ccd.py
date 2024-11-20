@@ -59,19 +59,29 @@ def compute_rms_values(phot_table, args):
         print(f'The number of data points are: {len(rel_flux)}')
         print(f'The color for the star is: {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
 
+        # Skip if there are no data points
+        if len(rel_flux) < 2:
+            print("Insufficient data points for covariance calculation. Skipping this star.")
+            continue
+
+        # Ensure rel_flux is a 2D array
+        if rel_flux.ndim == 1:
+            rel_flux = rel_flux[:, np.newaxis]
+
+        # Compute covariance matrix
+        try:
+            covariance_matrix = np.cov(rel_flux, rowvar=False)
+            sigma_0_squared = np.diag(covariance_matrix).mean()  # Mean variance (white noise)
+            red_noise_component = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
+        except Exception as e:
+            print(f"Error computing covariance matrix: {e}")
+            continue
+
         RMS_values = []
         time_seconds = []
 
-        # Compute the covariance matrix for red noise
-        if len(rel_flux.shape) == 1:  # Check if rel_flux is 1D
-            rel_flux = rel_flux[:, np.newaxis]  # Convert to 2D array (n, 1)
-
-        covariance_matrix = np.cov(rel_flux, rowvar=False)  # Compute covariance matrix
-        sigma_0_squared = np.diag(covariance_matrix).mean()  # Mean variance (white noise)
-        red_noise_component = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
-
         for i in range(1, max_binning):
-            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
+            time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux.flatten(), rel_fluxerr, i)
             exposure_time_seconds = i * args.exp
 
             # White noise contribution
@@ -89,6 +99,10 @@ def compute_rms_values(phot_table, args):
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
 
+    if len(average_rms_values) == 0:
+        print("No valid stars with sufficient data for RMS calculation.")
+        return None, None, None
+
     average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
     times_binned = times_binned[0]  # Use the first time bin set
     print(f'The shape of the rms values is: {average_rms_values.shape}')
@@ -100,7 +114,6 @@ def compute_rms_values(phot_table, args):
     RMS_model = np.sqrt(RMS_model_white**2 + RMS_model_red**2)
 
     return times_binned, average_rms_values, RMS_model
-
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """Generate two RMS plots in a single figure with one row and two columns."""
