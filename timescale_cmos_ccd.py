@@ -62,8 +62,11 @@ def compute_rms_values(phot_table, args):
         RMS_values = []
         time_seconds = []
 
-        # Covariance matrix for red noise
-        covariance_matrix = np.cov(rel_flux, rowvar=False)
+        # Compute the covariance matrix for red noise
+        if len(rel_flux.shape) == 1:  # Check if rel_flux is 1D
+            rel_flux = rel_flux[:, np.newaxis]  # Convert to 2D array (n, 1)
+
+        covariance_matrix = np.cov(rel_flux, rowvar=False)  # Compute covariance matrix
         sigma_0_squared = np.diag(covariance_matrix).mean()  # Mean variance (white noise)
         red_noise_component = np.sum(covariance_matrix) - np.trace(covariance_matrix)  # Off-diagonal terms
 
