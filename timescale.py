@@ -14,11 +14,10 @@ def compute_rms_values(phot_table):
     max_binning = 600
 
     for TIC_ID in phot_table:
-        Tmag_data = phot_table[(phot_table['TIC_ID'] >= 269218084)]
-        jd_mid = Tmag_data['Time_BJD']
-        rel_flux = Tmag_data['Relative_Flux']
-        rel_fluxerr = Tmag_data['Relative_Flux_err']
-        RMS_data = Tmag_data['RMS']
+        jd_mid = TIC_ID['Time_BJD']
+        rel_flux = TIC_ID['Relative_Flux']
+        rel_fluxerr = TIC_ID['Relative_Flux_err']
+        RMS_data = TIC_ID['RMS']
         print(f'The number of data points are: {len(rel_flux)}')
         RMS_values = []
         time_seconds = []
