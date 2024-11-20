@@ -113,8 +113,12 @@ if __name__ == "__main__":
 
     if phot_table1 is not None:
         # Compute RMS values
-        times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined = compute_rms_values(phot_table1, args.tic_id)
-        plot_two_rms(times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined)
+        results = compute_rms_values(phot_table1, args.tic_id)
 
+        if results[0] is None:  # Check if the compute_rms_values returned None
+            print(f"No data available for TIC_ID: {args.tic_id}. Exiting.")
+        else:
+            times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined = results
+            plot_two_rms(times_binned, RMS, RMS_model_white, RMS_model_red, RMS_model_combined)
     else:
         print("Error: Failed to process photometry file.")
