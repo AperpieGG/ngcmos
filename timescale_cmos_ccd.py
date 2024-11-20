@@ -77,9 +77,9 @@ def compute_rms_values(phot_table, args):
 
     binning_times = np.array([i for i in range(1, max_binning)])
 
-    RMS_model = average_rms_values[0] / np.sqrt(binning_times)
+    RMS_white = average_rms_values[0]**2 / binning_times
 
-    return times_binned, average_rms_values, RMS_model
+    return times_binned, average_rms_values, RMS_white
 
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
