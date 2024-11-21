@@ -94,11 +94,11 @@ def plot_two_rms(times, avg_rms, RMS_white, RMS_red, RMS_model):
     plt.show()
 
 
-def process_file():
+def process_file(phot_file):
     """Process a single photometry file."""
     plot_images()  # Optional: Displays images, ensure this function works correctly.
     current_night_directory = '.'
-    file_path = os.path.join(current_night_directory, 'rel_phot_NG1858-4651_5_1.fits')
+    file_path = os.path.join(current_night_directory, phot_file)
     phot_table = read_phot_file(file_path)
     return phot_table
 
@@ -106,10 +106,11 @@ def process_file():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run and plot RMS for two files.')
     parser.add_argument('tic_id', type=int, help='tic_id to ran statistics')
+    parser.add_argument('file', type=str, help='relative photometry file')
     args = parser.parse_args()
 
     # Process the photometry file
-    phot_table1 = process_file()
+    phot_table1 = process_file(args.file)
 
     if phot_table1 is not None:
         # Compute RMS values
