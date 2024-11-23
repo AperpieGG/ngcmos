@@ -50,7 +50,7 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
 
     if bin_size > 1:
         ax1.plot(time, flux, 'o', color='blue', alpha=0.2)
-
+    print(f'The data points for binned data are: {len(flux_binned)}')
     ax1.plot(time_binned, flux_binned, 'o', label=f'RMS = {rms_binned:.4f}', color='red')
     ax1.set_xlabel('Time (JD)')
     ax1.set_ylabel('Relative Flux')
