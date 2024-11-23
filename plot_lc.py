@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """
-Plot light curve for a given TIC ID from a FITS file containing photometry data
+Plot light curve for a given TIC ID from a FITS file containing photometry data.
 The data is taken from the rel_phot_NGFIELD.fits file that is created from relative_phot.py
 """
 import os
-
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
@@ -24,7 +23,7 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
         return
 
     tmag = tic_id_data['Tmag'][0]
-    # handle time in case tic_id_data['Time_JD'] does not exist
+    # Handle time in case 'Time_JD' does not exist
     if 'Time_JD' not in tic_id_data.names:
         time = tic_id_data['Time_BJD']
     else:
@@ -32,20 +31,28 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
 
     flux = tic_id_data['Relative_Flux']
     flux_err = tic_id_data['Relative_Flux_err']
-    # handle airmass in case tic_id_data['Airmass'] does not exist
+    # Handle airmass in case 'Airmass' does not exist
     if 'Airmass' not in tic_id_data.names:
         airmass = np.zeros_like(time)
     else:
         airmass = tic_id_data['Airmass']
     rms = tic_id_data['RMS'][0]
 
+    # Exclude every fourth data point
+    indices = np.arange(len(time))
+    mask = indices % 4 != 3  # Exclude every fourth data point (indices where modulo 4 equals 3)
+    time = time[mask]
+    flux = flux[mask]
+    flux_err = flux_err[mask]
+    airmass = airmass[mask]
+
     if bin_size > 1:
         time_binned, flux_binned, flux_err_binned = \
             bin_time_flux_error(time, flux, flux_err, bin_size)
         rms_binned = np.std(flux_binned)
     else:
-        time_binned, flux_binned, flux_err_binned, rms_binned\
-            = time, flux, flux_err, rms
+        time_binned, flux_binned, flux_err_binned, rms_binned = time, flux, flux_err, rms
+
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
     if bin_size > 1:
