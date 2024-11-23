@@ -40,7 +40,7 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
 
     # Exclude every fourth data point
     indices = np.arange(len(time))
-    mask = indices % 4 != 3  # Exclude every fourth data point (indices where modulo 4 equals 3)
+    mask = indices % 5 != 3  # Exclude every fourth data point (indices where modulo 4 equals 3)
     time = time[mask]
     flux = flux[mask]
     flux_err = flux_err[mask]
