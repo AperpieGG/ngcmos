@@ -64,7 +64,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     jd_mid = tic_id_data['jd_mid']
     x = tic_id_data['x'][0]
     y = tic_id_data['y'][0]
-
+    print(f'Stars position as re in x: {x}, y: {y}')
     fluxes = tic_id_data[f'flux_{aperture}']
     fluxerrs = tic_id_data[f'fluxerr_{aperture}']
     sky = tic_id_data[f'flux_w_sky_{aperture}'] - tic_id_data[f'flux_{aperture}']
