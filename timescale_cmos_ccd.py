@@ -59,6 +59,7 @@ def select_best_tic_ids(phot_table, args):
     print("\nSelected Stars with RSS and R-values:")
     for star_id, rss_value, r_value in sorted_stars:
         print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}, R-value: {r_value:.6f}")
+    print(f'The best tic_ids are: {best_tic_ids}')
     return best_tic_ids
 
 
