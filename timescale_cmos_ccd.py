@@ -7,6 +7,9 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 from scipy.stats import linregress
 
+PREDEFINED_BEST_TIC_IDS = [214657985, 188619865, 188620644, 169763812, 188628755,
+                           169763631, 214664842, 214661930, 270187208]
+
 
 def select_best_tic_ids(phot_table, args):
     """
@@ -57,23 +60,6 @@ def select_best_tic_ids(phot_table, args):
     for star_id, rss_value, r_value in sorted_stars:
         print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}, R-value: {r_value:.6f}")
     return best_tic_ids
-
-
-def save_best_tic_ids_to_json(best_tic_ids, json_file):
-    """Save the best TIC_IDs to a JSON file."""
-    # Convert numpy.int64 elements to Python int
-    best_tic_ids = [int(tic_id) for tic_id in best_tic_ids]
-    with open(json_file, 'w') as outfile:
-        json.dump({"TIC_IDs": best_tic_ids}, outfile, indent=4)
-    print(f"Best TIC_IDs saved to {json_file}")
-
-
-def load_tic_ids_from_json(json_file):
-    """Load TIC_IDs from a JSON file."""
-    with open(json_file, 'r') as infile:
-        data = json.load(infile)
-    print(f"TIC_IDs loaded from {json_file}")
-    return data["TIC_IDs"]
 
 
 def filter_to_tic_ids(phot_table, tic_ids):
@@ -287,23 +273,13 @@ if __name__ == "__main__":
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     parser.add_argument('--r', type=float, default=2, help='Rejection multiplication')
-    parser.add_argument('--json', type=str, help='Path to JSON file to save/load best TIC_IDs')
+    parser.add_argument('--best', action='store_true', help='Use predefined best TIC_IDs')
     args = parser.parse_args()
 
     # Process both files
     phot_table1 = process_file(args.file1, args)
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
-
-    # Use JSON file if provided
-    if args.json and os.path.exists(args.json):
-        best_tic_ids = load_tic_ids_from_json(args.json)
-    else:
-        # Select best TIC_IDs from the first file
-        best_tic_ids = [214657985, 188619865, 188620644, 169763812, 188628755, 169763631, 214664842, 214661930,
-                        270187208]
-        if args.json:
-            save_best_tic_ids_to_json(best_tic_ids, args.json)
 
     print("Trimming data in phot_table1")
     phot_table1 = trim_target_data(phot_table1)
@@ -316,7 +292,12 @@ if __name__ == "__main__":
         phot_table2 = filter_by_color(phot_table2, args.cl, args.ch)
 
     # Select best TIC_IDs from the first file
-    best_tic_ids = select_best_tic_ids(phot_table1, args)
+    if args.best:
+        print("Using predefined best TIC_IDs...")
+        best_tic_ids = PREDEFINED_BEST_TIC_IDS
+    else:
+        print("Selecting best TIC_IDs based on criteria...")
+        best_tic_ids = select_best_tic_ids(phot_table1, args)
 
     # Filter both files to include only the best TIC_IDs
     phot_table1 = filter_to_tic_ids(phot_table1, best_tic_ids)
