@@ -56,7 +56,7 @@ def select_best_tic_ids(phot_table, args):
     print("\nSelected Stars with RSS and R-values:")
     for star_id, rss_value, r_value in sorted_stars:
         print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}, R-value: {r_value:.6f}")
-
+    print(best_tic_ids)
     return best_tic_ids
 
 
@@ -71,16 +71,10 @@ def save_best_tic_ids_to_json(best_tic_ids, json_file):
 
 def load_tic_ids_from_json(json_file):
     """Load TIC_IDs from a JSON file."""
-    try:
-        with open(json_file, 'r') as infile:
-            data = json.load(infile)
-            if "TIC_IDs" not in data or not isinstance(data["TIC_IDs"], list):
-                raise ValueError("Invalid JSON structure: Expected a key 'TIC_IDs' with a list value.")
-            return data["TIC_IDs"]
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Error decoding JSON from {json_file}: {e}")
-    except FileNotFoundError:
-        raise ValueError(f"JSON file {json_file} not found.")
+    with open(json_file, 'r') as infile:
+        data = json.load(infile)
+    print(f"TIC_IDs loaded from {json_file}")
+    return data["TIC_IDs"]
 
 
 def filter_to_tic_ids(phot_table, tic_ids):
@@ -302,14 +296,14 @@ if __name__ == "__main__":
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
 
-    # Use JSON file if provided
-    if args.json and os.path.exists(args.json):
-        best_tic_ids = load_tic_ids_from_json(args.json)
-    else:
-        # Select best TIC_IDs from the first file
-        best_tic_ids = select_best_tic_ids(phot_table1, args)
-        if args.json:
-            save_best_tic_ids_to_json(best_tic_ids, args.json)
+    # # Use JSON file if provided
+    # if args.json and os.path.exists(args.json):
+    #     best_tic_ids = load_tic_ids_from_json(args.json)
+    # else:
+    #     # Select best TIC_IDs from the first file
+    #     best_tic_ids = select_best_tic_ids(phot_table1, args)
+    #     if args.json:
+    #         save_best_tic_ids_to_json(best_tic_ids, args.json)
 
     print("Trimming data in phot_table1")
     phot_table1 = trim_target_data(phot_table1)
