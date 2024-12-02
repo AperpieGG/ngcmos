@@ -10,7 +10,8 @@ from scipy.stats import linregress
 
 def select_best_tic_ids(phot_table, args):
     """
-    Select the best TIC_IDs based on the best linear model fit (lowest residual sum of squares).
+    Select the best TIC_IDs based on the best linear model fit (lowest residual sum of squares),
+    and reject stars with R-values much larger than the smallest R-value.
     """
     # Filter stars based on brightness range
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
@@ -31,15 +32,28 @@ def select_best_tic_ids(phot_table, args):
         fitted_line = slope * time + intercept
         rss = np.sum((rel_flux - fitted_line) ** 2)
 
-        # Store TIC_ID and RSS
-        stars_fit_list.append((tic_id, rss, r_value))
+        # Store TIC_ID, RSS, and R-value (absolute value to evaluate fit quality)
+        stars_fit_list.append((tic_id, rss, abs(r_value)))
+
+    # Find the smallest R-value (worst fit)
+    smallest_r_value = min(stars_fit_list, key=lambda x: x[2])[2]
+    print(f"Smallest R-value: {smallest_r_value:.6f}")
+
+    # Set a rejection threshold: reject stars with R-values > 2 * smallest_r_value
+    rejection_threshold = 2 * smallest_r_value
+    print(f"Rejection threshold for R-values: {rejection_threshold:.6f}")
+
+    # Filter stars by RSS and R-value
+    filtered_stars = [
+        (tic_id, rss, r_value) for tic_id, rss, r_value in stars_fit_list if r_value <= rejection_threshold
+    ]
 
     # Sort by RSS (ascending order) and select the top `num_stars`
-    sorted_stars = sorted(stars_fit_list, key=lambda x: x[1])[:args.num_stars]
+    sorted_stars = sorted(filtered_stars, key=lambda x: x[1])[:args.num_stars]
     best_tic_ids = [star[0] for star in sorted_stars]
 
     # Print each selected star along with its RSS and R-value
-    print("\nSelected Stars with RSS values:")
+    print("\nSelected Stars with RSS and R-values:")
     for star_id, rss_value, r_value in sorted_stars:
         print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}, R-value: {r_value:.6f}")
 
