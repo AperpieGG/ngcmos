@@ -26,7 +26,7 @@ def select_best_tic_ids(phot_table, args):
 
         # Calculate the residual sum of squares (RSS) as a flatness metric
         rss = np.sum((rel_flux - mean_flux) ** 2)
-        if rss < 0.095:
+        if rss < 0.096:
             stars_flatness_list.append((tic_id, rss))
 
     # Sort by RSS (ascending order) and select the top `num_stars`
