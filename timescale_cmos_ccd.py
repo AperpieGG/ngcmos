@@ -221,8 +221,12 @@ def trim_target_data(phot_table, trim_count):
             print(f"Skipping target with Tmag {Tmag} due to insufficient data points.")
             continue
 
-        # Trim data points for the target
+        # Trim data points from the beginning
         trimmed_data = Tmag_data[trim_count:]
+
+        # Print the new starting data point's airmass
+        new_airmass = trimmed_data['Airmass'][0]  # Assuming 'Airmass' is a column in the phot_table
+        print(f"Tmag {Tmag}: New starting airmass = {new_airmass}")
 
         trimmed_table_list.append(trimmed_data)
 
