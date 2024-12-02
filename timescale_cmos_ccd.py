@@ -300,8 +300,7 @@ if __name__ == "__main__":
     else:
         # Select best TIC_IDs from the first file
         best_tic_ids = select_best_tic_ids(phot_table1, args)
-        if args.json:
-            save_best_tic_ids_to_json(best_tic_ids, args.json)
+        save_best_tic_ids_to_json(best_tic_ids, args.json)
 
     print("Trimming data in phot_table1")
     phot_table1 = trim_target_data(phot_table1)
