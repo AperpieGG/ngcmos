@@ -60,6 +60,21 @@ def select_best_tic_ids(phot_table, args):
     return best_tic_ids
 
 
+def save_best_tic_ids_to_json(best_tic_ids, json_file):
+    """Save the best TIC_IDs to a JSON file."""
+    with open(json_file, 'w') as outfile:
+        json.dump({"TIC_IDs": best_tic_ids}, outfile, indent=4)
+    print(f"Best TIC_IDs saved to {json_file}")
+
+
+def load_tic_ids_from_json(json_file):
+    """Load TIC_IDs from a JSON file."""
+    with open(json_file, 'r') as infile:
+        data = json.load(infile)
+    print(f"TIC_IDs loaded from {json_file}")
+    return data["TIC_IDs"]
+
+
 def filter_to_tic_ids(phot_table, tic_ids):
     """Filter the photometry table to include only the specified TIC_IDs."""
     phot_table = phot_table[np.isin(phot_table['TIC_ID'], tic_ids)]
@@ -271,12 +286,22 @@ if __name__ == "__main__":
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     parser.add_argument('--r', type=float, default=2, help='Rejection multiplication')
+    parser.add_argument('--json', type=str, help='Path to JSON file to save/load best TIC_IDs')
     args = parser.parse_args()
 
     # Process both files
     phot_table1 = process_file(args.file1, args)
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
+
+    # Use JSON file if provided
+    if args.json and os.path.exists(args.json):
+        best_tic_ids = load_tic_ids_from_json(args.json)
+    else:
+        # Select best TIC_IDs from the first file
+        best_tic_ids = select_best_tic_ids(phot_table1, args)
+        if args.json:
+            save_best_tic_ids_to_json(best_tic_ids, args.json)
 
     print("Trimming data in phot_table1")
     phot_table1 = trim_target_data(phot_table1)
