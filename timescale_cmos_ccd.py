@@ -13,29 +13,28 @@ def select_best_tic_ids(phot_table, args):
     """
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
-    unique_tic_ids = np.unique(phot_table['TIC_ID'])
-    print(f"Total stars in brightness range: {len(unique_tic_ids)}")
+    unique_tmags = np.unique(phot_table['Tmag'])
+    print(f"Total stars in brightness range: {len(unique_tmags)}")
 
-    stars_flatness_list = []
-    for tic_id in unique_tic_ids:
-        star_data = phot_table[phot_table['TIC_ID'] == tic_id]
-        rel_flux = star_data['Relative_Flux']
-
-        # Fit a horizontal line: use the mean flux
+    stars_rss_list = []
+    for Tmag in unique_tmags:
+        Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
+        rel_flux = Tmag_data['Relative_Flux']
         mean_flux = np.mean(rel_flux)
+        rss = np.sum((rel_flux - mean_flux) ** 2)  # Calculate Residual Sum of Squares (RSS)
 
-        # Calculate the residual sum of squares (RSS) as a flatness metric
-        rss = np.sum((rel_flux - mean_flux) ** 2)
-        stars_flatness_list.append((tic_id, rss))
+        # Store TIC_ID and RSS if RSS < 0.095
+        if rss < 0.095:
+            stars_rss_list.append((Tmag_data['TIC_ID'][0], rss))
 
-    # Sort by RSS (ascending order) and select the top `num_stars`
-    sorted_stars = sorted(stars_flatness_list, key=lambda x: x[1])[:args.num_stars]
-    best_tic_ids = [star[0] for star in sorted_stars]
-
-    # Print each selected star along with its RSS
-    print("\nSelected Stars with RSS values:")
-    for star_id, rss_value in sorted_stars:
+    # Print all selected stars and their RSS values
+    print("\nSelected Stars with RSS < 0.095:")
+    for star_id, rss_value in stars_rss_list:
         print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}")
+
+    # Extract TIC_IDs
+    best_tic_ids = [star[0] for star in stars_rss_list]
+    print(f"\nNumber of selected stars: {len(best_tic_ids)}")
 
     return best_tic_ids
 
