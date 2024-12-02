@@ -40,7 +40,7 @@ def select_best_tic_ids(phot_table, args):
     print(f"Smallest R-value: {smallest_r_value:.6f}")
 
     # Set a rejection threshold: reject stars with R-values > 2 * smallest_r_value
-    rejection_threshold = 2 * smallest_r_value
+    rejection_threshold = args.rejection * smallest_r_value
     print(f"Rejection threshold for R-values: {rejection_threshold:.6f}")
 
     # Filter stars by RSS and R-value
@@ -246,6 +246,7 @@ if __name__ == "__main__":
     parser.add_argument('--ch', type=float, default=None, help='Upper limit for color index')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
+    parser.add_argument('--r', type=float, default=2, help='Rejection multiplication')
     parser.add_argument('--trim', type=int,
                         help='Number of data points to trim from the beginning and end')
     args = parser.parse_args()
