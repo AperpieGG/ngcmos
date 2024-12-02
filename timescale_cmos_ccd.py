@@ -71,10 +71,16 @@ def save_best_tic_ids_to_json(best_tic_ids, json_file):
 
 def load_tic_ids_from_json(json_file):
     """Load TIC_IDs from a JSON file."""
-    with open(json_file, 'r') as infile:
-        data = json.load(infile)
-    print(f"TIC_IDs loaded from {json_file}")
-    return data["TIC_IDs"]
+    try:
+        with open(json_file, 'r') as infile:
+            data = json.load(infile)
+            if "TIC_IDs" not in data or not isinstance(data["TIC_IDs"], list):
+                raise ValueError("Invalid JSON structure: Expected a key 'TIC_IDs' with a list value.")
+            return data["TIC_IDs"]
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Error decoding JSON from {json_file}: {e}")
+    except FileNotFoundError:
+        raise ValueError(f"JSON file {json_file} not found.")
 
 
 def filter_to_tic_ids(phot_table, tic_ids):
