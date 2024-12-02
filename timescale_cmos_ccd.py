@@ -5,38 +5,43 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
+from scipy.stats import linregress
 
 
 def select_best_tic_ids(phot_table, args):
     """
-    Select the best TIC_IDs based on the flattest flux values (lowest residual sum of squares).
+    Select the best TIC_IDs based on the best linear model fit (lowest residual sum of squares).
     """
+    # Filter stars based on brightness range
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
     unique_tic_ids = np.unique(phot_table['TIC_ID'])
     print(f"Total stars in brightness range: {len(unique_tic_ids)}")
 
-    stars_flatness_list = []
+    stars_fit_list = []
     for tic_id in unique_tic_ids:
         star_data = phot_table[phot_table['TIC_ID'] == tic_id]
         rel_flux = star_data['Relative_Flux']
+        time = star_data['Time_BJD']
 
-        # Fit a horizontal line: use the mean flux
-        mean_flux = np.mean(rel_flux)
+        # Fit a linear model: y = mx + b
+        slope, intercept, r_value, p_value, std_err = linregress(time, rel_flux)
 
-        # Calculate the residual sum of squares (RSS) as a flatness metric
-        rss = np.sum((rel_flux - mean_flux) ** 2)
-        if rss < 0.096:
-            stars_flatness_list.append((tic_id, rss))
+        # Calculate residuals and residual sum of squares (RSS)
+        fitted_line = slope * time + intercept
+        rss = np.sum((rel_flux - fitted_line) ** 2)
+
+        # Store TIC_ID and RSS
+        stars_fit_list.append((tic_id, rss, r_value))
 
     # Sort by RSS (ascending order) and select the top `num_stars`
-    sorted_stars = sorted(stars_flatness_list, key=lambda x: x[1])[:args.num_stars]
+    sorted_stars = sorted(stars_fit_list, key=lambda x: x[1])[:args.num_stars]
     best_tic_ids = [star[0] for star in sorted_stars]
 
-    # Print each selected star along with its RSS
+    # Print each selected star along with its RSS and R-value
     print("\nSelected Stars with RSS values:")
-    for star_id, rss_value in sorted_stars:
-        print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}")
+    for star_id, rss_value, r_value in sorted_stars:
+        print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}, R-value: {r_value:.6f}")
 
     return best_tic_ids
 
