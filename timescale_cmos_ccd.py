@@ -56,7 +56,6 @@ def select_best_tic_ids(phot_table, args):
     print("\nSelected Stars with RSS and R-values:")
     for star_id, rss_value, r_value in sorted_stars:
         print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}, R-value: {r_value:.6f}")
-    print(best_tic_ids)
     return best_tic_ids
 
 
@@ -296,14 +295,15 @@ if __name__ == "__main__":
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
 
-    # # Use JSON file if provided
-    # if args.json and os.path.exists(args.json):
-    #     best_tic_ids = load_tic_ids_from_json(args.json)
-    # else:
-    #     # Select best TIC_IDs from the first file
-    #     best_tic_ids = select_best_tic_ids(phot_table1, args)
-    #     if args.json:
-    #         save_best_tic_ids_to_json(best_tic_ids, args.json)
+    # Use JSON file if provided
+    if args.json and os.path.exists(args.json):
+        best_tic_ids = load_tic_ids_from_json(args.json)
+    else:
+        # Select best TIC_IDs from the first file
+        best_tic_ids = [214657985, 188619865, 188620644, 169763812, 188628755, 169763631, 214664842, 214661930,
+                        270187208]
+        if args.json:
+            save_best_tic_ids_to_json(best_tic_ids, args.json)
 
     print("Trimming data in phot_table1")
     phot_table1 = trim_target_data(phot_table1)
