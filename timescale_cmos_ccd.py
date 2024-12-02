@@ -8,26 +8,34 @@ from utils import plot_images, read_phot_file, bin_time_flux_error
 
 
 def select_best_tic_ids(phot_table, args):
-    """Select the best TIC_IDs based on the lowest RMS for the first photometry file."""
+    """
+    Select the best TIC_IDs based on the flattest flux values (lowest residual sum of squares).
+    """
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
-    unique_tmags = np.unique(phot_table['Tmag'])
-    print(f"Total stars in brightness range: {len(unique_tmags)}")
+    unique_tic_ids = np.unique(phot_table['TIC_ID'])
+    print(f"Total stars in brightness range: {len(unique_tic_ids)}")
 
-    stars_rms_list = []
-    for Tmag in unique_tmags:
-        Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
-        rel_flux = Tmag_data['Relative_Flux']
-        initial_rms = np.std(rel_flux)
-        stars_rms_list.append((Tmag_data['TIC_ID'][0], initial_rms))  # Store TIC_ID and RMS
+    stars_flatness_list = []
+    for tic_id in unique_tic_ids:
+        star_data = phot_table[phot_table['TIC_ID'] == tic_id]
+        rel_flux = star_data['Relative_Flux']
 
-    # Sort by RMS and select the top `num_stars`
-    sorted_stars = sorted(stars_rms_list, key=lambda x: x[1])[:args.num_stars]
+        # Fit a horizontal line: use the mean flux
+        mean_flux = np.mean(rel_flux)
+
+        # Calculate the residual sum of squares (RSS) as a flatness metric
+        rss = np.sum((rel_flux - mean_flux) ** 2)
+        stars_flatness_list.append((tic_id, rss))
+
+    # Sort by RSS (ascending order) and select the top `num_stars`
+    sorted_stars = sorted(stars_flatness_list, key=lambda x: x[1])[:args.num_stars]
     best_tic_ids = [star[0] for star in sorted_stars]
-    # Print each selected star along with its RMS
-    print("\nSelected Stars with RMS values:")
-    for star_id, rms_value in sorted_stars:
-        print(f"TIC_ID: {star_id}, RMS: {rms_value:.6f}")
+
+    # Print each selected star along with its RSS
+    print("\nSelected Stars with RSS values:")
+    for star_id, rss_value in sorted_stars:
+        print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}")
 
     return best_tic_ids
 
@@ -251,7 +259,7 @@ if __name__ == "__main__":
     times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, args)
     times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, args)
 
-    plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
+    # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
     
     # Plot the results
     plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
