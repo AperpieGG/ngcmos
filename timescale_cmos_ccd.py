@@ -209,13 +209,16 @@ def trim_target_data(phot_table):
     Trim the data points based on airmass criteria:
     - Trim from the beginning until the starting airmass is ≤ 1.7.
     - Trim from the end if the ending airmass exceeds 1.7.
-    Print the number of points trimmed from both the beginning and the end.
+    Print the total number of points trimmed from both the beginning and the end.
 
     :param phot_table: Input photometry table
     :return: Trimmed photometry table
     """
     unique_tmags = np.unique(phot_table['Tmag'])
     trimmed_table_list = []
+
+    total_start_trim_count = 0
+    total_end_trim_count = 0
 
     for Tmag in unique_tmags:
         # Select data for the current target
@@ -233,16 +236,19 @@ def trim_target_data(phot_table):
             end_trim_count += 1
             trimmed_data = trimmed_data[:-1]
 
-        # Print trimming details
-        print(f"Tmag {Tmag}: Trimmed {start_trim_count} points from the beginning.")
-        print(f"Tmag {Tmag}: Trimmed {end_trim_count} points from the end.")
+        # Update total counts
+        total_start_trim_count += start_trim_count
+        total_end_trim_count += end_trim_count
 
         if len(trimmed_data) == 0:
-            print(f"Tmag {Tmag}: All data points were trimmed.")
             continue
 
         # Add trimmed data to the list
         trimmed_table_list.append(trimmed_data)
+
+    # Print total trimming details
+    print(f"Total points trimmed from the beginning: {total_start_trim_count}")
+    print(f"Total points trimmed from the end: {total_end_trim_count}")
 
     # Combine all trimmed targets back into a single table
     if len(trimmed_table_list) > 0:
