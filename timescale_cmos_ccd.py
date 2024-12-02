@@ -62,6 +62,8 @@ def select_best_tic_ids(phot_table, args):
 
 def save_best_tic_ids_to_json(best_tic_ids, json_file):
     """Save the best TIC_IDs to a JSON file."""
+    # Convert numpy.int64 elements to Python int
+    best_tic_ids = [int(tic_id) for tic_id in best_tic_ids]
     with open(json_file, 'w') as outfile:
         json.dump({"TIC_IDs": best_tic_ids}, outfile, indent=4)
     print(f"Best TIC_IDs saved to {json_file}")
