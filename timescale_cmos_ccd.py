@@ -272,12 +272,10 @@ if __name__ == "__main__":
     # phot_table1 = downsample_phot_table(phot_table1, step=3)
     phot_table2 = process_file(args.file2, args)
 
-    # Trim data for each target in both photometry tables
-    if args.trim:
-        print("Trimming data in phot_table1")
-        phot_table1 = trim_target_data(phot_table1)
-        print("Trimming data in phot_table2")
-        phot_table2 = trim_target_data(phot_table2)
+    print("Trimming data in phot_table1")
+    phot_table1 = trim_target_data(phot_table1)
+    print("Trimming data in phot_table2")
+    phot_table2 = trim_target_data(phot_table2)
 
     # Apply color filtering if limits are provided
     if args.cl is not None and args.ch is not None:
