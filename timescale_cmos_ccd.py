@@ -204,11 +204,14 @@ def filter_by_color(phot_table, cl, ch):
     return phot_table[(phot_table['COLOR'] >= cl) & (phot_table['COLOR'] <= ch)]
 
 
-def trim_target_data(phot_table, trim_count):
+def trim_target_data(phot_table):
     """
-    Trim the specified number of data points from the beginning and end for each target's data.
+    Trim the data points based on airmass criteria:
+    - Trim from the beginning until the starting airmass is ≤ 1.7.
+    - Trim from the end if the ending airmass exceeds 1.7.
+    Print the number of points trimmed from both the beginning and the end.
+
     :param phot_table: Input photometry table
-    :param trim_count: Number of data points to remove from the beginning and the end
     :return: Trimmed photometry table
     """
     unique_tmags = np.unique(phot_table['Tmag'])
@@ -217,24 +220,35 @@ def trim_target_data(phot_table, trim_count):
     for Tmag in unique_tmags:
         # Select data for the current target
         Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
-        if len(Tmag_data) <= 2 * trim_count:
-            print(f"Skipping target with Tmag {Tmag} due to insufficient data points.")
+
+        # Trim from the beginning until airmass ≤ 1.7
+        start_trim_count = 0
+        while start_trim_count < len(Tmag_data) and Tmag_data['Airmass'][start_trim_count] > 1.7:
+            start_trim_count += 1
+        trimmed_data = Tmag_data[start_trim_count:]
+
+        # Trim from the end if airmass > 1.7
+        end_trim_count = 0
+        while len(trimmed_data) > 0 and trimmed_data['Airmass'][-1] > 1.7:
+            end_trim_count += 1
+            trimmed_data = trimmed_data[:-1]
+
+        # Print trimming details
+        print(f"Tmag {Tmag}: Trimmed {start_trim_count} points from the beginning.")
+        print(f"Tmag {Tmag}: Trimmed {end_trim_count} points from the end.")
+
+        if len(trimmed_data) == 0:
+            print(f"Tmag {Tmag}: All data points were trimmed.")
             continue
 
-        # Trim data points from the beginning
-        trimmed_data = Tmag_data[trim_count:]
-
-        # Print the new starting data point's airmass
-        new_airmass = trimmed_data['Airmass'][0]  # Assuming 'Airmass' is a column in the phot_table
-        print(f"Tmag {Tmag}: New starting airmass = {new_airmass}")
-
+        # Add trimmed data to the list
         trimmed_table_list.append(trimmed_data)
 
     # Combine all trimmed targets back into a single table
     if len(trimmed_table_list) > 0:
         trimmed_table = np.hstack(trimmed_table_list)
     else:
-        raise ValueError("No valid data points after trimming. Check your trim count.")
+        raise ValueError("No valid data points after trimming. Check your trimming criteria.")
 
     return trimmed_table
 
