@@ -222,7 +222,7 @@ def trim_target_data(phot_table, trim_count):
             continue
 
         # Trim data points for the target
-        trimmed_data = Tmag_data[trim_count:-trim_count]
+        trimmed_data = Tmag_data[trim_count:]
 
         trimmed_table_list.append(trimmed_data)
 
