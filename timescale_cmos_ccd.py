@@ -265,8 +265,6 @@ if __name__ == "__main__":
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     parser.add_argument('--r', type=float, default=2, help='Rejection multiplication')
-    parser.add_argument('--trim', type=int,
-                        help='Number of data points to trim from the beginning and end')
     args = parser.parse_args()
 
     # Process both files
@@ -277,9 +275,9 @@ if __name__ == "__main__":
     # Trim data for each target in both photometry tables
     if args.trim:
         print("Trimming data in phot_table1")
-        phot_table1 = trim_target_data(phot_table1, args.trim)
+        phot_table1 = trim_target_data(phot_table1)
         print("Trimming data in phot_table2")
-        phot_table2 = trim_target_data(phot_table2, args.trim)
+        phot_table2 = trim_target_data(phot_table2)
 
     # Apply color filtering if limits are provided
     if args.cl is not None and args.ch is not None:
