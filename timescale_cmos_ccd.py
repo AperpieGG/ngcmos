@@ -59,13 +59,13 @@ def compute_rms_values(phot_table, args):
 
     for Tmag in unique_tmags:
         Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
+        tic_id = Tmag_data['TIC_ID']
         jd_mid = Tmag_data['Time_BJD']
         rel_flux = Tmag_data['Relative_Flux']
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         RMS_data = Tmag_data['RMS']
         color = Tmag_data['COLOR']
-        print(f'The number of data points are: {len(rel_flux)}')
-        print(f'The color for the star is: {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
+        print(f'Star {tic_id[0]}, color {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
         RMS_values = []
         time_seconds = []
         for i in range(1, max_binning):
