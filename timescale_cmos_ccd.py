@@ -40,7 +40,7 @@ def select_best_tic_ids(phot_table, args):
     print(f"Smallest R-value: {smallest_r_value:.6f}")
 
     # Set a rejection threshold: reject stars with R-values > 2 * smallest_r_value
-    rejection_threshold = args.rejection * smallest_r_value
+    rejection_threshold = args.r * smallest_r_value
     print(f"Rejection threshold for R-values: {rejection_threshold:.6f}")
 
     # Filter stars by RSS and R-value
