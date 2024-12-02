@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 from scipy.stats import linregress
 
-PREDEFINED_BEST_TIC_IDS = [214657985, 188619865, 188620644, 169763812, 188628755,
-                           169763631, 214664842, 214661930, 270187208]
+PREDEFINED_BEST_TIC_IDS = [214657879, 214664709, 214664659, 188620276, 214664671, 169764230,
+                           188620407, 214662861, 188620411, 270187137]
 
 
 def select_best_tic_ids(phot_table, args):
