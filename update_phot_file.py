@@ -40,7 +40,7 @@ def multiply_flux_values(file_path, gain):
 
             # Find all flux-related fields dynamically
             flux_fields = [name for name in phot_table.names if name.startswith('flux_')
-                           or name.startswith('flux_w_sky_') or name.startswith('mean_pixel_value_')]
+                           or name.startswith('flux_w_sky_') or name.startswith('max_pixel_value_')]
 
             # Multiply each flux field by the gain
             for field in flux_fields:
