@@ -19,16 +19,8 @@ def get_phot_file(directory):
     list of str
         List of photometry files matching the pattern.
     """
-    phot_file = []
-    for filename in os.listdir(directory):
-        if filename.startswith('phot') and filename.endswith('fits'):
-            phot_file.append(filename)
-
-    # Open the FITS file and load the data
-    with fits.open(phot_file) as hdul:
-        phot_table = hdul[1].data  # Assuming the table is in the first extension
-
-    return phot_table
+    return [os.path.join(directory, filename) for filename in os.listdir(directory)
+            if filename.startswith('phot') and filename.endswith('.fits')]
 
 
 def multiply_flux_values(file_path, gain):
