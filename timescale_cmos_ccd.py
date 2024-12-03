@@ -107,7 +107,7 @@ def compute_rms_values(phot_table, args):
             if args.file1:
                 exposure_time_seconds = i * 10
             elif args.file2:
-                exposure_time_seconds = i * 13
+                exposure_time_seconds = i * 10
 
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
