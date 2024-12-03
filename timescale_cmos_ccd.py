@@ -112,13 +112,13 @@ def compute_rms_values(phot_table, args):
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
             exposure_time_seconds = i * exposure_time
+            print(f'Using exposure time: {exposure_time}')
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
-        print(f'The times binned are {times_binned}')
 
     average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
     times_binned = times_binned[0]  # Use the first time bin set
