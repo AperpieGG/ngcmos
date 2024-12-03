@@ -91,6 +91,8 @@ def compute_rms_values(phot_table, args):
     times_binned = []
     max_binning = int(args.bin)
 
+    exposure_time = 13 if 'file2' in args else 10
+
     for Tmag in unique_tmags:
         Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
         tic_id = Tmag_data['TIC_ID']
@@ -104,11 +106,7 @@ def compute_rms_values(phot_table, args):
         time_seconds = []
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            if args.file1:
-                exposure_time_seconds = i * 10
-            elif args.file2:
-                exposure_time_seconds = i * 10
-
+            exposure_time_seconds = i * exposure_time
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
@@ -303,7 +301,6 @@ if __name__ == "__main__":
     parser.add_argument('--fl', type=float, default=10.5, help='Upper limit for Tmag')
     parser.add_argument('--cl', type=float, default=None, help='Lower limit for color index')
     parser.add_argument('--ch', type=float, default=None, help='Upper limit for color index')
-    parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     parser.add_argument('--r', type=float, default=2, help='Rejection multiplication')
     parser.add_argument('--best', action='store_true', help='Use predefined best TIC_IDs')
