@@ -279,13 +279,13 @@ def trim_target_data(phot_table):
 
         # Trim from the beginning until airmass ≤ 1.7
         start_trim_count = 0
-        while start_trim_count < len(Tmag_data) and Tmag_data['Airmass'][start_trim_count] > 1.7:
+        while start_trim_count < len(Tmag_data) and Tmag_data['Airmass'][start_trim_count] > 1.75:
             start_trim_count += 1
         trimmed_data = Tmag_data[start_trim_count:]
 
         # Trim from the end if airmass > 1.7
         end_trim_count = 0
-        while len(trimmed_data) > 0 and trimmed_data['Airmass'][-1] > 1.7:
+        while len(trimmed_data) > 0 and trimmed_data['Airmass'][-1] > 1.75:
             end_trim_count += 1
             trimmed_data = trimmed_data[:-1]
 
