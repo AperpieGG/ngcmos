@@ -56,10 +56,11 @@ def target_info(table, tic_id_to_plot, APERTURE):
     # Extract the TESS magnitude of the target star
     target_tmag = target_star['Tmag'][0]
 
-    # Ensure the target star is brighter than 12 mags
-    if target_tmag >= 12:
-        raise ValueError(f"Target star with TIC ID {tic_id_to_plot} has Tmag = {target_tmag:.3f}, "
-                         f"which is not brighter than 12 mags. Skipping.")
+    # # Ensure the target star is brighter than 12 mags
+    # if target_tmag >= 12:
+    #     raise ValueError(f"Target star with TIC ID {tic_id_to_plot} has Tmag = {target_tmag:.3f}, "
+    #                      f"which is not brighter than 12 mags. Skipping.")
+
     target_flux = target_star[f'flux_{APERTURE}']  # Extract the flux of the target star
     target_fluxerr = target_star[f'fluxerr_{APERTURE}']  # Extract the flux error of the target star
     target_time = target_star['jd_bary']  # Extract the time of the target star
@@ -362,6 +363,7 @@ def main():
 
         # Loop through all tic_ids in the photometry file
         for tic_id in np.unique(phot_table['tic_id']):
+            print(f'The TIC_IDS to that will run is for total stars: {len(np.unique(phot_table["tic_id"]))}')
             # Check if all the Tmag values for the tic_id are less than or equal to 14
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):  # Adjusted threshold
                 logger.info("")
