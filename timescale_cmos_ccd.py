@@ -7,9 +7,19 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 from scipy.stats import linregress
 
-PREDEFINED_BEST_TIC_IDS = [169746324, 188628572, 270187334, 270187472, 214661787, 188620498, 270187374, 188630584, 270185366, 188627973, 188622564, 169763746, 214663076, 188635874, 188627896, 214661709, 188620412, 188626319, 169746344, 214664765, 188622244, 188630447, 169746139, 188628526, 214661950, 169746487, 188622434, 188630599, 188620528, 188622458, 188630696, 188630526, 188619770, 188622595, 214658188, 214662698, 188630459, 188628425, 188620577, 169745772, 188626089, 214664789, 214657511, 214657690, 188620457, 169745928, 49622366, 169763601, 169745757, 188628659, 169745911, 188622224, 214664599, 169745864, 188628148, 214661615, 169746166, 270185448, 188620386, 214657402, 188627964, 214657504, 169763864, 214657687, 214662717, 188622426, 188630686, 188626278, 214661826, 2052287087, 169745839, 188626216, 188630649, 270187373, 188628477, 2052292692, 188628807, 188625861, 188620112, 214657436, 188625841, 169763912, 169764339, 214664602, 188626214, 214657593, 270187021, 2052295954, 188630488, 188625936, 214661944, 270185292, 188622330, 214661715, 169763678, 169763606, 188627997, 214657936, 188620068, 188622410]
-
-
+PREDEFINED_BEST_TIC_IDS = [169746324, 188628572, 270187334, 270187472, 214661787, 188620498, 270187374, 188630584,
+                           270185366, 188627973, 188622564, 169763746, 214663076, 188635874, 188627896, 214661709,
+                           188620412, 188626319, 169746344, 214664765, 188622244, 188630447, 169746139, 188628526,
+                           214661950, 169746487, 188622434, 188630599, 188620528, 188622458, 188630696, 188630526,
+                           188619770, 188622595, 214658188, 214662698, 188630459, 188628425, 188620577, 169745772,
+                           188626089, 214664789, 214657511, 214657690, 188620457, 169745928, 49622366, 169763601,
+                           169745757, 188628659, 169745911, 188622224, 214664599, 169745864, 188628148, 214661615,
+                           169746166, 270185448, 188620386, 214657402, 188627964, 214657504, 169763864, 214657687,
+                           214662717, 188622426, 188630686, 188626278, 214661826, 2052287087, 169745839, 188626216,
+                           188630649, 270187373, 188628477, 2052292692, 188628807, 188625861, 188620112, 214657436,
+                           188625841, 169763912, 169764339, 214664602, 188626214, 214657593, 270187021, 2052295954,
+                           188630488, 188625936, 214661944, 270185292, 188622330, 214661715, 169763678, 169763606,
+                           188627997, 214657936, 188620068, 188622410]
 
 
 def select_best_tic_ids(phot_table, args):
@@ -94,7 +104,11 @@ def compute_rms_values(phot_table, args):
         time_seconds = []
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            exposure_time_seconds = i * args.exp
+            if args.file1:
+                exposure_time_seconds = i * 10
+            elif args.file2:
+                exposure_time_seconds = i * 13
+
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
@@ -115,21 +129,21 @@ def compute_rms_values(phot_table, args):
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """Generate two RMS plots in a single figure with one row and two columns."""
-    fig, axs = plt.subplots(1, 2, figsize=(6, 6), sharey=True)
+    fig, axs = plt.subplots(1, 1, figsize=(6, 6), sharey=True)
 
-    axs[0].plot(times1, avg_rms1, 'o', label=label1, color='black')
-    axs[0].plot(times1, RMS_model1, '--', color='black')
+    axs[0].plot(times1, avg_rms1, 'o', label=label1, color='blue')
+    axs[0].plot(times1, RMS_model1, '--', color='blue')
     axs[0].axvline(x=900, color='red', linestyle='-')
     axs[0].set_xscale('log')
     axs[0].set_yscale('log')
     axs[0].set_xlabel('Exposure time (s)')
     axs[0].set_ylabel('RMS (ppm)')
 
-    axs[1].plot(times2, avg_rms2, 'o', label=label2, color='black')
-    axs[1].plot(times2, RMS_model2, '--', color='black')
-    axs[1].axvline(x=900, color='red', linestyle='-')
-    axs[1].set_xscale('log')
-    axs[1].set_xlabel('Exposure time (s)')
+    axs[0].plot(times2, avg_rms2, 'o', label=label2, color='red')
+    axs[0].plot(times2, RMS_model2, '--', color='red')
+    axs[0].axvline(x=900, color='red', linestyle='-')
+    axs[0].set_xscale('log')
+    axs[0].set_xlabel('Exposure time (s)')
 
     plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
