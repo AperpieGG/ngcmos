@@ -118,7 +118,7 @@ def compute_rms_values(phot_table, args):
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
-        print(f'The times binned are {time_binned}')
+        print(f'The times binned are {times_binned}')
 
     average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
     times_binned = times_binned[0]  # Use the first time bin set
