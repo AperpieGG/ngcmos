@@ -128,26 +128,45 @@ def compute_rms_values(phot_table, args):
 
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
-    """Generate two RMS plots in a single figure with one row and two columns."""
-    fig, axs = plt.subplots(1, 1, figsize=(6, 6), sharey=True)
+    """
+    Generate a single RMS plot for two datasets in one figure.
 
-    axs[0].plot(times1, avg_rms1, 'o', label=label1, color='blue')
-    axs[0].plot(times1, RMS_model1, '--', color='blue')
-    axs[0].axvline(x=900, color='red', linestyle='-')
-    axs[0].set_xscale('log')
-    axs[0].set_yscale('log')
-    axs[0].set_xlabel('Exposure time (s)')
-    axs[0].set_ylabel('RMS (ppm)')
+    Parameters:
+        times1, times2 (array-like): Exposure times for the two datasets.
+        avg_rms1, avg_rms2 (array-like): Average RMS values for the two datasets.
+        RMS_model1, RMS_model2 (array-like): RMS models for the two datasets.
+        label1, label2 (str): Labels for the two datasets.
+    """
+    # Create a single plot
+    fig, ax = plt.subplots(figsize=(8, 6))
 
-    axs[0].plot(times2, avg_rms2, 'o', label=label2, color='red')
-    axs[0].plot(times2, RMS_model2, '--', color='red')
-    axs[0].axvline(x=900, color='red', linestyle='-')
-    axs[0].set_xscale('log')
-    axs[0].set_xlabel('Exposure time (s)')
+    # Plot for dataset 1
+    ax.plot(times1, avg_rms1, 'o', label=f"{label1} Data", color='blue')
+    ax.plot(times1, RMS_model1, '--', label=f"{label1} Model", color='blue')
 
-    plt.gca().yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    plt.gca().tick_params(axis='y', which='minor', length=4)
+    # Plot for dataset 2
+    ax.plot(times2, avg_rms2, 'o', label=f"{label2} Data", color='red')
+    ax.plot(times2, RMS_model2, '--', label=f"{label2} Model", color='red')
+
+    # Add vertical line for reference
+    ax.axvline(x=900, color='green', linestyle='-', label='Reference Line (x=900)')
+
+    # Set logarithmic scales
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    # Add labels and legend
+    ax.set_xlabel('Exposure Time (s)')
+    ax.set_ylabel('RMS (ppm)')
+    ax.set_title('RMS vs Exposure Time')
+    ax.legend()
+
+    # Format the y-axis tick labels
+    ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
+    ax.yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    ax.tick_params(axis='y', which='minor', length=4)
+
+    # Adjust layout and show the plot
     plt.tight_layout()
     plt.show()
 
