@@ -332,11 +332,8 @@ if __name__ == "__main__":
     phot_table1 = filter_to_tic_ids(phot_table1, best_tic_ids)
     phot_table2 = filter_to_tic_ids(phot_table2, best_tic_ids)
 
-    # Compute RMS values for both files
-    if 'file2' in args:
-        times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, 13, args)
-    else:
-        times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, 10, args)
+    times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, 13, args)
+    times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, 10, args)
 
     # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
 
