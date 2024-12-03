@@ -74,13 +74,13 @@ def select_best_tic_ids(phot_table, args):
     return best_tic_ids
 
 
-def filter_to_tic_ids(phot_table, tic_ids):
+def filter_to_tic_ids(phot_table,  tic_ids):
     """Filter the photometry table to include only the specified TIC_IDs."""
     phot_table = phot_table[np.isin(phot_table['TIC_ID'], tic_ids)]
     return phot_table
 
 
-def compute_rms_values(phot_table, args):
+def compute_rms_values(phot_table, exp, args):
     """Compute RMS values for the provided photometry table."""
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
 
@@ -102,11 +102,11 @@ def compute_rms_values(phot_table, args):
         print(f'Star {tic_id[0]}, color {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
         RMS_values = []
         time_seconds = []
-        print(f'Using exposure time: {args.exp}')
+        print(f'Using exposure time: {exp}')
 
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            exposure_time_seconds = i * args.exp
+            exposure_time_seconds = i * exp
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
@@ -333,14 +333,12 @@ if __name__ == "__main__":
     phot_table2 = filter_to_tic_ids(phot_table2, best_tic_ids)
 
     # Compute RMS values for both files
-    times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, args)
-    times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, args)
+    if 'file2' in args:
+        times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, 13, args)
+    else:
+        times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, 10, args)
 
     # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
-    if 'file2' in args:
-        args.exp = 13
-    else:
-        args.exp = 10
 
     # Plot the results
     plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
