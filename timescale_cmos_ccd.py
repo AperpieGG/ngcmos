@@ -149,7 +149,7 @@ def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
     ax.plot(times2, RMS_model2, '--', label=f"{label2} Model", color='red')
 
     # Add vertical line for reference
-    ax.axvline(x=900, color='green', linestyle='-', label='Reference Line (x=900)')
+    ax.axvline(x=900, color='black', linestyle='-', label='Reference Line (x=900)')
 
     # Set logarithmic scales
     ax.set_xscale('log')
