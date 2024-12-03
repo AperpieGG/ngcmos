@@ -224,6 +224,39 @@ def filter_by_color(phot_table, cl, ch):
     return phot_table[(phot_table['COLOR'] >= cl) & (phot_table['COLOR'] <= ch)]
 
 
+def trim_target_data_by_time(phot_table):
+    """
+    Trim the data points by removing the last 15 minutes of data based on `Time_BJD`.
+
+    :param phot_table: Input photometry table
+    :return: Trimmed photometry table
+    """
+    unique_tmags = np.unique(phot_table['Tmag'])
+    trimmed_table_list = []
+    time_threshold = 15 / (24 * 60)  # 15 minutes in days
+
+    for Tmag in unique_tmags:
+        # Select data for the current target
+        Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
+
+        # Find the last time in the data
+        last_time = Tmag_data['Time_BJD'][-1]
+
+        # Trim the data to exclude the last 15 minutes
+        trimmed_data = Tmag_data[Tmag_data['Time_BJD'] <= (last_time - time_threshold)]
+
+        # Add trimmed data to the list
+        trimmed_table_list.append(trimmed_data)
+
+    # Combine all trimmed targets back into a single table
+    if len(trimmed_table_list) > 0:
+        trimmed_table = np.hstack(trimmed_table_list)
+    else:
+        raise ValueError("No valid data points after trimming. Check your trimming criteria.")
+
+    return trimmed_table
+
+
 def trim_target_data(phot_table):
     """
     Trim the data points based on airmass criteria:
@@ -302,6 +335,11 @@ if __name__ == "__main__":
     phot_table1 = trim_target_data(phot_table1)
     print("Trimming data in phot_table2")
     phot_table2 = trim_target_data(phot_table2)
+
+    print("Trimming data in phot_table1 for time")
+    phot_table1 = trim_target_data_by_time(phot_table1)
+    print("Trimming data in phot_table2 for time")
+    phot_table2 = trim_target_data_by_time(phot_table2)
 
     # Apply color filtering if limits are provided
     if args.cl is not None and args.ch is not None:
