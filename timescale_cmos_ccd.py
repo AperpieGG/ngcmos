@@ -138,7 +138,7 @@ def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
         label1, label2 (str): Labels for the two datasets.
     """
     # Create a single plot
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(6, 8))
 
     # Plot for dataset 1
     ax.plot(times1, avg_rms1, 'o', label=f"{label1} Data", color='blue')
@@ -159,8 +159,6 @@ def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
     ax.set_xlabel('Exposure Time (s)')
     ax.set_ylabel('RMS (ppm)')
     ax.set_title('RMS vs Exposure Time')
-    ax.legend()
-
     # Format the y-axis tick labels
     ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     ax.yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
