@@ -336,10 +336,10 @@ if __name__ == "__main__":
     print("Trimming data in phot_table2")
     phot_table2 = trim_target_data(phot_table2)
 
-    print("Trimming data in phot_table1 for time")
-    phot_table1 = trim_target_data_by_time(phot_table1)
-    print("Trimming data in phot_table2 for time")
-    phot_table2 = trim_target_data_by_time(phot_table2)
+    # print("Trimming data in phot_table1 for time")
+    # phot_table1 = trim_target_data_by_time(phot_table1)
+    # print("Trimming data in phot_table2 for time")
+    # phot_table2 = trim_target_data_by_time(phot_table2)
 
     # Apply color filtering if limits are provided
     if args.cl is not None and args.ch is not None:
