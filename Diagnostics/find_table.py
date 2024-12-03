@@ -35,31 +35,6 @@ def find_rows_in_fits(file_path, frame_id, tic_id):
         return []
 
 
-def read_phot_file(filename):
-    """
-    Read the photometry file.
-
-    Parameters
-    ----------
-    filename : str
-        Photometry file to read.
-
-    Returns
-    -------
-    astropy.table.table.Table
-        Table containing the photometry data.
-    """
-    # Read the photometry file here using fits or any other appropriate method
-    try:
-        with fits.open(filename) as ff:
-            # Access the data in the photometry file as needed
-            tab = ff[1].data
-            return tab
-    except Exception as e:
-        print(f"Error reading photometry file {filename}: {e}")
-        return None
-
-
 def get_phot_files(directory):
     """
     Get photometry files with the pattern 'phot_*.fits' from the directory.
@@ -90,10 +65,10 @@ if __name__ == "__main__":
     # Path to your FITS file
     directory = '.'
     fits_filename = get_phot_files(directory)
-    fits_file = read_phot_file(fits_filename)
-    
+    print(f'Found photometry table: {fits_filename}, will read it...')
+
     # Call the function and retrieve results
-    rows = find_rows_in_fits(fits_file, args.frame_id, args.tic_id)
+    rows = find_rows_in_fits(fits_filename, args.frame_id, args.tic_id)
 
     # Print the results
     if rows:
