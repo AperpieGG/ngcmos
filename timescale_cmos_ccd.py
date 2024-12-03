@@ -91,12 +91,6 @@ def compute_rms_values(phot_table, args):
     times_binned = []
     max_binning = int(args.bin)
 
-    # Determine the exposure time based on the file argument
-    if 'file2' in args.file2:
-        exposure_time = 13
-    else:
-        exposure_time = 10
-
     for Tmag in unique_tmags:
         Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
         tic_id = Tmag_data['TIC_ID']
@@ -111,8 +105,8 @@ def compute_rms_values(phot_table, args):
 
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            exposure_time_seconds = i * exposure_time
-            print(f'Using exposure time: {exposure_time}')
+            exposure_time_seconds = i * args.exp
+            print(f'Using exposure time: {args.exp}')
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
@@ -343,7 +337,11 @@ if __name__ == "__main__":
     times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, args)
 
     # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
-    
+    if 'file2' in args:
+        args.exp = 13
+    else:
+        args.exp = 10
+        
     # Plot the results
     plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
 
