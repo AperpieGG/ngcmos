@@ -91,7 +91,11 @@ def compute_rms_values(phot_table, args):
     times_binned = []
     max_binning = int(args.bin)
 
-    exposure_time = 13 if 'file2' in args else 10
+    # Determine the exposure time based on the file argument
+    if 'file2' in args.file2:
+        exposure_time = 13
+    else:
+        exposure_time = 10
 
     for Tmag in unique_tmags:
         Tmag_data = phot_table[phot_table['Tmag'] == Tmag]
@@ -104,18 +108,17 @@ def compute_rms_values(phot_table, args):
         print(f'Star {tic_id[0]}, color {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
         RMS_values = []
         time_seconds = []
+
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-            if 'file2' in args:
-                exposure_time_seconds = i * 10 + (3 * i)
-            else:
-                exposure_time_seconds = i * 10
+            exposure_time_seconds = i * exposure_time
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
             time_seconds.append(exposure_time_seconds)
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
+        print(f'The times binned are {time_binned}')
 
     average_rms_values = np.median(average_rms_values, axis=0) * 1e6  # Convert to ppm
     times_binned = times_binned[0]  # Use the first time bin set
