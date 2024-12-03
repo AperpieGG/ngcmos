@@ -65,10 +65,15 @@ if __name__ == "__main__":
     # Path to your FITS file
     directory = '.'
     fits_filename = get_phot_files(directory)
-    print(f'Found photometry table: {fits_filename}, will read it...')
+
+    if not fits_filename:
+        print("No photometry files found in the directory.")
+        exit(1)
+    else:
+        print(f'Found photometry table: {fits_filename}, will read it...')
 
     # Call the function and retrieve results
-    rows = find_rows_in_fits(fits_filename, args.frame_id, args.tic_id)
+    rows = find_rows_in_fits(fits_filename[0], args.frame_id, args.tic_id)
 
     # Print the results
     if rows:
