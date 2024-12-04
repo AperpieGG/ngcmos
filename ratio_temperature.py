@@ -20,6 +20,8 @@ def main():
     parser = argparse.ArgumentParser(description='Process photometry FITS files.')
     parser.add_argument('--cam', type=str, default='CMOS', help='Camera type (CMOS or CCD)')
     args = parser.parse_args()
+
+    # Set parameters based on camera type
     if args.cam == 'CMOS':
         APERTURE = 5
         GAIN = 1.13
@@ -28,37 +30,42 @@ def main():
         APERTURE = 4
         GAIN = 2
         EXPOSURE = 13.0
-    phot_file = get_phot_file('.')
 
     # Read the photometry file
+    phot_file = get_phot_file('.')
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
 
         # Extract relevant columns
         tic_ids = phot_data['TIC_ID']
-        tmags = phot_data['Tmag']
-        teffs = phot_data['Teff']
+        tmags = phot_data['Tmag'][0]
+        teffs = phot_data['Teff'][0]
         flux = phot_data[f'flux_{APERTURE}']
 
-        # Calculate the converted flux: (flux_5 * 2) / exposure
-        converted_flux = (np.mean(flux) * GAIN) / EXPOSURE
+        # Create a dictionary to store aggregated data for each TIC_ID
+        tic_data = {}
 
-        # Filter rows where 'Teff' is not NULL or nan
-        valid_indices = ~np.isnan(teffs)
-        valid_tic_ids = tic_ids[valid_indices]
-        valid_tmags = tmags[valid_indices]
-        valid_teffs = teffs[valid_indices]
-        valid_flux = converted_flux[valid_indices]
+        for i, tic_id in enumerate(tic_ids):
+            if tic_id not in tic_data:
+                tic_data[tic_id] = {
+                    "flux_values": [],
+                    "Tmag": tmags[i],
+                    "Teff": teffs[i]
+                }
+            tic_data[tic_id]["flux_values"].append(flux[i])
 
-        # Prepare data for JSON output
+        # Filter TIC_IDs with valid Teff and calculate converted flux
         output_data = []
-        for i in range(len(valid_tic_ids)):
-            output_data.append({
-                "TIC_ID": int(valid_tic_ids[i]),
-                "Tmag": float(valid_tmags[i]),
-                "Teff": float(valid_teffs[i]),
-                "Converted_Flux": float(valid_flux[i])
-            })
+        for tic_id, data in tic_data.items():
+            if not np.isnan(data["Teff"]):  # Check for valid Teff
+                avg_flux = np.mean(data["flux_values"])  # Calculate average flux
+                converted_flux = (avg_flux * GAIN) / EXPOSURE  # Apply conversion
+                output_data.append({
+                    "TIC_ID": int(tic_id),
+                    "Tmag": float(data["Tmag"]),
+                    "Teff": float(data["Teff"]),
+                    "Converted_Flux": float(converted_flux)
+                })
 
         # Save to JSON file
         output_file = f'flux_vs_temperature_{args.cam}.json'
