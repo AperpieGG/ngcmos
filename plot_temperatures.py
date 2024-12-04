@@ -53,6 +53,12 @@ def main():
     flux_ratios = np.array(flux_ratios)
     tmags = np.array(tmags)
 
+    # Apply the Tmag < 12.5 filter
+    mask = tmags < 12.5
+    temperatures = temperatures[mask]
+    flux_ratios = flux_ratios[mask]
+    tmags = tmags[mask]
+
     # Plotting
     print("Creating the plot...")
     plt.figure(figsize=(10, 6))
