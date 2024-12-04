@@ -64,11 +64,14 @@ def main():
 
     # Plotting
     print("Creating the plot...")
-    plt.figure(figsize=(10, 6))
+    plt.figure()
+    # Set vmin and vmax in the scatter call
     scatter = plt.scatter(
-        temperatures, flux_ratios, c=colors, cmap='coolwarm', edgecolor='k', alpha=0.75
+        temperatures, flux_ratios, c=colors, cmap='coolwarm', edgecolor='k', alpha=0.75, vmin=0.5, vmax=1.5
     )
-    plt.colorbar(scatter, label=r'$\mathrm{G_{BP} - G_{RP}}$', vmin=0.5, vmax=1.5)
+
+    # Add colorbar without vmin and vmax
+    plt.colorbar(scatter, label=r'$\mathrm{G_{BP} - G_{RP}}$')
     plt.xlabel('Teff (K)')
     plt.ylabel('CMOS/CCD Flux Ratio')
     plt.ylim(0.8, 1.5)
