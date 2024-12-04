@@ -36,6 +36,15 @@ def main():
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
 
+        # Filter stars with Tmag < 14
+        phot_data = phot_data[phot_data['Tmag'] < 14]
+
+        # Filter stars with Tmag > 10
+        phot_data = phot_data[phot_data['Tmag'] > 10]
+
+        # Filter stars with valid Teff (not NaN or null)
+        phot_data = phot_data[~np.isnan(phot_data['Teff'])]
+
         # Extract relevant columns
         tic_ids = phot_data['TIC_ID']
         flux_col = f'flux_{APERTURE}'
