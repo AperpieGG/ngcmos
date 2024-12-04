@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pytho
 import numpy as np
 import json
 import os
@@ -18,7 +18,7 @@ def get_phot_file(directory):
 
 def main():
     parser = argparse.ArgumentParser(description='Process photometry FITS files.')
-    parser.add_argument('--cam', type=float, help='Gain to convert fluxes from ADU to electrons')
+    parser.add_argument('--cam', type=str, default='CMOS', help='Camera type (CMOS or CCD)')
     args = parser.parse_args()
     if args.cam == 'CMOS':
         APERTURE = 5
