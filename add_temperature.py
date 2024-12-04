@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 from astropy.io import fits
 import os
@@ -52,6 +53,6 @@ def main():
 
     print(f'Read data  all good {catalog_data}, {phot_data}')
 
-    
+
 if __name__ == "__main__":
     main()
