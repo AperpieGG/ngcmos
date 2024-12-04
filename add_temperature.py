@@ -49,12 +49,14 @@ def main():
     phot_file = get_phot_file('.')
 
     # Read the catalog file
+    print(f'Found catalog file: {catalog_file}')
     with fits.open(catalog_file) as catalog_hdul:
         catalog_data = catalog_hdul[1].data  # Assuming the table is in the first extension
         catalog_tic_ids = catalog_data['TIC_ID']
         catalog_teff = catalog_data['Teff']  # Assuming 'Teff' column exists
 
     # Read the photometry file
+    print(f'Found photometry file: {phot_file}')
     with fits.open(phot_file, mode='update') as phot_hdul:
         phot_data = phot_hdul[1].data
         phot_tic_ids = phot_data['TIC_ID']  # Assuming 'TIC_ID' column exists
