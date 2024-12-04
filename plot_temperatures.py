@@ -57,12 +57,13 @@ def main():
     print("Creating the plot...")
     plt.figure(figsize=(10, 6))
     scatter = plt.scatter(
-        temperatures, flux_ratios, c=tmags, cmap='hot', edgecolor='k', alpha=0.75
+        temperatures, flux_ratios, c=tmags, cmap='cividis', edgecolor='k', alpha=0.75
     )
     plt.colorbar(scatter, label='Tmag (Apparent Magnitude)')
     plt.xlabel('Teff (K)')
     plt.ylabel('CMOS/CCD Flux Ratio')
     plt.title('CMOS/CCD Flux Ratio as a Function of Temperature')
+    plt.ylim(0.8, 1.5)
     plt.grid(alpha=0.3)
     plt.tight_layout()
     plt.show()
