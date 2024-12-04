@@ -58,6 +58,7 @@ def main():
         fluxes = phot_data[flux_col]
         tmags = phot_data['Tmag']
         teffs = phot_data['Teff']
+        COLORs = phot_data['gaiabp'] - phot_data['gaiarp']
 
         # Print unique TIC_IDs for the analysis
         unique_tic_ids = np.unique(tic_ids)
@@ -71,12 +72,14 @@ def main():
             target_fluxes = fluxes[mask]
             tmag = tmags[mask][0]
             teff = teffs[mask][0]
+            COLOR = COLORs[mask][0]
 
             if tic_id not in tic_data:
                 tic_data[tic_id] = {
                     "flux_values": target_fluxes,
                     "Tmag": tmag,
-                    "Teff": teff
+                    "Teff": teff,
+                    "COLOR": COLOR
                 }
 
         # Filter TIC_IDs with valid Teff and calculate converted flux
@@ -88,6 +91,7 @@ def main():
                 "TIC_ID": int(tic_id),
                 "Tmag": float(data["Tmag"]),
                 "Teff": float(data["Teff"]),
+                "COLOR": float(data["COLOR"]),
                 "Converted_Flux": float(converted_flux)
             })
 
