@@ -32,18 +32,23 @@ def main():
         EXPOSURE = 13.0
 
     # Read the photometry file
+    print("Locating photometry file...")
     phot_file = get_phot_file('.')
+    print(f"Photometry file found: {phot_file}")
+
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
 
-        # Filter stars with Tmag < 14
-        phot_data = phot_data[phot_data['Tmag'] < 14]
+        # Initial number of entries in the photometry file
+        print(f"Initial number of entries in the photometry file: {len(phot_data)}")
 
-        # Filter stars with Tmag > 10
-        phot_data = phot_data[phot_data['Tmag'] > 10]
+        # Filter stars with Tmag < 14 and Tmag > 10
+        phot_data = phot_data[(phot_data['Tmag'] < 14) & (phot_data['Tmag'] > 10)]
+        print(f"Number of entries after filtering Tmag (10 < Tmag < 14): {len(phot_data)}")
 
         # Filter stars with valid Teff (not NaN or null)
         phot_data = phot_data[~np.isnan(phot_data['Teff'])]
+        print(f"Number of entries after filtering valid Teff: {len(phot_data)}")
 
         # Extract relevant columns
         tic_ids = phot_data['TIC_ID']
@@ -54,9 +59,14 @@ def main():
         tmags = phot_data['Tmag']
         teffs = phot_data['Teff']
 
+        # Print unique TIC_IDs for the analysis
+        unique_tic_ids = np.unique(tic_ids)
+        print(f"Unique TIC_IDs for the analysis: {len(unique_tic_ids)}")
+        print(f"TIC_IDs: {unique_tic_ids}")
+
         # Create a dictionary to store data grouped by TIC_ID
         tic_data = {}
-        for tic_id in np.unique(tic_ids):
+        for tic_id in unique_tic_ids:
             mask = phot_data['TIC_ID'] == tic_id
             target_fluxes = fluxes[mask]
             tmag = tmags[mask][0]
@@ -72,15 +82,14 @@ def main():
         # Filter TIC_IDs with valid Teff and calculate converted flux
         output_data = []
         for tic_id, data in tic_data.items():
-            if not np.isnan(data["Teff"]):  # Check for valid Teff
-                avg_flux = np.mean(data["flux_values"])  # Calculate average flux
-                converted_flux = (avg_flux * GAIN) / EXPOSURE  # Apply conversion
-                output_data.append({
-                    "TIC_ID": int(tic_id),
-                    "Tmag": float(data["Tmag"]),
-                    "Teff": float(data["Teff"]),
-                    "Converted_Flux": float(converted_flux)
-                })
+            avg_flux = np.mean(data["flux_values"])  # Calculate average flux
+            converted_flux = (avg_flux * GAIN) / EXPOSURE  # Apply conversion
+            output_data.append({
+                "TIC_ID": int(tic_id),
+                "Tmag": float(data["Tmag"]),
+                "Teff": float(data["Teff"]),
+                "Converted_Flux": float(converted_flux)
+            })
 
         # Save to JSON file
         output_file = f'flux_vs_temperature_{args.cam}.json'
