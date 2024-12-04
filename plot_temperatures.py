@@ -68,13 +68,11 @@ def main():
     scatter = plt.scatter(
         temperatures, flux_ratios, c=colors, cmap='coolwarm', edgecolor='k', alpha=0.75
     )
-    plt.colorbar(scatter, label='Tmag (Apparent Magnitude)')
+    plt.colorbar(scatter, label=r'$\mathrm{G_{BP} - G_{RP}}$')
     plt.xlabel('Teff (K)')
     plt.ylabel('CMOS/CCD Flux Ratio')
-    plt.title('CMOS/CCD Flux Ratio as a Function of Temperature')
     plt.ylim(0.8, 1.5)
     plt.xlim(3000, 7500)
-    plt.grid(alpha=0.3)
     plt.tight_layout()
     plt.show()
 
