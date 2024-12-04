@@ -49,31 +49,35 @@ def main():
     phot_file = get_phot_file('.')
 
     # Read the catalog file
-    print(f'Found catalog file: {catalog_file}')
     with fits.open(catalog_file) as catalog_hdul:
         catalog_data = catalog_hdul[1].data  # Assuming the table is in the first extension
         catalog_tic_ids = catalog_data['TIC_ID']
         catalog_teff = catalog_data['Teff']  # Assuming 'Teff' column exists
 
     # Read the photometry file
-    print(f'Found photometry file: {phot_file}')
     with fits.open(phot_file, mode='update') as phot_hdul:
         phot_data = phot_hdul[1].data
         phot_tic_ids = phot_data['TIC_ID']  # Assuming 'TIC_ID' column exists
 
-        # Add a new column for Teff if it doesn't exist
+        # Get unique TIC_IDs in the photometry file
+        unique_tic_ids = np.unique(phot_tic_ids)
+
+        # Add a new column for unique Teff values
         if 'Teff' not in phot_data.names:
             new_col = np.zeros(len(phot_data), dtype=np.float32)  # Default value is 0
             phot_hdul[1].data = fits.BinTableHDU.from_columns(
                 phot_hdul[1].columns + fits.Column(name='Teff', format='E', array=new_col)
             ).data
 
-        # Update the Teff column in the photometry file
+        # Create a mapping of TIC_ID to Teff
+        tic_to_teff = {tic: catalog_teff[np.where(catalog_tic_ids == tic)[0][0]]
+                       for tic in unique_tic_ids if tic in catalog_tic_ids}
+
+        # Update the Teff_Unique column
         for i, tic_id in enumerate(phot_tic_ids):
-            if tic_id in catalog_tic_ids:
-                idx = np.where(catalog_tic_ids == tic_id)[0][0]
-                phot_data['Teff'][i] = catalog_teff[idx]
-                print(f"Updated TIC_ID {tic_id}: Teff = {catalog_teff[idx]}")
+            if tic_id in tic_to_teff:
+                phot_data['Teff'][i] = tic_to_teff[tic_id]
+                print(f"Updated TIC_ID {tic_id}: Teff = {tic_to_teff[tic_id]}")
             else:
                 print(f"TIC_ID {tic_id} not found in the catalog.")
 
