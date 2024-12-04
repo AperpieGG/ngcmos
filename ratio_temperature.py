@@ -38,21 +38,27 @@ def main():
 
         # Extract relevant columns
         tic_ids = phot_data['TIC_ID']
-        tmags = phot_data['Tmag'][0]
-        teffs = phot_data['Teff'][0]
-        flux = phot_data[f'flux_{APERTURE}']
+        flux_col = f'flux_{APERTURE}'
+        if flux_col not in phot_data.names:
+            raise ValueError(f"Column {flux_col} not found in the photometry file.")
+        fluxes = phot_data[flux_col]
+        tmags = phot_data['Tmag']
+        teffs = phot_data['Teff']
 
-        # Create a dictionary to store aggregated data for each TIC_ID
+        # Create a dictionary to store data grouped by TIC_ID
         tic_data = {}
+        for tic_id in np.unique(tic_ids):
+            mask = phot_data['TIC_ID'] == tic_id
+            target_fluxes = fluxes[mask]
+            tmag = tmags[mask][0]
+            teff = teffs[mask][0]
 
-        for i, tic_id in enumerate(tic_ids):
             if tic_id not in tic_data:
                 tic_data[tic_id] = {
-                    "flux_values": [],
-                    "Tmag": tmags[0],
-                    "Teff": teffs[0]
+                    "flux_values": target_fluxes,
+                    "Tmag": tmag,
+                    "Teff": teff
                 }
-            tic_data[tic_id]["flux_values"].append(flux[i])
 
         # Filter TIC_IDs with valid Teff and calculate converted flux
         output_data = []
