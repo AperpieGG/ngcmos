@@ -33,6 +33,7 @@ def main():
     temperatures = []
     flux_ratios = []
     tmags = []
+    colors = []
 
     for tic_id, cmos_entry in cmos_dict.items():
         if tic_id in ccd_dict:
@@ -47,11 +48,13 @@ def main():
             temperatures.append(cmos_entry["Teff"])
             flux_ratios.append(flux_ratio)
             tmags.append(cmos_entry["Tmag"])  # Use Tmag from CMOS (assuming consistent)
+            colors.append(cmos_entry["COLOR"])
 
     # Convert to numpy arrays for easier handling
     temperatures = np.array(temperatures)
     flux_ratios = np.array(flux_ratios)
     tmags = np.array(tmags)
+    colors = np.array(colors)
 
     # # Apply the Tmag < 12.5 filter
     # mask = tmags < 11
@@ -63,7 +66,7 @@ def main():
     print("Creating the plot...")
     plt.figure(figsize=(10, 6))
     scatter = plt.scatter(
-        temperatures, flux_ratios, c=tmags, cmap='cividis', edgecolor='k', alpha=0.75
+        temperatures, flux_ratios, c=colors, cmap='coolwarm', edgecolor='k', alpha=0.75
     )
     plt.colorbar(scatter, label='Tmag (Apparent Magnitude)')
     plt.xlabel('Teff (K)')
