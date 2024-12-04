@@ -54,7 +54,7 @@ def main():
     tmags = np.array(tmags)
 
     # Apply the Tmag < 12.5 filter
-    mask = tmags < 12.5
+    mask = tmags < 11
     temperatures = temperatures[mask]
     flux_ratios = flux_ratios[mask]
     tmags = tmags[mask]
