@@ -39,8 +39,17 @@ def main():
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
 
-        # Initial number of entries in the photometry file
-        print(f"Initial number of entries in the photometry file: {len(phot_data)}")
+        # Find the `frame_id` with the smallest `airmass`
+        unique_frames = np.unique(phot_data['frame_id'])
+        frame_airmass = {
+            frame: np.min(phot_data[phot_data['frame_id'] == frame]['airmass']) for frame in unique_frames
+        }
+        best_frame_id = min(frame_airmass, key=frame_airmass.get)
+        print(f"Selected frame_id with smallest airmass: {best_frame_id}")
+
+        # Filter data to include only the selected frame_id
+        phot_data = phot_data[phot_data['frame_id'] == best_frame_id]
+        print(f"Number of entries for selected frame_id: {len(phot_data)}")
 
         # Filter stars with Tmag < 14 and Tmag > 10
         phot_data = phot_data[(phot_data['Tmag'] < 14) & (phot_data['Tmag'] > 10)]
@@ -69,24 +78,22 @@ def main():
         tic_data = {}
         for tic_id in unique_tic_ids:
             mask = phot_data['TIC_ID'] == tic_id
-            target_fluxes = fluxes[mask]
+            target_flux = fluxes[mask][0]  # Single flux value for the selected frame
             tmag = tmags[mask][0]
             teff = teffs[mask][0]
             COLOR = COLORs[mask][0]
 
-            if tic_id not in tic_data:
-                tic_data[tic_id] = {
-                    "flux_values": target_fluxes,
-                    "Tmag": tmag,
-                    "Teff": teff,
-                    "COLOR": COLOR
-                }
+            tic_data[tic_id] = {
+                "flux_value": target_flux,
+                "Tmag": tmag,
+                "Teff": teff,
+                "COLOR": COLOR
+            }
 
         # Filter TIC_IDs with valid Teff and calculate converted flux
         output_data = []
         for tic_id, data in tic_data.items():
-            avg_flux = np.mean(data["flux_values"])  # Calculate average flux
-            converted_flux = (avg_flux * GAIN) / EXPOSURE  # Apply conversion
+            converted_flux = (data["flux_value"] * GAIN) / EXPOSURE  # Apply conversion
             output_data.append({
                 "TIC_ID": int(tic_id),
                 "Tmag": float(data["Tmag"]),
