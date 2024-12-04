@@ -49,8 +49,8 @@ def main():
             if tic_id not in tic_data:
                 tic_data[tic_id] = {
                     "flux_values": [],
-                    "Tmag": tmags[i],
-                    "Teff": teffs[i]
+                    "Tmag": tmags[0],
+                    "Teff": teffs[0]
                 }
             tic_data[tic_id]["flux_values"].append(flux[i])
 
