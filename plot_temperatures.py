@@ -64,6 +64,7 @@ def main():
     plt.ylabel('CMOS/CCD Flux Ratio')
     plt.title('CMOS/CCD Flux Ratio as a Function of Temperature')
     plt.ylim(0.8, 1.5)
+    plt.xlim(3000, 7500)
     plt.grid(alpha=0.3)
     plt.tight_layout()
     plt.show()
