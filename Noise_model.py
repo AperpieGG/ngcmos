@@ -136,6 +136,7 @@ def main():
             color_list.append("black")  # Default to black for all if column is missing
 
         sky_list.append(tic_data['Sky'][0])
+        print(f'The sky listy is: {sky_list}')
         Tmags_list.append(tic_data['Tmag'][0])
 
     # Convert lists to numpy arrays for calculations
