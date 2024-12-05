@@ -29,7 +29,7 @@ def main():
     else:
         APERTURE = 4
         GAIN = 2
-        EXPOSURE = 13.0
+        EXPOSURE = 10.0
 
     # Read the photometry file
     print("Locating photometry file...")
@@ -61,17 +61,17 @@ def main():
 
         # Extract relevant columns
         tic_ids = phot_data['TIC_ID']
-        # flux_w_sky_col = f'flux_w_sky_{APERTURE}' # add if solve for sky
+        flux_w_sky_col = f'flux_w_sky_{APERTURE}' # add if solve for sky
         flux_col = f'flux_{APERTURE}'
 
-        # if flux_w_sky_col not in phot_data.names or flux_col not in phot_data.names:
-        #     raise ValueError(f"Columns {flux_w_sky_col} or {flux_col} not found in the photometry file.")
+        if flux_w_sky_col not in phot_data.names or flux_col not in phot_data.names:
+            raise ValueError(f"Columns {flux_w_sky_col} or {flux_col} not found in the photometry file.")
 
-        # # Calculate sky background
-        # sky_background = phot_data[flux_w_sky_col] - phot_data[flux_col]
-        # fluxes = sky_background
+        # Calculate sky background
+        sky_background = phot_data[flux_w_sky_col] - phot_data[flux_col]
+        fluxes = sky_background
 
-        fluxes = phot_data[flux_col]
+        # fluxes = phot_data[flux_col]
         tmags = phot_data['Tmag']
         teffs = phot_data['Teff']
         COLORs = phot_data['gaiabp'] - phot_data['gaiarp']
