@@ -66,7 +66,7 @@ def load_config(filename):
 
 
 # Load paths from the configuration file
-config = load_config('directories.json')
+config = load_config('Archive/directories.json')
 calibration_paths = config["calibration_paths"]
 base_paths = config["base_paths"]
 out_paths = config["out_paths"]
