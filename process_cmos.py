@@ -16,7 +16,6 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.utils.exceptions import AstropyWarning
 
-
 # Set up logging
 logger = logging.getLogger()  # Get the root logger
 logger.setLevel(logging.INFO)  # Set the overall logging level
@@ -154,7 +153,8 @@ def main():
         for filename in prefix_filenames:
             logging.info(f"Processing filename {filename}......")
             # Calibrate image and get FITS file
-            logging.info(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
+            logging.info(
+                f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
             reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
             logging.info(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
             # Convert reduced_data to a dictionary with filenames as keys
