@@ -46,7 +46,7 @@ def bias(base_path, out_path):
     master_bias_path = os.path.join(out_path, 'master_bias.fits')
 
     if os.path.exists(master_bias_path):
-        print('Found master bias')
+        # print('Found master bias')
         return fits.getdata(master_bias_path)
     else:
         print('Creating master bias')
@@ -90,7 +90,7 @@ def dark(base_path, out_path, master_bias):
     master_dark_path = os.path.join(out_path, 'master_dark.fits')
 
     if os.path.exists(master_dark_path):
-        print('Found master dark')
+        # print('Found master dark')
         return fits.getdata(master_dark_path)
     else:
         print('Creating master dark')
