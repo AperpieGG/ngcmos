@@ -128,15 +128,15 @@ def flat(out_path):
     """
     current_night_directory = os.getcwd()
     if current_night_directory == os.getcwd():
-        print('Current night directory is the current working directory.')
+        # print('Current night directory is the current working directory.')
 
         if os.path.exists(os.path.join(current_night_directory, 'master_flat.fits')):
-            print('Using current working directory and the master flat found in:',
-                  os.path.join(current_night_directory, 'master_flat.fits'))
+            # print('Using current working directory and the master flat found in:',
+            #       os.path.join(current_night_directory, 'master_flat.fits'))
             return fits.getdata(os.path.join(current_night_directory, 'master_flat.fits'))
 
         elif os.path.exists(os.path.join(out_path, 'master_flat.fits')):
-            print('Using master flat found in:', os.path.join(out_path, 'master_flat.fits'))
+            # print('Using master flat found in:', os.path.join(out_path, 'master_flat.fits'))
             return fits.getdata(os.path.join(out_path, 'master_flat.fits'))
         else:
             print("Master flat file not found in out path:", os.path.join(out_path, 'master_flat.fits'))
