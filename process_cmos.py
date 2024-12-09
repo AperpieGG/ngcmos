@@ -232,7 +232,7 @@ def main():
                 else:
                     frame_output.write(phot_output_filename, overwrite=True)
 
-                logging.info(f"Saved photometry for {filename} to {phot_output_filename}")
+                logging.info(f"Finished photometry for {filename}\n")
 
             except Exception as e:
                 logging.error(f"Error processing {filename}: {e}")
