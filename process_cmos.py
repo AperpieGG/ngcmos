@@ -154,16 +154,16 @@ def main():
             logging.info(f"Processing filename {filename}......")
             # Calibrate image and get FITS file
             try:
-                logging.info(
-                    f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
+                # logging.info(
+                #     f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
                 reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
-                logging.info(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
+                # logging.info(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
                 # Convert reduced_data to a dictionary with filenames as keys
                 reduced_data_dict = {filename: (data, header) for data, header in zip(reduced_data, reduced_header)}
 
                 # Access the reduced data and header corresponding to the filename
                 frame_data, frame_hdr = reduced_data_dict[filename]
-                logging.info(f"Extracting photometry for {filename}")
+                # logging.info(f"Extracting photometry for {filename}")
 
                 # Extract airmass and zero point from the header
                 airmass, zp = extract_airmass_and_zp(frame_hdr)
@@ -191,7 +191,7 @@ def main():
 
                 # Load the photometry catalog
                 phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-                logging.info(f"Found catalog with name {prefix}_catalog_input.fits")
+                # logging.info(f"Found catalog with name {prefix}_catalog_input.fits")
                 # Convert RA and DEC to pixel coordinates using the WCS information from the header
                 phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
