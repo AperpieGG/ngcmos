@@ -223,26 +223,22 @@ def main():
             # Stack the photometry and preamble
             frame_output = hstack([frame_preamble, frame_phot])
 
-            # Convert frame_output to a Table if it's not already
-            if not isinstance(frame_output, Table):
-                frame_output = Table(frame_output)
-
-            # Append the current frame's photometry to the accumulated photometry
+            # Stack the photometry results
             if phot_table is None:
                 phot_table = frame_output
             else:
                 phot_table = vstack([phot_table, frame_output])
 
-            logging.info(f"Finished photometry for {filename}")
+            logging.info(f"Finished photometry for {filename}\n")
 
-        # Save the photometry for the current prefix
+        # Save the accumulated photometry
         if phot_table is not None:
             phot_table.write(phot_output_filename, overwrite=True)
-            logging.info(f"Saved photometry for prefix {prefix} to {phot_output_filename}")
+            logging.info(f"Saved photometry for prefix {prefix} to {phot_output_filename}\n")
         else:
-            logging.info(f"No photometry data for prefix {prefix}.")
+            logging.info(f"No photometry data for prefix {prefix}.\n")
 
-    logging.info("Done!")
+        logging.info("Done!\n")
 
 
 if __name__ == "__main__":
