@@ -8,8 +8,6 @@ from astropy.io import fits
 import json
 from astropy.visualization import ZScaleInterval
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
-from scipy.optimize import curve_fit
-
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers
 
@@ -188,34 +186,6 @@ def find_comp_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def robust_flatness_check(time, flux, sigma_threshold=3):
-    """
-    Perform a robust linear fit using curve_fit.
-    Check if residuals are within the sigma threshold based on MAD.
-    """
-
-    # Define a linear model for fitting
-    def linear_model(t, a, b):
-        return a * t + b
-
-    # Perform a robust linear fit using curve_fit
-    try:
-        popt, _ = curve_fit(linear_model, time, flux)
-        model = linear_model(time, *popt)
-    except RuntimeError:
-        # Fallback to a flat model if fit fails
-        model = np.full_like(time, np.median(flux))
-
-    # Calculate residuals and MAD
-    residuals = flux - model
-    mad = np.median(np.abs(residuals - np.median(residuals)))
-
-    # Check if residuals are within sigma_threshold * MAD
-    passed_fit = np.all(np.abs(residuals) <= sigma_threshold * mad)
-
-    return model, residuals, mad, passed_fit
-
-
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
     # Calculate initial RMS of comparison stars
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
@@ -267,7 +237,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5
         print(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}")
 
         # Exit if the number of stars doesn't change or too many iterations
-        if N1 == N2 or i > 10:
+        if N1 == N2 or i > 11:
             break
 
     # Prepare data for visualization
@@ -367,10 +337,9 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
-def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9, sigma_threshold=3):
+def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
     """
-    Plot light curves using robust flatness detection.
-    Good stars are plotted in blue; outliers in red.
+    Plot the light curves for comparison stars in batches of `batch_size` (9 per figure by default).
     """
     total_stars = len(tic_ids)
     num_batches = int(np.ceil(total_stars / batch_size))  # Calculate how many batches we need
@@ -392,20 +361,23 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9, sigm
             comp_fluxerrs = fluxerr_list[idx]
             comp_time = time_list[idx]
 
-            # Perform a robust linear fit check
-            _, residuals, mad, passed_fit = robust_flatness_check(comp_time, comp_fluxes, sigma_threshold)
+            # Calculate the sum of all fluxes except the current star's flux
+            reference_fluxes_comp = np.sum(np.delete(flux_list, i, axis=0), axis=0)
+            reference_fluxerrs_comp = np.sqrt(np.sum(np.delete(fluxerr_list, i, axis=0) ** 2, axis=0))
 
-            # Set color: Blue for good stars, Red for excluded stars
-            plot_color = 'blue' if passed_fit else 'red'
+            # Normalize the current star's flux by the sum of the other comparison stars' fluxes
+            comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
+            comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs_comp ** 2)
+            # Normalize the star's flux by the mean flux
+            # comp_fluxes_dt = comp_fluxes_dt / np.mean(comp_fluxes_dt)
 
-            # Bin the data (optional)
+            # Bin the data (optional, can be skipped if not needed)
             comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
-                bin_time_flux_error(comp_time, comp_fluxes, comp_fluxerrs, 12)
-            )
+                bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
 
             # Plot the light curve in the current subplot
-            ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color=plot_color, alpha=0.8)
-            ax.set_title(f'TIC {tic_id} - {"Good" if passed_fit else "Excluded"}')
+            ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color='blue', alpha=0.8)
+            ax.set_title(f'Comparison star: {tic_id}')
             ax.set_xlabel('Time')
             ax.set_ylabel('Flux')
 
