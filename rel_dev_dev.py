@@ -13,6 +13,9 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2  # Color index tolerance for comparison stars
+MAGNITUDE_TOLERANCE = 1
+
+
 plot_images()
 
 
@@ -81,13 +84,20 @@ def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids, camera):
 
 def target_info(table, tic_id_to_plot, APERTURE):
     target_star = table[table['tic_id'] == tic_id_to_plot]  # Extract the target star data
-    target_tmag = target_star['Tmag'][0]  # Extract the TESS magnitude of the target star
+    # Extract the TESS magnitude of the target star
+    target_tmag = target_star['Tmag'][0]
+    target_flux = target_star[f'flux_{APERTURE}']  # Extract the flux of the target star
+    target_fluxerr = target_star[f'fluxerr_{APERTURE}']  # Extract the flux error of the target star
+    target_time = target_star['jd_bary']  # Extract the time of the target star
+    target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
     target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
     airmass_list = target_star['airmass']  # Extract airmass_list from target star
+    zp_list = target_star['ZP']  # Extract the zero point of the target star
     # Calculate mean flux for the target star (specific to the chosen aperture)
     target_flux_mean = target_star[f'flux_{APERTURE}'].mean()
 
-    return target_tmag, target_color_index, airmass_list, target_flux_mean
+    return (target_tmag, target_color_index, airmass_list, target_flux_mean,
+            target_sky, target_flux, target_fluxerr, target_time, zp_list)
 
 
 def extract_region_coordinates(region):
@@ -102,7 +112,9 @@ def extract_region_coordinates(region):
 
 def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file):
     # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean = target_info(table, tic_id_to_plot, APERTURE)
+    # Get target star info including the mean flux
+    target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _, _ = (
+        target_info(table, tic_id_to_plot, APERTURE))
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
@@ -162,106 +174,101 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_
     return filtered_table, airmass_list
 
 
-def find_star_rms(comp_fluxes, airmass):
-    comp_star_rms = np.array([])
-    Ncomps = comp_fluxes.shape[0]
-    for i in range(Ncomps):
-        comp_flux = np.copy(comp_fluxes[i])
-        airmass_cs = np.polyfit(airmass, comp_flux, 1)
+def find_comp_star_rms(comp_fluxes, airmass):
+    comp_star_rms = []
+    for i, flux in enumerate(comp_fluxes):
+        airmass_cs = np.polyfit(airmass, flux, 1)
         airmass_mod = np.polyval(airmass_cs, airmass)
-        comp_flux_corrected = comp_flux / airmass_mod
-        comp_flux_norm = comp_flux_corrected / np.median(comp_flux_corrected)
-        comp_star_rms_val = np.std(comp_flux_norm)
-        if np.isfinite(comp_star_rms_val):
-            comp_star_rms = np.append(comp_star_rms, comp_star_rms_val)
-        else:
-            comp_star_rms = np.append(comp_star_rms, 99.)
+        flux_corrected = flux / airmass_mod
+        flux_norm = flux_corrected / np.median(flux_corrected)
+        rms_val = np.std(flux_norm)
+        comp_star_rms.append(rms_val)
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2):
-    comp_star_rms = find_star_rms(comp_fluxes, airmass)
-    print(f'RMS of comparison stars: {comp_star_rms}')
-    print(f'Number of comparison stars RMS before filtering: {len(comp_star_rms)}')
+def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
+    # Calculate initial RMS of comparison stars
+    comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
+    print(f"Initial number of comparison stars: {len(comp_star_rms)}")
 
-    # Initialize mask and storage for good and bad stars' data
-    comp_star_mask = np.array([True] * len(comp_star_rms))
-    cumulative_mask = np.array([True] * len(comp_star_rms))
+    comp_star_mask = np.ones(len(comp_star_rms), dtype=bool)
     i = 0
-
-    # Containers to store final good/bad RMS and magnitudes for plotting
-    final_good_rms, final_good_mags = [], []
-    final_bad_rms, final_bad_mags = [], []
 
     while True:
         i += 1
-        comp_mags = np.copy(comp_mags0[cumulative_mask])
-        comp_rms = np.copy(comp_star_rms[cumulative_mask])
+        comp_mags = comp_mags0[comp_star_mask]
+        comp_rms = comp_star_rms[comp_star_mask]
         N1 = len(comp_mags)
 
         if N1 == 0:
-            print("No valid comparison stars left after filtering.")
+            print("No valid comparison stars left. Exiting.")
             break
 
         edges = np.arange(comp_mags.min(), comp_mags.max() + dmag, dmag)
         dig = np.digitize(comp_mags, edges)
         mag_nodes = (edges[:-1] + edges[1:]) / 2.
 
-        std_medians = []
-        for j in range(1, len(edges)):
-            in_bin = comp_rms[dig == j]
-            std_medians.append(np.nan if len(in_bin) == 0 else np.median(in_bin))
+        # Calculate median RMS per bin
+        std_medians = np.array([np.median(comp_rms[dig == j]) if len(comp_rms[dig == j]) > 0 else np.nan
+                                for j in range(1, len(edges))])
 
-        std_medians = np.array(std_medians)
+        # Remove NaNs from std_medians and mag_nodes
         valid_mask = ~np.isnan(std_medians)
         mag_nodes = mag_nodes[valid_mask]
         std_medians = std_medians[valid_mask]
 
+        # Handle too few points for fitting
         if len(mag_nodes) < 4:
             if len(mag_nodes) > 1:
                 mod = np.interp(comp_mags, mag_nodes, std_medians)
                 mod0 = np.interp(comp_mags0, mag_nodes, std_medians)
             else:
-                print("Not enough data for interpolation. Skipping iteration.")
+                print("Not enough points for fitting. Exiting.")
                 break
         else:
-            spl = Spline(mag_nodes, std_medians)
+            spl = Spline(mag_nodes, std_medians, k=3)
             mod = spl(comp_mags)
             mod0 = spl(comp_mags0)
 
         std = np.std(comp_rms - mod)
-        new_comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
-        cumulative_mask = cumulative_mask & new_comp_star_mask
+        comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
+        N2 = np.sum(comp_star_mask)
 
-        # Store final good/bad data for plotting after the iterations finish
-        final_good_rms = comp_star_rms[cumulative_mask]
-        final_good_mags = comp_mags0[cumulative_mask]
-        final_bad_rms = comp_star_rms[~cumulative_mask]
-        final_bad_mags = comp_mags0[~cumulative_mask]
+        print(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}")
 
-        if N1 == np.sum(cumulative_mask) or i > 10:
+        # Exit if the number of stars doesn't change or too many iterations
+        if N1 == N2 or i > 10:
             break
 
-    # Plot RMS vs. magnitude for good and bad comparison stars after all iterations
-    # Find RMS of the dimmest star among the good stars to set the y-axis limit
-    dimmest_good_star_rms = final_good_rms[final_good_mags.argmax()]
-    y_limit_high = 2 * dimmest_good_star_rms  # Adjust multiplier as needed for clarity
-    y_limit_low = 0.01 * dimmest_good_star_rms  # Adjust multiplier as needed for clarity
+    # Prepare data for visualization
+    final_good_mask = comp_star_mask
+    final_good_rms = comp_star_rms[final_good_mask]
+    final_good_mags = comp_mags0[final_good_mask]
 
-    plt.figure()
-    plt.scatter(final_good_mags, final_good_rms, color='black')
-    plt.scatter(final_bad_mags, final_bad_rms, color='red')
+    final_bad_mask = ~comp_star_mask
+    final_bad_rms = comp_star_rms[final_bad_mask]
+    final_bad_mags = comp_mags0[final_bad_mask]
+
+    # Determine plot limits based on the dimmest good star
+    if len(final_good_rms) > 0:
+        y_limit_high = 2 * max(final_good_rms)
+        y_limit_low = min(final_good_rms) * 0.01
+    else:
+        y_limit_high, y_limit_low = 1, 0.01
+
+    # Create the plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(final_good_mags, final_good_rms, color='black', label='Good Stars')
+    plt.scatter(final_bad_mags, final_bad_rms, color='red', label='Bad Stars')
     plt.xlabel('Magnitude')
     plt.ylabel('RMS')
-    plt.ylim(y_limit_low, y_limit_high)  # Set y-axis limit based on dimmest good star RMS
-    # plt.legend()
-    plt.ylim()
-    # plt.title('RMS vs. Magnitude of Comparison Stars')
+    plt.ylim(y_limit_low, y_limit_high)
+    plt.legend()
+    plt.title('RMS vs. Magnitude of Comparison Stars')
     plt.tight_layout()
     plt.show()
 
-    # save the data for the plot in a json file
-
+    # Save the data for the plot
     output_data = {
         "good_rms": final_good_rms.tolist(),
         "good_mags": final_good_mags.tolist(),
@@ -272,10 +279,10 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=3., dmag=0.2
     with open(f'rms_vs_mag_comps.json', 'w') as json_file:
         json.dump(output_data, json_file, indent=4)
 
-    print(f'RMS of comparison stars after filtering: {len(comp_star_rms[cumulative_mask])}')
-    print(f'RMS values after filtering: {comp_star_rms[cumulative_mask]}')
+    print(f'RMS of comparison stars after filtering: {len(comp_star_rms[comp_star_mask])}')
+    print(f'RMS values after filtering: {comp_star_rms[comp_star_mask]}')
 
-    return cumulative_mask, comp_star_rms, i
+    return comp_star_mask, comp_star_rms, i
 
 
 def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json):
