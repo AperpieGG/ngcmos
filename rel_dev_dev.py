@@ -186,6 +186,24 @@ def find_comp_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
+def apply_linear_fit(time, flux, degree=1, sigma_threshold=3):
+    """
+    Fits a polynomial model to the flux data using np.polyfit.
+    Returns model, residuals, rms, and a boolean indicating if the fit passed.
+    """
+    # Perform polynomial fitting
+    poly_fit = np.polyfit(time, flux, degree)
+    model = np.polyval(poly_fit, time)
+
+    # Calculate residuals and RMS
+    residuals = flux - model
+    rms = np.std(residuals)
+
+    # Check if residuals are within the sigma threshold
+    passed_fit = np.all(np.abs(residuals) <= sigma_threshold * rms)
+    return model, residuals, rms, passed_fit
+
+
 def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
     # Calculate initial RMS of comparison stars
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
@@ -337,9 +355,10 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     return good_comp_star_table  # Return the filtered table including only good comp stars
 
 
-def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
+def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9, degree=1, sigma_threshold=3):
     """
-    Plot the light curves for comparison stars in batches of `batch_size` (9 per figure by default).
+    Plot the light curves for comparison stars in batches of `batch_size` (default: 9).
+    Stars failing the linear flatness check are plotted in red.
     """
     total_stars = len(tic_ids)
     num_batches = int(np.ceil(total_stars / batch_size))  # Calculate how many batches we need
@@ -361,6 +380,12 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
             comp_fluxerrs = fluxerr_list[idx]
             comp_time = time_list[idx]
 
+            # Perform a linear fit check before plotting
+            _, _, _, passed_fit = apply_linear_fit(comp_time, comp_fluxes, degree, sigma_threshold)
+
+            # Set color: Blue for good stars, Red for excluded stars
+            plot_color = 'blue' if passed_fit else 'red'
+
             # Calculate the sum of all fluxes except the current star's flux
             reference_fluxes_comp = np.sum(np.delete(flux_list, i, axis=0), axis=0)
             reference_fluxerrs_comp = np.sqrt(np.sum(np.delete(fluxerr_list, i, axis=0) ** 2, axis=0))
@@ -368,16 +393,15 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
             # Normalize the current star's flux by the sum of the other comparison stars' fluxes
             comp_fluxes_dt = comp_fluxes / reference_fluxes_comp
             comp_fluxerrs_dt = np.sqrt(comp_fluxerrs ** 2 + reference_fluxerrs_comp ** 2)
-            # Normalize the star's flux by the mean flux
-            # comp_fluxes_dt = comp_fluxes_dt / np.mean(comp_fluxes_dt)
 
-            # Bin the data (optional, can be skipped if not needed)
+            # Bin the data
             comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
-                bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
+                bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12)
+            )
 
             # Plot the light curve in the current subplot
-            ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color='blue', alpha=0.8)
-            ax.set_title(f'Comparison star: {tic_id}')
+            ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color=plot_color, alpha=0.8)
+            ax.set_title(f'TIC {tic_id} - {"Good" if passed_fit else "Excluded"}')
             ax.set_xlabel('Time')
             ax.set_ylabel('Flux')
 
