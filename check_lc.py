@@ -117,8 +117,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         for radius in circle_radii:
             circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
             axs[2].add_patch(circle)
-        annulus = Circle((x, y), radius=15, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
-        dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
+        annulus = Circle((x, y), radius=6, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
+        dannulus = Circle((x, y), radius=11, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
         axs[2].add_patch(annulus)
         axs[2].add_patch(dannulus)
 
