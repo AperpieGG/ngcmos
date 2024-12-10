@@ -504,6 +504,7 @@ def main():
                     comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
                     comp_skys = (phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] -
                                  phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}'])
+                    AIRMASS = phot_table[phot_table['tic_id'] == tic_id]['airmass']
 
                 else:
                     # If no comp_stars file, use best_comps_table
@@ -524,7 +525,7 @@ def main():
 
             # Reference fluxes and errors (sum of all stars, excluding the target star)
             reference_fluxes = np.sum(flux_list, axis=0)
-            reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
+            # reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
 
             comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
                                     for cfi, csi in zip(flux_list, comp_skys)]))
