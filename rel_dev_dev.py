@@ -8,13 +8,13 @@ from astropy.io import fits
 import json
 from astropy.visualization import ZScaleInterval
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
+
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
-    remove_outliers
+    remove_outliers, scintilation_noise
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2  # Color index tolerance for comparison stars
 MAGNITUDE_TOLERANCE = 1
-
 
 plot_images()
 
@@ -334,7 +334,7 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     # Now filter the table based on these tic_ids
     good_comp_star_table = filtered_table[np.isin(filtered_table['tic_id'], good_tic_ids)]
 
-    return good_comp_star_table  # Return the filtered table including only good comp stars
+    return good_comp_star_table, airmass  # Return the filtered table including only good comp stars
 
 
 def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
@@ -396,6 +396,41 @@ def get_phot_files(directory):
     return files  # Return the first FITS file found as a string
 
 
+def calc_noise(APER, EXPTIME, DC, GAIN, RN, AIRMASS, lc, ):
+    """
+    Work out the additional noise sources for the error bars
+    Parameters
+    ----------
+    APER : float
+        Radius of the photometry aperture
+    EXPTIME : float
+        Current exposure time
+    DC : float
+        Dark current per pixel per second
+    lc : array-like
+        The photometry containing star + sky light
+    GAIN : float
+        Gain of the camera
+    RN : float
+        Read noise of the camera
+    AIRMASS : float
+        Airmass of the observation
+    Returns
+    -------
+    lc_err_new : array-like
+        A new error array accounting for other sources of noise
+    Raises
+    ------
+    None
+    """
+    npix = np.pi * APER ** 2
+    dark_current = DC * npix * EXPTIME
+    SCINT = scintilation_noise(AIRMASS, EXPTIME)
+    # scintillation?
+    lc_err_new = np.sqrt(lc / GAIN + dark_current + npix * RN ** 2 + (SCINT * lc) ** 2)
+    return lc_err_new
+
+
 def main():
     # Add parse for tic_id_to_plot
     parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
@@ -407,15 +442,26 @@ def main():
     parser.add_argument('--dmf', type=float, default=1.5, help='Fainter comparison star threshold (default: 1.5 mag)')
     parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
     parser.add_argument('--json_file', action='store_true', help='Use JSON file for region filtering (optional)')
-    # Add argument to provide a txt file if comparison stars are known
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
-
     args = parser.parse_args()
+
+    # Set parameters based on camera type
+    if args.cam == 'CMOS':
+        APERTURE = 5
+        DC = 1.6
+        GAIN = 1.13
+        EXPOSURE = 10.0
+        RN = 1.56
+    else:
+        APERTURE = 4
+        GAIN = 2
+        DC = 0.00515
+        EXPOSURE = 10.0
+        RN = 12.9
+
     tic_id_to_plot = args.tic_id
-    APERTURE = args.aper
     DM_BRIGHT = args.dmb
     DM_FAINT = args.dmf
-    camera = args.cam
     crop_size = args.crop
     fwhm_pos = args.json_file
     current_night_directory = os.getcwd()  # Change this if necessary
@@ -440,8 +486,8 @@ def main():
                 print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
                 # Find the best comparison stars
-                best_comps_table = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
-                                                   crop_size, fwhm_pos)
+                best_comps_table, AIRMASS = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
+                                                            crop_size, fwhm_pos)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
@@ -456,6 +502,9 @@ def main():
                     comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_mid']
                     comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                     comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+                    comp_skys = phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] - \
+                                phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+
                 else:
                     # If no comp_stars file, use best_comps_table
                     comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
@@ -475,13 +524,16 @@ def main():
             reference_fluxes = np.sum(flux_list, axis=0)
             reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
 
+            comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
+                                    for cfi, csi in zip(flux_list, comp_skys)]))
+
             # Bin the master reference data
             time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
                 bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 12))
 
             if args.pos:
                 # Plot the comparison stars' positions on the image
-                plot_comps_position(phot_table, tic_id_to_plot, tic_ids, camera)
+                plot_comps_position(phot_table, tic_id_to_plot, tic_ids, args.cam)
 
             # Call the plot function
             plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
@@ -490,6 +542,7 @@ def main():
             target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
             target_flux = target_star[f'flux_{APERTURE}']
             target_fluxerr = target_star[f'fluxerr_{APERTURE}']
+            target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
             target_time = target_star['jd_mid']
 
             # Bin the target star data and do the relative photometry
@@ -502,7 +555,8 @@ def main():
 
             # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
             flux_ratio = target_flux / reference_fluxes
-            flux_err_ratio = np.sqrt((target_fluxerr/target_flux**2) + (reference_fluxerrs/reference_fluxes**2))
+            target_err = calc_noise(APERTURE, EXPOSURE, DC, RN, target_flux + target_sky)
+            flux_err_ratio = np.sqrt((target_err / target_flux ** 2) + (reference_fluxerrs / reference_fluxes ** 2))
             flux_err = flux_ratio * flux_err_ratio
 
             # Calculate the average flux ratio of the target star
@@ -530,14 +584,14 @@ def main():
                 "RMS": RMS.tolist()
             }
 
-            json_filename = f'target_light_curve_{tic_id_to_plot}_{camera}.json'
+            json_filename = f'target_light_curve_{tic_id_to_plot}_{args.cam}.json'
             with open(json_filename, 'w') as json_file:
                 json.dump(data_to_save, json_file, indent=4)
 
             print(f'Data saved to {json_filename}')
 
             # Save tic_ids used for comparison stars in a txt file
-            comp_stars_filename = f'comp_stars_{tic_id_to_plot}_{camera}.txt'
+            comp_stars_filename = f'comp_stars_{tic_id_to_plot}_{args.cam}.txt'
 
             with open(comp_stars_filename, 'w') as comp_stars_file:
                 for tic_id in tic_ids:
