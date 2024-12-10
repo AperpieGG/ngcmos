@@ -396,7 +396,7 @@ def get_phot_files(directory):
     return files  # Return the first FITS file found as a string
 
 
-def calc_noise(APER, EXPTIME, DC, GAIN, RN, AIRMASS, lc, ):
+def calc_noise(APER, EXPTIME, DC, GAIN, RN, AIRMASS, lc):
     """
     Work out the additional noise sources for the error bars
     Parameters
