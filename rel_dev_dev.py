@@ -502,14 +502,16 @@ def main():
                     comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_mid']
                     comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                     comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
-                    comp_skys = phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] - \
-                                phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+                    comp_skys = (phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] -
+                                 phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}'])
 
                 else:
                     # If no comp_stars file, use best_comps_table
                     comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_mid']
                     comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
                     comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+                    comp_skys = (phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] -
+                                 phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}'])
 
                 time_list.append(comp_time)
                 flux_list.append(comp_fluxes)
@@ -526,6 +528,9 @@ def main():
 
             comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
                                     for cfi, csi in zip(flux_list, comp_skys)]))
+
+            # Calculate the sum of all fluxes except the target star's flux
+            reference_fluxerrs = np.sqrt(np.sum(comp_errs**2, axis=0))
 
             # Bin the master reference data
             time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
@@ -570,7 +575,8 @@ def main():
             RMS = np.std(target_fluxes_dt)
 
             print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
-            plt.plot(target_time_binned, target_fluxes_dt_binned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
+            # plt.plot(target_time_binned, target_fluxes_dt_binned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
+            plt.errorbar(target_time_binned, target_fluxes_dt_binned, yerr=target_fluxerrs_binned, fmt='o', color='red')
             plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
             plt.legend(loc='best')
             plt.show()
