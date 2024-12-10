@@ -559,8 +559,8 @@ def main():
             target_fluxes_dt = flux_ratio / flux_ratio_mean
 
             # Calculate the error in the normalized flux
-            flux_err_ratio = np.sqrt((target_err / target_flux ** 2) + (reference_fluxerrs / reference_fluxes ** 2))
-            flux_err = flux_ratio * flux_err_ratio
+            err_factor = np.sqrt((target_err/target_flux)**2 + (reference_fluxerrs/reference_fluxes)**2)
+            flux_err = flux_ratio * err_factor
             target_flux_err_dt = flux_err / flux_ratio_mean
 
             # Estimate the RMS of the target star
