@@ -560,7 +560,7 @@ def main():
 
             # Calculate the flux ratio for the target star with respect to the summation of the reference stars' fluxes
             flux_ratio = target_flux / reference_fluxes
-            target_err = calc_noise(APERTURE, EXPOSURE, DC, RN, target_flux + target_sky)
+            target_err = calc_noise(APERTURE, EXPOSURE, DC, RN, AIRMASS, target_flux + target_sky)
             flux_err_ratio = np.sqrt((target_err / target_flux ** 2) + (reference_fluxerrs / reference_fluxes ** 2))
             flux_err = flux_ratio * flux_err_ratio
 
