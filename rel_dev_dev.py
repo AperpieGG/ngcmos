@@ -576,7 +576,7 @@ def main():
 
             print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
             # plt.plot(target_time_binned, target_fluxes_dt_binned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
-            plt.errorbar(target_time_binned, target_fluxes_dt_binned, yerr=target_flux_err_dt, fmt='o', color='red')
+            plt.errorbar(target_time, target_fluxes_dt, yerr=target_flux_err_dt, fmt='o', color='red')
             plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
             plt.legend(loc='best')
             plt.show()
