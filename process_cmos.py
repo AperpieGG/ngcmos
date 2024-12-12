@@ -148,6 +148,18 @@ def save_photometry(phot_output_filename, frame_output):
     logging.info(f"Saved photometry to {phot_output_filename}")
 
 
+def preload_processed_frames(phot_output_filename):
+    """Load all processed frames into memory."""
+    if not os.path.exists(phot_output_filename):
+        return set()
+    try:
+        phot_table = Table.read(phot_output_filename)
+        return set(phot_table['frame_id'])
+    except Exception as e:
+        logging.error(f"Error reading {phot_output_filename}: {e}")
+        return set()
+    
+
 def main():
     # set directory for the current working directory
     directory = os.getcwd()
@@ -163,6 +175,10 @@ def main():
 
     for prefix in prefixes:
         phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
+
+        # Preload processed frames into memory
+        processed_frames = preload_processed_frames(phot_output_filename)
+        logging.info(f"Loaded {len(processed_frames)} processed frames.")
 
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
 
