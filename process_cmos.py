@@ -155,14 +155,32 @@ signal.signal(signal.SIGTERM, handle_termination)
 signal.signal(signal.SIGINT, handle_termination)
 
 
-# Worker process for saving photometry
 def photometry_writer(queue, phot_output_filename):
+    """Writes photometry data asynchronously."""
     while True:
         frame_output = queue.get()
+
+        # Check if the processing is done
         if frame_output == "DONE":
-            logging.info("Writer process received termination signal.")
+            logging.info("Writer process completed.")
             break
-        save_photometry_incremental(phot_output_filename, frame_output)
+
+        # Try saving the photometry data
+        try:
+            if isinstance(frame_output, Table):
+                if os.path.exists(phot_output_filename):
+                    existing_table = Table.read(phot_output_filename)
+                    updated_table = vstack([existing_table, frame_output])
+                else:
+                    updated_table = frame_output
+
+                updated_table.write(phot_output_filename, overwrite=True)
+                logging.info(f"Saved photometry to {phot_output_filename}")
+            else:
+                logging.error("Received invalid frame output, skipping save.")
+
+        except Exception as e:
+            logging.error(f"Error saving photometry data: {e}")
 
 
 # Improved save function
