@@ -1,7 +1,5 @@
 #! /usr/bin/env python
 import os
-import signal
-import sys
 from datetime import datetime, timedelta
 from calibration_images import reduce_images
 from utils import (get_location, wcs_phot, _detect_objects_sep, get_catalog,
@@ -17,7 +15,7 @@ from astropy.time import Time
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 from astropy.utils.exceptions import AstropyWarning
-from multiprocessing import Queue, Process
+
 
 # Set up logging
 logger = logging.getLogger()  # Get the root logger
@@ -47,7 +45,7 @@ warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 GAIN = 1.131
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
-APERTURE_RADII = [4, 4.9, 5, 6, 8, 10]
+APERTURE_RADII = [4.9, 5, 6, 8, 10]
 RSI = 15
 RSO = 20
 DEFOCUS = 0.0
@@ -127,42 +125,6 @@ def get_prefix(filenames):
     return prefixes
 
 
-def get_processed_frame_ids_fits(phot_output_filename):
-    """Extract processed frame IDs using Astropy FITS."""
-    if not os.path.exists(phot_output_filename):
-        return set()
-    try:
-        with fits.open(phot_output_filename) as hdul:
-            data = hdul[1].data  # Assuming the table is in the first extension
-            return set(data['frame_id'])
-    except Exception as e:
-        logging.error(f"Error reading {phot_output_filename}: {e}")
-        return set()
-
-
-def file_already_processed_fits(filename, processed_frame_ids):
-    """Check if a file has already been processed using preloaded IDs."""
-    return filename in processed_frame_ids
-
-
-def save_photometry(phot_output_filename, frame_output):
-    """Append photometry results to the output file."""
-    try:
-        if os.path.exists(phot_output_filename):
-            with fits.open(phot_output_filename, mode='update') as hdul:
-                existing_table = Table(hdul[1].data)
-                updated_table = vstack([existing_table, frame_output])
-                hdul[1].data = updated_table.as_array()
-                hdul.flush()
-                logging.info(f"Updated photometry file: {phot_output_filename}")
-        else:
-            frame_output.write(phot_output_filename, overwrite=True)
-            logging.info(f"Created new photometry file: {phot_output_filename}")
-
-    except Exception as e:
-        logging.error(f"Error saving photometry data: {e}")
-
-
 def main():
     # set directory for the current working directory
     directory = os.getcwd()
@@ -179,92 +141,108 @@ def main():
     for prefix in prefixes:
         phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
 
-        # Load processed frame IDs once
-        processed_frame_ids = get_processed_frame_ids_fits(phot_output_filename)
+        # Open the photometry file for the current prefix
+        if os.path.exists(phot_output_filename):
+            logging.info(f"Photometry file for prefix {prefix} already exists, skipping to the next prefix.")
+            continue
 
+        logging.info(f"Creating new photometry file for prefix {prefix}.")
+        phot_table = None
+
+        # Iterate over filenames with the current prefix
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
-
         for filename in prefix_filenames:
-            if file_already_processed_fits(filename, processed_frame_ids):
-                logging.info(f"File {filename} already processed, skipping...")
+            logging.info(f"Processing filename {filename}......")
+            # Calibrate image and get FITS file
+            logging.info(f"The average pixel value for {filename} is {fits.getdata(os.path.join(directory, filename)).mean()}")
+            reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
+            logging.info(f"The average pixel value for {filename} is {reduced_data[0].mean()}")
+            # Convert reduced_data to a dictionary with filenames as keys
+            reduced_data_dict = {filename: (data, header) for data, header in zip(reduced_data, reduced_header)}
+
+            # Access the reduced data and header corresponding to the filename
+            frame_data, frame_hdr = reduced_data_dict[filename]
+            logging.info(f"Extracting photometry for {filename}")
+
+            # Extract airmass and zero point from the header
+            airmass, zp = extract_airmass_and_zp(frame_hdr)
+
+            wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
+            wcs_header = {}
+            for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
+                key = line[0:8].strip()
+                if '=' in line and key not in wcs_ignore_cards:
+                    card = fits.Card.fromstring(line)
+                    wcs_header[card.keyword] = card.value
+
+            frame_bg = sep.Background(frame_data)
+            frame_data_corr_no_bg = frame_data - frame_bg
+            estimate_coord = SkyCoord(ra=frame_hdr['TELRA'],
+                                      dec=frame_hdr['TELDEC'],
+                                      unit=(u.deg, u.deg))
+            estimate_coord_radius = 3 * u.deg
+
+            frame_objects = _detect_objects_sep(frame_data_corr_no_bg, frame_bg.globalrms,
+                                                AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS)
+            if len(frame_objects) < N_OBJECTS_LIMIT:
+                logging.info(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!")
                 continue
 
-            logging.info(f"Processing {filename}...")
+            # Load the photometry catalog
+            phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
+            logging.info(f"Found catalog with name {prefix}_catalog_input.fits")
+            # Convert RA and DEC to pixel coordinates using the WCS information from the header
+            phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
-            try:
-                # Perform photometry on the file
-                reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
-                reduced_data_dict = {filename: (data, header) for data, header in zip(reduced_data, reduced_header)}
-                # Access the reduced data and header
-                frame_data, frame_hdr = reduced_data_dict[filename]
-                # Extract airmass and zero point from the header
-                airmass, zp = extract_airmass_and_zp(frame_hdr)
+            # Do time conversions - one time value per format per target
+            half_exptime = frame_hdr['EXPTIME'] / 2.
+            time_isot = Time([frame_hdr['DATE-OBS'] for i in range(len(phot_x))],
+                             format='isot', scale='utc', location=get_location())
+            time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
+            # Correct to mid-exposure time
+            time_jd = time_jd + half_exptime * u.second
+            ra = phot_cat['ra_deg_corr']
+            dec = phot_cat['dec_deg_corr']
+            ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
+            time_bary = time_jd.tdb + ltt_bary
+            time_helio = time_jd.utc + ltt_helio
 
-                wcs_ignore_cards = ['SIMPLE', 'BITPIX', 'NAXIS', 'EXTEND', 'DATE', 'IMAGEW', 'IMAGEH']
-                wcs_header = {}
-                for line in [frame_hdr[i:i + 80] for i in range(0, len(frame_hdr), 80)]:
-                    key = line[0:8].strip()
-                    if '=' in line and key not in wcs_ignore_cards:
-                        card = fits.Card.fromstring(line)
-                        wcs_header[card.keyword] = card.value
-                frame_bg = sep.Background(frame_data)
-                frame_data_corr_no_bg = frame_data - frame_bg
-                estimate_coord = SkyCoord(
-                    ra=frame_hdr['TELRA'],
-                    dec=frame_hdr['TELDEC'],
-                    unit=(u.deg, u.deg)
-                )
-                estimate_coord_radius = 3 * u.deg
+            frame_ids = [filename for i in range(len(phot_x))]
+            logging.info(f"Found {len(frame_ids)} sources")
 
-                frame_objects = _detect_objects_sep(
-                    frame_data_corr_no_bg, frame_bg.globalrms,
-                    AREA_MIN, AREA_MAX, DETECTION_SIGMA, DEFOCUS
-                )
-                if len(frame_objects) < N_OBJECTS_LIMIT:
-                    logging.info(f"Fewer than {N_OBJECTS_LIMIT} objects found in {filename}, skipping photometry!")
-                    continue
-                # Load the photometry catalog
-                phot_cat, _ = get_catalog(f"{directory}/{prefix}_catalog_input.fits", ext=1)
-                phot_x, phot_y = WCS(frame_hdr).all_world2pix(
-                    phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
+            frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
+                                    phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, time_bary.value,
+                                    time_helio.value, phot_x, phot_y,
+                                    [airmass] * len(phot_x), [zp] * len(phot_x)],
+                                   names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
+                                          "jd_bary", "jd_helio", "x", "y", "airmass", "zp"))
 
-                # Perform time conversions
-                half_exptime = frame_hdr['EXPTIME'] / 2.
-                time_isot = Time(
-                    [frame_hdr['DATE-OBS'] for _ in range(len(phot_x))],
-                    format='isot', scale='utc', location=get_location())
+            # Extract photometry at locations
+            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
 
-                time_jd = Time(time_isot.jd, format='jd', scale='utc', location=get_location())
-                time_jd = time_jd + half_exptime * u.second
-                ra = phot_cat['ra_deg_corr']
-                dec = phot_cat['dec_deg_corr']
-                ltt_bary, ltt_helio = get_light_travel_times(ra, dec, time_jd)
-                time_bary = time_jd.tdb + ltt_bary
-                time_helio = time_jd.utc + ltt_helio
-                frame_ids = [filename] * len(phot_x)
-                logging.info(f"Found {len(frame_ids)} sources")
+            # Stack the photometry and preamble
+            frame_output = hstack([frame_preamble, frame_phot])
 
-                frame_preamble = Table(
-                    [frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
-                     phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, time_bary.value,
-                     time_helio.value, phot_x, phot_y,
-                     [airmass] * len(phot_x), [zp] * len(phot_x)],
-                    names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
-                           "jd_bary", "jd_helio", "x", "y", "airmass", "zp")
-                )
-                # Extract photometry at locations
-                frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
-                # Combine preamble and photometry
-                frame_output = hstack([frame_preamble, frame_phot])
+            # Convert frame_output to a Table if it's not already
+            if not isinstance(frame_output, Table):
+                frame_output = Table(frame_output)
 
-                # Save results incrementally
-                save_photometry(phot_output_filename, frame_output)
-                logging.info(f"Finished photometry for {filename}")
+            # Append the current frame's photometry to the accumulated photometry
+            if phot_table is None:
+                phot_table = frame_output
+            else:
+                phot_table = vstack([phot_table, frame_output])
 
-            except Exception as e:
-                logging.error(f"Error processing {filename}: {e}")
+            logging.info(f"Finished photometry for {filename}")
 
-    logging.info("Done!\n")
+        # Save the photometry for the current prefix
+        if phot_table is not None:
+            phot_table.write(phot_output_filename, overwrite=True)
+            logging.info(f"Saved photometry for prefix {prefix} to {phot_output_filename}")
+        else:
+            logging.info(f"No photometry data for prefix {prefix}.")
+
+    logging.info("Done!")
 
 
 if __name__ == "__main__":
