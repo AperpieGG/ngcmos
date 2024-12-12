@@ -127,16 +127,22 @@ def get_prefix(filenames):
     return prefixes
 
 
-def file_already_processed(phot_output_filename, filename):
-    """Check if the current file has already been processed."""
+def get_processed_frame_ids_fits(phot_output_filename):
+    """Extract processed frame IDs using Astropy FITS."""
     if not os.path.exists(phot_output_filename):
-        return False
+        return set()
     try:
-        phot_table = Table.read(phot_output_filename)
-        return filename in phot_table['frame_id']
+        with fits.open(phot_output_filename) as hdul:
+            data = hdul[1].data  # Assuming the table is in the first extension
+            return set(data['frame_id'])
     except Exception as e:
         logging.error(f"Error reading {phot_output_filename}: {e}")
-        return False
+        return set()
+
+
+def file_already_processed_fits(filename, processed_frame_ids):
+    """Check if a file has already been processed using preloaded IDs."""
+    return filename in processed_frame_ids
 
 
 # Signal handling for termination
@@ -172,10 +178,9 @@ def save_photometry_incremental(phot_output_filename, frame_output):
 
 
 # Main processing function
-def process_file(queue, directory, prefix, filename, phot_output_filename):
+def process_file(queue, directory, prefix, filename, phot_output_filename, processed_frame_ids):
     try:
-        # Skip already processed files
-        if file_already_processed(phot_output_filename, filename):
+        if file_already_processed_fits(filename, processed_frame_ids):
             logging.info(f"File {filename} already processed, skipping...")
             return
 
@@ -248,6 +253,10 @@ def main():
 
     for prefix in prefixes:
         phot_output_filename = os.path.join(directory, f"phot_{prefix}.fits")
+
+        processed_frame_ids = get_processed_frame_ids_fits(phot_output_filename)
+        logging.info(f"Loaded {len(processed_frame_ids)} processed frames for prefix {prefix}.")
+
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
 
         queue = Queue()
@@ -255,7 +264,7 @@ def main():
         writer_process.start()
 
         for filename in prefix_filenames:
-            process_file(queue, directory, prefix, filename, phot_output_filename)
+            process_file(queue, directory, prefix, filename, phot_output_filename, processed_frame_ids)
 
         queue.put("DONE")
         writer_process.join()
