@@ -67,7 +67,9 @@ def main():
         plt.ylabel('Frequency')
         plt.yscale('log')
         plt.legend(loc='upper right')
-        # plt.show()
+   
+        # save the histogram to a png file
+        plt.savefig(f'zp{APERTURE}.pdf', dpi=300)
 
         # save the results to a json file
         with open(f'zp{APERTURE}.json', 'w') as json_file:
