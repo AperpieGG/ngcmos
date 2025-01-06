@@ -61,8 +61,8 @@ def main():
 
         # plot zp_list on a histogram
         plt.hist(zp_list, bins=100, label=f"Avg: {np.nanmean(zp_list):.2f}")
-        plt.axvline(np.nanmean(zp_list), color='r', linestyle='--', label=f"Mean: {np.nanmean(zp_list):.2f}")
-        plt.axvline(np.nanmedian(zp_list), color='g', linestyle='--', label=f"Median: {np.nanmedian(zp_list):.2f}")
+        plt.axvline(np.nanmean(zp_list), color='b', linestyle='--', label=f"Mean: {np.nanmean(zp_list):.2f}")
+        # plt.axvline(np.nanmedian(zp_list), color='g', linestyle='--', label=f"Median: {np.nanmedian(zp_list):.2f}")
         plt.xlabel('Zero Point')
         plt.ylabel('Frequency')
         plt.yscale('log')
