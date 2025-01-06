@@ -106,7 +106,7 @@ def main(phot_file):
     plot_images()
 
     # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
+    current_night_directory = '.'
 
     # Plot the current photometry file
     print(f"Plotting the photometry file {phot_file}...")
@@ -115,7 +115,7 @@ def main(phot_file):
     results = calculate_mean_rms_flux(phot_table, num_stars=args.num_stars)
 
     # Save results to JSON file
-    save_results_to_json(results, phot_file)
+    # save_results_to_json(results, phot_file)
 
 
 def main_loop(phot_files):
@@ -125,7 +125,7 @@ def main_loop(phot_files):
 
 if __name__ == "__main__":
     # Get the current night directory
-    current_night_directory = find_current_night_directory(base_path)
+    current_night_directory = '.'
 
     # Get photometry files with the pattern 'phot_*.fits'
     phot_files = get_phot_files(current_night_directory)
