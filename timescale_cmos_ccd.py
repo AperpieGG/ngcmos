@@ -230,6 +230,8 @@ def filter_by_color(phot_table, cl, ch):
 def trim_target_data_by_time(phot_table):
     """
     Trim the data points by removing the last 15 minutes of data based on `Time_BJD`.
+    This is because we are including the astronomical twilight for both 20240705 and 20240622.
+    This increases the red noise from morning light!
 
     :param phot_table: Input photometry table
     :return: Trimmed photometry table
@@ -263,8 +265,8 @@ def trim_target_data_by_time(phot_table):
 def trim_target_data(phot_table):
     """
     Trim the data points based on airmass criteria:
-    - Trim from the beginning until the starting airmass is ≤ 1.7.
-    - Trim from the end if the ending airmass exceeds 1.7.
+    - Trim from the beginning until the starting airmass is ≤ 1.75.
+    - Trim from the end if the ending airmass exceeds 1.75.
     Print the total number of points trimmed from both the beginning and the end.
 
     :param phot_table: Input photometry table
