@@ -67,7 +67,7 @@ def main():
         plt.ylabel('Frequency')
         plt.yscale('log')
         # plt.legend(loc='upper right')
-        plt.ylim(18, 21)
+        plt.xlim(18, 21)
         plt.savefig(f'zp{APERTURE}.pdf', dpi=300)
         plt.show()
 
