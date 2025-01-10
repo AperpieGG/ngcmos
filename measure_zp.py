@@ -69,11 +69,19 @@ def main():
             json.dump(np.nanmean(zp_list), json_file, indent=4)
 
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
-            # if nan exclude it from the list
-            zp_list = [zp for zp in zp_list if not np.isnan(zp)]
-            color_list = [color_list[i] for i in range(len(zp_list)) if not np.isnan(zp_list[i])]
-            # save the zp_list and color_list to a json file
-            json.dump({'zp_list': zp_list, 'color_list': color_list}, json_file, indent=4)
+            # Filter out entries where either zp or color is NaN
+            valid_data = [
+                {'zp': zp, 'color': color}
+                for zp, color in zip(zp_list, color_list)
+                if not (np.isnan(zp) or np.isnan(color))
+            ]
+
+            # Extract zp_list and color_list separately after filtering
+            filtered_zp_list = [entry['zp'] for entry in valid_data]
+            filtered_color_list = [entry['color'] for entry in valid_data]
+
+            # Save the filtered lists to a JSON file
+            json.dump({'zp_list': filtered_zp_list, 'color_list': filtered_color_list}, json_file, indent=4)
 
         print(f"Results saved to zp{APERTURE}.json and zp{APERTURE}_list.json")
 
