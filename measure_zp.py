@@ -76,8 +76,12 @@ def main():
             json.dump(np.nanmean(zp_list), json_file, indent=4)
 
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
+            # if nan exclude it from the list
+            zp_list = [zp for zp in zp_list if not np.isnan(zp)]
             json.dump(zp_list, json_file, indent=4)
 
+        print(f"Results saved to zp{APERTURE}.json and zp{APERTURE}_list.json")
 
+        
 if __name__ == "__main__":
     main()
