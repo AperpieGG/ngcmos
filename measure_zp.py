@@ -14,19 +14,24 @@ def measure_zp(table, APERTURE, EXPOSURE):
     tic_ids = np.unique(table['TIC_ID'])
     print(f'Found {len(tic_ids)} unique TIC IDs')
     zp_list = []
+    color_list = []
 
     for tic_id in tic_ids:
         # Average flux for the current TIC ID
-        tic_flux = np.mean(table[table['TIC_ID'] == tic_id][f'flux_{APERTURE}'])
+        tic_data = table[table['TIC_ID'] == tic_id]
+
+        tic_flux = np.mean(tic_data[f'flux_{APERTURE}'])
         # First Tmag value for the current TIC ID
-        tic_Tmag = table[table['TIC_ID'] == tic_id]['Tmag'][0]
+        tic_Tmag = tic_data['Tmag'][0]
+        target_color_index = tic_data['gaiabp'][0] - tic_data['gaiarp'][0]
 
         # Calculate zero point for the current TIC ID
         zp = tic_Tmag + 2.5 * np.log10(tic_flux / EXPOSURE)
         print(f'TIC ID: {tic_id}, Zero Point: {zp}')
         zp_list.append(zp)
+        color_list.append(target_color_index)
 
-    return zp_list
+    return zp_list, color_list
 
 
 def main():
@@ -56,20 +61,8 @@ def main():
         print(f"Photometry file: {phot_file}")
 
         # Measure zero point
-        zp_list = measure_zp(phot_table, APERTURE, EXPOSURE)
+        zp_list, color_list = measure_zp(phot_table, APERTURE, EXPOSURE)
         print(f"Zero point average: {np.nanmean(zp_list)}")
-
-        # plot zp_list on a histogram
-        plt.hist(zp_list, bins=100, label=f"Avg: {np.nanmean(zp_list):.2f}")
-        plt.axvline(np.nanmean(zp_list), color='black', linestyle='--', label=f"Mean: {np.nanmean(zp_list):.2f}")
-        # plt.axvline(np.nanmedian(zp_list), color='g', linestyle='--', label=f"Median: {np.nanmedian(zp_list):.2f}")
-        plt.xlabel('Zero Point')
-        plt.ylabel('Frequency')
-        plt.yscale('log')
-        # plt.legend(loc='upper right')
-        # plt.xlim(18, 21)
-        plt.savefig(f'zp{APERTURE}.pdf', dpi=300)
-        plt.show()
 
         # save the results to a json file
         with open(f'zp{APERTURE}.json', 'w') as json_file:
@@ -78,10 +71,12 @@ def main():
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
             # if nan exclude it from the list
             zp_list = [zp for zp in zp_list if not np.isnan(zp)]
+            color_list = [color_list[i] for i in range(len(zp_list)) if not np.isnan(zp_list[i])]
             json.dump(zp_list, json_file, indent=4)
+            json.dump(color_list, json_file, indent=4)
 
         print(f"Results saved to zp{APERTURE}.json and zp{APERTURE}_list.json")
 
-        
+
 if __name__ == "__main__":
     main()
