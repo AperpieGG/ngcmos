@@ -65,15 +65,18 @@ def main():
         # plt.axvline(np.nanmedian(zp_list), color='g', linestyle='--', label=f"Median: {np.nanmedian(zp_list):.2f}")
         plt.xlabel('Zero Point')
         plt.ylabel('Frequency')
-        # plt.yscale('log')
+        plt.yscale('log')
         # plt.legend(loc='upper right')
-        plt.xlim(18, 21)
+        # plt.xlim(18, 21)
         plt.savefig(f'zp{APERTURE}.pdf', dpi=300)
         plt.show()
 
         # save the results to a json file
         with open(f'zp{APERTURE}.json', 'w') as json_file:
             json.dump(np.nanmean(zp_list), json_file, indent=4)
+
+        with open(f'zp{APERTURE}_list.json', 'w') as json_file:
+            json.dump(zp_list, json_file, indent=4)
 
 
 if __name__ == "__main__":
