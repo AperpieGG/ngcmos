@@ -72,8 +72,8 @@ def main():
             # if nan exclude it from the list
             zp_list = [zp for zp in zp_list if not np.isnan(zp)]
             color_list = [color_list[i] for i in range(len(zp_list)) if not np.isnan(zp_list[i])]
-            json.dump(zp_list, json_file, indent=4)
-            json.dump(color_list, json_file, indent=4)
+            # save the zp_list and color_list to a json file
+            json.dump({'zp_list': zp_list, 'color_list': color_list}, json_file, indent=4)
 
         print(f"Results saved to zp{APERTURE}.json and zp{APERTURE}_list.json")
 
