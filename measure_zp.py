@@ -65,7 +65,7 @@ def main():
         # plt.axvline(np.nanmedian(zp_list), color='g', linestyle='--', label=f"Median: {np.nanmedian(zp_list):.2f}")
         plt.xlabel('Zero Point')
         plt.ylabel('Frequency')
-        plt.yscale('log')
+        # plt.yscale('log')
         # plt.legend(loc='upper right')
         plt.xlim(18, 21)
         plt.savefig(f'zp{APERTURE}.pdf', dpi=300)
