@@ -27,7 +27,7 @@ def measure_zp(table, APERTURE, EXPOSURE):
 
         # Calculate zero point for the current TIC ID
         zp = tic_Tmag + 2.5 * np.log10(tic_flux / EXPOSURE)
-        print(f'TIC ID: {tic_id}, Zero Point: {zp}')
+        print(f'TIC ID: {tic_id}, Zero Point: {zp}, Color Index: {target_color_index}')
         zp_list.append(zp)
         color_list.append(target_color_index)
 
