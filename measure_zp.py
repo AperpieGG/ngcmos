@@ -80,7 +80,7 @@ def main():
 
         # save the results to a json file
         with open(f'zp{APERTURE}.json', 'w') as json_file:
-            json.dump(np.nanmean(zp_list), json_file, indent=4, cls=NumpyEncoder)
+            json.dump(np.nanmean(zp_list), json_file, indent=4)
 
         print(f"Results saved to zp{APERTURE}.json")
 
@@ -94,7 +94,8 @@ def main():
 
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
             # Save the filtered lists to a JSON file
-            json.dump({'zp_list': filtered_zp_list, 'color_list': filtered_color_list}, json_file, indent=4)
+            json.dump({'zp_list': filtered_zp_list, 'color_list': filtered_color_list}, json_file, indent=4,
+                      cls=NumpyEncoder)
 
         print(f"Results saved to zp{APERTURE}_list.json")
 
