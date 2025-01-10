@@ -71,7 +71,7 @@ def main():
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
             # Filter out entries where either zp or color is NaN
             valid_data = [
-                {'zp': zp, 'color': color}
+                {'zp': float(zp), 'color': float(color)}
                 for zp, color in zip(zp_list, color_list)
                 if not (np.isnan(zp) or np.isnan(color))
             ]
