@@ -10,6 +10,20 @@ from utils import get_phot_files, read_phot_file, plot_images
 plot_images()
 
 
+class NumpyEncoder(json.JSONEncoder):
+    """ Custom JSON encoder for NumPy data types """
+
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NumpyEncoder, self).default(obj)
+
+
 def measure_zp(table, APERTURE, EXPOSURE):
     tic_ids = np.unique(table['TIC_ID'])
     print(f'Found {len(tic_ids)} unique TIC IDs')
@@ -66,7 +80,7 @@ def main():
 
         # save the results to a json file
         with open(f'zp{APERTURE}.json', 'w') as json_file:
-            json.dump(np.nanmean(zp_list), json_file, indent=4)
+            json.dump(np.nanmean(zp_list), json_file, indent=4, cls=NumpyEncoder)
 
         print(f"Results saved to zp{APERTURE}.json")
 
