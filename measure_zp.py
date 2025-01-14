@@ -29,6 +29,8 @@ def measure_zp(table, APERTURE, EXPOSURE):
     print(f'Found {len(tic_ids)} unique TIC IDs')
     zp_list = []
     color_list = []
+    avg_flux = []
+    mags = []
 
     for tic_id in tic_ids:
         # Average flux for the current TIC ID
@@ -44,6 +46,16 @@ def measure_zp(table, APERTURE, EXPOSURE):
         print(f'TIC ID: {tic_id}, Zero Point: {zp}, Color Index: {target_color_index}')
         zp_list.append(zp)
         color_list.append(target_color_index)
+        avg_flux.append(tic_flux)
+        mags.append(tic_Tmag)
+
+        # color-coded with color index
+        plt.scatter(tic_flux, tic_Tmag, c=target_color_index, cmap='coolwarm', vmin=0.5, vmax=1.5)
+        plt.colorbar(label='Color Index')
+        plt.xlabel('Flux')
+        plt.ylabel('Tmag')
+        plt.title('Flux vs Tmag')
+        plt.show()
 
     return zp_list, color_list
 
