@@ -50,7 +50,7 @@ def measure_zp(table, APERTURE, EXPOSURE):
         mags.append(tic_Tmag)
 
         # color-coded with color index
-        plt.scatter(tic_flux, tic_Tmag, c=target_color_index, cmap='coolwarm', vmin=0.5, vmax=1.5)
+        plt.scatter(avg_flux, mags, c=target_color_index, cmap='coolwarm', vmin=0.5, vmax=1.5)
         plt.colorbar(label='Color Index')
         plt.xlabel('Flux')
         plt.ylabel('Tmag')
