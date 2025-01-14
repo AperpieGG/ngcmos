@@ -100,8 +100,9 @@ def main():
         filtered_tmag_list = [entry['tmag'] for entry in valid_data]
 
         # color-coded with color index
-        plt.scatter(filtered_flux_list, filtered_tmag_list, c=filtered_color_list, cmap='coolwarm', vmin=0.5, vmax=1.5)
+        plt.scatter(filtered_tmag_list, filtered_flux_list, c=filtered_color_list, cmap='coolwarm', vmin=0.5, vmax=1.5)
         plt.colorbar(label='Color Index')
+        plt.yscale('log')
         plt.xlabel('Flux')
         plt.ylabel('Tmag')
         plt.title('Flux vs Tmag')
