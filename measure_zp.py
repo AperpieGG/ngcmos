@@ -49,15 +49,7 @@ def measure_zp(table, APERTURE, EXPOSURE):
         avg_flux.append(tic_flux)
         mags.append(tic_Tmag)
 
-    # color-coded with color index
-    plt.scatter(avg_flux, mags, c=target_color_index, cmap='coolwarm', vmin=0.5, vmax=1.5)
-    plt.colorbar(label='Color Index')
-    plt.xlabel('Flux')
-    plt.ylabel('Tmag')
-    plt.title('Flux vs Tmag')
-    plt.show()
-
-    return zp_list, color_list
+    return zp_list, color_list, avg_flux, mags
 
 
 def main():
@@ -87,7 +79,7 @@ def main():
         print(f"Photometry file: {phot_file}")
 
         # Measure zero point
-        zp_list, color_list = measure_zp(phot_table, APERTURE, EXPOSURE)
+        zp_list, color_list, flux_list, tmag_list = measure_zp(phot_table, APERTURE, EXPOSURE)
         print(f"Zero point average: {np.nanmean(zp_list)}")
 
         # save the results to a json file
@@ -97,16 +89,28 @@ def main():
         print(f"Results saved to zp{APERTURE}.json")
 
         # Filter out entries where either zp or color is NaN
-        valid_data = [{'zp': zp, 'color': color} for zp, color in zip(zp_list, color_list)
-                      if not np.isnan(zp) and not np.isnan(color)]
+        valid_data = [{'zp': zp, 'color': color, 'flux': flux, 'tmag': tmag}
+                      for zp, color, flux, tmag in zip(zp_list, color_list, flux_list, tmag_list)
+                      if not np.isnan(zp) and not np.isnan(color) and not np.isnan(flux) and not np.isnan(tmag)]
 
         # Extract zp_list and color_list separately after filtering
         filtered_zp_list = [entry['zp'] for entry in valid_data]
         filtered_color_list = [entry['color'] for entry in valid_data]
+        filtered_flux_list = [entry['flux'] for entry in valid_data]
+        filtered_tmag_list = [entry['tmag'] for entry in valid_data]
+
+        # color-coded with color index
+        plt.scatter(filtered_flux_list, filtered_tmag_list, c=filtered_color_list, cmap='coolwarm', vmin=0.5, vmax=1.5)
+        plt.colorbar(label='Color Index')
+        plt.xlabel('Flux')
+        plt.ylabel('Tmag')
+        plt.title('Flux vs Tmag')
+        plt.show()
 
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
             # Save the filtered lists to a JSON file
-            json.dump({'zp_list': filtered_zp_list, 'color_list': filtered_color_list}, json_file, indent=4,
+            json.dump({'zp_list': filtered_zp_list, 'color_list': filtered_color_list,
+                       'flux_list': filtered_flux_list, 'tmag_list': filtered_tmag_list},
                       cls=NumpyEncoder)
 
         print(f"Results saved to zp{APERTURE}_list.json")
