@@ -37,6 +37,12 @@ def measure_zp(table, APERTURE, EXPOSURE):
         tic_data = table[table['TIC_ID'] == tic_id]
 
         tic_flux = np.mean(tic_data[f'flux_{APERTURE}'])
+        if APERTURE == 4:
+            # multiply flux by CCD gain that is 2
+            tic_flux *= 2
+        else:
+            # multiply flux by CMOS gain that is 1.131
+            tic_flux *= 1.131
         # First Tmag value for the current TIC ID
         tic_Tmag = tic_data['Tmag'][0]
         target_color_index = tic_data['gaiabp'][0] - tic_data['gaiarp'][0]
@@ -106,12 +112,16 @@ def main():
         plt.xlabel('Flux')
         plt.ylabel('Tmag')
         plt.title('Flux vs Tmag')
+        # revert the x-axis
+        plt.gca().invert_xaxis()
+        plt.xlim(9, 16)
         plt.show()
 
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
             # Save the filtered lists to a JSON file
             json.dump({'zp_list': filtered_zp_list, 'color_list': filtered_color_list,
                        'flux_list': filtered_flux_list, 'tmag_list': filtered_tmag_list},
+                      json_file,  # Pass the file pointer here
                       cls=NumpyEncoder)
 
         print(f"Results saved to zp{APERTURE}_list.json")
