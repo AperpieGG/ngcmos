@@ -86,7 +86,6 @@ def main():
 
         # Measure zero point
         zp_list, color_list, flux_list, tmag_list = measure_zp(phot_table, APERTURE, EXPOSURE)
-        print(f"Zero point average: {np.nanmean(zp_list)}")
 
         # save the results to a json file
         with open(f'zp{APERTURE}.json', 'w') as json_file:
@@ -104,6 +103,7 @@ def main():
         filtered_color_list = [entry['color'] for entry in valid_data]
         filtered_flux_list = [entry['flux'] for entry in valid_data]
         filtered_tmag_list = [entry['tmag'] for entry in valid_data]
+        print(f"Zero point average: {np.nanmean(filtered_zp_list)}")
 
         # color-coded with color index
         plt.scatter(filtered_tmag_list, filtered_flux_list, c=filtered_color_list, cmap='coolwarm', vmin=0.5, vmax=1.5)

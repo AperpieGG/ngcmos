@@ -11,6 +11,7 @@ import numpy as np
 from astropy.time import Time
 import warnings
 from astropy.units import UnitsWarning
+from astroquery.vizier import Vizier
 
 # Suppress Astropy UnitsWarnings
 warnings.simplefilter('ignore', UnitsWarning)
@@ -46,7 +47,7 @@ def arg_parse():
                         help='Maximum magnitude delta for a star to be considered as blended.')
     parser.add_argument('--catalog',
                         type=str,
-                        default='IV/38/tic',
+                        default='IV/39/tic82',
                         help='Vizier catalog ID to query (default: TIC8).')
     return parser.parse_args()
 
@@ -182,7 +183,7 @@ def build_query_vizier(sample_coords, sample_radius, catalog_id, htm_depth=None)
 
     # Query Vizier catalog
     Vizier.ROW_LIMIT = -1  # No row limit for the query
-    result = Vizier.query_region(sample_coords, radius=sample_radius, catalog=catalog_id)
+    result = Vizier.query_region(sample_coords, radius=30 * u.arcmin, catalog=catalog_id)
 
     if len(result) == 0:
         raise Exception(f"No data found for catalog {catalog_id} in the specified region.")
@@ -197,7 +198,7 @@ def build_query_vizier(sample_coords, sample_radius, catalog_id, htm_depth=None)
     return result_table, column_names, column_dtypes
 
 
-def query_vizier(center, width, height, catalog='IV/38/tic'):
+def query_vizier(center, width, height, catalog='IV/39/tic82'):
     """
     Query a Vizier catalog for a specified region.
 
@@ -229,13 +230,15 @@ def fetch_catalog_vizier(ra_center, dec_center, box_width, box_height,
     Fetch catalog from Vizier, apply proper motion corrections, perform blending checks,
     and output the catalog to a FITS file. Returns the processed catalog and metadata.
     """
-    from astroquery.vizier import Vizier
 
     # Query Vizier for data with additional columns
     print("Fetching catalog from Vizier...")
     Vizier.ROW_LIMIT = -1
-    vizier_query = Vizier(columns=["TIC", "GAIA", "RAJ2000", "DEJ2000", "Tmag", "Gmag", "BPmag", "RPmag", "pmRA", "pmDE"])
-
+    vizier_query = Vizier(
+        columns=["TIC", "GAIA", "RAJ2000", "DEJ2000", "Tmag", "Gmag", "BPmag", "RPmag", "pmRA", "pmDE"],
+        column_filters={"Gmag": "<16"}  # Filter for Gaia magnitude < 16
+    )
+    vizier_query.ROW_LIMIT = -1  # Set the row limit after creating the Vizier instance
     try:
         catalog = vizier_query.query_region(SkyCoord(ra=ra_center, dec=dec_center, unit=(u.deg, u.deg)),
                                             width=box_width * u.deg, height=box_height * u.deg,
@@ -280,6 +283,7 @@ def fetch_catalog_vizier(ra_center, dec_center, box_width, box_height,
 
     # Perform blending checks
     print("Performing blending checks...")
+    start = Time.now()
     n_stars = len(ra_corr)
     blended = np.zeros(n_stars, dtype=bool)
     exclusion_radius = 6 * 4. / 3600.  # Radius in degrees for blending exclusion
@@ -293,15 +297,13 @@ def fetch_catalog_vizier(ra_center, dec_center, box_width, box_height,
         blended[i] = np.any((distances < exclusion_radius) & (magnitudes < blend_delta) & (distances > 0))
 
     print(f"Blending check complete. {np.sum(blended)} stars flagged as blended.")
+    print(f"Elapsed time: {Time.now() - start}")
 
-    # Remove blended stars
-    catalog = catalog[~blended]
-    ra_corr = ra_corr[~blended]
-    dec_corr = dec_corr[~blended]
-    
     # Add corrected RA/Dec to the catalog
     catalog["RA_CORR"] = ra_corr
     catalog["DEC_CORR"] = dec_corr
+    # Add a column for the blending flag
+    catalog["BLENDED"] = blended
 
     # Check for missing columns and warn
     for column in ["Tmag", "Gmag", "BPmag", "RPmag"]:
