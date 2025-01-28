@@ -45,7 +45,7 @@ warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 GAIN = 1.131
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
-APERTURE_RADII = [4.9, 5, 6]
+APERTURE_RADII = [5]
 RSI = 15
 RSO = 20
 DEFOCUS = 0.0
@@ -210,12 +210,12 @@ def main():
             frame_ids = [filename for i in range(len(phot_x))]
             logging.info(f"Found {len(frame_ids)} sources")
 
-            frame_preamble = Table([frame_ids, phot_cat['gaia_id'], phot_cat['Tmag'], phot_cat['tic_id'],
+            frame_preamble = Table([frame_ids, phot_cat['Tmag'], phot_cat['tic_id'],
                                     phot_cat['gaiabp'], phot_cat['gaiarp'], time_jd.value, time_bary.value,
-                                    time_helio.value, phot_x, phot_y,
+                                    phot_x, phot_y,
                                     [airmass] * len(phot_x), [zp] * len(phot_x)],
-                                   names=("frame_id", "gaia_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
-                                          "jd_bary", "jd_helio", "x", "y", "airmass", "zp"))
+                                   names=("frame_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
+                                          "jd_bary", "x", "y", "airmass", "zp"))
 
             # Extract photometry at locations
             frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
