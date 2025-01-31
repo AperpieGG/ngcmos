@@ -6,6 +6,8 @@ import argparse
 from astropy.io import fits
 
 
+# Script is currently running for sky and not for flux, adjust it accordingly.
+
 def get_phot_file(directory):
     """
     Get photometry files with the pattern 'phot_*.fits' from the directory.
@@ -25,7 +27,7 @@ def main():
     if args.cam == 'CMOS':
         APERTURE = 5
         GAIN = 1.13
-        EXPOSURE = 10.0
+        EXPOSURE = 5
     else:
         APERTURE = 4
         GAIN = 2
@@ -61,7 +63,7 @@ def main():
 
         # Extract relevant columns
         tic_ids = phot_data['TIC_ID']
-        flux_w_sky_col = f'flux_w_sky_{APERTURE}' # add if solve for sky
+        flux_w_sky_col = f'flux_w_sky_{APERTURE}'  # add if solve for sky
         flux_col = f'flux_{APERTURE}'
 
         if flux_w_sky_col not in phot_data.names or flux_col not in phot_data.names:
