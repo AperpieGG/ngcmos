@@ -10,7 +10,7 @@ from astropy.visualization import ZScaleInterval
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
-    remove_outliers, scintilation_noise
+    remove_outliers, scintilation_noise, bin_by_time_interval
 
 # Constants for filtering stars
 COLOR_TOLERANCE = 0.2  # Color index tolerance for comparison stars
@@ -378,7 +378,7 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
 
             # Bin the data (optional, can be skipped if not needed)
             comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
-                bin_time_flux_error(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 12))
+                bin_by_time_interval(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 5))
 
             # Plot the light curve in the current subplot
             ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color='blue', alpha=0.8)
