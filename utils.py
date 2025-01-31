@@ -18,6 +18,7 @@ from scipy.stats import median_abs_deviation
 from astropy.time import Time
 from wotan import flatten
 
+
 # pylint: disable=invalid-name
 # pylint: disable=no-member
 # pylint: disable=c-extension-no-member
@@ -720,7 +721,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, rn, dc, exposure, 
     # set exposure time and random flux
     exposure_time = exposure
     synthetic_flux = np.arange(100, 1e7, 1000)
-    synthetic_mag = np.mean(zp) + 2.5*np.log10(gain) - 2.5 * np.log10(synthetic_flux/exposure_time)
+    synthetic_mag = np.mean(zp) + 2.5 * np.log10(gain) - 2.5 * np.log10(synthetic_flux / exposure_time)
     # set dark current rate from cmos characterisation
     dark_current = dc * exposure_time * npix
     dc_noise = np.sqrt(dark_current) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
@@ -824,3 +825,50 @@ def open_json_file():
 
     print(f"Opened JSON file: {filename}")
     return data
+
+
+def bin_by_time_interval(time, flux, error, interval_minutes=5):
+    """
+    Bin data dynamically based on a specified time interval.
+
+    Parameters
+    ----------
+    time :
+        Array of time values.
+    flux :
+        Array of flux values corresponding to the time array.
+    error :
+        Array of error values corresponding to the flux array.
+    interval_minutes : int, optional
+        Time interval for binning in minutes (default is 5).
+
+    Returns
+    -------
+    binned_time : array
+        Binned time values (averages within each bin).
+    binned_flux : array
+        Binned flux values (averages within each bin).
+    binned_error : array
+        Binned error values (propagated within each bin).
+    """
+    interval_days = interval_minutes / (24 * 60)  # Convert minutes to days
+    binned_time, binned_flux, binned_error = [], [], []
+
+    start_idx = 0
+    while start_idx < len(time):
+        # Find the end index where the time difference exceeds the interval
+        end_idx = start_idx
+        while end_idx < len(time) and (time[end_idx] - time[start_idx]) < interval_days:
+            end_idx += 1
+
+        # Bin the data in the current interval
+        binned_time.append(np.mean(time[start_idx:end_idx]))
+        binned_flux.append(np.mean(flux[start_idx:end_idx]))
+        binned_error.append(
+            np.sqrt(np.sum(error[start_idx:end_idx] ** 2)) / (end_idx - start_idx)
+        )
+
+        # Move to the next interval
+        start_idx = end_idx
+
+    return np.array(binned_time), np.array(binned_flux), np.array(binned_error)
