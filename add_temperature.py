@@ -51,7 +51,7 @@ def main():
     # Read the catalog file
     with fits.open(catalog_file) as catalog_hdul:
         catalog_data = catalog_hdul[1].data  # Assuming the table is in the first extension
-        catalog_tic_ids = catalog_data['TIC_ID']
+        catalog_tic_ids = catalog_data['TIC']
         catalog_teff = catalog_data['Teff']  # Assuming 'Teff' column exists
 
     # Read the photometry file
@@ -64,10 +64,13 @@ def main():
 
         # Add a new column for unique Teff values
         if 'Teff' not in phot_data.names:
-            new_col = np.zeros(len(phot_data), dtype=np.float32)  # Default value is 0
-            phot_hdul[1].data = fits.BinTableHDU.from_columns(
-                phot_hdul[1].columns + fits.Column(name='Teff', format='E', array=new_col)
-            ).data
+            # Create a new HDU with the added column
+            new_col = fits.Column(name='Teff', format='E', array=np.zeros(len(phot_data), dtype=np.float32))
+            new_hdu = fits.BinTableHDU.from_columns(phot_hdul[1].columns + new_col)
+
+            # Replace the existing HDU with the new one
+            phot_hdul[1] = new_hdu
+            phot_data = phot_hdul[1].data  # Update the reference to phot_data
 
         # Create a mapping of TIC_ID to Teff
         tic_to_teff = {tic: catalog_teff[np.where(catalog_tic_ids == tic)[0][0]]
