@@ -605,8 +605,9 @@ def main():
                 "Relative_Flux_err": target_flux_err_dt.tolist(),
                 "RMS": RMS.tolist()
             }
-
-            json_filename = f'target_light_curve_{tic_id_to_plot}_{args.cam}.json'
+            # grab the last 4 letters of the working directory
+            date = os.getcwd()[-4:]
+            json_filename = f'target_light_curve_{tic_id_to_plot}_{args.cam}_{date}.json'
             with open(json_filename, 'w') as json_file:
                 json.dump(data_to_save, json_file, indent=4)
 
