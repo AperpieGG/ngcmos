@@ -378,7 +378,7 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
 
             # Bin the data (optional, can be skipped if not needed)
             comp_time_dt, comp_fluxes_dt_binned, comp_fluxerrs_dt_binned = (
-                bin_by_time_interval(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 5))
+                bin_by_time_interval(comp_time, comp_fluxes_dt, comp_fluxerrs_dt, 2))
 
             # Plot the light curve in the current subplot
             ax.plot(comp_time_dt, comp_fluxes_dt_binned, 'o', color='blue', alpha=0.8)
@@ -584,12 +584,12 @@ def main():
 
             # Bin the target star data and do the relative photometry
             target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-                bin_time_flux_error(target_time, target_fluxes_dt, target_flux_err_dt, 12))
+                bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 5))
 
             # Calculate the RMS for the binned data
             RMS_binned = np.std(target_fluxes_binned)
 
-            print(f'RMS for Target: {RMS * 100:.3f}% and binned: {RMS_binned * 100:.3f}%')
+            print(f'RMS for Target: {RMS * 100:.3f}% and binned 5 min: {RMS_binned * 100:.3f}%')
             # plt.plot(target_time_binned, target_fluxes_dt_binned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
             plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red',
                          label=f'RMS unbinned = {RMS:.4f}')
