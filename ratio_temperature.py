@@ -71,9 +71,9 @@ def main():
 
         # Calculate sky background
         sky_background = phot_data[flux_w_sky_col] - phot_data[flux_col]
-        fluxes = sky_background
+        fluxes = sky_background  # Use sky background
 
-        # fluxes = phot_data[flux_col]
+        # fluxes = phot_data[flux_col] # Use flux
         tmags = phot_data['Tmag']
         teffs = phot_data['Teff']
         COLORs = phot_data['gaiabp'] - phot_data['gaiarp']
