@@ -18,6 +18,17 @@ def get_phot_file(directory):
     raise FileNotFoundError("No photometry file found in the directory.")
 
 
+def find_exposure(directory):
+    # search for any .fits file that has a header and contains the EXPTIME keyword
+    for filename in os.listdir(directory):
+        exclude_words = ['phot', 'evening', 'master', 'morning', 'catalog']
+        if filename.endswith('.fits') and not any(word in filename for word in exclude_words):
+            with fits.open(filename) as hdul:
+                header = hdul[0].header
+                if 'EXPTIME' and 'OBJECT' in header:
+                    return header['EXPTIME'], header['OBJECT']
+
+
 def main():
     parser = argparse.ArgumentParser(description='Process photometry FITS files.')
     parser.add_argument('--cam', type=str, default='CMOS', help='Camera type (CMOS or CCD)')
@@ -27,16 +38,18 @@ def main():
     if args.cam == 'CMOS':
         APERTURE = 5
         GAIN = 1.13
-        EXPOSURE = 5
     else:
         APERTURE = 4
         GAIN = 2
-        EXPOSURE = 10.0
 
     # Read the photometry file
     print("Locating photometry file...")
     phot_file = get_phot_file('.')
     print(f"Photometry file found: {phot_file}")
+    
+    # Find the exposure time
+    EXPOSURE, OBJECT = find_exposure('.')
+    print(f"Exposure time found: {EXPOSURE} seconds for {OBJECT}")
 
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
@@ -87,7 +100,7 @@ def main():
         tic_data = {}
         for tic_id in unique_tic_ids:
             mask = phot_data['TIC_ID'] == tic_id
-            target_flux = np.mean(fluxes[mask])  # Single flux value for the selected frame
+            target_flux = fluxes[mask][0]  # Single flux value for the selected frame
             tmag = tmags[mask][0]
             teff = teffs[mask][0]
             COLOR = COLORs[mask][0]
