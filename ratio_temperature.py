@@ -22,7 +22,8 @@ def find_exposure(directory):
     # search for any .fits file that has a header and contains the EXPTIME keyword
     for filename in os.listdir(directory):
         exclude_words = ['phot', 'evening', 'master', 'morning', 'catalog']
-        if filename.endswith('.fits') and not any(word in filename for word in exclude_words):
+        if (filename.endswith('.fits') or filename.endswith('fits.bz2')
+                and not any(word in filename for word in exclude_words)):
             with fits.open(filename) as hdul:
                 header = hdul[0].header
                 if 'EXPTIME' and 'OBJECT' in header:
@@ -46,7 +47,7 @@ def main():
     print("Locating photometry file...")
     phot_file = get_phot_file('.')
     print(f"Photometry file found: {phot_file}")
-    
+
     # Find the exposure time
     EXPOSURE, OBJECT = find_exposure('.')
     print(f"Exposure time found: {EXPOSURE} seconds for {OBJECT}")
