@@ -71,9 +71,9 @@ def main():
 
         # Calculate sky background
         sky_background = phot_data[flux_w_sky_col] - phot_data[flux_col]
-        fluxes = sky_background  # Use sky background
+        # fluxes = sky_background  # Use sky background
 
-        # fluxes = phot_data[flux_col] # Use flux
+        fluxes = phot_data[flux_col]  # Use flux
         tmags = phot_data['Tmag']
         teffs = phot_data['Teff']
         COLORs = phot_data['gaiabp'] - phot_data['gaiarp']
@@ -87,7 +87,7 @@ def main():
         tic_data = {}
         for tic_id in unique_tic_ids:
             mask = phot_data['TIC_ID'] == tic_id
-            target_flux = fluxes[mask][0]  # Single flux value for the selected frame
+            target_flux = np.mean(fluxes[mask])  # Single flux value for the selected frame
             tmag = tmags[mask][0]
             teff = teffs[mask][0]
             COLOR = COLORs[mask][0]
@@ -102,7 +102,7 @@ def main():
         # Filter TIC_IDs with valid Teff and calculate converted flux
         output_data = []
         for tic_id, data in tic_data.items():
-            converted_flux = (data["flux_value"] * GAIN) / EXPOSURE  # Apply conversion
+            converted_flux = (data["flux_value"] * GAIN) / EXPOSURE  # e-/s
             output_data.append({
                 "TIC_ID": int(tic_id),
                 "Tmag": float(data["Tmag"]),
