@@ -63,7 +63,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Read and organize TIC IDs with associated '
                     'RMS, Sky, Airmass, ZP, and Magnitude from FITS table.'
-                    'Example usage if you have CMOS: RN=1.56, DC=1.6, Aper=4, Exp=10.0, Bin=1'
+                    'Example usage if you have CMOS: RN=1.56, DC=1.6, Aper=5, Exp=10.0, Bin=1'
                     'Example usage if you have CCD: RN=12.6, DC=0.00515, Aper=4, Exp=10.0, Bin=1')
     parser.add_argument('--exp', type=float, default=10.0, help='Exposure time in seconds')
     parser.add_argument('--aper', type=str, default=6, help='Aperture size in meters')
@@ -105,16 +105,26 @@ def main():
         filtered_tmag_list = [entry['tmag'] for entry in valid_data]
         print(f"Zero point average: {np.nanmean(filtered_zp_list)}")
 
-        # color-coded with color index
-        plt.scatter(filtered_tmag_list, filtered_flux_list, c=filtered_color_list, cmap='coolwarm', vmin=0.5, vmax=1.5)
+        plt.scatter(filtered_tmag_list, -2.5 * np.log10(np.array(filtered_flux_list) / EXPOSURE),
+                    c=filtered_color_list, cmap='coolwarm', vmin=0.5, vmax=1.5)
+
+        # Fit a linear regression to find the zero point
+        m, b = np.polyfit(filtered_tmag_list, -2.5 * np.log10(np.array(filtered_flux_list) / EXPOSURE), 1)
+        print(f"Slope: {m}, Intercept (Zero Point): {b}")
+
+        # Plot the best-fit line
+        plt.plot(filtered_tmag_list, m * np.array(filtered_tmag_list) + b, color='black', linestyle='--',
+                 label=f"Fit: y={m:.2f}x + {b:.2f}")
+
         plt.colorbar(label='Color Index')
-        plt.yscale('log')
-        plt.xlabel('Flux')
-        plt.ylabel('Tmag')
-        plt.title('Flux vs Tmag')
-        # revert the x-axis
+        plt.xlabel('Tmag (Catalog)')
+        plt.ylabel('Instrumental Magnitude')
+        plt.title('Instrumental Magnitude vs Tmag')
+
+        # Invert axes for correct photometric convention
         plt.gca().invert_xaxis()
-        plt.xlim(9, 16)
+        plt.gca().invert_yaxis()
+        plt.legend()
         plt.show()
 
         with open(f'zp{APERTURE}_list.json', 'w') as json_file:
