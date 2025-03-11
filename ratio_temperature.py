@@ -56,28 +56,35 @@ def main():
     with fits.open(phot_file) as hdul:
         data = hdul[1].data
 
-        # **Step 1: Identify Frame IDs in Airmass Peak**
-        min_airmass, max_airmass = 1.2, 1.2  # Define the peak airmass range
-        mask = (data['airmass'] >= min_airmass) & (data['airmass'] <= max_airmass)
+        # **Step 1: Filter out frame_ids with airmass > 1.2**
+        mask = data['airmass'] <= 1.2
+        filtered_data = data[mask]
 
-        if np.sum(mask) == 0:
-            raise ValueError("No frames found in the specified airmass range (1.2 to 1.2).")
+        if len(filtered_data) == 0:
+            raise ValueError("No frame IDs with airmass <= 1.2 found.")
 
-        frame_ids = np.unique(data['frame_id'][mask])
-        print(f"Found {len(frame_ids)} frame IDs in airmass range 1.2 to 1.2.")
+        # **Step 2: Extract and Sort by Frame ID**
+        frame_airmass_dict = {frame: airmass for frame, airmass in
+                              zip(filtered_data['frame_id'], filtered_data['airmass'])}
+        sorted_frames = sorted(frame_airmass_dict.items())  # Sort by frame_id
 
-        # **Step 2: Filter Data for Selected Frame IDs**
-        filtered_data = data[np.isin(data['frame_id'], frame_ids)]
+        print("Selected frame_ids with airmass <= 1.2 (sorted by frame_id):")
+        for frame_id, airmass in sorted_frames:
+            print(f"Frame ID: {frame_id}, Airmass: {airmass}")
+
+        # **Step 3: Filter Data to Keep Only These Frame IDs**
+        valid_frame_ids = set(frame_airmass_dict.keys())
+        filtered_data = filtered_data[np.isin(filtered_data['frame_id'], list(valid_frame_ids))]
         print(f"Entries after filtering frame IDs: {len(filtered_data)}")
 
-        # **Step 3: Apply Star Selection Criteria**
+        # **Step 4: Apply Star Selection Criteria**
         filtered_data = filtered_data[(filtered_data['Tmag'] < 14) & (filtered_data['Tmag'] > 10)]
         print(f"Entries after Tmag filter (10 < Tmag < 14): {len(filtered_data)}")
 
         filtered_data = filtered_data[~np.isnan(filtered_data['Teff'])]
         print(f"Entries after Teff filter: {len(filtered_data)}")
 
-        # **Step 4: Extract Flux and Compute Statistics**
+        # **Step 5: Extract Flux and Compute Statistics**
         flux_col = f'flux_{AP}'
         if flux_col not in filtered_data.names:
             raise ValueError(f"Column {flux_col} not found.")
@@ -86,13 +93,13 @@ def main():
         avg_flux = np.mean(flux)
         print(f"Average flux: {avg_flux}")
 
-        # **Step 5: Extract Other Information**
+        # **Step 6: Extract Other Information**
         tic_ids = filtered_data['TIC_ID']
         tmags = filtered_data['Tmag']
         teffs = filtered_data['Teff']
         colors = filtered_data['gaiabp'] - filtered_data['gaiarp']
 
-        # **Step 6: Organize Data by TIC_ID**
+        # **Step 7: Organize Data by TIC_ID**
         tic_data = {}
         for tid in np.unique(tic_ids):
             mask = tic_ids == tid
@@ -103,7 +110,7 @@ def main():
                 "Color": colors[mask][0]
             }
 
-        # **Step 7: Compute Converted Flux and Save**
+        # **Step 8: Compute Converted Flux and Save**
         output = []
         for tid, vals in tic_data.items():
             conv_flux = (vals["flux"] * GAIN) / EXP
@@ -115,8 +122,8 @@ def main():
                 "Converted_Flux": float(conv_flux)
             })
 
-        # **Step 8: Save Data**
-        out_file = f'flux_vs_temperature_{args.cam}.json'
+        # **Step 9: Save Data**
+        out_file = f'flux_vs_temp_{args.cam}.json'
         with open(out_file, 'w') as f:
             json.dump(output, f, indent=4)
 
