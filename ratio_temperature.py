@@ -55,83 +55,41 @@ def main():
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
 
-        # Find the `frame_id` with the smallest `airmass`
-        unique_frames = np.unique(phot_data['frame_id'])
-        frame_airmass = {
-            frame: np.min(phot_data[phot_data['frame_id'] == frame]['airmass']) for frame in unique_frames
-        }
-        best_frame_id = min(frame_airmass, key=frame_airmass.get)
-        print(f"Selected frame_id with smallest airmass: {best_frame_id}")
+        # Sort by airmass and extract 41 values around the minimum
+        sorted_indices = np.argsort(phot_data['airmass'])
+        min_index = sorted_indices[0]  # Get the index of the smallest airmass
 
-        # Filter data to include only the selected frame_id
-        phot_data = phot_data[phot_data['frame_id'] == best_frame_id]
-        print(f"Number of entries for selected frame_id: {len(phot_data)}")
+        # Select ±20 data points around the min airmass
+        lower_bound = max(0, min_index - 20)
+        upper_bound = min(len(phot_data), min_index + 21)  # Include 20 above + 1 min + 20 below
 
-        # Filter stars with Tmag < 14 and Tmag > 10
-        phot_data = phot_data[(phot_data['Tmag'] < 14) & (phot_data['Tmag'] > 10)]
-        print(f"Number of entries after filtering Tmag (10 < Tmag < 14): {len(phot_data)}")
+        selected_data = phot_data[sorted_indices[lower_bound:upper_bound]]
+        print(f"Selected {len(selected_data)} data points around the minimum airmass.")
 
-        # Filter stars with valid Teff (not NaN or null)
-        phot_data = phot_data[~np.isnan(phot_data['Teff'])]
-        print(f"Number of entries after filtering valid Teff: {len(phot_data)}")
-
-        # Extract relevant columns
-        tic_ids = phot_data['TIC_ID']
-        flux_w_sky_col = f'flux_w_sky_{APERTURE}'  # add if solve for sky
+        # Extract necessary columns
         flux_col = f'flux_{APERTURE}'
+        if flux_col not in phot_data.names:
+            raise ValueError(f"Column {flux_col} not found in the photometry file.")
 
-        if flux_w_sky_col not in phot_data.names or flux_col not in phot_data.names:
-            raise ValueError(f"Columns {flux_w_sky_col} or {flux_col} not found in the photometry file.")
+        fluxes = selected_data[flux_col]
+        avg_flux = np.mean(fluxes)  # Compute the average flux
 
-        # Calculate sky background
-        sky_background = phot_data[flux_w_sky_col] - phot_data[flux_col]
-        # fluxes = sky_background  # Use sky background
-
-        fluxes = phot_data[flux_col]  # Use flux
-        tmags = phot_data['Tmag']
-        teffs = phot_data['Teff']
-        COLORs = phot_data['gaiabp'] - phot_data['gaiarp']
-
-        # Print unique TIC_IDs for the analysis
-        unique_tic_ids = np.unique(tic_ids)
-        print(f"Unique TIC_IDs for the analysis: {len(unique_tic_ids)}")
-        print(f"TIC_IDs: {unique_tic_ids}")
-
-        # Create a dictionary to store data grouped by TIC_ID
-        tic_data = {}
-        for tic_id in unique_tic_ids:
-            mask = phot_data['TIC_ID'] == tic_id
-            target_flux = fluxes[mask][0]  # Single flux value for the selected frame
-            tmag = tmags[mask][0]
-            teff = teffs[mask][0]
-            COLOR = COLORs[mask][0]
-
-            tic_data[tic_id] = {
-                "flux_value": target_flux,
-                "Tmag": tmag,
-                "Teff": teff,
-                "COLOR": COLOR
-            }
-
-        # Filter TIC_IDs with valid Teff and calculate converted flux
-        output_data = []
-        for tic_id, data in tic_data.items():
-            converted_flux = (data["flux_value"] * GAIN) / EXPOSURE  # e-/s
-            output_data.append({
-                "TIC_ID": int(tic_id),
-                "Tmag": float(data["Tmag"]),
-                "Teff": float(data["Teff"]),
-                "COLOR": float(data["COLOR"]),
-                "Converted_Flux": float(converted_flux)
-            })
+        # Prepare output data
+        output_data = {
+            "Min_Airmass": selected_data['airmass'][20],  # The actual minimum airmass value
+            "Avg_Flux": avg_flux,
+            "Selected_TIC_IDs": selected_data['TIC_ID'].tolist(),
+            "Selected_Tmags": selected_data['Tmag'].tolist(),
+            "Selected_Teffs": selected_data['Teff'].tolist(),
+            "Selected_Colors": (selected_data['gaiabp'] - selected_data['gaiarp']).tolist()
+        }
 
         # Save to JSON file
-        output_file = f'flux_vs_temperature_{args.cam}.json'
+        output_file = f'flux_vs_temperature_min_airmass_{args.cam}.json'
         with open(output_file, 'w') as json_file:
             json.dump(output_data, json_file, indent=4)
 
-        print(f"Saved {len(output_data)} targets with valid 'Teff' to {output_file}")
-
+        print(f"Saved data for minimum airmass region to {output_file}")
 
 if __name__ == "__main__":
     main()
