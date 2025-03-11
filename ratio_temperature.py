@@ -70,14 +70,14 @@ def main():
                 frame_airmass[frame_id] = airmass
                 unique_frames.append(frame_id)
 
-            if len(unique_frames) == 300:  # Stop once we have 300 unique frame IDs
+            if len(unique_frames) == 500:  # Stop once we have 300 unique frame IDs
                 break
 
         # Sort frame IDs based on their actual airmass values
         unique_frames.sort(key=lambda x: frame_airmass[x])
 
         # Print each frame_id and its corresponding airmass value
-        print("Selected 300 unique frame_ids with lowest airmass values:")
+        print("Selected 500 unique frame_ids with lowest airmass values:")
         for frame in unique_frames:
             print(f"Frame ID: {frame}, Airmass: {frame_airmass[frame]}")
 
