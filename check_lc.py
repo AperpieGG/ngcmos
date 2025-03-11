@@ -61,7 +61,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         print(f"TIC ID {tic_id_to_plot} not found in the current photometry file.")
         return
     tmag = tic_id_data['Tmag'][0]
-    jd_mid = tic_id_data['jd_mid']
+    jd_mid = tic_id_data['jd_bary']
     x = tic_id_data['x'][0]
     y = tic_id_data['y'][0]
     print(f'Stars position as re in x: {x}, y: {y}')
@@ -130,7 +130,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
         axs[0].set_title(f'Raw lightcurve for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
-        axs[0].set_ylabel('Flux [e-]')
+        axs[0].set_ylabel('Flux [ADU]')
         axs[0].legend()
 
         ax2 = axs[0].twiny()
@@ -150,8 +150,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         # Plot jd_mid vs sky
         axs[1].errorbar(jd_mid_binned, sky_binned, yerr=skyerrs_binned, fmt='o', color='red', label='Sky')
-        axs[1].set_ylabel('Flux [e-]')
-        axs[1].set_xlabel('MJD [days]')
+        axs[1].set_ylabel('Flux [ADU]')
+        axs[1].set_xlabel('BJD [days]')
         axs[1].legend()
         plt.tight_layout()
         plt.show()
