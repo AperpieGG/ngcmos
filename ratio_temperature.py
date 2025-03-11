@@ -60,22 +60,31 @@ def main():
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
 
-        # Sort data by airmass
-        sorted_indices = np.argsort(phot_data['airmass'])  # Sort indices by airmass
-        sorted_phot_data = phot_data[sorted_indices]  # Apply sorting
+        # Sort by airmass and extract 30 unique frame_ids
+        sorted_idx = np.argsort(phot_data['airmass'])
 
         # Extract 30 unique frame IDs with the lowest airmass values
         unique_frame_ids = []
-        for frame_id in sorted_phot_data['frame_id']:
-            if frame_id not in unique_frame_ids:
+        frame_airmass = []
+        for i in sorted_idx:
+            frame_id = phot_data['frame_id'][i]
+            airmass = phot_data['airmass'][i]
+
+            if frame_id not in frame_airmass:
+                frame_airmass[frame_id] = airmass
                 unique_frame_ids.append(frame_id)
-            if len(unique_frame_ids) == 300:
-                break  # Stop once we have 30 unique frame IDs
+
+            if len(unique_frame_ids) == 100:  # Stop when we have 300 unique frame_ids
+                break
 
         unique_frame_ids.sort()
+        # Sort frame_ids based on their airmass values
+        unique_frame_ids.sort(key=lambda x: frame_airmass[x])
+
+        # Print each frame_id and its corresponding airmass value
         print("Selected 300 unique frame_ids with lowest airmass values:")
-        for frame, airmass in zip(unique_frame_ids, sorted_indices):
-            print(f"Frame ID: {frame}, Airmass: {airmass}")
+        for frame in unique_frame_ids:
+            print(f"Frame ID: {frame}, Airmass: {frame_airmass[frame]}")
 
         # Filter data to include only the selected frame_ids
         phot_data = phot_data[np.isin(phot_data['frame_id'], unique_frame_ids)]
