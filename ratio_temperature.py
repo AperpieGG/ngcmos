@@ -72,7 +72,9 @@ def main():
             if len(unique_frame_ids) == 30:
                 break  # Stop once we have 30 unique frame IDs
 
-        print(f"Selected 30 unique frame_ids with lowest airmass values: {unique_frame_ids}")
+        print("Selected 30 unique frame_ids with lowest airmass values:")
+        for frame in unique_frame_ids:
+            print(frame)
 
         # Filter data to include only the selected frame_ids
         phot_data = phot_data[np.isin(phot_data['frame_id'], unique_frame_ids)]
