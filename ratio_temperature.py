@@ -74,7 +74,7 @@ def main():
                 break
 
         # Sort frame IDs based on their actual airmass values
-        unique_frames.sort(key=lambda x: frame_airmass[x])
+        unique_frames.sort()
 
         # Print each frame_id and its corresponding airmass value
         print("Selected 500 unique frame_ids with lowest airmass values:")
