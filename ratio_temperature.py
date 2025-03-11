@@ -72,6 +72,7 @@ def main():
             if len(unique_frame_ids) == 30:
                 break  # Stop once we have 30 unique frame IDs
 
+        unique_frame_ids.sort()
         print("Selected 30 unique frame_ids with lowest airmass values:")
         for frame in unique_frame_ids:
             print(frame)
