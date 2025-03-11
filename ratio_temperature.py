@@ -60,15 +60,22 @@ def main():
     with fits.open(phot_file) as phot_hdul:
         phot_data = phot_hdul[1].data
 
-        # Sort data by airmass and select the lowest 30 airmass values
+        # Sort data by airmass
         sorted_indices = np.argsort(phot_data['airmass'])  # Sort indices by airmass
-        top_30_indices = sorted_indices[:30]  # Select first 30 indices (lowest airmass)
-        top_30_frames = phot_data['frame_id'][top_30_indices]  # Extract corresponding frame_ids
+        sorted_phot_data = phot_data[sorted_indices]  # Apply sorting
 
-        print(f"Selected frame_ids with 30 lowest airmass values: {top_30_frames}")
+        # Extract 30 unique frame IDs with the lowest airmass values
+        unique_frame_ids = []
+        for frame_id in sorted_phot_data['frame_id']:
+            if frame_id not in unique_frame_ids:
+                unique_frame_ids.append(frame_id)
+            if len(unique_frame_ids) == 30:
+                break  # Stop once we have 30 unique frame IDs
+
+        print(f"Selected 30 unique frame_ids with lowest airmass values: {unique_frame_ids}")
 
         # Filter data to include only the selected frame_ids
-        phot_data = phot_data[np.isin(phot_data['frame_id'], top_30_frames)]
+        phot_data = phot_data[np.isin(phot_data['frame_id'], unique_frame_ids)]
         print(f"Number of entries for selected frame_ids: {len(phot_data)}")
 
         # Filter stars with Tmag < 14 and Tmag > 10
@@ -136,6 +143,7 @@ def main():
 
         print(f"Saved {len(output_data)} targets with valid 'Teff' to {output_file}")
         print(f"Average flux for 30 lowest airmass frame_ids: {avg_flux}")
+
 
 if __name__ == "__main__":
     main()
