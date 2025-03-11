@@ -74,7 +74,7 @@ def main():
 
         unique_frame_ids.sort()
         print("Selected 300 unique frame_ids with lowest airmass values:")
-        for frame, airmass in enumerate(unique_frame_ids, sorted_phot_data['airmass']):
+        for frame, airmass in zip(unique_frame_ids, sorted_phot_data['airmass']):
             print(f"Frame ID: {frame}, Airmass: {airmass}")
 
         # Filter data to include only the selected frame_ids
