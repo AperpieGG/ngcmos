@@ -69,11 +69,11 @@ def main():
         for frame_id in sorted_phot_data['frame_id']:
             if frame_id not in unique_frame_ids:
                 unique_frame_ids.append(frame_id)
-            if len(unique_frame_ids) == 30:
+            if len(unique_frame_ids) == 100:
                 break  # Stop once we have 30 unique frame IDs
 
         unique_frame_ids.sort()
-        print("Selected 30 unique frame_ids with lowest airmass values:")
+        print("Selected 100 unique frame_ids with lowest airmass values:")
         for frame, airmass in zip(unique_frame_ids, sorted_phot_data['airmass']):
             print(f"Frame ID: {frame}, Airmass: {airmass}")
 
