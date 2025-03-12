@@ -127,9 +127,16 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         legend_labels.append('Annulus, 15-20 pix')
         axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(1.01, 1.0))
 
+        if aperture == 4:
+            gain = 2
+        elif aperture == 5:
+            gain = 1.13
+        else:
+            gain = 1
+
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
-        axs[0].set_title(f'Raw lightcurve for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f})')
+        axs[0].set_title(f'Raw LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f}), Mean Flux: {(np.mean(fluxes_binned) * gain):.2f} e-')
         axs[0].set_ylabel('Flux [ADU]')
         axs[0].legend()
 
