@@ -16,7 +16,7 @@ PREDEFINED_BEST_TIC_IDS = [169764198, 214662885, 188620378, 5796019, 188625925, 
 def select_best_tic_ids(phot_table, args):
     """
     Select the best TIC_IDs based on the best linear model fit (lowest residual sum of squares),
-    and reject stars with R-values much larger than the smallest R-value.
+    and reject stars with R-values significantly smaller than the best (strongest) R-value.
     """
     # Filter stars based on brightness range
     phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
@@ -30,6 +30,9 @@ def select_best_tic_ids(phot_table, args):
         rel_flux = star_data['Relative_Flux']
         time = star_data['Time_BJD']
 
+        if len(time) < 2:
+            continue  # skip if not enough data points for a fit
+
         # Fit a linear model: y = mx + b
         slope, intercept, r_value, p_value, std_err = linregress(time, rel_flux)
 
@@ -40,18 +43,26 @@ def select_best_tic_ids(phot_table, args):
         # Store TIC_ID, RSS, and R-value (absolute value to evaluate fit quality)
         stars_fit_list.append((tic_id, rss, abs(r_value)))
 
-    # Find the smallest R-value (worst fit)
-    smallest_r_value = min(stars_fit_list, key=lambda x: x[2])[2]
-    print(f"Smallest R-value: {smallest_r_value:.6f}")
+    if not stars_fit_list:
+        print("No valid stars found for fitting.")
+        return []
 
-    # Set a rejection threshold: reject stars with R-values > 2 * smallest_r_value
-    rejection_threshold = args.r * smallest_r_value
+    # Find the largest R-value (best fit)
+    largest_r_value = max(stars_fit_list, key=lambda x: x[2])[2]
+    print(f"Largest R-value: {largest_r_value:.6f}")
+
+    # Set a rejection threshold: reject stars with R-values < largest_r_value / args.r
+    rejection_threshold = largest_r_value / args.r
     print(f"Rejection threshold for R-values: {rejection_threshold:.6f}")
 
     # Filter stars by RSS and R-value
     filtered_stars = [
-        (tic_id, rss, r_value) for tic_id, rss, r_value in stars_fit_list if r_value <= rejection_threshold
+        (tic_id, rss, r_value) for tic_id, rss, r_value in stars_fit_list if r_value >= rejection_threshold
     ]
+
+    if not filtered_stars:
+        print("All stars rejected based on R-value threshold.")
+        return []
 
     # Sort by RSS (ascending order) and select the top `num_stars`
     sorted_stars = sorted(filtered_stars, key=lambda x: x[1])[:args.num_stars]
@@ -61,7 +72,8 @@ def select_best_tic_ids(phot_table, args):
     print("\nSelected Stars with RSS and R-values:")
     for star_id, rss_value, r_value in sorted_stars:
         print(f"TIC_ID: {star_id}, RSS: {rss_value:.6f}, R-value: {r_value:.6f}")
-    print(f'The best tic_ids are: {best_tic_ids}')
+
+    print(f'\nSelected best TIC_IDs: {best_tic_ids}')
     return best_tic_ids
 
 
