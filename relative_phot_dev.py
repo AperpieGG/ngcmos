@@ -56,10 +56,10 @@ def target_info(table, tic_id_to_plot, APERTURE):
     # Extract the TESS magnitude of the target star
     target_tmag = target_star['Tmag'][0]
 
-    # Ensure the target star is brighter than 12 mags
-    if target_tmag >= 12:
-        raise ValueError(f"Target star with TIC ID {tic_id_to_plot} has Tmag = {target_tmag:.3f}, "
-                         f"which is not brighter than 12 mags. Skipping.")
+    # # Ensure the target star is brighter than 12 mags
+    # if target_tmag >= 12:
+    #     raise ValueError(f"Target star with TIC ID {tic_id_to_plot} has Tmag = {target_tmag:.3f}, "
+    #                      f"which is not brighter than 12 mags. Skipping.")
 
     target_flux = target_star[f'flux_{APERTURE}']  # Extract the flux of the target star
     target_fluxerr = target_star[f'fluxerr_{APERTURE}']  # Extract the flux error of the target star
