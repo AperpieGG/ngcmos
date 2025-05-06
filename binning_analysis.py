@@ -13,11 +13,14 @@ def find_comp_star_rms(comp_tic_ids, phot_table):
     Get the unique RMS values for each comparison star TIC ID from the photometry table.
     """
     comp_star_rms = []
+    print(f'The comp tic ids are: {comp_tic_ids}')
 
     for tic in comp_tic_ids:
         # Filter the table for this TIC ID
         mask = phot_table['TIC ID'] == tic
-        rms_values = np.unique(phot_table['rms'][mask])
+        if np.sum(mask) == 0:
+            raise ValueError(f"No data found for TIC ID {tic}")
+        rms_values = np.unique(phot_table['RMS'][mask])
 
         if len(rms_values) == 1:
             comp_star_rms.append(rms_values[0])
