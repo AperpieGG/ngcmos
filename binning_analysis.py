@@ -11,8 +11,10 @@ from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 
 def find_comp_star_rms(comp_fluxes, airmass):
     comp_star_rms = []
-    for i, flux in enumerate(comp_fluxes):
-        airmass_cs = np.polyfit(airmass, flux, 1)
+    for flux in comp_fluxes:
+        airmass_1d = np.asarray(airmass).ravel()
+        flux_1d = np.asarray(flux).ravel()
+        airmass_cs = np.polyfit(airmass_1d, flux_1d, 1)
         airmass_mod = np.polyval(airmass_cs, airmass)
         flux_corrected = flux / airmass_mod
         flux_norm = flux_corrected / np.median(flux_corrected)
@@ -118,7 +120,6 @@ def select_best_tic_ids(phot_table, args):
 
     comp_fluxes = []
     comp_mags = []
-    airmass_values = []
     airmass_values = []
 
     for tic in tic_ids:
