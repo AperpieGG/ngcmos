@@ -5,21 +5,25 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
-from scipy.stats import linregress
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 
 
-def find_comp_star_rms(comp_fluxes, airmass):
+def find_comp_star_rms(comp_tic_ids, phot_table):
+    """
+    Get the unique RMS values for each comparison star TIC ID from the photometry table.
+    """
     comp_star_rms = []
-    for flux in comp_fluxes:
-        airmass_1d = np.asarray(airmass).ravel()
-        flux_1d = np.asarray(flux).ravel()
-        airmass_cs = np.polyfit(airmass_1d, flux_1d, 1)
-        airmass_mod = np.polyval(airmass_cs, airmass)
-        flux_corrected = flux / airmass_mod
-        flux_norm = flux_corrected / np.median(flux_corrected)
-        rms_val = np.std(flux_norm)
-        comp_star_rms.append(rms_val)
+
+    for tic in comp_tic_ids:
+        # Filter the table for this TIC ID
+        mask = phot_table['TIC ID'] == tic
+        rms_values = np.unique(phot_table['rms'][mask])
+
+        if len(rms_values) == 1:
+            comp_star_rms.append(rms_values[0])
+        else:
+            raise ValueError(f"Multiple or no unique RMS values found for TIC ID {tic}: {rms_values}")
+
     return np.array(comp_star_rms)
 
 
