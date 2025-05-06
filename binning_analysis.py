@@ -27,9 +27,9 @@ def find_comp_star_rms(comp_tic_ids, phot_table):
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
+def find_bad_comp_stars(comp_tic_ids, phot_table, comp_mags0, sig_level=2., dmag=0.5):
     # Calculate initial RMS of comparison stars
-    comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
+    comp_star_rms = find_comp_star_rms(comp_tic_ids, phot_table)
     print(f"Initial number of comparison stars: {len(comp_star_rms)}")
 
     comp_star_mask = np.ones(len(comp_star_rms), dtype=bool)
@@ -122,25 +122,22 @@ def select_best_tic_ids(phot_table, args):
     # Identify unique comparison stars
     tic_ids = np.unique(phot_table['TIC_ID'])
 
-    comp_fluxes = []
+    valid_tic_ids = []
     comp_mags = []
-    airmass_values = []
 
     for tic in tic_ids:
         star_data = phot_table[phot_table['TIC_ID'] == tic]
         if len(star_data) < 10:
             continue  # Skip stars with too little data
-        comp_fluxes.append(star_data['Relative_Flux'])
+        valid_tic_ids.append(tic)
         comp_mags.append(star_data['Tmag'][0])
-        airmass_values.append(star_data['Airmass'])
 
-    comp_fluxes = np.array(comp_fluxes)
+    valid_tic_ids = np.array(valid_tic_ids)
     comp_mags = np.array(comp_mags)
-    airmass_values = np.array(airmass_values)
 
-    comp_mask, comp_rms, iterations = find_bad_comp_stars(comp_fluxes, airmass_values, comp_mags)
+    comp_mask, comp_rms, iterations = find_bad_comp_stars(valid_tic_ids, phot_table, comp_mags)
 
-    best_tic_ids = tic_ids[comp_mask]
+    best_tic_ids = valid_tic_ids[comp_mask]
     print(f"Selected {len(best_tic_ids)} good comparison TIC IDs.")
     return best_tic_ids
 
