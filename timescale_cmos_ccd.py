@@ -329,6 +329,7 @@ if __name__ == "__main__":
     parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
     parser.add_argument('--r', type=float, default=2, help='Rejection multiplication')
     parser.add_argument('--best', action='store_true', help='Use predefined best TIC_IDs')
+    parser.add_argument('--tic', type=int, default=None, help='plot individual TIC_ID')
     args = parser.parse_args()
 
     # Process both files
@@ -358,6 +359,9 @@ if __name__ == "__main__":
     else:
         print("Selecting best TIC_IDs based on criteria...")
         best_tic_ids = select_best_tic_ids(phot_table1, args)
+
+    if args.tic is not None:
+        best_tic_ids = [args.tic]
 
     # Filter both files to include only the best TIC_IDs
     phot_table1 = filter_to_tic_ids(phot_table1, best_tic_ids)
