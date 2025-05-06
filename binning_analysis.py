@@ -119,6 +119,7 @@ def select_best_tic_ids(phot_table, args):
     comp_fluxes = []
     comp_mags = []
     airmass_values = []
+    airmass_values = []
 
     for tic in tic_ids:
         star_data = phot_table[phot_table['TIC_ID'] == tic]
@@ -126,8 +127,7 @@ def select_best_tic_ids(phot_table, args):
             continue  # Skip stars with too little data
         comp_fluxes.append(star_data['Relative_Flux'])
         comp_mags.append(star_data['Tmag'][0])
-        if not airmass_values:
-            airmass_values = star_data['Airmass']
+        airmass_values.append(star_data['Airmass'])
 
     comp_fluxes = np.array(comp_fluxes)
     comp_mags = np.array(comp_mags)
