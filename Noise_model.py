@@ -125,7 +125,7 @@ def main():
             # bin the data
             time = tic_data['Time_BJD']
             flux = tic_data['Relative_Flux']
-            flux_err = tic_data['Relative_Flux_Error']
+            flux_err = tic_data['Relative_Flux_err']
             time, flux, flux_err = bin_by_time_interval(time, flux, flux_err, interval_minutes=bin_size)
             # Calculate the RMS
             RMS = np.std(flux)
