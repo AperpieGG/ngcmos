@@ -30,7 +30,7 @@ def find_comp_star_rms(comp_tic_ids, phot_table):
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_tic_ids, phot_table, comp_mags0, sig_level=2., dmag=0.5):
+def find_bad_comp_stars(comp_tic_ids, phot_table, comp_mags0, sig_level=4., dmag=0.25):
     # Calculate initial RMS of comparison stars
     comp_star_rms = find_comp_star_rms(comp_tic_ids, phot_table)
     print(f"Initial number of comparison stars: {len(comp_star_rms)}")
