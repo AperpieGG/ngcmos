@@ -5,7 +5,7 @@ import os
 import json
 import numpy as np
 from astropy.io import fits
-from utils import noise_sources, bin_by_time_interval
+from utils import noise_sources, bin_by_time_interval, bin_time_flux_error
 
 
 # Constants for noise calculations
@@ -126,7 +126,7 @@ def main():
             time = tic_data['Time_BJD']
             flux = tic_data['Relative_Flux']
             flux_err = tic_data['Relative_Flux_err']
-            time, flux, flux_err = bin_by_time_interval(time, flux, flux_err, interval_minutes=bin_size)
+            time, flux, flux_err = bin_time_flux_error(time, flux, flux_err, bin_fact=bin_size)
             # Calculate the RMS
             RMS = np.std(flux)
             # Convert RMS to ppm
