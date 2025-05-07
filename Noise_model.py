@@ -5,7 +5,7 @@ import os
 import json
 import numpy as np
 from astropy.io import fits
-from utils import noise_sources
+from utils import noise_sources, bin_by_time_interval
 
 
 # Constants for noise calculations
@@ -120,8 +120,21 @@ def main():
         airmass_list.extend(tic_data['Airmass'])
         zp_list.extend(tic_data['ZP'])
 
-        # Append other data points as before
-        if tic_data['RMS'][0] is not None:
+        if bin_size > 1:
+            # Bin the data, request the flux from the table and do the analysis.
+            # bin the data
+            time = tic_data['Time_BJD']
+            flux = tic_data['Relative_Flux']
+            flux_err = tic_data['Relative_Flux_Error']
+            time, flux, flux_err = bin_by_time_interval(time, flux, flux_err, interval_minutes=bin_size)
+            # Calculate the RMS
+            RMS = np.std(flux)
+            # Convert RMS to ppm
+            RMS = RMS * 1000000
+            RMS_list.append(RMS)
+
+        else:
+            # Use the original data without binning
             RMS_list.append(tic_data['RMS'][0] * 1000000)  # Convert RMS to ppm
 
         # Handle COLOR column
