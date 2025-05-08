@@ -30,7 +30,6 @@ def find_comp_star_rms(comp_tic_ids, phot_table):
 
         rel_flux = phot_table['Relative_Flux'][mask]
         if len(rel_flux) > 2:
-            print(f'The length of the relative flux is {len(rel_flux)}.')
             comp_star_rms.append(np.array(np.std(rel_flux)))
         else:
             raise ValueError(f"Multiple or no unique RMS values found for TIC ID {tic}: {np.std(rel_flux)}")
@@ -402,15 +401,6 @@ if __name__ == "__main__":
     # Process both files
     phot_table1 = process_file(args.file1, args)
     phot_table2 = process_file(args.file2, args)
-
-    # the below statement is for testing!
-    tic_id = 4611043
-    mask = phot_table1['TIC_ID'] == tic_id
-    if np.sum(mask) == 0:
-        print(f"No data found for TIC ID {tic_id}")
-    else:
-        flux_length = len(phot_table1['Relative_Flux'][mask])
-        print(f'The length of the relative flux for TIC ID {tic_id} in file1: {flux_length}')
 
     print("Trimming data in phot_table1")
     phot_table1 = trim_target_data(phot_table1)
