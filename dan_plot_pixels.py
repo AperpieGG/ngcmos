@@ -111,7 +111,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         im = axs[2].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
         axs[2].set_xlabel('X')
         axs[2].set_ylabel('Y')
-        axs[2].colorbar(im, ax=axs[2], label='Normalized Intensity')
+        plt.colorbar(im, ax=axs[2], label='Normalized Intensity')
         circle_radii = [aperture]
 
         for radius in circle_radii:
@@ -121,6 +121,12 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
         axs[2].add_patch(annulus)
         axs[2].add_patch(dannulus)
+        # Add a text patch with max pixel value
+        max_pixel_value = np.max(cropped_image_data)
+        textstr = f'Max pixel: {max_pixel_value:.0f} ADU'
+        axs[2].text(0.98, 0.95, textstr, transform=axs[2].transAxes,
+                    fontsize=10, verticalalignment='top', horizontalalignment='right',
+                    bbox=dict(boxstyle='round', facecolor='white', edgecolor='black', alpha=0.8))
 
         # Create legend labels
         legend_labels = [f'Aperture, {radius} pix)' for radius in circle_radii]
