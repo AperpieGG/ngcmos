@@ -110,11 +110,12 @@ def find_bad_comp_stars(comp_tic_ids, phot_table, comp_mags0, sig_level=4., dmag
 
     # Create the plot
     plt.figure(figsize=(10, 6))
-    plt.scatter(final_good_mags, final_good_rms, color='black', label='Good Stars')
-    plt.scatter(final_bad_mags, final_bad_rms, color='red', label='Bad Stars')
+    plt.scatter(final_good_mags, final_good_rms*1e6, color='black', label='Good Stars')
+    plt.scatter(final_bad_mags, final_bad_rms*1e6, color='red', label='Bad Stars')
     plt.xlabel('Magnitude')
-    plt.ylabel('RMS')
-    plt.ylim(y_limit_low, y_limit_high)
+    plt.ylim(y_limit_low*1e6, y_limit_high*1e6)
+    plt.ylabel('RMS (ppm)')
+    plt.yscale('log')
     plt.legend()
     plt.title('RMS vs. Magnitude of Comparison Stars')
     plt.tight_layout()
