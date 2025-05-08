@@ -7,7 +7,13 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 from scipy.stats import linregress
 
-PREDEFINED_BEST_TIC_IDS = [ 270187283]
+PREDEFINED_BEST_TIC_IDS = [4611043, 5796255, 5796320, 5796376, 169746092, 169746369, 169746459, 169763609, 169763615,
+                           169763631, 169763812, 169763929, 169763985, 169764011, 169764168, 169764174, 188619865,
+                           188620052, 188620343, 188620450, 188620477, 188620644, 188622237, 188622268, 188622275,
+                           188622523, 188627904, 188628115, 188628237, 188628252, 188628309, 188628413, 188628448,
+                           188628555, 188628748, 188628755, 214657492, 214657985, 214658021, 214661588, 214661799,
+                           214661930, 214662807, 214662895, 214662905, 214664699, 214664842, 270185125, 270185254,
+                           270187139, 270187208, 270187283]
 
 
 def select_best_tic_ids(phot_table, args):
@@ -323,7 +329,7 @@ if __name__ == "__main__":
     parser.add_argument('--fl', type=float, default=10.5, help='Upper limit for Tmag')
     parser.add_argument('--cl', type=float, default=None, help='Lower limit for color index')
     parser.add_argument('--ch', type=float, default=None, help='Upper limit for color index')
-    parser.add_argument('--bin', type=float, default=600, help='Maximum binning time in seconds')
+    parser.add_argument('--bin', type=float, default=180, help='Maximum binning time in seconds')
     parser.add_argument('--r', type=float, default=2, help='Rejection multiplication')
     parser.add_argument('--best', action='store_true', help='Use predefined best TIC_IDs')
     parser.add_argument('--tic', type=int, default=None, help='plot individual TIC_ID')
