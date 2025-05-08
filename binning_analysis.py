@@ -85,7 +85,7 @@ def find_bad_comp_stars(comp_tic_ids, phot_table, comp_mags0, sig_level=4., dmag
         comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
         N2 = np.sum(comp_star_mask)
 
-        print(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}")
+        print(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}, TIC IDs: {comp_tic_ids[comp_star_mask]}")
 
         # Exit if the number of stars doesn't change or too many iterations
         if N1 == N2 or i > 11:
