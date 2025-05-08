@@ -154,7 +154,8 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
-        axs[0].set_title(f'Raw LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f}), Mean Flux: {(np.mean(fluxes_binned) * gain):.2f} e-')
+        axs[0].set_title(
+            f'Raw LC for TIC ID {tic_id_to_plot} (Tmag = {tmag:.2f}), Mean Flux: {(np.mean(fluxes_binned) * gain):.2f} e-')
         axs[0].set_ylabel('Flux [ADU]')
         axs[0].legend()
 
@@ -227,3 +228,7 @@ def main():
                 break  # Move to next TIC after plotting
         if not found:
             print(f'TIC ID {tic_id} not found in any photometry file.')
+
+
+if __name__ == "__main__":
+    main()
