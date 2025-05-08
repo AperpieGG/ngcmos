@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
 from utils import plot_images, get_phot_files, read_phot_file, bin_time_flux_error, remove_outliers
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Rectangle
 from astropy.visualization import ZScaleInterval
 
 
@@ -111,7 +111,6 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         im = axs[2].imshow(normalized_image_data, cmap='gray', origin='lower', extent=extent)
         axs[2].set_xlabel('X')
         axs[2].set_ylabel('Y')
-        plt.colorbar(im, ax=axs[2], label='Normalized Intensity')
         circle_radii = [aperture]
 
         for radius in circle_radii:
@@ -121,6 +120,19 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
         axs[2].add_patch(annulus)
         axs[2].add_patch(dannulus)
+        # Find coordinates of max pixel in cropped image
+        max_pos_local = np.unravel_index(np.argmax(cropped_image_data), cropped_image_data.shape)
+        max_y_local, max_x_local = max_pos_local  # Note: image indexing is (row, col) = (y, x)
+
+        # Convert local (cropped) coordinates back to full image coordinates
+        max_x = x_min + max_x_local
+        max_y = y_min + max_y_local
+
+        # Draw a red square at max pixel position
+        axs[2].add_patch(Rectangle(
+            (max_x - 0.5, max_y - 0.5), 1, 1,
+            linewidth=1.5, edgecolor='red', facecolor='none'
+        ))
         # Add a text patch with max pixel value
         max_pixel_value = np.max(cropped_image_data)
         textstr = f'Max pixel: {max_pixel_value:.0f} ADU'
