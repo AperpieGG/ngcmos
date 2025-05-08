@@ -6,18 +6,15 @@ This script is plotting the unbinned relative photometry lightcurve, and mask th
 This script is to test the red noise from timescale of noise script.
 """
 import os
-
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from utils import plot_images, bin_time_flux_error, get_rel_phot_files, read_phot_file
-import argparse
 
 
 def plot_lc(filename, tic_id_to_plot, bin_size):
-    # Open the FITS file and read the data
     with fits.open(filename) as hdul:
-        table = hdul[1].data  # Assuming data is in the first extension
+        table = hdul[1].data
 
     tic_id_data = table[table['TIC_ID'] == tic_id_to_plot]
 
@@ -26,7 +23,7 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
         return
 
     tmag = tic_id_data['Tmag'][0]
-    # handle time in case tic_id_data['Time_JD'] does not exist
+
     if 'Time_JD' not in tic_id_data.names:
         time = tic_id_data['Time_BJD']
     else:
@@ -34,35 +31,34 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
 
     flux = tic_id_data['Relative_Flux']
     flux_err = tic_id_data['Relative_Flux_err']
-    # handle airmass in case tic_id_data['Airmass'] does not exist
+
     if 'Airmass' not in tic_id_data.names:
         airmass = np.zeros_like(time)
     else:
         airmass = tic_id_data['Airmass']
 
-    # Apply airmass mask
     valid_mask = airmass < 1.75
     time = time[valid_mask]
     flux = flux[valid_mask]
     flux_err = flux_err[valid_mask]
     airmass = airmass[valid_mask]
 
-    # calculate RMS
     rms = np.std(flux)
-    print(f'The RMS is: {rms:.4f}')
+    print(f'The RMS for TIC {tic_id_to_plot} is: {rms:.4f}')
 
     if bin_size > 1:
         time_binned, flux_binned, flux_err_binned = \
             bin_time_flux_error(time, flux, flux_err, bin_size)
         rms_binned = np.std(flux_binned)
     else:
-        time_binned, flux_binned, flux_err_binned, rms_binned\
-            = time, flux, flux_err, rms
+        time_binned, flux_binned, flux_err_binned, rms_binned = time, flux, flux_err, rms
+
     fig, ax1 = plt.subplots(figsize=(8, 6))
 
     if bin_size > 1:
         ax1.plot(time, flux, 'o', color='blue', alpha=0.2)
-    print(f'The data points for binned data are: {len(flux_binned)}')
+
+    print(f'The data points for binned data for TIC {tic_id_to_plot}: {len(flux_binned)}')
     ax1.plot(time_binned, flux_binned, 'o', label=f'RMS = {rms_binned:.4f}', color='red')
     ax1.set_xlabel('Time (JD)')
     ax1.set_ylabel('Relative Flux')
@@ -73,7 +69,6 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
     ax2.set_xlim(ax1.get_xlim())
     ax2.set_xlabel('Airmass')
 
-    # Interpolate airmass values at the positions of the primary x-axis ticks
     primary_xticks = ax1.get_xticks()
     interpolated_airmass = np.interp(primary_xticks, time, airmass)
     airmass_ticks = [f'{a:.2f}' for a in interpolated_airmass]
@@ -83,7 +78,11 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
 
     ax1.legend()
     plt.tight_layout()
-    plt.show()
+
+    output_filename = f"{tic_id_to_plot}_lc.png"
+    plt.savefig(output_filename, dpi=200)
+    plt.close()
+    print(f"Saved plot to {output_filename}")
 
 
 def main():
