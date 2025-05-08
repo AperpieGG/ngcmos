@@ -179,15 +179,17 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         axs[1].set_xlabel('BJD [days]')
         axs[1].legend()
         plt.tight_layout()
+        output_filename = f"check_{tic_id_to_plot}_lc.png"
+        plt.savefig(output_filename, bbox_inches='tight')
+        print(f"Saved plot as {output_filename}")
+        plt.close(fig)
         plt.show()
 
 
 def main():
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Plot light curve for a specific TIC ID')
-    parser.add_argument('tic_id', type=int, help='The TIC ID of the star to plot')
-    parser.add_argument('aperture', type=int,
-                        help='The aperture size for photometry (i.e. 1-6)')
+    parser = argparse.ArgumentParser(description='Plot light curves for a list of TIC IDs')
+    parser.add_argument('aperture', type=int, help='The aperture size for photometry (i.e. 1-6)')
     parser.add_argument('--bin', type=int, default=1, help='Number of images to bin')
     args = parser.parse_args()
     bin_size = args.bin
@@ -199,27 +201,29 @@ def main():
     # Get the current night directory
     current_night_directory = '.'
 
-    print(f"Current night directory: {current_night_directory}")
+    # Define the known TIC IDs to plot
+    tic_ids_to_plot = [4611043, 5796255, 5796320, 5796376, 169746092, 169746369, 169746459, 169763609, 169763615,
+                       169763631, 169763812, 169763929, 169763985, 169764011, 169764168, 169764174, 188619865,
+                       188620052, 188620343, 188620450, 188620477, 188620644, 188622237, 188622268, 188622275,
+                       188622523, 188627904, 188628115, 188628237, 188628252, 188628309, 188628413, 188628448,
+                       188628555, 188628748, 188628755, 214657492, 214657985, 214658021, 214661588, 214661799,
+                       214661930, 214662807, 214662895, 214662905, 214664699, 214664842,
+                       270185125, 270185254, 270187139, 270187208, 270187283]
 
-    # Get photometry files with the pattern 'phot_*.fits'
+    # Get photometry files
     phot_files = get_phot_files(current_night_directory)
     print(f"Photometry files: {phot_files}")
 
-    # Loop through photometry files
-    for phot_file in phot_files:
-        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-        # Check if tic_id exists in the current photometry file
-        if args.tic_id in phot_table['tic_id']:
-            print('Found star in photometry file:', phot_file)
-            plot_lc(phot_table, args.tic_id, bin_size, aperture, image_directory=current_night_directory)
-            break  # Stop looping if tic_id is found
-        else:
-            print(f"TIC ID {args.tic_id} not found in {phot_file}")
-
-    else:
-        print(f"TIC ID {args.tic_id} not found in any photometry file.")
-
-
-if __name__ == "__main__":
-    main()
+    # Loop over all TIC IDs
+    for tic_id in tic_ids_to_plot:
+        found = False
+        for phot_file in phot_files:
+            phot_path = os.path.join(current_night_directory, phot_file)
+            phot_table = read_phot_file(phot_path)
+            if tic_id in phot_table['tic_id']:
+                print(f'Found TIC {tic_id} in {phot_file}')
+                plot_lc(phot_table, tic_id, bin_size, aperture, image_directory=current_night_directory)
+                found = True
+                break  # Move to next TIC after plotting
+        if not found:
+            print(f'TIC ID {tic_id} not found in any photometry file.')
