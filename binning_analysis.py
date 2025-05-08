@@ -85,7 +85,8 @@ def find_bad_comp_stars(comp_tic_ids, phot_table, comp_mags0, sig_level=4., dmag
         comp_star_mask = (comp_star_rms <= mod0 + std * sig_level)
         N2 = np.sum(comp_star_mask)
 
-        print(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}, TIC IDs: {comp_tic_ids[comp_star_mask]}")
+        print(f"Iteration {i}: Stars included: {N2}, Stars excluded: {N1 - N2}")
+        print(f'The TIC ids of the excluded stars are: {comp_tic_ids[~comp_star_mask]}')
 
         # Exit if the number of stars doesn't change or too many iterations
         if N1 == N2 or i > 11:
@@ -180,7 +181,7 @@ def compute_rms_values(phot_table, exp, args):
         print(f'Star {tic_id[0]}, color {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
         RMS_values = []
         time_seconds = []
-        print(f'Using exposure time: {exp}')
+        # print(f'Using exposure time: {exp}')
 
         for i in range(1, max_binning):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
