@@ -417,6 +417,7 @@ if __name__ == "__main__":
             plt.tight_layout()
             # save png
             plt.savefig(f"RMS_vs_time_{tic}.png")
+            plt.close()
     # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
     else:
         plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
