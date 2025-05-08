@@ -142,19 +142,34 @@ def compute_rms_per_tic(tic_id, phot_table, exposure_time, args):
     return time_seconds, rms_values, rms_model
 
 
-def plot_and_save_rms(times, rms_values, rms_model, tic_id, label):
-    """Plot and save the RMS plot for a single star."""
+def plot_and_save_rms(t1, t2, rms1, rms2, model1, model2, tic_id):
     fig, ax = plt.subplots(figsize=(6, 8))
-    ax.plot(times, rms_values, 'o', label=f"{label} Data")
-    ax.plot(times, rms_model, '--', label=f"{label} Model")
-    ax.axvline(x=900, color='black', linestyle='-', label='Reference (x=900)')
+
+    # Plot for dataset 1
+    ax.plot(t1, rms1, 'o', label=f"{label1} Data", color='blue')
+    ax.plot(t1, model1, '--', label=f"{label1} Model", color='blue')
+
+    # Plot for dataset 2
+    ax.plot(t2, rms2, 'o', label=f"{label2} Data", color='red')
+    ax.plot(t2, model2, '--', label=f"{label2} Model", color='red')
+
+    # Add vertical line for reference
+    ax.axvline(x=900, color='black', linestyle='-', label='Reference Line (x=900)')
+
+    # Set logarithmic scales
     ax.set_xscale('log')
     ax.set_yscale('log')
+
+    # Add labels and legend
     ax.set_xlabel('Exposure Time (s)')
     ax.set_ylabel('RMS (ppm)')
-    ax.set_title(f'RMS vs Exposure Time — TIC {tic_id}')
+    ax.set_title('RMS vs Exposure Time')
+    # Format the y-axis tick labels
     ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
     ax.yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
+    ax.tick_params(axis='y', which='minor', length=4)
+
+    # Adjust layout and show the plot
     plt.tight_layout()
     plt.savefig(f"time_{tic_id}.png")
     plt.close()
@@ -194,8 +209,6 @@ if __name__ == "__main__":
         t1, rms1, model1 = compute_rms_per_tic(tic_id, phot_table1, 10, args)
         t2, rms2, model2 = compute_rms_per_tic(tic_id, phot_table2, 13, args)
 
-        if t1 is not None:
-            plot_and_save_rms(t1, rms1, model1, tic_id, label='CMOS')
-        if t2 is not None:
-            plot_and_save_rms(t2, rms2, model2, tic_id, label='CCD')
+        plot_and_save_rms(t1, t2, rms1, rms2, model1, model2, tic_id)
+
 
