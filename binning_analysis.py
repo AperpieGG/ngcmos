@@ -31,7 +31,7 @@ def find_comp_star_rms(comp_tic_ids, phot_table):
         rel_flux = phot_table['Relative_Flux'][mask]
         if len(rel_flux) > 2:
             print(f'The length of the relative flux is {len(rel_flux)}.')
-            comp_star_rms.append(np.std(rel_flux)[0])
+            comp_star_rms.append(np.array(np.std(rel_flux)[0]))
         else:
             raise ValueError(f"Multiple or no unique RMS values found for TIC ID {tic}: {np.std(rel_flux)}")
 
