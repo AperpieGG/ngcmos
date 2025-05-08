@@ -10,7 +10,14 @@ from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 
 def find_comp_star_rms(comp_tic_ids, phot_table):
     """
-    Get the unique RMS values for each comparison star TIC ID from the photometry table.
+    Compute the RMS of relative flux for each comparison star TIC ID from the photometry table.
+
+    Parameters:
+        comp_tic_ids (list): List of comparison star TIC IDs.
+        phot_table (astropy.table.Table or similar): Photometry table containing 'TIC_ID' and relative flux column.
+
+    Returns:
+        np.ndarray: Array of RMS values corresponding to the TIC IDs.
     """
     comp_star_rms = []
     print(f'The comp tic ids are: {comp_tic_ids}')
@@ -20,12 +27,13 @@ def find_comp_star_rms(comp_tic_ids, phot_table):
         mask = phot_table['TIC_ID'] == tic
         if np.sum(mask) == 0:
             raise ValueError(f"No data found for TIC ID {tic}")
-        rms_values = np.unique(phot_table['RMS'][mask])
 
-        if len(rms_values) == 1:
-            comp_star_rms.append(rms_values[0])
+        rel_flux = phot_table['Relative_Flux'][mask]
+        if len(rel_flux) < 2:
+            print(f'The length of the relative flux is {len(rel_flux)}.')
+            comp_star_rms.append(np.std(rel_flux)[0])
         else:
-            raise ValueError(f"Multiple or no unique RMS values found for TIC ID {tic}: {rms_values}")
+            raise ValueError(f"Multiple or no unique RMS values found for TIC ID {tic}: {np.std(rel_flux)}")
 
     return np.array(comp_star_rms)
 
@@ -394,15 +402,16 @@ if __name__ == "__main__":
     # Process both files
     phot_table1 = process_file(args.file1, args)
     phot_table2 = process_file(args.file2, args)
+    print(f'The length of the relative flux for file1: {len(phot_table1["Relative_Flux"])}')
 
     print("Trimming data in phot_table1")
     phot_table1 = trim_target_data(phot_table1)
     print("Trimming data in phot_table2")
     phot_table2 = trim_target_data(phot_table2)
 
-    print("Trimming data in phot_table1 for time")
+    print("Trimming data in phot_table1 for time to exclude the twilight")
     phot_table1 = trim_target_data_by_time(phot_table1)
-    print("Trimming data in phot_table2 for time")
+    print("Trimming data in phot_table2 for time to exclude the twilight")
     phot_table2 = trim_target_data_by_time(phot_table2)
 
     best_tic_ids = select_best_tic_ids(phot_table1, args)
