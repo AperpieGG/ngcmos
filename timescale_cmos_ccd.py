@@ -154,9 +154,6 @@ def plot_tic_ids(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, lab
     ax.yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
     ax.tick_params(axis='y', which='minor', length=4)
 
-    # Adjust layout and show the plot
-    plt.tight_layout()
-
 
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """
@@ -417,9 +414,9 @@ if __name__ == "__main__":
         for tic in best_tic_ids:
             plot_tic_ids(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
             plt.title(f"RMS vs time for TIC ID: {tic}")
+            plt.tight_layout()
             # save png
             plt.savefig(f"RMS_vs_time_{tic}.png")
-            plt.show()
     # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
     else:
         plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
