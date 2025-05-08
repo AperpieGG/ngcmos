@@ -7,10 +7,13 @@ from matplotlib import pyplot as plt, ticker
 from utils import plot_images, read_phot_file, bin_time_flux_error
 from scipy.stats import linregress
 
-PREDEFINED_BEST_TIC_IDS = [169764198, 214662885, 188620378, 5796019, 188625925, 214664449, 169745778, 188620006,
-                           188626027, 214658940, 270185211, 214662777, 188622477, 214657751, 188627947, 169745799,
-                           169763769, 169745871, 188626099, 188628405, 188619831, 2052295037, 188619928, 188626078,
-                           188619888]
+PREDEFINED_BEST_TIC_IDS = [4611043, 5796255, 5796320, 5796376, 169746092, 169746369, 169746459, 169763609, 169763615,
+                           169763631, 169763812, 169763929, 169763985, 169764011, 169764168, 169764174, 188619865,
+                           188620052, 188620343, 188620450, 188620477, 188620644, 188622237, 188622268, 188622275,
+                           188622523, 188627904, 188628115, 188628237, 188628252, 188628309, 188628413, 188628448,
+                           188628555, 188628748, 188628755, 214657492, 214657985, 214658021, 214661588, 214661799,
+                           214661930, 214662807, 214662895, 214662905, 214664699, 214664842, 270185125, 270185254,
+                           270187139, 270187208, 270187283]
 
 
 def select_best_tic_ids(phot_table, args):
@@ -370,8 +373,10 @@ if __name__ == "__main__":
     times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, 10, args)
     times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, 13, args)
 
+    if args.best:
+        for tic in best_tic_ids:
+            plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
     # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
-
-    # Plot the results
-    plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
+    else:
+        plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
 
