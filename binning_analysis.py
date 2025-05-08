@@ -104,9 +104,9 @@ def find_bad_comp_stars(comp_tic_ids, phot_table, comp_mags0, sig_level=4., dmag
     # Determine plot limits based on the dimmest good star
     if len(final_good_rms) > 0:
         y_limit_high = 2 * max(final_good_rms)
-        y_limit_low = min(final_good_rms) * 0.001
+        y_limit_low = min(final_good_rms) * 0.1
     else:
-        y_limit_high, y_limit_low = 1, 0.001
+        y_limit_high, y_limit_low = 1, 0.1
 
     # Create the plot
     plt.figure(figsize=(10, 6))
