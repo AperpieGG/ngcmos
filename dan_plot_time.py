@@ -146,12 +146,12 @@ def plot_and_save_rms(t1, t2, rms1, rms2, model1, model2, tic_id):
     fig, ax = plt.subplots(figsize=(6, 8))
 
     # Plot for dataset 1
-    ax.plot(t1, rms1, 'o', label=f"{label1} Data", color='blue')
-    ax.plot(t1, model1, '--', label=f"{label1} Model", color='blue')
+    ax.plot(t1, rms1, 'o', color='blue')
+    ax.plot(t1, model1, '--', color='blue')
 
     # Plot for dataset 2
-    ax.plot(t2, rms2, 'o', label=f"{label2} Data", color='red')
-    ax.plot(t2, model2, '--', label=f"{label2} Model", color='red')
+    ax.plot(t2, rms2, 'o', color='red')
+    ax.plot(t2, model2, '--', color='red')
 
     # Add vertical line for reference
     ax.axvline(x=900, color='black', linestyle='-', label='Reference Line (x=900)')
