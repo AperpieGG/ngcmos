@@ -90,7 +90,7 @@ def compute_rms_values(phot_table, exp, args):
         rel_fluxerr = Tmag_data['Relative_Flux_err']
         RMS_data = np.array(np.std(rel_flux))
         color = Tmag_data['COLOR']
-        print(f'Star {tic_id[0]}, color {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data[0]}')
+        print(f'Star {tic_id[0]}, color {color[0]}, and Tmag {Tmag}, and RMS: {RMS_data}')
         RMS_values = []
         time_seconds = []
         print(f'Using exposure time: {exp}')
