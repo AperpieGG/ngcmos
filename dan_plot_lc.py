@@ -89,25 +89,33 @@ def plot_lc(filename, tic_id_to_plot, bin_size):
 def main():
     plot_images()
     directory = '.'
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('tic_id', type=int, help='TIC ID of the star')
-    parser.add_argument('--bin', type=int, default=1, help='Bin size for time binning')
-    args = parser.parse_args()
+
+    # Define the known TIC IDs you want to plot
+    tic_ids_to_plot = [4611043, 5796255, 5796320, 5796376, 169746092, 169746369, 169746459, 169763609, 169763615,
+                       169763631, 169763812, 169763929, 169763985, 169764011, 169764168, 169764174, 188619865,
+                       188620052, 188620343, 188620450, 188620477, 188620644, 188622237, 188622268, 188622275,
+                       188622523, 188627904, 188628115, 188628237, 188628252, 188628309, 188628413, 188628448,
+                       188628555, 188628748, 188628755, 214657492, 214657985, 214658021, 214661588, 214661799,
+                       214661930, 214662807, 214662895, 214662905, 214664699, 214664842,
+                       270185125, 270185254, 270187139, 270187208, 270187283]
+
+    bin_size = 1  # Set the bin size here
 
     filenames = get_rel_phot_files(directory)
 
-    # Loop through photometry files
-    for phot_file in filenames:
-        phot_table = read_phot_file(os.path.join(directory, phot_file))
+    for tic_id in tic_ids_to_plot:
+        found = False
+        for phot_file in filenames:
+            phot_table = read_phot_file(os.path.join(directory, phot_file))
 
-        # Check if tic_id exists in the current photometry file
-        if args.tic_id in phot_table['tic_id']:
-            print('Found star in photometry file:', phot_file)
-            plot_lc(phot_file, args.tic_id, args.bin)
-            break  # Stop looping if tic_id is found
-        else:
-            print(f"TIC ID {args.tic_id} not found in {phot_file}")
+            if tic_id in phot_table['tic_id']:
+                print(f'Found TIC ID {tic_id} in photometry file: {phot_file}')
+                plot_lc(phot_file, tic_id, bin_size)
+                found = True
+                break
+
+        if not found:
+            print(f"TIC ID {tic_id} not found in any photometry file.")
 
 
 if __name__ == "__main__":
