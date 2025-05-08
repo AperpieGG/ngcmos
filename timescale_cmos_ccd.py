@@ -118,43 +118,6 @@ def compute_rms_values(phot_table, exp, args):
     return times_binned, average_rms_values, RMS_model
 
 
-def plot_tic_ids(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
-    """
-    Generate a single RMS plot for two datasets in one figure.
-
-    Parameters:
-        times1, times2 (array-like): Exposure times for the two datasets.
-        avg_rms1, avg_rms2 (array-like): Average RMS values for the two datasets.
-        RMS_model1, RMS_model2 (array-like): RMS models for the two datasets.
-        label1, label2 (str): Labels for the two datasets.
-    """
-    # Create a single plot
-    fig, ax = plt.subplots(figsize=(6, 8))
-
-    # Plot for dataset 1
-    ax.plot(times1, avg_rms1, 'o', label=f"{label1} Data", color='blue')
-    ax.plot(times1, RMS_model1, '--', label=f"{label1} Model", color='blue')
-
-    # Plot for dataset 2
-    ax.plot(times2, avg_rms2, 'o', label=f"{label2} Data", color='red')
-    ax.plot(times2, RMS_model2, '--', label=f"{label2} Model", color='red')
-
-    # Add vertical line for reference
-    ax.axvline(x=900, color='black', linestyle='-', label='Reference Line (x=900)')
-
-    # Set logarithmic scales
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-
-    # Add labels and legend
-    ax.set_xlabel('Exposure Time (s)')
-    ax.set_ylabel('RMS (ppm)')
-    # Format the y-axis tick labels
-    ax.yaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=False))
-    ax.yaxis.set_minor_formatter(ticker.ScalarFormatter(useMathText=False))
-    ax.tick_params(axis='y', which='minor', length=4)
-
-
 def plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1, label2):
     """
     Generate a single RMS plot for two datasets in one figure.
@@ -410,15 +373,8 @@ if __name__ == "__main__":
     times1, avg_rms1, RMS_model1 = compute_rms_values(phot_table1, 10, args)
     times2, avg_rms2, RMS_model2 = compute_rms_values(phot_table2, 13, args)
 
-    if args.best:
-        for tic in best_tic_ids:
-            plot_tic_ids(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
-            plt.title(f"RMS vs time for TIC ID: {tic}")
-            plt.tight_layout()
-            # save png
-            plt.savefig(f"RMS_vs_time_{tic}.png")
-            plt.close()
     # plot_flux_histogram(phot_table1, phot_table2, label1='CMOS', label2='CCD')
-    else:
-        plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
+
+    # Plot the results
+    plot_two_rms(times1, avg_rms1, RMS_model1, times2, avg_rms2, RMS_model2, label1=args.file1, label2=args.file2)
 
