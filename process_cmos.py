@@ -45,9 +45,9 @@ warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 GAIN = 1.131
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
-APERTURE_RADII = [4, 5]
-RSI = 7  # 15
-RSO = 12  # 20
+APERTURE_RADII = [4, 5, 6, 8]
+RSI = 15  # 15
+RSO = 20  # 20
 DEFOCUS = 0.0
 AREA_MIN = 10
 AREA_MAX = 200
