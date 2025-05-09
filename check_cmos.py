@@ -17,15 +17,29 @@ import json
 import logging
 import warnings
 
-warnings.simplefilter('ignore', category=UserWarning)
-
 # Set up logging
-logging.basicConfig(
-    filename='check_cmos.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()  # Get the root logger
+logger.setLevel(logging.INFO)  # Set the overall logging level
+
+# Create file handler
+file_handler = logging.FileHandler('donuts.log')
+file_handler.setLevel(logging.INFO)  # Set the level for the file handler
+
+# Create stream handler (for terminal output)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)  # Set the level for the stream handler
+
+# Create a formatter and set it for both handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+
+# Add both handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
+
+# Ignore some annoying warnings
+warnings.simplefilter('ignore', category=UserWarning)
 
 
 def filter_filenames(directory):
@@ -108,14 +122,16 @@ def check_headers(directory, filenames):
 
 def check_donuts(file_groups, filenames):
     """
-    Check donuts for each group of images with the same prefix.
+    Check donuts for each image in the directory.
 
     Parameters
     ----------
     file_groups : list of str
-        Prefixes for the groups of images.
-    filenames : list of lists of filenames for the groups of images.
+        Directory containing the images.
+    filenames : list of str
+        List of filenames.
     """
+    # Assuming Donuts class and measure_shift function are defined elsewhere
     for filename, file_group in zip(filenames, file_groups):
         # Using the first filename as the reference image
         reference_image = file_group[0]
@@ -124,18 +140,18 @@ def check_donuts(file_groups, filenames):
         # Assuming Donuts class and measure_shift function are defined elsewhere
         d = Donuts(reference_image)
 
-        for filename in file_group[1:]:
-            shift = d.measure_shift(filename)
+        for i in file_group[1:]:
+            shift = d.measure_shift(i)
             sx = round(shift.x.value, 2)
             sy = round(shift.y.value, 2)
-            logger.info(f'{filename} shift X: {sx} Y: {sy}')
+            logger.info(f'{i} shift X: {sx} Y: {sy}')
             shifts = np.array([abs(sx), abs(sy)])
 
-            if np.sum(shifts > 50) > 0:
-                logger.warning(f'{filename} image shift too big X: {sx} Y: {sy}')
+            if abs(sx) >= 0.5 or abs(sy) >= 0.5:
+                logger.warning(f'{i} image shift too big X: {sx} Y: {sy}')
                 if not os.path.exists('failed_donuts'):
                     os.mkdir('failed_donuts')
-                comm = f'mv {filename} failed_donuts/'
+                comm = f'mv {i} failed_donuts/'
                 logger.info(comm)
                 os.system(comm)
 
