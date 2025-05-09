@@ -26,7 +26,7 @@ for observe_dir in $(find . -maxdepth 1 -type d -name "action*_observeField"); d
 
 #    # Run the additional Python scripts within this subdirectory
 #    python /home/ops/fwhm_stars/fwhm_batches.py --size 13.5 --cam CCD   # make plot and save to fwhm_results.json
-    python /home/ops/ngcmos/relative_phot_dev.py --aper 4
+    python /home/ops/ngcmos/relative_photometry.py --aper 4
     python /home/ops/ngcmos/measure_zp.py --aper 4
 #    python /home/ops/fwhm_stars/best_fwhm.py --size 13.5                # save to fwhm_positions.json
     python /home/ops/ngcmos/zip_fits.py                                 # zip the FITS files to bz2 and delete .fits files
