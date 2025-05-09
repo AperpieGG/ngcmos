@@ -90,7 +90,7 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size):
     valid_color_mag_table = color_data[mag_mask]
 
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
-    valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
+    valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.7]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
 
     # # If the target star is 12 mags or fainter, limit the comparison stars to 1000
