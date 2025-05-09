@@ -7,6 +7,7 @@ and moves the files without CTYPE1 and/or CTYPE2 to a separate directory.
 Usage:
 python check_headers.py
 """
+import logging
 
 from donuts import Donuts
 from astropy.io import fits
@@ -18,6 +19,28 @@ from utils import get_location, get_light_travel_times
 import astropy.units as u
 from astropy.time import Time
 
+# Set up logging
+logger = logging.getLogger()  # Get the root logger
+logger.setLevel(logging.INFO)  # Set the overall logging level
+
+# Create file handler
+file_handler = logging.FileHandler('donuts.log')
+file_handler.setLevel(logging.INFO)  # Set the level for the file handler
+
+# Create stream handler (for terminal output)
+stream_handler = logging.StreamHandler()
+stream_handler.setLevel(logging.INFO)  # Set the level for the stream handler
+
+# Create a formatter and set it for both handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+
+# Add both handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
+
+# Ignore some annoying warnings
 warnings.simplefilter('ignore', category=UserWarning)
 
 
@@ -167,9 +190,8 @@ def check_donuts(directory, filenames):
             sx = round(shift.x.value, 2)
             sy = round(shift.y.value, 2)
             print(f'{filename} shift X: {sx} Y: {sy}')
-            shifts = np.array([abs(sx), abs(sy)])
 
-            if np.sum(shifts > 50) > 0:
+            if abs(sx) >= 0.5 or abs(sy) >= 0.5:
                 print(f'{filename} image shift too big X: {sx} Y: {sy}')
                 failed_donuts_dir = os.path.join(directory, 'failed_donuts')
                 if not os.path.exists(failed_donuts_dir):
