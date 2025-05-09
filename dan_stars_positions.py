@@ -93,6 +93,7 @@ def main():
         color = 'lime' if tic_id in good_cmos_stars else 'red'
         circ = patches.Circle((x, y), radius=10, edgecolor=color, facecolor='none', linewidth=1.5)
         ax.add_patch(circ)
+        ax.text(x + 12, y + 12, str(tic_id), color=color, fontsize=8, weight='bold')
 
     ax.set_title(f'Frame: {first_frame_id}')
     ax.set_xlabel('X Pixel')
