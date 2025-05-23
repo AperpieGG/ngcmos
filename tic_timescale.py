@@ -3,7 +3,9 @@ import argparse
 import json
 import numpy as np
 from matplotlib import pyplot as plt, ticker
-from utils import bin_time_flux_error
+from utils import bin_time_flux_error, plot_images
+
+plot_images()
 
 
 def load_json_data(json_file):
