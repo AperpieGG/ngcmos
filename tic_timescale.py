@@ -38,7 +38,7 @@ def trim_target_data_by_time(data):
     return {
         'Time_BJD': data['Time_BJD'][mask],
         'Relative_Flux': data['Relative_Flux'][mask],
-        'RMS': data['RMS'][mask],
+        'RMS': np.std(data['Relative_Flux'][mask]),
         'TIC_ID': data['TIC_ID']
     }
 
