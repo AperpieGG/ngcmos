@@ -29,8 +29,8 @@ def trim_target_data_by_time(data):
     """
     Trim the data points by removing the first 30 minutes and the last 15 minutes of data based on `Time_BJD`.
     """
-    start_threshold = 57 / (24 * 60)  # 30 minutes in days
-    end_threshold = 5 / (24 * 60)  # 15 minutes in days
+    start_threshold = 40 / (24 * 60)  # 30 minutes in days
+    end_threshold = 15 / (24 * 60)  # 15 minutes in days
 
     start_time = data['Time_BJD'][0]
     end_time = data['Time_BJD'][-1]
