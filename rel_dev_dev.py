@@ -583,7 +583,7 @@ def main():
             RMS = np.std(target_fluxes_dt)
 
             # remove outliers
-            target_time, target_fluxes_dt, target_flux_err_dt = (
+            target_time, target_fluxes_dt, target_flux_err_dt, _, _ = (
                 remove_outliers(target_time, target_fluxes_dt, target_flux_err_dt))
 
             # Bin the target star data and do the relative photometry
