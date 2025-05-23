@@ -557,7 +557,7 @@ def main():
                 plot_comps_position(phot_table, tic_id_to_plot, tic_ids, args.cam)
 
             # Call the plot function
-            plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
+            # plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids)
 
             # Perform relative photometry for target star and plot
             target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
