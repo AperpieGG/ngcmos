@@ -186,7 +186,7 @@ def find_comp_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2., dmag=0.5):
+def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.5):
     # Calculate initial RMS of comparison stars
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     print(f"Initial number of comparison stars: {len(comp_star_rms)}")
