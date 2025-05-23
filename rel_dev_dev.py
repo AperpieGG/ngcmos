@@ -584,7 +584,7 @@ def main():
 
             # Bin the target star data and do the relative photometry
             target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-                bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 5))
+                bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 0.167))
 
             # Calculate the RMS for the binned data
             RMS_binned = np.std(target_fluxes_binned)
