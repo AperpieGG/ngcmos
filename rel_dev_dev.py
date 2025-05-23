@@ -13,7 +13,7 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers, scintilation_noise, bin_by_time_interval
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 0.1  # Color index tolerance for comparison stars
+COLOR_TOLERANCE = 0.05  # Color index tolerance for comparison stars
 MAGNITUDE_TOLERANCE = 1
 
 plot_images()
