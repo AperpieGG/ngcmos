@@ -511,9 +511,9 @@ def remove_outliers(time, flux, flux_err, air_mass=None, zero_point=None):
     n_air_mass = np.copy(air_mass) if air_mass is not None else None
     n_zero_point = np.copy(zero_point) if zero_point is not None else None
 
-    for _ in range(3):
+    for _ in range(5):
         mad = median_abs_deviation(n_flux)
-        loc = np.where((n_flux < np.median(n_flux) + 10 * mad) & (n_flux > np.median(n_flux) - 10 * mad))[0]
+        loc = np.where((n_flux < np.median(n_flux) + 8 * mad) & (n_flux > np.median(n_flux) - 8 * mad))[0]
 
         # Update time, flux, and flux_err with non-outlier values
         n_time = n_time[loc]
