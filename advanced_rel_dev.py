@@ -247,7 +247,7 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
         target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
             bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 30))
 
-        RMS_binned = np.std(target_fluxes_binned)
+        RMS_binned = np.std(target_fluxes_binned)*1e6
         return RMS_binned
     except Exception as e:
         print(f"Error for dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim}: {e}")
@@ -257,22 +257,22 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
 if __name__ == "__main__":
     tic_id = 169763609  # replace with your target TIC ID
 
-    dmb_range = [0.1, 0.3, 0.5]
-    dmf_range = [0.1, 0.3, 0.5]
-    crop_range = [None, 200, 300]
-    color_lim_range = [0.05, 0.1, 0.2]
+    dmb_range = [0.1, 0.2, 0.3, 0.4, 0.5]
+    dmf_range = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
+    crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
+    color_lim_range = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 
     best_rms = np.inf
     best_params = None
-    target_rms = 500e-6
-    tolerance = 200e-6
+    target_rms = 500
+    tolerance = 200
 
     for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
         rms = run_photometry(tic_id, dmb, dmf, crop, color_lim)
-        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms:.2e}")
+        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {int(rms)}")
 
         if np.abs(rms - target_rms) <= tolerance:
-            print(f"\n🎯 Found optimal config! RMS = {rms:.2e}")
+            print(f"\n🎯 Found optimal config! RMS = {int(rms)}")
             print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
             break  # comment this out if you want to keep searching
 
@@ -281,5 +281,6 @@ if __name__ == "__main__":
             best_params = (dmb, dmf, crop, color_lim)
 
     else:
-        print(f"\n🔍 Best RMS found: {best_rms:.2e}")
-        print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, color_lim={best_params[3]}")
+        print(f"\n🔍 Best RMS found: {int(best_rms)}")
+        print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, "
+              f"color_lim={best_params[3]}")
