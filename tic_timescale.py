@@ -83,8 +83,15 @@ def compute_rms_values(data, exp, max_binning):
 
 def plot_timescale(times, avg_rms, RMS_model, label, label_color):
     fig, ax = plt.subplots(figsize=(6, 8))
-    ax.plot(times, avg_rms, 'o', label=f"{label} Data", color=label_color)
+    # ax.plot(times, avg_rms, 'o', label=f"{label} Data", color=label_color)
+    # ax.plot(times, RMS_model, '--', label=f"{label} Model", color=label_color)
+    # Trim arrays to same length
+    min_len = min(len(times), len(RMS_model))
+    times = times[:min_len]
+    RMS_model = RMS_model[:min_len]
+
     ax.plot(times, RMS_model, '--', label=f"{label} Model", color=label_color)
+    ax.plot(times, avg_rms[:min_len], '0', label=f"{label}", color=label_color)
     ax.axvline(x=900, color='black', linestyle='-', label='Reference Line (x=900)')
     ax.set_xscale('log')
     ax.set_yscale('log')
