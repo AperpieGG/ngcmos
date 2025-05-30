@@ -10,138 +10,10 @@ from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers, bin_by_time_interval, calc_noise, get_phot_files, target_info
 
 # Constants for filtering stars
-COLOR_TOLERANCE = 0.4  # Color index tolerance for comparison stars
+COLOR_TOLERANCE = 0.1  # Color index tolerance for comparison stars
+
 
 plot_images()
-
-
-# def optimize_photometry_args(all_phot_data, exp, target_tic):
-#     from itertools import product
-#
-#     best_args = None
-#     best_rms = float('inf')
-#     best_result = None
-#
-#     # Define candidate values to try
-#     crop_sizes = [128, 256, 512]
-#     mag_ranges = [(8, 11), (9, 12), (10, 13)]
-#     color_options = [True, False]
-#     tolerance_ppm = 50
-#
-#     # Try all combinations of parameters
-#     for crop, (bl, fl), use_color in product(crop_sizes, mag_ranges, color_options):
-#         print(f"\nTrying: crop={crop}, mag_range=({bl},{fl}), use_color={use_color}")
-#
-#         # Simulate parsed arguments
-#         class Args:
-#             pass
-#
-#         args = Args()
-#         args.crop = crop
-#         args.bl = bl
-#         args.fl = fl
-#         args.color = use_color
-#         args.bin = 100  # Ensure binning goes up to 90
-#
-#         # Filter table using your pipeline
-#         filtered_data = filter_comparison_stars(all_phot_data, args)
-#
-#         # Run RMS analysis
-#         times_binned, rms_values, _ = compute_rms_values(filtered_data, exp, args)
-#
-#         # Index of bin=90 (if i starts at 1)
-#         try:
-#             rms_at_90 = rms_values[89]
-#             print(f"RMS at bin=90: {rms_at_90:.2f} ppm")
-#         except IndexError:
-#             print("Not enough bins to evaluate bin=90.")
-#             continue
-#
-#         # Check if this is the best result so far
-#         if abs(rms_at_90 - 500) < abs(best_rms - 500):
-#             best_args = (crop, bl, fl, use_color)
-#             best_rms = rms_at_90
-#             best_result = (times_binned, rms_values)
-#
-#         # Early stopping if within tolerance
-#         if abs(rms_at_90 - 500) <= tolerance_ppm:
-#             break
-#
-#     if best_args:
-#         crop, bl, fl, use_color = best_args
-#         print(f"\n✅ Best parameters:")
-#         print(f"Crop size: {crop}")
-#         print(f"Mag range: {bl}–{fl}")
-#         print(f"Color dependency: {use_color}")
-#         print(f"RMS at bin=90: {best_rms:.2f} ppm")
-#     else:
-#         print("❌ No suitable configuration found.")
-#
-#     return best_args, best_result
-
-
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file):
-    # Get target star info including the mean flux
-    # Get target star info including the mean flux
-    target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _, _ = (
-        target_info(table, tic_id_to_plot, APERTURE))
-
-    # Filter based on color index within the tolerance
-    color_index = table['gaiabp'] - table['gaiarp']
-    color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
-    color_data = table[color_mask]
-
-    # Filter stars brighter than the target within dmb and fainter than the target within dmf
-    mag_mask = (color_data['Tmag'] >= target_tmag - dmb) & (color_data['Tmag'] <= target_tmag + dmf)
-    valid_color_mag_table = color_data[mag_mask]
-
-    # Exclude stars with Tmag less than 9.4 and remove the target star from the table
-    valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
-    filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
-
-    # Then in your main code, make these changes:
-    if json_file:  # Check if json_file is set (instead of json)
-        with open('fwhm_positions.json', 'r') as file:
-            regions_data = json.load(file)  # Use `json.load` with the module, not the boolean
-
-        # Extract coordinates for central and similar regions
-        region_coordinates = []
-
-        # Central region
-        central = regions_data['central_region']['position']
-        region_coordinates.append((central['x_start'], central['x_end'], central['y_start'], central['y_end']))
-
-        # Similar regions
-        for similar_region in regions_data['central_region']['similar_regions']:
-            position = similar_region['position']
-            region_coordinates.append((position['x_start'], position['x_end'], position['y_start'], position['y_end']))
-
-        # Filter stars based on the defined regions
-        combined_mask = np.zeros(len(filtered_table), dtype=bool)
-        for (x_min, x_max, y_min, y_max) in region_coordinates:
-            region_mask = (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) & \
-                          (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
-            combined_mask |= region_mask  # Combine masks
-
-        # Apply combined mask to filtered_table
-        filtered_table = filtered_table[combined_mask]
-
-    if crop_size:
-        # Get target star coordinates
-        x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
-        y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
-
-        # Apply crop filter based on coordinates
-        x_min, x_max = x_target - crop_size // 2, x_target + crop_size // 2
-        y_min, y_max = y_target - crop_size // 2, y_target + crop_size // 2
-
-        # Further filter the comparison stars based on the crop region
-        filtered_table = filtered_table[
-            (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) &
-            (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
-            ]
-
-    return filtered_table, airmass_list
 
 
 def find_comp_star_rms(comp_fluxes, airmass):
@@ -210,58 +82,53 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.
         if N1 == N2 or i > 11:
             break
 
-    # Prepare data for visualization
-    final_good_mask = comp_star_mask
-    final_good_rms = comp_star_rms[final_good_mask]
-    final_good_mags = comp_mags0[final_good_mask]
-
-    final_bad_mask = ~comp_star_mask
-    final_bad_rms = comp_star_rms[final_bad_mask]
-    final_bad_mags = comp_mags0[final_bad_mask]
-
-    # Determine plot limits based on the dimmest good star
-    if len(final_good_rms) > 0:
-        y_limit_high = 2 * max(final_good_rms)
-        y_limit_low = min(final_good_rms) * 0.01
-    else:
-        y_limit_high, y_limit_low = 1, 0.01
-
-    # Create the plot
-    plt.figure(figsize=(10, 6))
-    plt.scatter(final_good_mags, final_good_rms, color='black', label='Good Stars')
-    plt.scatter(final_bad_mags, final_bad_rms, color='red', label='Bad Stars')
-    plt.xlabel('Magnitude')
-    plt.ylabel('RMS')
-    plt.ylim(y_limit_low, y_limit_high)
-    plt.legend()
-    plt.title('RMS vs. Magnitude of Comparison Stars')
-    plt.tight_layout()
-    plt.show()
-
-    # Save the data for the plot
-    output_data = {
-        "good_rms": final_good_rms.tolist(),
-        "good_mags": final_good_mags.tolist(),
-        "bad_rms": final_bad_rms.tolist(),
-        "bad_mags": final_bad_mags.tolist()
-    }
-
-    with open(f'rms_vs_mag_comps.json', 'w') as json_file:
-        json.dump(output_data, json_file, indent=4)
-
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[comp_star_mask])}')
     print(f'RMS values after filtering: {comp_star_rms[comp_star_mask]}')
 
     return comp_star_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json, exclude_tic_ids=set()):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size):
+    # Get target star info including the mean flux
+    # Get target star info including the mean flux
+    target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _, _ = (
+        target_info(table, tic_id_to_plot, APERTURE))
+
+    # Filter based on color index within the tolerance
+    color_index = table['gaiabp'] - table['gaiarp']
+    color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
+    color_data = table[color_mask]
+
+    # Filter stars brighter than the target within dmb and fainter than the target within dmf
+    mag_mask = (color_data['Tmag'] >= target_tmag - dmb) & (color_data['Tmag'] <= target_tmag + dmf)
+    valid_color_mag_table = color_data[mag_mask]
+
+    # Exclude stars with Tmag less than 9.4 and remove the target star from the table
+    valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
+    filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
+
+    if crop_size:
+        # Get target star coordinates
+        x_target = table[table['tic_id'] == tic_id_to_plot]['x'][0]
+        y_target = table[table['tic_id'] == tic_id_to_plot]['y'][0]
+
+        # Apply crop filter based on coordinates
+        x_min, x_max = x_target - crop_size // 2, x_target + crop_size // 2
+        y_min, y_max = y_target - crop_size // 2, y_target + crop_size // 2
+
+        # Further filter the comparison stars based on the crop region
+        filtered_table = filtered_table[
+            (filtered_table['x'] >= x_min) & (filtered_table['x'] <= x_max) &
+            (filtered_table['y'] >= y_min) & (filtered_table['y'] <= y_max)
+            ]
+
+    return filtered_table, airmass_list
+
+
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
     # Remove bad comparison stars
-    if exclude_tic_ids:
-        filtered_table = filtered_table[~np.isin(filtered_table['tic_id'], list(exclude_tic_ids))]
-        print(f"Comparison stars after exclusion: {len(filtered_table)}")
 
     tic_ids = np.unique(filtered_table['tic_id'])
     print(f'Number of comparison stars after filtering: {len(tic_ids)}')
@@ -316,184 +183,30 @@ def main():
     # Add parse for tic_id_to_plot
     parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
-    parser.add_argument('--aper', type=float, default=5, help='Aperture number to use for photometry.')
+    parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
     parser.add_argument('--cam', type=str, default='CMOS', help='Aperture number to use for photometry.')
     parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
-    parser.add_argument('--dmf', type=float, default=1.5, help='Fainter comparison star threshold (default: 1.5 mag)')
+    parser.add_argument('--dmf', type=float, default=0.5, help='Fainter comparison star threshold (default: 1.5 mag)')
     parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
-    parser.add_argument('--json_file', action='store_true', help='Use JSON file for region filtering (optional)')
-    parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
-    parser.add_argument('--exclude', type=str, help='Text file containing TIC IDs of bad comparison stars to exclude.')
     args = parser.parse_args()
 
-    # Read excluded TIC IDs if provided
-    exclude_tic_ids = set()
-    if args.exclude:
-        try:
-            exclude_tic_ids = set(np.loadtxt(args.exclude, dtype=int))
-            print(f"Excluding {len(exclude_tic_ids)} TIC IDs from comparison stars.")
-        except Exception as e:
-            print(f"Error reading exclusion file: {e}")
+    directory = '.'
+    phot_file = get_phot_files(directory)[0]
 
-    # Set parameters based on camera type
-    if args.cam == 'CMOS':
-        APERTURE = 5
-        DC = 1.6
-        GAIN = 1.13
-        EXPOSURE = 10.0
-        RN = 1.56
-    else:
-        APERTURE = 4
-        GAIN = 2
-        DC = 0.00515
-        EXPOSURE = 10.0
-        RN = 12.9
+    phot_table = read_phot_file(os.path.join(directory, phot_file))
 
-    tic_id_to_plot = args.tic_id
-    DM_BRIGHT = args.dmb
-    DM_FAINT = args.dmf
-    crop_size = args.crop
-    fwhm_pos = args.json_file
-    current_night_directory = os.getcwd()  # Change this if necessary
+    (target_tmag, target_color_index, airmass_list, target_flux_mean,
+     target_sky, target_flux, target_fluxerr, target_time, zp_list) = target_info(phot_table, args.tic_id, args.aper)
 
-    # Read the photometry file
-    phot_files = get_phot_files(current_night_directory)
-    for phot_file in phot_files:
-        print(f'Photometry file: {phot_file}')
+    # Extract data for the specific TIC ID
+    if args.tic_id in np.unique(phot_table['tic_id']):
+        print(f"Performing relative photometry for TIC ID = {args.tic_id}")
 
-        phot_table = read_phot_file(os.path.join(current_night_directory, phot_file))
-
-        # Extract data for the specific TIC ID
-        if tic_id_to_plot in np.unique(phot_table['tic_id']):
-            print(f"Performing relative photometry for TIC ID = {tic_id_to_plot}")
-
-            if args.comp_stars:
-                # Read the file with known comparison stars
-                comp_stars_file = args.comp_stars
-                comp_stars = np.loadtxt(comp_stars_file, dtype=int)
-                # Use the tic_ids directly from the phot_table
-                tic_ids = np.intersect1d(comp_stars, np.unique(phot_table['tic_id']))
-                print(f'Found {len(tic_ids)} comparison stars from the file.')
-            else:
-                # Find the best comparison stars
-                best_comps_table, AIRMASS = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
-                                                            crop_size, fwhm_pos, exclude_tic_ids)
-                tic_ids = np.unique(best_comps_table['tic_id'])
-                print(f'Found {len(tic_ids)} comparison stars from the analysis')
-
-            time_list = []
-            flux_list = []
-            fluxerr_list = []
-
-            # Collect time, flux, and flux error data
-            for tic_id in tic_ids:
-                if args.comp_stars:
-                    # If comparison stars are loaded from the file, do not call find_best_comps
-                    comp_time = phot_table[phot_table['tic_id'] == tic_id]['jd_bary']
-                    comp_fluxes = phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-                    comp_fluxerrs = phot_table[phot_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
-                    comp_skys = (phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] -
-                                 phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}'])
-                    AIRMASS = phot_table[phot_table['tic_id'] == tic_id]['airmass']
-
-                else:
-                    # If no comp_stars file, use best_comps_table
-                    comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_bary']
-                    comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-                    comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
-                    comp_skys = (phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] -
-                                 phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}'])
-
-                time_list.append(comp_time)
-                flux_list.append(comp_fluxes)
-                fluxerr_list.append(comp_fluxerrs)
-
-            # Convert lists to arrays
-            flux_list = np.array(flux_list)
-            fluxerr_list = np.array(fluxerr_list)
-            time_list = np.array(time_list)
-
-            # Reference fluxes and errors (sum of all stars, excluding the target star)
-            reference_fluxes = np.sum(flux_list, axis=0)
-            # reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
-
-            comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
-                                    for cfi, csi in zip(flux_list, comp_skys)]))
-
-            # Calculate the sum of all fluxes except the target star's flux
-            reference_fluxerrs = np.sqrt(np.sum(comp_errs**2, axis=0))
-
-            # Bin the master reference data
-            time_list_binned, reference_fluxes_binned, reference_fluxerrs_binned = (
-                bin_time_flux_error(time_list[0], reference_fluxes, reference_fluxerrs, 1))
-
-            # Perform relative photometry for target star and plot
-            target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
-            target_flux = target_star[f'flux_{APERTURE}']
-            target_fluxerr = target_star[f'fluxerr_{APERTURE}']
-            target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
-            target_time = target_star['jd_bary']
-            target_err = calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, target_flux + target_sky)
-
-            # Detrend the target star data
-            flux_ratio = target_flux / reference_fluxes_binned
-
-            # Normalize the target fluxes by the median flux ratio
-            flux_ratio_mean = np.median(flux_ratio)
-            target_fluxes_dt = flux_ratio / flux_ratio_mean
-
-            # Calculate the error in the normalized flux
-            err_factor = np.sqrt((target_err/target_flux)**2 + (reference_fluxerrs/reference_fluxes)**2)
-            flux_err = flux_ratio * err_factor
-            target_flux_err_dt = flux_err / flux_ratio_mean
-
-            # Estimate the RMS of the target star
-            RMS = np.std(target_fluxes_dt)
-
-            # remove outliers
-            target_time, target_fluxes_dt, target_flux_err_dt, _, _ = (
-                remove_outliers(target_time, target_fluxes_dt, target_flux_err_dt))
-
-            # Bin the target star data and do the relative photometry
-            target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-                bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 0.167))
-
-            # Calculate the RMS for the binned data
-            RMS_binned = np.std(target_fluxes_binned)
-
-            print(f'RMS for Target: {RMS * 100:.3f}% and binned 5 min: {RMS_binned * 100:.3f}%')
-            # plt.plot(target_time_binned, target_fluxes_dt_binned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
-            plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red',
-                         label=f'RMS unbinned = {RMS:.4f}')
-            plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
-            plt.legend(loc='best')
-            plt.show()
-
-            # Save target_time_binned and target_fluxes_dt in a JSON file
-            data_to_save = {
-                "TIC_ID": tic_id_to_plot,
-                "Time_BJD": target_time.tolist(),
-                "Relative_Flux": target_fluxes_dt.tolist(),
-                "Relative_Flux_err": target_flux_err_dt.tolist(),
-                "RMS": RMS.tolist()
-            }
-            # grab the last 4 letters of the working directory
-            date = os.getcwd()[-4:]
-            json_filename = f'target_light_curve_{tic_id_to_plot}_{args.cam}_{date}.json'
-            with open(json_filename, 'w') as json_file:
-                json.dump(data_to_save, json_file, indent=4)
-
-            print(f'Data saved to {json_filename}')
-
-            # Save tic_ids used for comparison stars in a txt file
-            comp_stars_filename = f'comp_stars_{tic_id_to_plot}_{args.cam}.txt'
-
-            with open(comp_stars_filename, 'w') as comp_stars_file:
-                for tic_id in tic_ids:
-                    comp_stars_file.write(f'{tic_id}\n')
-        else:
-            print(f"No data found for TIC ID = {tic_id_to_plot}")
+        best_comps_table, AIRMASS = find_best_comps(phot_table, args.tic_id, args.aper, args.dmb, args.dmf,
+                                                    args.crop)
+        tic_ids = np.unique(best_comps_table['tic_id'])
+        print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
