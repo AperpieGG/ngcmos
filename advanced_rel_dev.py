@@ -258,9 +258,9 @@ if __name__ == "__main__":
     tic_id = 169763609  # replace with your target TIC ID
 
     dmb_range = [0.1, 0.2, 0.3, 0.4, 0.5]
-    dmf_range = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
-    crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
-    color_lim_range = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+    dmf_range = np.arange(0.25, 4, 0.25).round(2).tolist()
+    crop_range = [None, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
+    color_lim_range = np.arange(0.1, 1.05, 0.05).round(2).tolist()
 
     best_rms = np.inf
     best_params = None
