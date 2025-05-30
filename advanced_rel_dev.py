@@ -183,12 +183,25 @@ def main():
     # Add parse for tic_id_to_plot
     parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
     parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
-    parser.add_argument('--aper', type=int, default=5, help='Aperture number to use for photometry.')
     parser.add_argument('--cam', type=str, default='CMOS', help='Aperture number to use for photometry.')
-    parser.add_argument('--dmb', type=float, default=0.5, help='Brighter comparison star threshold (default: 0.5 mag)')
-    parser.add_argument('--dmf', type=float, default=0.5, help='Fainter comparison star threshold (default: 1.5 mag)')
+    parser.add_argument('--dmb', type=float, default=0.1, help='Brighter comparison star threshold (default: 0.5 mag)')
+    parser.add_argument('--dmf', type=float, default=0.1, help='Fainter comparison star threshold (default: 1.5 mag)')
     parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
     args = parser.parse_args()
+
+    # Set parameters based on camera type
+    if args.cam == 'CMOS':
+        APERTURE = 5
+        DC = 1.6
+        GAIN = 1.13
+        EXPOSURE = 10.0
+        RN = 1.56
+    else:
+        APERTURE = 4
+        GAIN = 2
+        DC = 0.00515
+        EXPOSURE = 10.0
+        RN = 12.9
 
     directory = '.'
     phot_file = get_phot_files(directory)[0]
@@ -196,16 +209,78 @@ def main():
     phot_table = read_phot_file(os.path.join(directory, phot_file))
 
     (target_tmag, target_color_index, airmass_list, target_flux_mean,
-     target_sky, target_flux, target_fluxerr, target_time, zp_list) = target_info(phot_table, args.tic_id, args.aper)
+     target_sky, target_flux, target_fluxerr, target_time, zp_list) = target_info(phot_table, args.tic_id, APERTURE)
 
     # Extract data for the specific TIC ID
     if args.tic_id in np.unique(phot_table['tic_id']):
         print(f"Performing relative photometry for TIC ID = {args.tic_id}")
 
-        best_comps_table, AIRMASS = find_best_comps(phot_table, args.tic_id, args.aper, args.dmb, args.dmf,
+        best_comps_table, AIRMASS = find_best_comps(phot_table, args.tic_id, APERTURE, args.dmb, args.dmf,
                                                     args.crop)
         tic_ids = np.unique(best_comps_table['tic_id'])
         print(f'Found {len(tic_ids)} comparison stars from the analysis')
+
+        time_list = []
+        flux_list = []
+        fluxerr_list = []
+
+        for tic_id in tic_ids:
+            # If no comp_stars file, use best_comps_table
+            comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_bary']
+            comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+            comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
+            comp_skys = (phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] -
+                         phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}'])
+
+        np.array(time_list.append(comp_time))
+        np.array(flux_list.append(comp_fluxes))
+        np.array(fluxerr_list.append(comp_fluxerrs))
+
+        # Reference fluxes and errors (sum of all stars, excluding the target star)
+        reference_fluxes = np.sum(flux_list, axis=0)
+        # reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
+
+        comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
+                                for cfi, csi in zip(flux_list, comp_skys)]))
+
+        # Calculate the sum of all fluxes except the target star's flux
+        reference_fluxerrs = np.sqrt(np.sum(comp_errs ** 2, axis=0))
+
+        # Perform relative photometry for target star and plot
+        target_star = phot_table[phot_table['tic_id'] == args.tic_id]
+        target_flux = target_star[f'flux_{APERTURE}']
+        target_fluxerr = target_star[f'fluxerr_{APERTURE}']
+        target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
+        target_time = target_star['jd_bary']
+        target_err = calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, target_flux + target_sky)
+
+        # Detrend the target star data
+        flux_ratio = target_flux / reference_fluxes
+
+        # Normalize the target fluxes by the median flux ratio
+        flux_ratio_mean = np.median(flux_ratio)
+        target_fluxes_dt = flux_ratio / flux_ratio_mean
+
+        # Calculate the error in the normalized flux
+        err_factor = np.sqrt((target_err / target_flux) ** 2 + (reference_fluxerrs / reference_fluxes) ** 2)
+        flux_err = flux_ratio * err_factor
+        target_flux_err_dt = flux_err / flux_ratio_mean
+
+        # remove outliers
+        target_time, target_fluxes_dt, target_flux_err_dt, _, _ = (
+            remove_outliers(target_time, target_fluxes_dt, target_flux_err_dt))
+
+        # Estimate the RMS of the target star
+        RMS = np.std(target_fluxes_dt)
+
+        # Bin the target star data and do the relative photometry
+        target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
+            bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 0.167))
+
+        # Calculate the RMS for the binned data
+        RMS_binned = np.std(target_fluxes_binned)
+
+        print(f'RMS for Target: {RMS * 100:.3f}% and binned 5 min: {RMS_binned * 100:.3f}%')
 
 
 if __name__ == '__main__':
