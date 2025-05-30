@@ -3,7 +3,7 @@ import argparse
 import json
 import numpy as np
 from matplotlib import pyplot as plt, ticker
-from utils import bin_time_flux_error, plot_images
+from utils import bin_time_flux_error, plot_images, bin_by_time_interval
 
 plot_images()
 
@@ -54,10 +54,24 @@ def compute_rms_values(data, exp, max_binning):
     RMS_values = []
     time_seconds = []
 
-    for i in range(1, max_binning):
-        time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
-        exposure_time_seconds = i * exp
-        RMS = np.std(dt_flux_binned)
+    # Exposure time in seconds
+    min_interval_sec = exp
+    max_interval_sec = 1800
+    step_sec = exp  # Step by exposure time
+
+    # Convert seconds to minutes for the binning function
+    intervals_min = [sec / 60 for sec in range(min_interval_sec, max_interval_sec + 1, step_sec)]
+
+    for interval_minutes in intervals_min:
+        time_binned, flux_binned, fluxerr_binned = bin_by_time_interval(jd_mid, rel_flux, rel_fluxerr,
+                                                                        interval_minutes=interval_minutes)
+
+        # Convert interval back to seconds for plotting
+        exposure_time_seconds = interval_minutes * 60
+
+        # Compute RMS
+        RMS = np.std(flux_binned)
+
         RMS_values.append(RMS)
         time_seconds.append(exposure_time_seconds)
 
