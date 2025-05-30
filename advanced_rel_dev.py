@@ -260,23 +260,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     tic_id = args.tic_id
-    
+
     dmb_range = [0.1, 0.2, 0.3, 0.4, 0.5]
     dmf_range = np.arange(0.25, 4, 0.25).round(2).tolist()
-    crop_range = [None, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
-    color_lim_range = np.arange(0.1, 1.05, 0.05).round(2).tolist()
+    crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
+    color_lim_range = np.arange(0.1, 0.8, 0.1).round(2).tolist()
 
     best_rms = np.inf
     best_params = None
-    target_rms = 700
+    target_rms = 600
     tolerance = 200
 
     for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
         rms = run_photometry(tic_id, dmb, dmf, crop, color_lim)
-        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {(rms)}")
+        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms}")
 
         if np.abs(rms - target_rms) <= tolerance:
-            print(f"\n🎯 Found optimal config! RMS = {(rms)}")
+            print(f"\n🎯 Found optimal config! RMS = {rms}")
             print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
             break  # comment this out if you want to keep searching
 
@@ -285,6 +285,6 @@ if __name__ == "__main__":
             best_params = (dmb, dmf, crop, color_lim)
 
     else:
-        print(f"\n🔍 Best RMS found: {(best_rms)}")
+        print(f"\n🔍 Best RMS found: {best_rms}")
         print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, "
               f"color_lim={best_params[3]}")
