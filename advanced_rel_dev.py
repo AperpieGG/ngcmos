@@ -271,7 +271,7 @@ def main():
 
         # Bin the target star data and do the relative photometry
         target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-            bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 0.167))
+            bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 30))
 
         # Calculate the RMS for the binned data
         RMS_binned = np.std(target_fluxes_binned)
@@ -283,7 +283,6 @@ def main():
         plt.title(f'Target star: {args.tic_id}, Tmag = {target_star["Tmag"][0]:.2f}')
         plt.legend(loc='best')
         plt.show()
-
 
 
 if __name__ == '__main__':
