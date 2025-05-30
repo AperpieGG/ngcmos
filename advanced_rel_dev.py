@@ -282,6 +282,13 @@ def main():
 
         print(f'RMS for Target: {int(RMS*10e6)} and binned 5 min: {int(RMS_binned*10e6)}')
 
+        plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red',
+                     label=f'RMS unbinned = {RMS:.4f}')
+        plt.title(f'Target star: {args.tic_id}, Tmag = {target_star["Tmag"][0]}')
+        plt.legend(loc='best')
+        plt.show()
+
+
 
 if __name__ == '__main__':
     main()
