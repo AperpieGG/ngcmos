@@ -12,10 +12,6 @@ from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers, scintilation_noise, bin_by_time_interval
 
-# Constants for filtering stars
-COLOR_TOLERANCE = 0.1  # Color index tolerance for comparison stars
-MAGNITUDE_TOLERANCE = 1
-
 plot_images()
 
 
@@ -110,7 +106,7 @@ def extract_region_coordinates(region):
     return x_min, x_max, y_min, y_max
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file, color_lim):
     # Get target star info including the mean flux
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _, _ = (
@@ -118,7 +114,7 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
-    color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
+    color_mask = np.abs(color_index - target_color) <= color_lim
     color_data = table[color_mask]
 
     # Filter stars brighter than the target within dmb and fainter than the target within dmf
@@ -285,9 +281,9 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.
     return comp_star_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json, exclude_tic_ids=set()):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json,  color_lim, exclude_tic_ids=set()):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json, color_lim)
     # Remove bad comparison stars
     if exclude_tic_ids:
         filtered_table = filtered_table[~np.isin(filtered_table['tic_id'], list(exclude_tic_ids))]
@@ -449,6 +445,7 @@ def main():
     parser.add_argument('--json_file', action='store_true', help='Use JSON file for region filtering (optional)')
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
     parser.add_argument('--exclude', type=str, help='Text file containing TIC IDs of bad comparison stars to exclude.')
+    parser.add_argument('--color', type=float, default=0.1, help='Color tolerance for the comparison stars threshold')
     args = parser.parse_args()
 
     # Read excluded TIC IDs if provided
@@ -479,6 +476,7 @@ def main():
     DM_FAINT = args.dmf
     crop_size = args.crop
     fwhm_pos = args.json_file
+    COLOR_TOLERANCE = args.color
     current_night_directory = os.getcwd()  # Change this if necessary
 
     # Read the photometry file
@@ -502,7 +500,7 @@ def main():
             else:
                 # Find the best comparison stars
                 best_comps_table, AIRMASS = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
-                                                            crop_size, fwhm_pos, exclude_tic_ids)
+                                                            crop_size, fwhm_pos, COLOR_TOLERANCE, exclude_tic_ids)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
