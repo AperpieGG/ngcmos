@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     phot_data = load_json_data(args.json_file)
     print("Trimming data by time...")
-    phot_data = trim_target_data_by_time(phot_data)
+    # phot_data = trim_target_data_by_time(phot_data)
     times, avg_rms, RMS_model = compute_rms_values(phot_data, exp=10, max_binning=args.bin)
     if args.cam == 'CMOS':
         label_color = 'blue'
