@@ -872,3 +872,90 @@ def bin_by_time_interval(time, flux, error, interval_minutes=5):
         start_idx = end_idx
 
     return np.array(binned_time), np.array(binned_flux), np.array(binned_error)
+
+
+def calc_noise(APER, EXPTIME, DC, GAIN, RN, AIRMASS, lc):
+    """
+    Work out the additional noise sources for the error bars
+    Parameters
+    ----------
+    APER : float
+        Radius of the photometry aperture
+    EXPTIME : float
+        Current exposure time
+    DC : float
+        Dark current per pixel per second
+    lc : array-like
+        The photometry containing star + sky light
+    GAIN : float
+        Gain of the camera
+    RN : float
+        Read noise of the camera
+    AIRMASS : float
+        Airmass of the observation
+    Returns
+    -------
+    lc_err_new : array-like
+        A new error array accounting for other sources of noise
+    Raises
+    ------
+    None
+    """
+    npix = np.pi * APER ** 2
+    dark_current = DC * npix * EXPTIME
+    SCINT = scintilation_noise(AIRMASS, EXPTIME)
+    # scintillation?
+    lc_err_new = np.sqrt(lc / GAIN + dark_current + npix * RN ** 2 + (SCINT * lc) ** 2)
+    return lc_err_new
+
+
+def get_image_data(frame_id):
+    """
+    Get the image data corresponding to the given frame_id.
+
+    Parameters:
+        frame_id (str): The frame_id of the image.
+
+    Returns:
+        numpy.ndarray or None: The image data if the image exists, otherwise None.
+    """
+    # Define the directory where the images are stored (use cwd if not explicitly defined)
+    image_directory = os.getcwd()  # You can change this to the desired image directory path
+    image_path_fits = os.path.join(image_directory, frame_id)
+
+    print(f"Looking for FITS image at: {image_path_fits}")
+
+    # Check if the uncompressed FITS file exists
+    if os.path.exists(image_path_fits):
+        print("FITS file found.")
+        with fits.open(image_path_fits) as hdul:
+            image_data = hdul[0].data  # Assuming the image data is in the primary HDU
+        return image_data
+
+
+def extract_region_coordinates(region):
+    # Assuming region is a dictionary that has 'x_min', 'x_max', 'y_min', 'y_max' keys
+    x_min = region['x_min']
+    x_max = region['x_max']
+    y_min = region['y_min']
+    y_max = region['y_max']
+
+    return x_min, x_max, y_min, y_max
+
+
+def target_info(table, tic_id_to_plot, APERTURE):
+    target_star = table[table['tic_id'] == tic_id_to_plot]  # Extract the target star data
+    # Extract the TESS magnitude of the target star
+    target_tmag = target_star['Tmag'][0]
+    target_flux = target_star[f'flux_{APERTURE}']  # Extract the flux of the target star
+    target_fluxerr = target_star[f'fluxerr_{APERTURE}']  # Extract the flux error of the target star
+    target_time = target_star['jd_bary']  # Extract the time of the target star
+    target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
+    target_color_index = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
+    airmass_list = target_star['airmass']  # Extract airmass_list from target star
+    zp_list = target_star['ZP']  # Extract the zero point of the target star
+    # Calculate mean flux for the target star (specific to the chosen aperture)
+    target_flux_mean = target_star[f'flux_{APERTURE}'].mean()
+
+    return (target_tmag, target_color_index, airmass_list, target_flux_mean,
+            target_sky, target_flux, target_fluxerr, target_time, zp_list)
