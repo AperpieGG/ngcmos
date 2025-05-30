@@ -288,3 +288,7 @@ if __name__ == "__main__":
         print(f"\n🔍 Best RMS found: {best_rms}")
         print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, "
               f"color_lim={best_params[3]}")
+
+        with open("best_params_log.txt", "a") as f:
+            f.write(f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]} "
+                    f"--crop {best_params[2]} --color {best_params[3]}\n")
