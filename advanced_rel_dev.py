@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
     tic_id = args.tic_id
 
-    dmb_range = [0.1, 0.2, 0.3, 0.4, 0.5]
+    dmb_range = [0.1, 0.5]
     dmf_range = np.arange(0.25, 4, 0.25).round(2).tolist()
     crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
     color_lim_range = np.arange(0.1, 0.8, 0.1).round(2).tolist()
