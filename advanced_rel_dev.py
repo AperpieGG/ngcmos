@@ -255,8 +255,12 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
 
 
 if __name__ == "__main__":
-    tic_id = 169763609  # replace with your target TIC ID
+    parser = argparse.ArgumentParser(description="Optimize photometric parameters.")
+    parser.add_argument('--tic_id', type=int, required=True, help="Target TIC ID")
+    args = parser.parse_args()
 
+    tic_id = args.tic_id
+    
     dmb_range = [0.1, 0.2, 0.3, 0.4, 0.5]
     dmf_range = np.arange(0.25, 4, 0.25).round(2).tolist()
     crop_range = [None, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
