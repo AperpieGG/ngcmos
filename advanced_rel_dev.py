@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import itertools
 import os
 import numpy as np
 import argparse
@@ -175,114 +176,110 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     return good_comp_star_table, airmass  # Return the filtered table including only good comp stars
 
 
-def main():
-    # Add parse for tic_id_to_plot
-    parser = argparse.ArgumentParser(description='Plot light curves for a given TIC ID.')
-    parser.add_argument('tic_id', type=int, help='TIC ID to plot the light curve for.')
-    parser.add_argument('--cam', type=str, default='CMOS', help='Aperture number to use for photometry.')
-    parser.add_argument('--dmb', type=float, default=0.1, help='Brighter comparison star threshold (default: 0.5 mag)')
-    parser.add_argument('--dmf', type=float, default=0.1, help='Fainter comparison star threshold (default: 1.5 mag)')
-    parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
-    args = parser.parse_args()
+def run_photometry(tic_id, dmb, dmf, crop, color_lim):
+    try:
+        # (All your main() logic moved here with 'args.dmb' -> dmb etc.)
+        # Skip CLI parser and set values directly
+        cam = 'CMOS'
+        if cam == 'CMOS':
+            APERTURE = 5
+            DC = 1.6
+            GAIN = 1.13
+            EXPOSURE = 10.0
+            RN = 1.56
+        else:
+            APERTURE = 4
+            GAIN = 2
+            DC = 0.00515
+            EXPOSURE = 10.0
+            RN = 12.9
 
-    color_lim = 0.1  # Color index tolerance for comparison stars
+        directory = '.'
+        phot_file = get_phot_files(directory)[0]
+        phot_table = read_phot_file(os.path.join(directory, phot_file))
 
-    # Set parameters based on camera type
-    if args.cam == 'CMOS':
-        APERTURE = 5
-        DC = 1.6
-        GAIN = 1.13
-        EXPOSURE = 10.0
-        RN = 1.56
-    else:
-        APERTURE = 4
-        GAIN = 2
-        DC = 0.00515
-        EXPOSURE = 10.0
-        RN = 12.9
+        if tic_id not in np.unique(phot_table['tic_id']):
+            return np.inf  # or None
 
-    directory = '.'
-    phot_file = get_phot_files(directory)[0]
-
-    phot_table = read_phot_file(os.path.join(directory, phot_file))
-
-    # Extract data for the specific TIC ID
-    if args.tic_id in np.unique(phot_table['tic_id']):
-        print(f"Performing relative photometry for TIC ID = {args.tic_id}")
-
-        best_comps_table, AIRMASS = find_best_comps(phot_table, args.tic_id, APERTURE, args.dmb, args.dmf,
-                                                    args.crop, color_lim)
+        best_comps_table, AIRMASS = find_best_comps(phot_table, tic_id, APERTURE, dmb, dmf, crop, color_lim)
         tic_ids = np.unique(best_comps_table['tic_id'])
-        print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
         time_list = []
         flux_list = []
         fluxerr_list = []
+        sky_list = []
 
-        for tic_id in tic_ids:
-            # If no comp_stars file, use best_comps_table
-            comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id]['jd_bary']
-            comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id][f'flux_{APERTURE}']
-            comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id][f'fluxerr_{APERTURE}']
-            comp_skys = (phot_table[phot_table['tic_id'] == tic_id][f'flux_w_sky_{APERTURE}'] -
-                         phot_table[phot_table['tic_id'] == tic_id][f'flux_{APERTURE}'])
+        for tic_id_ in tic_ids:
+            comp_time = best_comps_table[best_comps_table['tic_id'] == tic_id_]['jd_bary']
+            comp_fluxes = best_comps_table[best_comps_table['tic_id'] == tic_id_][f'flux_{APERTURE}']
+            comp_fluxerrs = best_comps_table[best_comps_table['tic_id'] == tic_id_][f'fluxerr_{APERTURE}']
+            comp_sky = (phot_table[phot_table['tic_id'] == tic_id_][f'flux_w_sky_{APERTURE}'] -
+                        phot_table[phot_table['tic_id'] == tic_id_][f'flux_{APERTURE}'])
 
-        np.array(time_list.append(comp_time))
-        np.array(flux_list.append(comp_fluxes))
-        np.array(fluxerr_list.append(comp_fluxerrs))
+            time_list.append(np.array(comp_time))
+            flux_list.append(np.array(comp_fluxes))
+            fluxerr_list.append(np.array(comp_fluxerrs))
+            sky_list.append(np.array(comp_sky))
 
-        # Reference fluxes and errors (sum of all stars, excluding the target star)
         reference_fluxes = np.sum(flux_list, axis=0)
-        # reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
-
         comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
-                                for cfi, csi in zip(flux_list, comp_skys)]))
-
-        # Calculate the sum of all fluxes except the target star's flux
+                                for cfi, csi in zip(flux_list, sky_list)]))
         reference_fluxerrs = np.sqrt(np.sum(comp_errs ** 2, axis=0))
 
-        # Perform relative photometry for target star and plot
-        target_star = phot_table[phot_table['tic_id'] == args.tic_id]
+        target_star = phot_table[phot_table['tic_id'] == tic_id]
         target_flux = target_star[f'flux_{APERTURE}']
         target_fluxerr = target_star[f'fluxerr_{APERTURE}']
         target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
         target_time = target_star['jd_bary']
         target_err = calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, target_flux + target_sky)
 
-        # Detrend the target star data
         flux_ratio = target_flux / reference_fluxes
-
-        # Normalize the target fluxes by the median flux ratio
         flux_ratio_mean = np.median(flux_ratio)
         target_fluxes_dt = flux_ratio / flux_ratio_mean
 
-        # Calculate the error in the normalized flux
         err_factor = np.sqrt((target_err / target_flux) ** 2 + (reference_fluxerrs / reference_fluxes) ** 2)
         flux_err = flux_ratio * err_factor
         target_flux_err_dt = flux_err / flux_ratio_mean
 
-        # remove outliers
         target_time, target_fluxes_dt, target_flux_err_dt, _, _ = (
             remove_outliers(target_time, target_fluxes_dt, target_flux_err_dt))
 
-        # Estimate the RMS of the target star
-        RMS = np.std(target_fluxes_dt)
-
-        # Bin the target star data and do the relative photometry
         target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
             bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 30))
 
-        # Calculate the RMS for the binned data
         RMS_binned = np.std(target_fluxes_binned)
-
-        print(f'RMS for Target: {int(RMS*10e6)} and binned 5 min: {int(RMS_binned*10e6)}')
-
-        plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red',
-                     label=f'RMS unbinned = {RMS:.4f}')
-        plt.title(f'Target star: {args.tic_id}, Tmag = {target_star["Tmag"][0]:.2f}')
-        plt.legend(loc='best')
-        plt.show()
+        return RMS_binned
+    except Exception as e:
+        print(f"Error for dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim}: {e}")
+        return np.inf
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    tic_id = 169763609  # replace with your target TIC ID
+
+    dmb_range = [0.1, 0.3, 0.5]
+    dmf_range = [0.1, 0.3, 0.5]
+    crop_range = [None, 200, 300]
+    color_lim_range = [0.05, 0.1, 0.2]
+
+    best_rms = np.inf
+    best_params = None
+    target_rms = 500e-6
+    tolerance = 200e-6
+
+    for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
+        rms = run_photometry(tic_id, dmb, dmf, crop, color_lim)
+        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms:.2e}")
+
+        if np.abs(rms - target_rms) <= tolerance:
+            print(f"\n🎯 Found optimal config! RMS = {rms:.2e}")
+            print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
+            break  # comment this out if you want to keep searching
+
+        if rms < best_rms:
+            best_rms = rms
+            best_params = (dmb, dmf, crop, color_lim)
+
+    else:
+        print(f"\n🔍 Best RMS found: {best_rms:.2e}")
+        print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, color_lim={best_params[3]}")
