@@ -15,69 +15,69 @@ COLOR_TOLERANCE = 0.4  # Color index tolerance for comparison stars
 plot_images()
 
 
-def optimize_photometry_args(all_phot_data, exp, target_tic):
-    from itertools import product
-
-    best_args = None
-    best_rms = float('inf')
-    best_result = None
-
-    # Define candidate values to try
-    crop_sizes = [128, 256, 512]
-    mag_ranges = [(8, 11), (9, 12), (10, 13)]
-    color_options = [True, False]
-    tolerance_ppm = 50
-
-    # Try all combinations of parameters
-    for crop, (bl, fl), use_color in product(crop_sizes, mag_ranges, color_options):
-        print(f"\nTrying: crop={crop}, mag_range=({bl},{fl}), use_color={use_color}")
-
-        # Simulate parsed arguments
-        class Args:
-            pass
-
-        args = Args()
-        args.crop = crop
-        args.bl = bl
-        args.fl = fl
-        args.color = use_color
-        args.bin = 100  # Ensure binning goes up to 90
-
-        # Filter table using your pipeline
-        filtered_data = filter_comparison_stars(all_phot_data, args)
-
-        # Run RMS analysis
-        times_binned, rms_values, _ = compute_rms_values(filtered_data, exp, args)
-
-        # Index of bin=90 (if i starts at 1)
-        try:
-            rms_at_90 = rms_values[89]
-            print(f"RMS at bin=90: {rms_at_90:.2f} ppm")
-        except IndexError:
-            print("Not enough bins to evaluate bin=90.")
-            continue
-
-        # Check if this is the best result so far
-        if abs(rms_at_90 - 500) < abs(best_rms - 500):
-            best_args = (crop, bl, fl, use_color)
-            best_rms = rms_at_90
-            best_result = (times_binned, rms_values)
-
-        # Early stopping if within tolerance
-        if abs(rms_at_90 - 500) <= tolerance_ppm:
-            break
-
-    if best_args:
-        crop, bl, fl, use_color = best_args
-        print(f"\n✅ Best parameters:")
-        print(f"Crop size: {crop}")
-        print(f"Mag range: {bl}–{fl}")
-        print(f"Color dependency: {use_color}")
-        print(f"RMS at bin=90: {best_rms:.2f} ppm")
-    else:
-        print("❌ No suitable configuration found.")
-
-    return best_args, best_result
+# def optimize_photometry_args(all_phot_data, exp, target_tic):
+#     from itertools import product
+#
+#     best_args = None
+#     best_rms = float('inf')
+#     best_result = None
+#
+#     # Define candidate values to try
+#     crop_sizes = [128, 256, 512]
+#     mag_ranges = [(8, 11), (9, 12), (10, 13)]
+#     color_options = [True, False]
+#     tolerance_ppm = 50
+#
+#     # Try all combinations of parameters
+#     for crop, (bl, fl), use_color in product(crop_sizes, mag_ranges, color_options):
+#         print(f"\nTrying: crop={crop}, mag_range=({bl},{fl}), use_color={use_color}")
+#
+#         # Simulate parsed arguments
+#         class Args:
+#             pass
+#
+#         args = Args()
+#         args.crop = crop
+#         args.bl = bl
+#         args.fl = fl
+#         args.color = use_color
+#         args.bin = 100  # Ensure binning goes up to 90
+#
+#         # Filter table using your pipeline
+#         filtered_data = filter_comparison_stars(all_phot_data, args)
+#
+#         # Run RMS analysis
+#         times_binned, rms_values, _ = compute_rms_values(filtered_data, exp, args)
+#
+#         # Index of bin=90 (if i starts at 1)
+#         try:
+#             rms_at_90 = rms_values[89]
+#             print(f"RMS at bin=90: {rms_at_90:.2f} ppm")
+#         except IndexError:
+#             print("Not enough bins to evaluate bin=90.")
+#             continue
+#
+#         # Check if this is the best result so far
+#         if abs(rms_at_90 - 500) < abs(best_rms - 500):
+#             best_args = (crop, bl, fl, use_color)
+#             best_rms = rms_at_90
+#             best_result = (times_binned, rms_values)
+#
+#         # Early stopping if within tolerance
+#         if abs(rms_at_90 - 500) <= tolerance_ppm:
+#             break
+#
+#     if best_args:
+#         crop, bl, fl, use_color = best_args
+#         print(f"\n✅ Best parameters:")
+#         print(f"Crop size: {crop}")
+#         print(f"Mag range: {bl}–{fl}")
+#         print(f"Color dependency: {use_color}")
+#         print(f"RMS at bin=90: {best_rms:.2f} ppm")
+#     else:
+#         print("❌ No suitable configuration found.")
+#
+#     return best_args, best_result
 
 
 def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file):
