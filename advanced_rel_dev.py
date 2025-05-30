@@ -266,10 +266,10 @@ if __name__ == "__main__":
     crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
     color_lim_range = np.arange(0.1, 0.8, 0.1).round(2).tolist()
 
-    best_rms = np.inf
-    best_params = None
     target_rms = 600
     tolerance = 200
+    best_rms = np.inf
+    best_params = None
 
     for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
         rms = run_photometry(tic_id, dmb, dmf, crop, color_lim)
@@ -278,17 +278,23 @@ if __name__ == "__main__":
         if np.abs(rms - target_rms) <= tolerance:
             print(f"\n🎯 Found optimal config! RMS = {rms}")
             print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
-            break  # comment this out if you want to keep searching
+
+            with open("best_params_log.txt", "a") as f:
+                f.write(f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf} --crop {crop} --color {color_lim}\n")
+            break  # Optional: stop if a good enough RMS is found
 
         if rms < best_rms:
             best_rms = rms
             best_params = (dmb, dmf, crop, color_lim)
 
-    else:
-        print(f"\n🔍 Best RMS found: {best_rms}")
+    # If no optimal config was found within tolerance, still log the best found
+    if best_params is not None:
+        print(f"\n🔍 Best RMS found (not within target tolerance): {best_rms}")
         print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, "
               f"color_lim={best_params[3]}")
 
         with open("best_params_log.txt", "a") as f:
             f.write(f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]} "
-                    f"--crop {best_params[2]} --color {best_params[3]}\n")
+                    f"--crop {best_params[2]} --color {best_params[3]}  # Best RMS: {best_rms:.2e}\n")
+    else:
+        print("⚠️ No valid RMS found.")
