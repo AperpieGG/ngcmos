@@ -264,15 +264,15 @@ if __name__ == "__main__":
 
     best_rms = np.inf
     best_params = None
-    target_rms = 500
+    target_rms = 700
     tolerance = 200
 
     for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
         rms = run_photometry(tic_id, dmb, dmf, crop, color_lim)
-        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {int(rms)}")
+        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {(rms)}")
 
         if np.abs(rms - target_rms) <= tolerance:
-            print(f"\n🎯 Found optimal config! RMS = {int(rms)}")
+            print(f"\n🎯 Found optimal config! RMS = {(rms)}")
             print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
             break  # comment this out if you want to keep searching
 
@@ -281,6 +281,6 @@ if __name__ == "__main__":
             best_params = (dmb, dmf, crop, color_lim)
 
     else:
-        print(f"\n🔍 Best RMS found: {int(best_rms)}")
+        print(f"\n🔍 Best RMS found: {(best_rms)}")
         print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, "
               f"color_lim={best_params[3]}")
