@@ -80,7 +80,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.
             break
 
     print(f'RMS of comparison stars after filtering: {len(comp_star_rms[comp_star_mask])}')
-    print(f'RMS values after filtering: {comp_star_rms[comp_star_mask]}')
+    # print(f'RMS values after filtering: {comp_star_rms[comp_star_mask]}')
 
     return comp_star_mask, comp_star_rms, i
 
