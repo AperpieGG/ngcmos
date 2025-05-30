@@ -263,7 +263,7 @@ if __name__ == "__main__":
 
     dmb_range = [0.1, 0.5]
     dmf_range = np.arange(0.5, 4, 0.5).round(2).tolist()
-    crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
+    crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 2000]
     color_lim_range = np.arange(0.1, 0.8, 0.1).round(2).tolist()
 
     target_rms = 600
