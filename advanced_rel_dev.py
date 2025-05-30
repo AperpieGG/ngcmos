@@ -9,9 +9,6 @@ from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers, bin_by_time_interval, calc_noise, get_phot_files, target_info
 
-# Constants for filtering stars
-COLOR_TOLERANCE = 0.1  # Color index tolerance for comparison stars
-
 
 plot_images()
 
@@ -88,7 +85,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.
     return comp_star_mask, comp_star_rms, i
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, color_lim):
     # Get target star info including the mean flux
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _, _ = (
@@ -96,7 +93,7 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size):
 
     # Filter based on color index within the tolerance
     color_index = table['gaiabp'] - table['gaiarp']
-    color_mask = np.abs(color_index - target_color) <= COLOR_TOLERANCE
+    color_mask = np.abs(color_index - target_color) <= color_lim
     color_data = table[color_mask]
 
     # Filter stars brighter than the target within dmb and fainter than the target within dmf
@@ -125,9 +122,9 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size):
     return filtered_table, airmass_list
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, color_lim):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, color_lim)
     # Remove bad comparison stars
 
     tic_ids = np.unique(filtered_table['tic_id'])
@@ -189,6 +186,8 @@ def main():
     parser.add_argument('--crop', type=int, help='Crop size for comparison stars (optional)')
     args = parser.parse_args()
 
+    color_lim = 0.1  # Color index tolerance for comparison stars
+
     # Set parameters based on camera type
     if args.cam == 'CMOS':
         APERTURE = 5
@@ -208,15 +207,12 @@ def main():
 
     phot_table = read_phot_file(os.path.join(directory, phot_file))
 
-    (target_tmag, target_color_index, airmass_list, target_flux_mean,
-     target_sky, target_flux, target_fluxerr, target_time, zp_list) = target_info(phot_table, args.tic_id, APERTURE)
-
     # Extract data for the specific TIC ID
     if args.tic_id in np.unique(phot_table['tic_id']):
         print(f"Performing relative photometry for TIC ID = {args.tic_id}")
 
         best_comps_table, AIRMASS = find_best_comps(phot_table, args.tic_id, APERTURE, args.dmb, args.dmf,
-                                                    args.crop)
+                                                    args.crop, color_lim)
         tic_ids = np.unique(best_comps_table['tic_id'])
         print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
@@ -284,7 +280,7 @@ def main():
 
         plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red',
                      label=f'RMS unbinned = {RMS:.4f}')
-        plt.title(f'Target star: {args.tic_id}, Tmag = {target_star["Tmag"][0]}')
+        plt.title(f'Target star: {args.tic_id}, Tmag = {target_star["Tmag"][0]:.2f}')
         plt.legend(loc='best')
         plt.show()
 
