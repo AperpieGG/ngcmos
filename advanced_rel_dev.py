@@ -280,7 +280,7 @@ def main():
         # Calculate the RMS for the binned data
         RMS_binned = np.std(target_fluxes_binned)
 
-        print(f'RMS for Target: {RMS * 100:.3f}% and binned 5 min: {RMS_binned * 100:.3f}%')
+        print(f'RMS for Target: {RMS}% and binned 5 min: {RMS_binned}%')
 
 
 if __name__ == '__main__':
