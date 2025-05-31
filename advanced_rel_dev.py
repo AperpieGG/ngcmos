@@ -276,7 +276,8 @@ if __name__ == "__main__":
 
     for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
         rms, rms_unbinned = run_photometry(tic_id, dmb, dmf, crop, color_lim)
-        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms}")
+        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms} "
+              f"and RMS Unbinned: {rms_unbinned:.2f}")
 
         if np.abs(rms - target_rms) <= tolerance:
             print(f"\n🎯 Found optimal config! RMS = {rms}")
