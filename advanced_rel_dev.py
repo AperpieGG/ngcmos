@@ -244,11 +244,13 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
         target_time, target_fluxes_dt, target_flux_err_dt, _, _ = (
             remove_outliers(target_time, target_fluxes_dt, target_flux_err_dt))
 
+        rms_unbinned = np.std(target_fluxes_dt) * 1e6  # Convert to ppm
+
         target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
             bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 30))
 
         RMS_binned = np.std(target_fluxes_binned)*1e6
-        return RMS_binned
+        return RMS_binned, rms_unbinned
     except Exception as e:
         print(f"Error for dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim}: {e}")
         return np.inf
@@ -273,7 +275,7 @@ if __name__ == "__main__":
     found_optimal = False
 
     for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
-        rms = run_photometry(tic_id, dmb, dmf, crop, color_lim)
+        rms, rms_unbinned = run_photometry(tic_id, dmb, dmf, crop, color_lim)
         print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms}")
 
         if np.abs(rms - target_rms) <= tolerance:
@@ -282,7 +284,8 @@ if __name__ == "__main__":
             found_optimal = True
             with open("best_params_log.txt", "a") as f:
                 f.write(
-                    f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf} --crop {crop} --color {color_lim}  # Found RMS: {rms:.2e}\n")
+                    f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf} --crop {crop} --color {color_lim}  "
+                    f"# Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n")
             break
 
         if rms < best_rms:
@@ -296,6 +299,7 @@ if __name__ == "__main__":
 
         with open("best_params_log.txt", "a") as f:
             f.write(f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]} "
-                    f"--crop {best_params[2]} --color {best_params[3]}  # Best RMS: {best_rms:.2e}\n")
+                    f"--crop {best_params[2]} --color {best_params[3]}  # Best RMS: {best_rms:.2e} "
+                    f"and RMS Unbinned: {rms_unbinned:.2f}\n")
     elif not found_optimal:
         print("⚠️ No valid RMS found.")
