@@ -253,7 +253,7 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
         return RMS_binned, rms_unbinned
     except Exception as e:
         print(f"Error for dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim}: {e}")
-        return np.inf
+        return np.inf, np.inf
 
 
 if __name__ == "__main__":
