@@ -32,5 +32,5 @@ echo "Found $count unique TIC IDs with Tmag between 10 and 11"
 # Loop through TIC IDs and run the optimization script
 for tic_id in $tic_ids; do
   echo "Running optimization for TIC $tic_id"
-  python3 advanced_rel_dev.py --tic_id "$tic_id"
+  python3 /home/ops/ngcmos/advanced_rel_dev.py --tic_id "$tic_id"
 done
