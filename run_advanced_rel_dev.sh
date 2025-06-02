@@ -3,6 +3,10 @@
 # Path to your .phot file
 PHOT_FILE="phot_NG2320-1302.fits"
 
+# shellcheck disable=SC2034
+TMAG_Bright=$1
+# shellcheck disable=SC2034
+TMAG_Faint=$2
 
 # Check if 'targets' directory exists
 if [ -d "targets" ]; then
@@ -23,7 +27,7 @@ with fits.open("$PHOT_FILE") as hdul:
     tmags = data['Tmag']
 
 # Filter by Tmag
-mask = (tmags >= 10) & (tmags <= 11)
+mask = (tmags >= $TMAG_Bright) & (tmags <= $TMAG_Faint)
 unique_ids = np.unique(tic_ids[mask])
 
 # Print unique TIC IDs (space-separated) and count, separated by |
