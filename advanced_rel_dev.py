@@ -257,16 +257,11 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Optimize photometric parameters.")
+    parser.add_argument('--tic_id', type=int, required=True, help="Target TIC ID")
+    args = parser.parse_args()
 
-
-    tic_id_list = [[4611043, 5796255, 5796320, 5796376, 169746092, 169746369, 169746459, 169763609, 169763615,
-                           169763631, 169763812, 169763929, 169763985, 169764011, 169764168, 169764174, 188619865,
-                           188620052, 188620343, 188620450, 188620477, 188620644, 188622237, 188622268, 188622275,
-                           188622523, 188627904, 188628115, 188628237, 188628252, 188628309, 188628413, 188628448,
-                           188628555, 188628748, 188628755, 214657492, 214657985, 214658021, 214661588, 214661799,
-                           214661930, 214662807, 214662895, 214662905, 214664699, 214664842, 270185125, 270185254,
-                           270187139, 270187208, 270187283]
-]
+    tic_id = args.tic_id
 
     dmb_range = [0.1, 0.5]
     dmf_range = np.arange(0.5, 4, 0.5).round(2).tolist()
@@ -279,39 +274,33 @@ if __name__ == "__main__":
     best_params = None
     found_optimal = False
 
-    for tic_id in tic_id_list:
-        print(f"\n--- Running optimization for TIC {tic_id} ---")
-        best_rms = np.inf
-        best_params = None
-        found_optimal = False
+    for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
+        rms, rms_unbinned = run_photometry(tic_id, dmb, dmf, crop, color_lim)
+        print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms} "
+              f"and RMS Unbinned: {rms_unbinned:.2f}")
 
-        for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
-            rms, rms_unbinned = run_photometry(tic_id, dmb, dmf, crop, color_lim)
-            print(f"Params: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms} "
-                  f"and RMS Unbinned: {rms_unbinned:.2f}")
-
-            if np.abs(rms - target_rms) <= tolerance:
-                print(f"\n🎯 Found optimal config! RMS = {rms}")
-                print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
-                found_optimal = True
-                with open("best_params_log.txt", "a") as f:
-                    f.write(
-                        f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf} --crop {crop} --color {color_lim}  "
-                        f"# Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n")
-                break
-
-            if rms < best_rms:
-                best_rms = rms
-                best_params = (dmb, dmf, crop, color_lim)
-
-        if not found_optimal and best_params is not None:
-            print(f"\n🔍 Best RMS found (not within target tolerance): {best_rms}")
-            print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, "
-                  f"color_lim={best_params[3]}")
-
+        if np.abs(rms - target_rms) <= tolerance:
+            print(f"\n🎯 Found optimal config! RMS = {rms}")
+            print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
+            found_optimal = True
             with open("best_params_log.txt", "a") as f:
-                f.write(f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]} "
-                        f"--crop {best_params[2]} --color {best_params[3]}  # Best RMS: {best_rms:.2e} "
-                        f"and RMS Unbinned: {rms_unbinned:.2f}\n")
-        elif not found_optimal:
-            print("⚠️ No valid RMS found.")
+                f.write(
+                    f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf} --crop {crop} --color {color_lim}  "
+                    f"# Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n")
+            break
+
+        if rms < best_rms:
+            best_rms = rms
+            best_params = (dmb, dmf, crop, color_lim)
+
+    if not found_optimal and best_params is not None:
+        print(f"\n🔍 Best RMS found (not within target tolerance): {best_rms}")
+        print(f"Best parameters: dmb={best_params[0]}, dmf={best_params[1]}, crop={best_params[2]}, "
+              f"color_lim={best_params[3]}")
+
+        with open("best_params_log.txt", "a") as f:
+            f.write(f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]} "
+                    f"--crop {best_params[2]} --color {best_params[3]}  # Best RMS: {best_rms:.2e} "
+                    f"and RMS Unbinned: {rms_unbinned:.2f}\n")
+    elif not found_optimal:
+        print("⚠️ No valid RMS found.")
