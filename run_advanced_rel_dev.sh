@@ -3,6 +3,15 @@
 # Path to your .phot file
 PHOT_FILE="phot_NG2320-1302.fits"
 
+
+# Check if 'targets' directory exists
+if [ -d "targets" ]; then
+  echo "📁 'targets/' directory already exists. Skipping optimization and file move."
+  echo "Running plot_timescale_json.py..."
+  python3 plot_timescale_json.py
+  exit 0
+fi
+
 # Extract unique TIC IDs with Tmag between 10 and 11 using Python
 output=$(python3 - <<END
 from astropy.io import fits
