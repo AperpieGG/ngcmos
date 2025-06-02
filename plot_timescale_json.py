@@ -5,7 +5,9 @@ import numpy as np
 from matplotlib import pyplot as plt, ticker
 from astropy.table import Table, vstack
 import argparse
-from utils import bin_time_flux_error
+from utils import bin_time_flux_error, plot_images
+
+plot_images()
 
 
 def load_all_jsons_as_table(directory):
@@ -72,7 +74,7 @@ def compute_rms_values(phot_table, exp, args):
 
 def plot_timescale(times, avg_rms, RMS_model):
     fig, ax = plt.subplots(figsize=(6, 8))
-    ax.plot(times, avg_rms, 'o-', label="Median RMS (data)", color="blue")
+    ax.plot(times, avg_rms, 'o', label="Median RMS (data)", color="blue")
     ax.plot(times, RMS_model, '--', label="Model", color="blue")
     ax.axvline(x=900, color='black', linestyle='--', label='Reference (900s)')
     ax.set_xscale('log')
