@@ -9,7 +9,6 @@ from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers, bin_by_time_interval, calc_noise, get_phot_files, target_info
 
-
 plot_images()
 
 
@@ -124,7 +123,8 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, color
 
 def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, color_lim):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, color_lim)
+    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size,
+                                               color_lim)
     # Remove bad comparison stars
 
     tic_ids = np.unique(filtered_table['tic_id'])
@@ -249,7 +249,7 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
         target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
             bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 30))
 
-        RMS_binned = np.std(target_fluxes_binned)*1e6
+        RMS_binned = np.std(target_fluxes_binned) * 1e6
         return RMS_binned, rms_unbinned
     except Exception as e:
         print(f"Error for dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim}: {e}")
@@ -284,9 +284,11 @@ if __name__ == "__main__":
             print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
             found_optimal = True
             with open("best_params_log.txt", "a") as f:
-                f.write(
-                    f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf} --crop {crop} --color {color_lim}  "
-                    f"# Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n")
+                cmd = f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf}"
+                if crop is not None:
+                    cmd += f" --crop {crop}"
+                cmd += f" --color {color_lim}  # Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n"
+                f.write(cmd)
             break
 
         if rms < best_rms:
@@ -299,8 +301,10 @@ if __name__ == "__main__":
               f"color_lim={best_params[3]}")
 
         with open("best_params_log.txt", "a") as f:
-            f.write(f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]} "
-                    f"--crop {best_params[2]} --color {best_params[3]}  # Best RMS: {best_rms:.2e} "
-                    f"and RMS Unbinned: {rms_unbinned:.2f}\n")
+            cmd = f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]}"
+            if best_params[2] is not None:
+                cmd += f" --crop {best_params[2]}"
+            cmd += f" --color {best_params[3]}  # Best RMS: {best_rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n"
+            f.write(cmd)
     elif not found_optimal:
         print("⚠️ No valid RMS found.")
