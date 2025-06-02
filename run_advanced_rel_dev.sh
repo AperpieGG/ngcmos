@@ -33,3 +33,35 @@ for tic_id in $tic_ids; do
   echo "Running optimization for TIC $tic_id"
   python3 /home/ops/ngcmos/advanced_rel_dev.py --tic_id "$tic_id"
 done
+
+# Now parse and execute each line from best_params_log.txt
+LOG_FILE="best_params_log.txt"
+
+if [[ -f "$LOG_FILE" ]]; then
+  echo "Executing best parameter configurations from $LOG_FILE..."
+
+  while IFS= read -r line; do
+    # Strip everything after the first '#' (the comment)
+    cmd=$(echo "$line" | cut -d'#' -f1)
+
+    # Run the command with Python
+    echo "Executing: $cmd"
+    python3 -c "import sys; sys.argv = ['$cmd']; exec(open('rel_dev_dev.py').read())"
+  done < "$LOG_FILE"
+else
+  echo "No best_params_log.txt found."
+fi
+
+
+# Create the 'targets' directory if it doesn't exist
+mkdir -p targets
+
+# Move all target light curve JSON files into the 'targets' folder
+mv target_light_curve*.json targets/
+
+echo "Moved all target_light_curve JSON files to ./targets/"
+
+# Run the plot_timescale_json.py script
+python3 plot_timescale_json.py
+
+echo "✅ Finished running plot_timescale_json.py"
