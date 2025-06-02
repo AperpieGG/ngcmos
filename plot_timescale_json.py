@@ -35,7 +35,6 @@ def load_all_jsons_as_table(directory):
 
 def compute_rms_values(phot_table, exp, args):
     """Compute RMS vs binning and return the median curve over all stars."""
-    phot_table = phot_table[(phot_table['Tmag'] >= args.bl) & (phot_table['Tmag'] <= args.fl)]
     tic_ids = np.unique(phot_table['TIC_ID'])
     print(f"Total stars in brightness range: {len(tic_ids)}")
 
