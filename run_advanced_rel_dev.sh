@@ -71,6 +71,6 @@ mv target_light_curve*.json targets/
 echo "Moved all target_light_curve JSON files to ./targets/"
 
 # Run the plot_timescale_json.py script
-python3 plot_timescale_json.py
+python3 /home/ops/ngcmos/plot_timescale_json.py
 
 echo "✅ Finished running plot_timescale_json.py"
