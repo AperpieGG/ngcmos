@@ -98,5 +98,21 @@ if __name__ == "__main__":
     home_dir = '.'
     directory = f"{home_dir}/targets"
     phot_table = load_all_jsons_as_table(directory)
+
     times, avg_rms, RMS_model = compute_rms_values(phot_table, exp=10, args=args)
+
+    # Save the results
+    output_data = {
+        "Time_Binned": times,
+        "Median_RMS_ppm": avg_rms.tolist(),
+        "RMS_Model_ppm": RMS_model.tolist()
+    }
+
+    with open("rms_vs_timescale.json", "w") as outfile:
+        json.dump(output_data, outfile, indent=2)
+
+    print("Saved RMS vs timescale results to rms_vs_timescale.json")
+
+    # Plot
     plot_timescale(times, avg_rms, RMS_model)
+
