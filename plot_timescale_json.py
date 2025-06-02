@@ -1,4 +1,6 @@
 #! /usr/bin/env python
+# This scripts opens a directory where JSON files are stored for each TIC_ID with the advanced photometry
+# and computes the RMS vs time binning for all stars, plotting the average curve.
 import glob
 import json
 import numpy as np
@@ -91,10 +93,10 @@ def plot_timescale(times, avg_rms, RMS_model):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aggregate RMS vs time binning from all JSON files")
-    parser.add_argument('--dir', type=str, default='.', help='Directory with JSON files')
     parser.add_argument('--bin', type=int, default=180, help='Max binning size')
     args = parser.parse_args()
-
-    phot_table = load_all_jsons_as_table(args.dir)
+    home_dir = '.'
+    directory = f"{home_dir}/targets"
+    phot_table = load_all_jsons_as_table(directory)
     times, avg_rms, RMS_model = compute_rms_values(phot_table, exp=10, args=args)
     plot_timescale(times, avg_rms, RMS_model)
