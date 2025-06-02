@@ -8,7 +8,7 @@ PHOT_FILE="phot_NG2320-1302.fits"
 if [ -d "targets" ]; then
   echo "📁 'targets/' directory already exists. Skipping optimization and file move."
   echo "Running plot_timescale_json.py..."
-  python3 plot_timescale_json.py
+  python3 /home/ops/ngcmos/plot_timescale_json.py
   exit 0
 fi
 
