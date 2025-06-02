@@ -284,7 +284,7 @@ if __name__ == "__main__":
             print(f"Params => dmb: {dmb}, dmf: {dmf}, crop: {crop}, color_lim: {color_lim}")
             found_optimal = True
             with open("best_params_log.txt", "a") as f:
-                cmd = f"rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf}"
+                cmd = f"/home/ops/ngcmos/rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf}"
                 if crop is not None:
                     cmd += f" --crop {crop}"
                 cmd += f" --color {color_lim}  # Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n"
@@ -301,7 +301,7 @@ if __name__ == "__main__":
               f"color_lim={best_params[3]}")
 
         with open("best_params_log.txt", "a") as f:
-            cmd = f"rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]}"
+            cmd = f"/home/ops/ngcmos/rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]}"
             if best_params[2] is not None:
                 cmd += f" --crop {best_params[2]}"
             cmd += f" --color {best_params[3]}  # Best RMS: {best_rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n"
