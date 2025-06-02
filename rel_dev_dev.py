@@ -75,7 +75,7 @@ def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids, camera):
     plt.ylabel('Y Pixel')
     # plt.legend([target_circle, comp_circle], ['Target', 'Comp Stars'], loc='upper right')
     plt.title(f'Target: {tic_id_to_plot}')
-    plt.show()
+    # plt.show()
 
 
 def target_info(table, tic_id_to_plot, APERTURE):
@@ -262,7 +262,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.
     plt.legend()
     plt.title('RMS vs. Magnitude of Comparison Stars')
     plt.tight_layout()
-    plt.show()
+    # plt.show()
 
     # Save the data for the plot
     output_data = {
@@ -383,7 +383,7 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
             ax.set_ylabel('Flux')
 
         plt.tight_layout()
-        plt.show()
+        # plt.show()
 
 
 def get_phot_files(directory):
@@ -597,7 +597,7 @@ def main():
                          label=f'RMS unbinned = {RMS:.4f}')
             plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
             plt.legend(loc='best')
-            plt.show()
+            # plt.show()
 
             # Save target_time_binned and target_fluxes_dt in a JSON file
             data_to_save = {
