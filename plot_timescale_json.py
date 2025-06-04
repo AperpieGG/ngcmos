@@ -37,7 +37,7 @@ def load_all_jsons_as_table(directory):
     return vstack(all_tables)
 
 
-def compute_rms_values(phot_table, exp, args):
+def compute_rms_values(phot_table, args):
     """Compute RMS vs binning and return the median curve over all stars."""
     tic_ids = np.unique(phot_table['TIC_ID'])
     print(f"Total stars in brightness range: {len(tic_ids)}")
@@ -61,7 +61,7 @@ def compute_rms_values(phot_table, exp, args):
             time_binned, dt_flux_binned, dt_fluxerr_binned = bin_time_flux_error(jd_mid, rel_flux, rel_fluxerr, i)
             RMS = np.std(dt_flux_binned)
             RMS_values.append(RMS)
-            time_seconds.append(i * exp)
+            time_seconds.append(i * args.exp)
 
         average_rms_values.append(RMS_values)
         times_binned.append(time_seconds)
@@ -94,12 +94,13 @@ def plot_timescale(times, avg_rms, RMS_model):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aggregate RMS vs time binning from all JSON files")
     parser.add_argument('--bin', type=int, default=180, help='Max binning size')
+    parser.add_argument('--exp', type=int, default=10, help='Exposure time in seconds')
     args = parser.parse_args()
     home_dir = '.'
     directory = f"{home_dir}/targets"
     phot_table = load_all_jsons_as_table(directory)
 
-    times, avg_rms, RMS_model = compute_rms_values(phot_table, exp=10, args=args)
+    times, avg_rms, RMS_model = compute_rms_values(phot_table, args=args)
 
     # Save the results
     output_data = {
