@@ -289,7 +289,7 @@ if __name__ == "__main__":
                 cmd = f"/home/ops/ngcmos/rel_dev_dev.py {tic_id} --dmb {dmb} --dmf {dmf}"
                 if crop is not None:
                     cmd += f" --crop {crop}"
-                cmd += f" --color {color_lim}  # Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n"
+                cmd += f" --color {color_lim} --cam {args.cam}  # Found RMS: {rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n"
                 f.write(cmd)
             break
 
@@ -306,7 +306,8 @@ if __name__ == "__main__":
             cmd = f"/home/ops/ngcmos/rel_dev_dev.py {tic_id} --dmb {best_params[0]} --dmf {best_params[1]}"
             if best_params[2] is not None:
                 cmd += f" --crop {best_params[2]}"
-            cmd += f" --color {best_params[3]}  # Best RMS: {best_rms:.2e} and RMS Unbinned: {rms_unbinned:.2f}\n"
+            cmd += (f" --color {best_params[3]} --cam {args.cam}  # Best RMS: {best_rms:.2e} "
+                    f"and RMS Unbinned: {rms_unbinned:.2f}\n")
             f.write(cmd)
     elif not found_optimal:
         print("⚠️ No valid RMS found.")
