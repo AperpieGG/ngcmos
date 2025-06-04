@@ -8,6 +8,8 @@ TMAG_Bright=$1
 # shellcheck disable=SC2034
 TMAG_Faint=$2
 
+cam=$3
+
 # Check if 'targets' directory exists
 if [ -d "targets" ]; then
   echo "📁 'targets/' directory already exists. Skipping optimization and file move."
@@ -44,7 +46,7 @@ echo "Found $count unique TIC IDs with Tmag between 10 and 11"
 # Loop through each TIC ID and run the optimization script
 for tic_id in $tic_ids; do
   echo "Running optimization for TIC $tic_id"
-  python3 /home/ops/ngcmos/advanced_rel_dev.py --tic_id "$tic_id"
+  python3 /home/ops/ngcmos/advanced_rel_dev.py --tic_id "$tic_id" --cam "$cam"
 done
 
 # Now parse and execute each line from best_params_log.txt
