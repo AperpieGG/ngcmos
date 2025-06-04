@@ -176,7 +176,7 @@ def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_s
     return good_comp_star_table, airmass  # Return the filtered table including only good comp stars
 
 
-def run_photometry(tic_id, dmb, dmf, crop, color_lim):
+def run_photometry(tic_id, dmb, dmf, crop, color_lim, cam):
     try:
         # (All your main() logic moved here with 'args.dmb' -> dmb etc.)
         # Skip CLI parser and set values directly
@@ -259,6 +259,8 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Optimize photometric parameters.")
     parser.add_argument('--tic_id', type=int, required=True, help="Target TIC ID")
+    parser.add_argument('--cam', type=str, default='CMOS', choices=['CMOS', 'CCD'],
+                        help="Camera type (CMOS or CCD)")
     args = parser.parse_args()
 
     tic_id = args.tic_id
@@ -275,7 +277,7 @@ if __name__ == "__main__":
     found_optimal = False
 
     for dmb, dmf, crop, color_lim in itertools.product(dmb_range, dmf_range, crop_range, color_lim_range):
-        rms, rms_unbinned = run_photometry(tic_id, dmb, dmf, crop, color_lim)
+        rms, rms_unbinned = run_photometry(tic_id, dmb, dmf, crop, color_lim, args.cam)
         print(f"Params for star {tic_id}: dmb={dmb}, dmf={dmf}, crop={crop}, color_lim={color_lim} => RMS: {rms} "
               f"and RMS Unbinned: {rms_unbinned:.2f}")
 
