@@ -265,12 +265,12 @@ if __name__ == "__main__":
 
     tic_id = args.tic_id
 
-    dmb_range = [0.1, 0.5]
-    dmf_range = np.arange(0.5, 4, 0.5).round(2).tolist()
-    crop_range = [None, 400, 600, 800, 1000, 1200, 1400, 2000]
-    color_lim_range = np.arange(0.1, 0.8, 0.1).round(2).tolist()
+    dmb_range = [0.2, 0.5]
+    dmf_range = np.arange(0.5, 3, 0.5).round(2).tolist()
+    crop_range = [None, 400, 800, 1000, 1200, 1400, 200]
+    color_lim_range = np.arange(0.1, 0.6, 0.1).round(2).tolist()
 
-    target_rms = 400
+    target_rms = 600
     tolerance = 200
     best_rms = np.inf
     best_params = None
