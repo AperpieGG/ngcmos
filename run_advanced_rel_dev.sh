@@ -52,17 +52,18 @@ LOG_FILE="best_params_log.txt"
 
 if [[ -f "$LOG_FILE" ]]; then
   echo "Executing best parameter configurations from $LOG_FILE..."
-
+  # Read the log file line by line
   while IFS= read -r line; do
-    # Strip everything after the first '#' (the comment)
-    cmd=$(echo "$line" | cut -d'#' -f1)
+    # Remove comment and trim whitespace
+    cmd=$(echo "$line" | cut -d'#' -f1 | xargs)
 
-    # Run the command with Python
-    echo "Executing: $cmd"
-    python3 -c "import sys; sys.argv = ['$cmd']; exec(open('rel_dev_dev.py').read())"
+    if [[ -n "$cmd" ]]; then
+      echo "Executing: $cmd"
+      eval "$cmd" || echo "⚠️ Failed to execute: $cmd"
+    fi
   done < "$LOG_FILE"
 else
-  echo "No best_params_log.txt found."
+  echo "❌ No $LOG_FILE found."
 fi
 
 
