@@ -269,7 +269,7 @@ if __name__ == "__main__":
     crop_range = [None, 400, 800, 1000, 1200, 1400, 2000]
     color_lim_range = np.arange(0.1, 0.6, 0.1).round(2).tolist()
 
-    target_rms = 600
+    target_rms = 1000
     tolerance = 200
     best_rms = np.inf
     best_params = None
