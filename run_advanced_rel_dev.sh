@@ -35,7 +35,8 @@ unique_ids = np.unique(tic_ids[mask])
 # Take first 45
 selected_ids = unique_ids[:45]
 
-print(" ".join(str(tic) for tic in selected_ids) + "|" + str(len(selected_ids)))
+# Print selected TICs, selected count, and full count
+print(" ".join(str(tic) for tic in selected_ids) + "|" + str(len(selected_ids)) + "|" + str(len(unique_ids)))
 END
 )
 
