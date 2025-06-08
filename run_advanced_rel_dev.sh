@@ -32,14 +32,9 @@ with fits.open("$PHOT_FILE") as hdul:
 mask = (tmags >= $TMAG_Bright) & (tmags <= $TMAG_Faint)
 unique_ids = np.unique(tic_ids[mask])
 
-# Randomly select up to 45 TICs
-if len(unique_ids) > 45:
-    selected_ids = np.random.choice(unique_ids, 45, replace=False)
-else:
-    selected_ids = unique_ids
+# Print unique TIC IDs (space-separated) and count, separated by |
+print(" ".join(str(tic) for tic in unique_ids[:45]) + "|" + str(len(unique_ids)))
 
-# Print space-separated TICs and total count
-print(" ".join(str(tic) for tic in selected_ids) + "|" + str(len(selected_ids)))
 END
 )
 
