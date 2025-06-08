@@ -32,17 +32,18 @@ with fits.open("$PHOT_FILE") as hdul:
 mask = (tmags >= $TMAG_Bright) & (tmags <= $TMAG_Faint)
 unique_ids = np.unique(tic_ids[mask])
 
-# Print unique TIC IDs (space-separated) and count, separated by |
-print(" ".join(str(tic) for tic in unique_ids[:45]) + "|" + str(len(unique_ids)))
+# Take first 45
+selected_ids = unique_ids[:45]
 
+print(" ".join(str(tic) for tic in selected_ids) + "|" + str(len(selected_ids)))
 END
 )
 
-# Separate the output into TIC IDs and count
-IFS='|' read -r tic_ids count <<< "$output"
+# Separate the output into TIC IDs, selected count, and full count
+IFS='|' read -r tic_ids selected_count full_count <<< "$output"
 
 # Print the count
-echo "Found $count unique TIC IDs with Tmag between $TMAG_Bright and $TMAG_Faint"
+echo "Selected $selected_count out of $full_count TIC IDs with Tmag between $TMAG_Bright and $TMAG_Faint"
 
 # Loop through each TIC ID and run the optimization script
 for tic_id in $tic_ids; do
