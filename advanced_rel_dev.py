@@ -180,7 +180,6 @@ def run_photometry(tic_id, dmb, dmf, crop, color_lim, cam):
     try:
         # (All your main() logic moved here with 'args.dmb' -> dmb etc.)
         # Skip CLI parser and set values directly
-        cam = 'CMOS'
         if cam == 'CMOS':
             APERTURE = 5
             DC = 1.6
