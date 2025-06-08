@@ -47,7 +47,7 @@ END
 IFS='|' read -r tic_ids count <<< "$output"
 
 # Print the count
-echo "Found $count unique TIC IDs with Tmag between 10 and 11"
+echo "Found $count unique TIC IDs with Tmag between $TMAG_Bright and $TMAG_Faint"
 
 # Loop through each TIC ID and run the optimization script
 for tic_id in $tic_ids; do
