@@ -8,8 +8,7 @@ from utils import noise_sources, bin_time_flux_error
 
 
 class NumpyEncoder(json.JSONEncoder):
-    """ Custom JSON encoder for NumPy data types """
-
+    """Custom JSON encoder for NumPy data types"""
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -40,8 +39,9 @@ def main():
     args = parser.parse_args()
 
     bin_size = args.bin_size
-    cam = args.cam
+    cam = args.cam.upper()
 
+    # Camera configuration
     if cam == 'CMOS':
         READ_NOISE = 1.56
         DARK_CURRENT = 1.6
@@ -55,14 +55,18 @@ def main():
         APERTURE = 4
         EXPOSURE = 10.0
 
+    # Locate JSON target files
     current_dir = os.getcwd()
     target_dir = os.path.join(current_dir, 'targets')
     json_files = [f for f in os.listdir(target_dir) if f.startswith('target_light_curve_') and f.endswith('.json')]
-    print(f"Found {len(json_files)} target JSON files in {target_dir}")
+    print(f"📁 Found {len(json_files)} JSON files in {target_dir}")
 
+    # Load zero point
     zp = extract_zero_point(f'zp{APERTURE}.json')
 
+    # Prepare output containers
     RMS_list, Tmags_list, color_list = [], [], []
+    synthetic_mag_list = []
     photon_shot_noise_list = []
     sky_noise_list = []
     read_noise_list = []
@@ -70,9 +74,8 @@ def main():
     N_list = []
     RNS_list = []
     tic_ids = []
-
-    sky_values = []
-    airmass_values = []
+    all_sky = []
+    all_airmass = []
 
     for file in json_files:
         file_path = os.path.join(target_dir, file)
@@ -84,70 +87,61 @@ def main():
 
         Tmag = float(data['Tmag'])
         color = float(data['COLOR'])
-        sky = np.mean(np.array(data['Sky']))
-        airmass = np.mean(np.array(data['Airmass']))
-        sky_values.append(sky)
-        airmass_values.append(airmass)
-
+        sky = np.array(data['Sky'])
+        sky = np.mean(sky, axis=0)  # collapse to 1D average
+        airmass = np.array(data['Airmass'])
         flux = np.array(data['Relative_Flux'])
         flux_err = np.array(data['Relative_Flux_err'])
         time = np.array(data['Time_BJD'])
 
+        all_sky.append(sky)
+        all_airmass.extend(airmass)
+
+        # Bin and calculate RMS
         if bin_size > 1:
             time, flux, flux_err = bin_time_flux_error(time, flux, flux_err, bin_fact=bin_size)
-            RMS = np.std(flux) * 1e6
+            RMS = np.std(flux) * 1e6  # ppm
         else:
-            RMS = float(data['RMS']) * 1e6
+            RMS = float(data.get('RMS', np.std(flux))) * 1e6  # fallback if RMS not stored
 
         RMS_list.append(RMS)
         Tmags_list.append(Tmag)
         color_list.append(color)
 
-        # Per-star noise values still calculated for diagnostics
-        _, psn, sn, rn, dcn, N, RNS = noise_sources(
-            [sky], bin_size, [airmass], zp, APERTURE,
-            READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
-        )
+    # Convert to arrays
+    all_sky = np.array(all_sky)
+    airmass_array = np.array(all_airmass)
 
-        photon_shot_noise_list.append(psn)
-        sky_noise_list.append(sn)
-        read_noise_list.append(rn)
-        dc_noise_list.append(dcn)
-        N_list.append(N)
-        RNS_list.append(RNS)
+    print("🌌 Average sky flux:", np.mean(all_sky))
+    print("🧭 Calculated ZP vs Header ZP mean:", np.mean(zp))
 
-    # Compute global synthetic magnitude once
-    avg_sky = np.mean(sky_values)
-    avg_airmass = np.mean(airmass_values)
-    print("Average sky flux:", avg_sky)
-
-    synthetic_mag, _, _, _, _, _, _ = noise_sources(
-        [avg_sky], bin_size, [avg_airmass], zp, APERTURE,
-        READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
+    # Call noise_sources
+    synthetic_mag, psn, sn, rn, dcn, N, RNS = noise_sources(
+        all_sky, bin_size, airmass_array, zp, APERTURE, READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
     )
 
+    # Convert all outputs to serializable lists
     output_data = {
         "TIC_IDs": tic_ids,
         "RMS_list": RMS_list,
         "Tmag_list": Tmags_list,
-        "synthetic_mag": synthetic_mag[0],
-        "photon_shot_noise": photon_shot_noise_list,
-        "sky_noise": sky_noise_list,
-        "read_noise": read_noise_list,
-        "dc_noise": dc_noise_list,
-        "N": N_list,
-        "RNS": RNS_list,
+        "synthetic_mag": synthetic_mag.tolist(),
+        "photon_shot_noise": psn.tolist(),
+        "sky_noise": sn.tolist(),
+        "read_noise": rn.tolist(),
+        "dc_noise": dcn.tolist(),
+        "N": N.tolist(),
+        "RNS": RNS.tolist(),
         "COLOR": color_list
     }
 
-    cwd_last_four = current_dir[-4:]
-    output_filename = f"rms_mags_from_json_{cam}_{cwd_last_four}.json"
-
-    with open(output_filename, 'w') as json_file:
+    # Create output filename
+    output_name = f"rms_mags_from_json_{cam}_{current_dir[-4:]}.json"
+    with open(output_name, 'w') as json_file:
         json.dump(output_data, json_file, indent=4, cls=NumpyEncoder)
 
-    print(f"✅ Results saved to {output_filename}")
+    print(f"✅ Noise model results saved to {output_name}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
