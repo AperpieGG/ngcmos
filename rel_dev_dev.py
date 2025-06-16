@@ -605,14 +605,14 @@ def main():
             data_to_save = {
                 "TIC_ID": tic_id_to_plot,
                 "Tmag": target_star["Tmag"][0],
-                "COLOR": np.float32(target_color),
+                "COLOR": target_color,
                 "Airmass": target_airmass.tolist(),
                 "Sky": target_sky.tolist(),
                 "ZP": target_star['ZP'].tolist(),
                 "Time_BJD": target_time.tolist(),
                 "Relative_Flux": target_fluxes_dt.tolist(),
                 "Relative_Flux_err": target_flux_err_dt.tolist(),
-                "RMS": RMS.tolist()
+                "RMS": RMS
             }
             # grab the last 4 letters of the working directory
             date = os.getcwd()[-4:]
