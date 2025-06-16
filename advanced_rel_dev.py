@@ -281,6 +281,7 @@ if __name__ == "__main__":
     dmf_range = np.arange(0.5, 3, 0.5).round(2).tolist()
     crop_range = [None, 400, 800, 1000, 1200, 1400, 2000]
     color_lim_range = np.arange(0.1, 0.6, 0.1).round(2).tolist()
+    tolerance = 200
 
     if 8 < tmag < 9.5:
         dmb_range = [0.0]
@@ -288,6 +289,7 @@ if __name__ == "__main__":
     if 9.5 < tmag < 10:
         dmb_range = [0.0]
         target_rms = 400
+        tolerance = 100
     if 10 < tmag < 11:
         target_rms = 400
     elif 10 <= tmag < 12:
@@ -297,7 +299,6 @@ if __name__ == "__main__":
     elif 13 <= tmag < 14:
         target_rms = 2000
 
-    tolerance = 200
     best_rms = np.inf
     best_params = None
     found_optimal = False
