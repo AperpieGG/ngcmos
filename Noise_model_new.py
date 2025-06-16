@@ -9,6 +9,7 @@ from utils import noise_sources, bin_time_flux_error
 
 class NumpyEncoder(json.JSONEncoder):
     """ Custom JSON encoder for NumPy data types """
+
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)
@@ -55,17 +56,13 @@ def main():
         EXPOSURE = 10.0
 
     current_dir = os.getcwd()
-    # Set the path to the 'targets' subdirectory
-    target_dir = os.path.join(os.getcwd(), 'targets')
-
-    # Collect all target JSON files within that subdirectory
+    target_dir = os.path.join(current_dir, 'targets')
     json_files = [f for f in os.listdir(target_dir) if f.startswith('target_light_curve_') and f.endswith('.json')]
     print(f"Found {len(json_files)} target JSON files in {target_dir}")
-    
+
     zp = extract_zero_point(f'zp{APERTURE}.json')
 
     RMS_list, Tmags_list, color_list = [], [], []
-    synthetic_mag_list = []
     photon_shot_noise_list = []
     sky_noise_list = []
     read_noise_list = []
@@ -74,8 +71,11 @@ def main():
     RNS_list = []
     tic_ids = []
 
+    sky_values = []
+    airmass_values = []
+
     for file in json_files:
-        file_path = os.path.join(target_dir, file)  # add the targets directory path
+        file_path = os.path.join(target_dir, file)
         with open(file_path, 'r') as f:
             data = json.load(f)
 
@@ -84,16 +84,18 @@ def main():
 
         Tmag = float(data['Tmag'])
         color = float(data['COLOR'])
-        sky = np.array(data['Sky'])
-        sky = np.mean(sky, axis=0)
-        airmass_array = np.array(data['Airmass'])
+        sky = np.mean(np.array(data['Sky']))
+        airmass = np.mean(np.array(data['Airmass']))
+        sky_values.append(sky)
+        airmass_values.append(airmass)
+
         flux = np.array(data['Relative_Flux'])
         flux_err = np.array(data['Relative_Flux_err'])
         time = np.array(data['Time_BJD'])
 
         if bin_size > 1:
             time, flux, flux_err = bin_time_flux_error(time, flux, flux_err, bin_fact=bin_size)
-            RMS = np.std(flux) * 1e6  # convert to ppm
+            RMS = np.std(flux) * 1e6
         else:
             RMS = float(data['RMS']) * 1e6
 
@@ -101,23 +103,34 @@ def main():
         Tmags_list.append(Tmag)
         color_list.append(color)
 
-        synthetic_mag, psn, sn, rn, dcn, N, RNS = noise_sources(
-            [sky], bin_size, airmass_array, zp, APERTURE, READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
+        # Per-star noise values still calculated for diagnostics
+        _, psn, sn, rn, dcn, N, RNS = noise_sources(
+            [sky], bin_size, [airmass], zp, APERTURE,
+            READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
         )
 
-        synthetic_mag_list.append(synthetic_mag)
-        photon_shot_noise_list.append(psn)
-        sky_noise_list.append(sn)
-        read_noise_list.append(rn)
-        dc_noise_list.append(dcn)
-        N_list.append(N)
-        RNS_list.append(RNS)
+        photon_shot_noise_list.append(psn[0])
+        sky_noise_list.append(sn[0])
+        read_noise_list.append(rn[0])
+        dc_noise_list.append(dcn[0])
+        N_list.append(N[0])
+        RNS_list.append(RNS[0])
+
+    # Compute global synthetic magnitude once
+    avg_sky = np.mean(sky_values)
+    avg_airmass = np.mean(airmass_values)
+    print("Average sky flux:", avg_sky)
+
+    synthetic_mag, _, _, _, _, _, _ = noise_sources(
+        [avg_sky], bin_size, [avg_airmass], zp, APERTURE,
+        READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
+    )
 
     output_data = {
         "TIC_IDs": tic_ids,
         "RMS_list": RMS_list,
         "Tmag_list": Tmags_list,
-        "synthetic_mag": synthetic_mag_list,
+        "synthetic_mag": synthetic_mag[0],
         "photon_shot_noise": photon_shot_noise_list,
         "sky_noise": sky_noise_list,
         "read_noise": read_noise_list,
