@@ -562,6 +562,7 @@ def main():
             target_flux = target_star[f'flux_{APERTURE}']
             target_airmass = target_star['airmass']
             target_color = target_star['gaiabp'][0] - target_star['gaiarp'][0]  # Extract the color index
+            print(f'Target star color index: {target_color}')
             target_fluxerr = target_star[f'fluxerr_{APERTURE}']
             target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
             target_time = target_star['jd_bary']
@@ -605,9 +606,9 @@ def main():
             data_to_save = {
                 "TIC_ID": tic_id_to_plot,
                 "Tmag": target_star["Tmag"][0],
+                "COLOR": target_color,
                 "Airmass": target_airmass.tolist(),
                 "Sky": target_sky.tolist(),
-                "COLOR": target_color,
                 "ZP": target_star['ZP'].tolist(),
                 "Time_BJD": target_time.tolist(),
                 "Relative_Flux": target_fluxes_dt.tolist(),
