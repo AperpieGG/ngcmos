@@ -274,6 +274,7 @@ if __name__ == "__main__":
     if len(target_row) == 0:
         raise ValueError(f"TIC ID {tic_id} not found in photometry file.")
     tmag = target_row['Tmag'][0]
+    print(f'The Tmag for TIC ID {tic_id} is {tmag}')
     del phot_data
 
     dmb_range = [0.2, 0.5]
