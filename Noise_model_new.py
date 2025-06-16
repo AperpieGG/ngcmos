@@ -84,7 +84,8 @@ def main():
 
         Tmag = float(data['Tmag'])
         color = float(data['COLOR'])
-        sky = float(data['Sky'])
+        sky = np.array(data['Sky'])
+        sky = np.mean(sky, axis=0)
         airmass_array = np.array(data['Airmass'])
         flux = np.array(data['Relative_Flux'])
         flux_err = np.array(data['Relative_Flux_err'])
