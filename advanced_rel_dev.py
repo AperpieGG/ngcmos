@@ -289,9 +289,9 @@ if __name__ == "__main__":
     if 9.5 < tmag < 10:
         dmb_range = [0.0]
         target_rms = 400
-        tolerance = 100
     if 10 < tmag < 11:
         target_rms = 400
+        tolerance = 100
     elif 10 <= tmag < 12:
         target_rms = 600
     elif 12 <= tmag < 13:
