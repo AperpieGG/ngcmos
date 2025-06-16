@@ -60,6 +60,7 @@ def main():
 
     # Collect all target JSON files within that subdirectory
     json_files = [f for f in os.listdir(target_dir) if f.startswith('target_light_curve_') and f.endswith('.json')]
+    print(f"Found {len(json_files)} target JSON files in {target_dir}")
     
     zp = extract_zero_point(f'zp{APERTURE}.json')
 
