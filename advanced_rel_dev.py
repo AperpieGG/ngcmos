@@ -283,15 +283,15 @@ if __name__ == "__main__":
     color_lim_range = np.arange(0.1, 0.6, 0.1).round(2).tolist()
     tolerance = 200
 
-    if 8 < tmag < 9.5:
+    if 7.5 < tmag < 9.5:
         dmb_range = [0.0]
         target_rms = 400
-    if 9.5 < tmag < 10:
+    elif 9.5 < tmag < 10:
         dmb_range = [0.0]
         target_rms = 400
-    if 10 < tmag < 11:
+    elif 10 < tmag < 11:
         target_rms = 400
-    elif 10 <= tmag < 12:
+    elif 11 <= tmag < 12:
         target_rms = 600
     elif 12 <= tmag < 13:
         target_rms = 1000
