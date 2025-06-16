@@ -262,14 +262,40 @@ if __name__ == "__main__":
                         help="Camera type (CMOS or CCD)")
     args = parser.parse_args()
 
-    tic_id = args.tic_id
+    tic_id = args.tic_id  # The TIC ID you're interested in
+
+    # Load the photometry table
+    phot_file = get_phot_files('.')  # This returns a list of file names
+    phot_data = read_phot_file(os.path.join('.', phot_file[0]))
+
+    # Filter to get the Tmag for the specific TIC ID
+    target_row = phot_data[phot_data['tic_id'] == tic_id]
+
+    if len(target_row) == 0:
+        raise ValueError(f"TIC ID {tic_id} not found in photometry file.")
+    tmag = target_row['Tmag'][0]
+    del phot_data
 
     dmb_range = [0.2, 0.5]
     dmf_range = np.arange(0.5, 3, 0.5).round(2).tolist()
     crop_range = [None, 400, 800, 1000, 1200, 1400, 2000]
     color_lim_range = np.arange(0.1, 0.6, 0.1).round(2).tolist()
 
-    target_rms = 1000
+    if 8 < tmag < 9.5:
+        dmb_range = [0.0]
+        target_rms = 400
+    if 9.5 < tmag < 10:
+        dmb_range = [0.0]
+        target_rms = 400
+    if 10 < tmag < 11:
+        target_rms = 400
+    elif 10 <= tmag < 12:
+        target_rms = 600
+    elif 12 <= tmag < 13:
+        target_rms = 1000
+    elif 13 <= tmag < 14:
+        target_rms = 2000
+
     tolerance = 200
     best_rms = np.inf
     best_params = None
