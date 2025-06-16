@@ -109,12 +109,12 @@ def main():
             READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
         )
 
-        photon_shot_noise_list.append(psn[0])
-        sky_noise_list.append(sn[0])
-        read_noise_list.append(rn[0])
-        dc_noise_list.append(dcn[0])
-        N_list.append(N[0])
-        RNS_list.append(RNS[0])
+        photon_shot_noise_list.append(psn)
+        sky_noise_list.append(sn)
+        read_noise_list.append(rn)
+        dc_noise_list.append(dcn)
+        N_list.append(N)
+        RNS_list.append(RNS)
 
     # Compute global synthetic magnitude once
     avg_sky = np.mean(sky_values)
