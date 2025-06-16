@@ -105,13 +105,13 @@ def main():
             [sky], bin_size, airmass_array, zp, APERTURE, READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN
         )
 
-        synthetic_mag_list.append(synthetic_mag[0])
-        photon_shot_noise_list.append(psn[0])
-        sky_noise_list.append(sn[0])
-        read_noise_list.append(rn[0])
-        dc_noise_list.append(dcn[0])
-        N_list.append(N[0])
-        RNS_list.append(RNS[0])
+        synthetic_mag_list.append(synthetic_mag)
+        photon_shot_noise_list.append(psn)
+        sky_noise_list.append(sn)
+        read_noise_list.append(rn)
+        dc_noise_list.append(dcn)
+        N_list.append(N)
+        RNS_list.append(RNS)
 
     output_data = {
         "TIC_IDs": tic_ids,
