@@ -75,7 +75,8 @@ def main():
     tic_ids = []
 
     for file in json_files:
-        with open(file, 'r') as f:
+        file_path = os.path.join(target_dir, file)  # add the targets directory path
+        with open(file_path, 'r') as f:
             data = json.load(f)
 
         tic_id = data['TIC_ID']
