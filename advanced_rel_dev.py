@@ -291,7 +291,6 @@ if __name__ == "__main__":
         target_rms = 400
     if 10 < tmag < 11:
         target_rms = 400
-        tolerance = 100
     elif 10 <= tmag < 12:
         target_rms = 600
     elif 12 <= tmag < 13:
