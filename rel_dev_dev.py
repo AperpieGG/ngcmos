@@ -560,6 +560,7 @@ def main():
             # Perform relative photometry for target star and plot
             target_star = phot_table[phot_table['tic_id'] == tic_id_to_plot]
             target_flux = target_star[f'flux_{APERTURE}']
+            target_airmass = target_star['airmass']
             target_fluxerr = target_star[f'fluxerr_{APERTURE}']
             target_sky = target_star[f'flux_w_sky_{APERTURE}'] - target_star[f'flux_{APERTURE}']
             target_time = target_star['jd_bary']
@@ -602,6 +603,11 @@ def main():
             # Save target_time_binned and target_fluxes_dt in a JSON file
             data_to_save = {
                 "TIC_ID": tic_id_to_plot,
+                "Tmag": target_star["Tmag"][0],
+                "Airmass": target_airmass.tolist(),
+                "Sky": target_sky.tolist(),
+                "COLOR": target_flux['gaiabp'][0] - target_flux['gaiarp'][0],
+                "ZP": target_star['ZP'].tolist(),
                 "Time_BJD": target_time.tolist(),
                 "Relative_Flux": target_fluxes_dt.tolist(),
                 "Relative_Flux_err": target_flux_err_dt.tolist(),
