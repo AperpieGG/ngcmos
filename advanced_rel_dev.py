@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+Description: This script optimizes photometric parameters for a given target star by iterating through various
+ combinations of parameters and calculating the resulting RMS values.
+It uses comparison stars to improve the photometric precision. This is the updated photometry script
+The main pipeline will run in run_photometry.sh file
+"""
+
+
 import itertools
 import os
 import numpy as np
