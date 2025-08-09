@@ -92,7 +92,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     # Plot the image data
     if image_data is not None:
         # Define the size of the region around the star
-        radius = 30  # pixels
+        radius = 50  # pixels
 
         # Define the limits for the region around the star
         x_min = max(int(x - radius), 0)
@@ -114,11 +114,24 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         circle_radii = [aperture]
 
+        if aperture == 4:
+            gain = 2
+            radius_inner = 15
+            radius_outer = 20
+        elif aperture == 5:
+            gain = 1.13
+            radius_inner = 15
+            radius_outer = 20
+        elif aperture == 20:
+            gain = 3.85
+            radius_inner = 35
+            radius_outer = 45
+
         for radius in circle_radii:
             circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
             axs[2].add_patch(circle)
-        annulus = Circle((x, y), radius=15, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
-        dannulus = Circle((x, y), radius=20, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
+        annulus = Circle((x, y), radius=radius_inner, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
+        dannulus = Circle((x, y), radius=radius_outer, edgecolor='lime', facecolor='none', lw=1, linestyle='dashed')
         axs[2].add_patch(annulus)
         axs[2].add_patch(dannulus)
 
@@ -126,13 +139,6 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         legend_labels = [f'Aperture, {radius} pix)' for radius in circle_radii]
         legend_labels.append('Annulus, 15-20 pix')
         axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(1.01, 1.0))
-
-        if aperture == 4:
-            gain = 2
-        elif aperture == 5:
-            gain = 1.13
-        else:
-            gain = 1
 
         # Plot jd_mid vs flux
         axs[0].errorbar(jd_mid_binned, fluxes_binned, yerr=fluxerrs_binned, fmt='o', color='black', label='Raw Flux')
