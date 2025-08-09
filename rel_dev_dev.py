@@ -75,7 +75,7 @@ def plot_comps_position(table, tic_id_to_plot, filtered_tic_ids, camera):
     plt.ylabel('Y Pixel')
     # plt.legend([target_circle, comp_circle], ['Target', 'Comp Stars'], loc='upper right')
     plt.title(f'Target: {tic_id_to_plot}')
-    # plt.show()
+    plt.show()
 
 
 def target_info(table, tic_id_to_plot, APERTURE):
@@ -262,7 +262,7 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.
     plt.legend()
     plt.title('RMS vs. Magnitude of Comparison Stars')
     plt.tight_layout()
-    # plt.show()
+    plt.show()
 
     # Save the data for the plot
     output_data = {
@@ -383,7 +383,7 @@ def plot_comp_lc(time_list, flux_list, fluxerr_list, tic_ids, batch_size=9):
             ax.set_ylabel('Flux')
 
         plt.tight_layout()
-        # plt.show()
+        plt.show()
 
 
 def get_phot_files(directory):
@@ -464,12 +464,18 @@ def main():
         GAIN = 1.13
         EXPOSURE = 10.0
         RN = 1.56
-    else:
+    elif args.cam == 'CCD':
         APERTURE = 4
         GAIN = 2
         DC = 0.00515
         EXPOSURE = 10.0
         RN = 12.9
+    elif args.cam == 'IMX571':
+        APERTURE = 20
+        GAIN = 3.85
+        DC = 0.002
+        EXPOSURE = 10.0
+        RN = 5.1
 
     tic_id_to_plot = args.tic_id
     DM_BRIGHT = args.dmb
@@ -588,7 +594,7 @@ def main():
 
             # Bin the target star data and do the relative photometry
             target_time_binned, target_fluxes_binned, target_fluxerrs_binned = (
-                bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 0.167))
+                bin_by_time_interval(target_time, target_fluxes_dt, target_flux_err_dt, 5)) # 0.167 for 10
 
             # Calculate the RMS for the binned data
             RMS_binned = np.std(target_fluxes_binned)
@@ -599,7 +605,7 @@ def main():
                          label=f'RMS unbinned = {RMS:.4f}')
             plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
             plt.legend(loc='best')
-            # plt.show()
+            plt.show()
 
             # Save target_time_binned and target_fluxes_dt in a JSON file
             data_to_save = {
