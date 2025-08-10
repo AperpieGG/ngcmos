@@ -39,9 +39,11 @@ def measure_zp(table, APERTURE, EXPOSURE):
         tic_flux = np.mean(tic_data[f'flux_{APERTURE}'])
         if APERTURE == 4:
             # multiply flux by CCD gain that is 2
+            print(f'Using CCD gain for aperture {APERTURE}')
             tic_flux *= 2
         else:
             # multiply flux by CMOS gain that is 1.131
+            print(f'Using CMOS gain for aperture {APERTURE}')
             tic_flux *= 1.131
         # First Tmag value for the current TIC ID
         tic_Tmag = tic_data['Tmag'][0]
