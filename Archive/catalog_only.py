@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
         # Call the catalog maker only for the first image of each prefix
         if not os.path.exists(cat_file):
-            cmd_args = ["/home/ops/refcatpipe2/cmos/make_ref_catalog.py",
+            cmd_args = ["/home/ops/refcatpipe2/cmos/make_ref_catalog_W1m.py",
                         ra, dec, box_size, box_size, epoch, cat_file]
             cmd = " ".join(cmd_args)
             os.system(cmd)
