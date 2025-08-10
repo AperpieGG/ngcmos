@@ -137,7 +137,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         # Create legend labels
         legend_labels = [f'Aperture, {radius} pix)' for radius in circle_radii]
-        legend_labels.append('Annulus, 15-20 pix')
+        legend_labels.append(f'Annulus, {radius_inner}-{radius_outer} pix')
         axs[2].legend(legend_labels, loc='upper left', bbox_to_anchor=(1.01, 1.0))
 
         # Plot jd_mid vs flux
