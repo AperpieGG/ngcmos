@@ -471,11 +471,11 @@ def main():
         EXPOSURE = 10.0
         RN = 12.9
     elif args.cam == 'IMX571':
-        APERTURE = 20
-        GAIN = 3.85
-        DC = 0.002
+        APERTURE = 30
+        GAIN = 0.25
+        DC = 0.001
         EXPOSURE = 10.0
-        RN = 5.1
+        RN = 1.08
 
     tic_id_to_plot = args.tic_id
     DM_BRIGHT = args.dmb
@@ -545,7 +545,7 @@ def main():
             # Reference fluxes and errors (sum of all stars, excluding the target star)
             reference_fluxes = np.sum(flux_list, axis=0)
             # reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
-
+            print(f'The RN, DC GAIN, AIRMASS are: {RN}, {DC}, {GAIN}, {AIRMASS}')
             comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
                                     for cfi, csi in zip(flux_list, comp_skys)]))
 
