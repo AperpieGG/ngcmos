@@ -362,8 +362,8 @@ def main():
         data_list = []
 
         # Loop through all tic_ids in the photometry file
+        print(f'The TIC_IDS to that will run is for total stars: {len(np.unique(phot_table["tic_id"]))}')
         for tic_id in np.unique(phot_table['tic_id']):
-            print(f'The TIC_IDS to that will run is for total stars: {len(np.unique(phot_table["tic_id"]))}')
             # Check if all the Tmag values for the tic_id are less than or equal to 14
             if np.all(phot_table['Tmag'][phot_table['tic_id'] == tic_id] < 14):  # Adjusted threshold
                 logger.info("")
