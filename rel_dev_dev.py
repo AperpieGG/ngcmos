@@ -476,6 +476,12 @@ def main():
         DC = 0.001
         EXPOSURE = 10.0
         RN = 1.08
+    elif args.cam == 'IMX571-2':
+        APERTURE = 10
+        GAIN = 3.85
+        DC = 0.001 * 2
+        EXPOSURE = 10.0
+        RN = 2.65 * 2
 
     tic_id_to_plot = args.tic_id
     DM_BRIGHT = args.dmb
@@ -603,7 +609,7 @@ def main():
             # plt.plot(target_time_binned, target_fluxes_dt_binned, 'o', color='red', label=f'RMS unbinned = {RMS:.4f}')
             plt.errorbar(target_time_binned, target_fluxes_binned, yerr=target_fluxerrs_binned, fmt='o', color='red',
                          label=f'RMS unbinned = {RMS:.4f}')
-            plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]}')
+            plt.title(f'Target star: {tic_id_to_plot}, Tmag = {target_star["Tmag"][0]:.3f}')
             plt.legend(loc='best')
             plt.show()
 
