@@ -182,7 +182,7 @@ def find_comp_star_rms(comp_fluxes, airmass):
     return np.array(comp_star_rms)
 
 
-def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=1.5, dmag=0.5):
+def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2, dmag=0.5):
     # Calculate initial RMS of comparison stars
     comp_star_rms = find_comp_star_rms(comp_fluxes, airmass)
     print(f"Initial number of comparison stars: {len(comp_star_rms)}")
@@ -470,14 +470,20 @@ def main():
         DC = 0.00515
         EXPOSURE = 10.0
         RN = 12.9
-    elif args.cam == 'IMX571':
+    elif args.cam == 'IMX571-LN':
         APERTURE = 30
         GAIN = 0.25
         DC = 0.001
         EXPOSURE = 10.0
         RN = 1.08
+    elif args.cam == 'IMX571-HWC':
+        APERTURE = 30
+        GAIN = 0.75
+        DC = 0.001
+        EXPOSURE = 10.0
+        RN = 3.14
     elif args.cam == 'IMX571-2':
-        APERTURE = 10
+        APERTURE = 20
         GAIN = 3.85
         DC = 0.001 * 2
         EXPOSURE = 10.0
@@ -551,7 +557,7 @@ def main():
             # Reference fluxes and errors (sum of all stars, excluding the target star)
             reference_fluxes = np.sum(flux_list, axis=0)
             # reference_fluxerrs = np.sqrt(np.sum(fluxerr_list ** 2, axis=0))
-            print(f'The RN, DC GAIN, AIRMASS are: {RN}, {DC}, {GAIN}, {AIRMASS}')
+            print(f'The RN, DC GAIN are: {RN}, {DC}, {GAIN}')
             comp_errs = np.vstack(([calc_noise(APERTURE, EXPOSURE, DC, GAIN, RN, AIRMASS, cfi + csi)
                                     for cfi, csi in zip(flux_list, comp_skys)]))
 
