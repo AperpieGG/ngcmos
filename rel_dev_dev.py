@@ -127,28 +127,31 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_
 
     # --- Apply identical flux constraint if requested ---
     if identical_flux:
-        flux_diff_limit = 3000  # counts tolerance
+        flux_diff_limit = 2000  # counts tolerance
+        last_n_points = 700
 
-        # Get all unique TIC IDs in the filtered table
-        tic_ids_unique = np.unique(filtered_table['tic_id'])
+        # Extract target star flux
+        target_flux_array = table[table['tic_id'] == tic_id_to_plot][f'flux_{APERTURE}']
+        if len(target_flux_array) < last_n_points:
+            raise ValueError(f"Target star has less than {last_n_points} points.")
 
-        # Compute mean flux per TIC ID
-        mean_flux_per_star = np.array([
-            np.mean(filtered_table[f'flux_{APERTURE}'][filtered_table['tic_id'] == tid])
-            for tid in tic_ids_unique
-        ])
+        target_last_mean = np.mean(target_flux_array[-last_n_points:])
 
-        # Select TIC IDs within ±flux_diff_limit of target_flux_mean
-        valid_ids = tic_ids_unique[
-            (mean_flux_per_star >= target_flux_mean - flux_diff_limit) &
-            (mean_flux_per_star <= target_flux_mean + flux_diff_limit)
-            ]
+        # Filter comparison stars
+        valid_tic_ids = []
+        for tic_id in np.unique(filtered_table['tic_id']):
+            comp_flux = filtered_table[filtered_table['tic_id'] == tic_id][f'flux_{APERTURE}']
+            if len(comp_flux) < last_n_points:
+                continue  # skip stars with not enough points
+            comp_last_mean = np.mean(comp_flux[-last_n_points:])
+            if abs(comp_last_mean - target_last_mean) <= flux_diff_limit:
+                valid_tic_ids.append(tic_id)
 
-        # Filter the table to keep only valid TIC IDs
-        mask = np.isin(filtered_table['tic_id'], valid_ids)
+        # Apply mask to filtered_table
+        mask = np.isin(filtered_table['tic_id'], valid_tic_ids)
         filtered_table = filtered_table[mask]
 
-        print(f"Remaining comparison stars after identical flux filter: {len(valid_ids)}")
+        print(f"Remaining comparison stars after last-{last_n_points}-points flux filter: {len(valid_tic_ids)}")
 
     # Then in your main code, make these changes:
     if json_file:  # Check if json_file is set (instead of json)
