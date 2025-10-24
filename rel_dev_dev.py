@@ -106,7 +106,8 @@ def extract_region_coordinates(region):
     return x_min, x_max, y_min, y_max
 
 
-def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file, color_lim):
+def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_file, color_lim,
+                     identical_flux=False):
     # Get target star info including the mean flux
     # Get target star info including the mean flux
     target_tmag, target_color, airmass_list, target_flux_mean, _, _, _, _, _ = (
@@ -124,6 +125,20 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_
     # Exclude stars with Tmag less than 9.4 and remove the target star from the table
     valid_color_mag_table = valid_color_mag_table[valid_color_mag_table['Tmag'] > 9.4]
     filtered_table = valid_color_mag_table[valid_color_mag_table['tic_id'] != tic_id_to_plot]
+
+    # --- Apply identical flux constraint if requested ---
+    if identical_flux:
+        flux_diff_limit = 3000  # counts tolerance
+        # Compute mean flux for all stars for the same aperture
+        mean_flux_all = table.groupby('tic_id')[f'flux_{APERTURE}'].mean()
+        # Filter stars with mean flux within ±3000 counts of target
+        valid_flux_ids = mean_flux_all[
+            (mean_flux_all >= target_flux_mean - flux_diff_limit) &
+            (mean_flux_all <= target_flux_mean + flux_diff_limit)
+            ].index
+        filtered_table = filtered_table[np.isin(filtered_table['tic_id'], valid_flux_ids)]
+        print(f"Applying identical flux filter (±{flux_diff_limit} counts). "
+              f"Remaining comparison stars: {len(filtered_table['tic_id'].unique())}")
 
     # Then in your main code, make these changes:
     if json_file:  # Check if json_file is set (instead of json)
@@ -281,9 +296,13 @@ def find_bad_comp_stars(comp_fluxes, airmass, comp_mags0, sig_level=2, dmag=0.5)
     return comp_star_mask, comp_star_rms, i
 
 
-def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json,  color_lim, exclude_tic_ids=set()):
+def find_best_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
+                    crop_size, json, color_lim, exclude_tic_ids=set(),
+                    identical_flux=False):
     # Filter the table based on color/magnitude tolerance
-    filtered_table, airmass = limits_for_comps(table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json, color_lim)
+    filtered_table, airmass = limits_for_comps(
+        table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT, crop_size, json, color_lim,
+        identical_flux=identical_flux)
     # Remove bad comparison stars
     if exclude_tic_ids:
         filtered_table = filtered_table[~np.isin(filtered_table['tic_id'], list(exclude_tic_ids))]
@@ -446,6 +465,8 @@ def main():
     parser.add_argument('--comp_stars', type=str, help='Text file with known comparison stars.')
     parser.add_argument('--exclude', type=str, help='Text file containing TIC IDs of bad comparison stars to exclude.')
     parser.add_argument('--color', type=float, default=0.1, help='Color tolerance for the comparison stars threshold')
+    parser.add_argument('--identical_flux', action='store_true',
+                        help='Filter comparison stars with nearly identical average flux (±3000 counts) to the target star')
     args = parser.parse_args()
 
     # Read excluded TIC IDs if provided
@@ -517,8 +538,10 @@ def main():
                 print(f'Found {len(tic_ids)} comparison stars from the file.')
             else:
                 # Find the best comparison stars
-                best_comps_table, AIRMASS = find_best_comps(phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
-                                                            crop_size, fwhm_pos, COLOR_TOLERANCE, exclude_tic_ids)
+                best_comps_table, AIRMASS = find_best_comps(
+                    phot_table, tic_id_to_plot, APERTURE, DM_BRIGHT, DM_FAINT,
+                    crop_size, fwhm_pos, COLOR_TOLERANCE, exclude_tic_ids,
+                    identical_flux=args.identical_flux)
                 tic_ids = np.unique(best_comps_table['tic_id'])
                 print(f'Found {len(tic_ids)} comparison stars from the analysis')
 
