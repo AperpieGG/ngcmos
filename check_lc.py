@@ -92,7 +92,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
     # Plot the image data
     if image_data is not None:
         # Define the size of the region around the star
-        radius = 50  # pixels
+        radius = 30  # pixels
 
         # Define the limits for the region around the star
         x_min = max(int(x - radius), 0)
@@ -114,7 +114,7 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
 
         circle_radii = [aperture]
 
-        if aperture == 4:
+        if aperture == 4 or aperture == 3:
             gain = 2
             radius_inner = 15
             radius_outer = 20
@@ -126,6 +126,10 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
             gain = 3.85
             radius_inner = 35
             radius_outer = 45
+        else:
+            gain = 0.75
+            radius_inner = 60
+            radius_outer = 65
 
         for radius in circle_radii:
             circle = Circle((x, y), radius=radius, edgecolor='lime', facecolor='none', lw=1)
@@ -167,6 +171,10 @@ def plot_lc(table, tic_id_to_plot, bin_size, aperture, image_directory=""):
         axs[1].set_xlabel('BJD [days]')
         axs[1].legend()
         plt.tight_layout()
+        # Save the figure
+        fig_filename = f'light_curve_TIC_{tic_id_to_plot}_aperture_{aperture}.png'
+        plt.savefig(fig_filename)
+        print(f'Light curve plot saved as {fig_filename}')
         plt.show()
 
 
