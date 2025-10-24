@@ -8,7 +8,7 @@ from astropy.io import fits
 import json
 from astropy.visualization import ZScaleInterval
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
-
+import pandas as pd
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
     remove_outliers, scintilation_noise, bin_by_time_interval
 
@@ -129,13 +129,21 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_
     # --- Apply identical flux constraint if requested ---
     if identical_flux:
         flux_diff_limit = 3000  # counts tolerance
-        # Compute mean flux for all stars for the same aperture
-        mean_flux_all = table.groupby('tic_id')[f'flux_{APERTURE}'].mean()
-        # Filter stars with mean flux within ±3000 counts of target
+        # Convert to pandas DataFrame for grouping
+        df = table.to_pandas()
+
+        # Compute mean flux per TIC ID for the same aperture
+        mean_flux_all = df.groupby('tic_id')[f'flux_{APERTURE}'].mean()
+
+        # Compute mean flux for target
+        target_flux_mean = mean_flux_all.get(tic_id_to_plot, np.nan)
+
+        # Filter stars within ±3000 counts of target
         valid_flux_ids = mean_flux_all[
             (mean_flux_all >= target_flux_mean - flux_diff_limit) &
             (mean_flux_all <= target_flux_mean + flux_diff_limit)
             ].index
+
         filtered_table = filtered_table[np.isin(filtered_table['tic_id'], valid_flux_ids)]
         print(f"Applying identical flux filter (±{flux_diff_limit} counts). "
               f"Remaining comparison stars: {len(filtered_table['tic_id'].unique())}")
