@@ -6,7 +6,6 @@ import argparse
 import matplotlib.pyplot as plt
 from astropy.io import fits
 import json
-import pandas as pd
 from astropy.visualization import ZScaleInterval
 from scipy.interpolate import InterpolatedUnivariateSpline as Spline
 from utils import plot_images, read_phot_file, bin_time_flux_error, \
@@ -130,26 +129,26 @@ def limits_for_comps(table, tic_id_to_plot, APERTURE, dmb, dmf, crop_size, json_
     if identical_flux:
         flux_diff_limit = 3000  # counts tolerance
 
-        # Convert FITS recarray to pandas DataFrame
-        df = pd.DataFrame(table)
+        # Get all unique TIC IDs in the filtered table
+        tic_ids_unique = np.unique(filtered_table['tic_id'])
 
-        # Compute mean flux per TIC ID for the selected aperture
-        mean_flux_all = df.groupby('tic_id')[f'flux_{APERTURE}'].mean()
+        # Compute mean flux per TIC ID
+        mean_flux_per_star = np.array([
+            np.mean(filtered_table[f'flux_{APERTURE}'][filtered_table['tic_id'] == tid])
+            for tid in tic_ids_unique
+        ])
 
-        # Compute mean flux for the target
-        target_flux_mean = mean_flux_all.get(tic_id_to_plot, np.nan)
+        # Select TIC IDs within ±flux_diff_limit of target_flux_mean
+        valid_ids = tic_ids_unique[
+            (mean_flux_per_star >= target_flux_mean - flux_diff_limit) &
+            (mean_flux_per_star <= target_flux_mean + flux_diff_limit)
+            ]
 
-        # Filter stars with mean flux within ±3000 counts of target
-        valid_flux_ids = mean_flux_all[
-            (mean_flux_all >= target_flux_mean - flux_diff_limit) &
-            (mean_flux_all <= target_flux_mean + flux_diff_limit)
-            ].index
+        # Filter the table to keep only valid TIC IDs
+        mask = np.isin(filtered_table['tic_id'], valid_ids)
+        filtered_table = filtered_table[mask]
 
-        # Apply filter to original table
-        filtered_table = filtered_table[np.isin(filtered_table['tic_id'], valid_flux_ids)]
-
-        print(f"Applying identical flux filter (±{flux_diff_limit} counts). "
-              f"Remaining comparison stars: {len(np.unique(filtered_table['tic_id']))}")
+        print(f"Remaining comparison stars after identical flux filter: {len(valid_ids)}")
 
     # Then in your main code, make these changes:
     if json_file:  # Check if json_file is set (instead of json)
