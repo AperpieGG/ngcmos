@@ -340,24 +340,48 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
                          r=3.0)  # expand ellipse by factor (2–4 typical)
 
     col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
-    Tout = None
-    for r in aperture_radii:
-        flux, fluxerr, _ = sep.sum_circle(
-            data, x, y, r,
-            subpix=0,
-            bkgann=(rsi, rso),
-            gain=gain,
-            mask=mask
-        )
 
-        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(
-            data, x, y, r,
-            subpix=0,
-            gain=gain,
-            mask=mask
-        )
-        # calculate the max pixel value in each aperture
-        max_pixel_value = np.array([find_max_pixel_value(data, int(i), int(j), int(r + 1)) for i, j in zip(x, y)])
+    Tout = []
+
+    ny, nx = data.shape
+
+    for r in aperture_radii:
+
+        # ----------------------------------
+        # Skip stars too close to edge
+        # ----------------------------------
+        if (x < rso or x > nx - rso or
+                y < rso or y > ny - rso):
+            Tout.append([np.nan, np.nan, np.nan, np.nan, np.nan])
+            continue
+
+        try:
+            # With sky subtraction
+            flux, fluxerr, _ = sep.sum_circle(
+                data, x, y, r,
+                subpix=0,
+                bkgann=(rsi, rso),
+                gain=gain,
+                mask=mask
+            )
+
+            # Without sky subtraction
+            flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(
+                data, x, y, r,
+                subpix=0,
+                gain=gain,
+                mask=mask
+            )
+
+            # Peak pixel inside aperture
+            yy, xx = np.ogrid[:ny, :nx]
+            aperture_mask = (xx - x) ** 2 + (yy - y) ** 2 <= r ** 2
+            max_pixel_value = np.nanmax(data[aperture_mask])
+
+        except ZeroDivisionError:
+            Tout.append([np.nan, np.nan, np.nan, np.nan, np.nan])
+            continue
+
         # build this photometry into a table
         if Tout is None:
             Tout = Table([flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
