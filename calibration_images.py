@@ -189,8 +189,8 @@ def reduce_images(base_path, out_path, prefix_filenames):
             time_helio = time_jd.utc + ltt_helio
 
             # Reduce image
-            print(f'Found master flat in: {master_flat}')
-            fd = (fd - master_bias - master_dark * hdr['EXPTIME'] / 10)   / master_flat
+            # print(f'Found master flat in: {master_flat}')
+            fd = (fd - master_bias - master_dark * hdr['EXPTIME'] / 10)   # / master_flat
             reduced_data.append(fd)  # Append the reduced image to the list
             reduced_header_info.append(hdr)
 
