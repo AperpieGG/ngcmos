@@ -318,7 +318,7 @@ def find_max_pixel_value(data, x, y, radius):
 def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
     """
     Extract photometry at positions (x, y) for multiple aperture radii.
-    Uses SEP's mask_ellipse to mask detected stars, preventing contamination
+    Uses SEP's segmentation map to mask detected stars, preventing contamination
     in the annulus background.
 
     Parameters
@@ -340,48 +340,52 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
         Photometry table with fluxes, errors, max pixel in aperture.
     """
 
-    # Detect sources
+    # Estimate global background
     bkg = sep.Background(data)
     data_sub = data - bkg
-    objects = sep.extract(data_sub, thresh=5.0)
 
-    # Create empty mask (False = good pixel, True = masked)
-    mask = np.zeros(data.shape, dtype=bool)
+    # Detect sources and create segmentation map
+    objects, segmap = sep.extract(data_sub, thresh=5.0, segmentation_map=True)
 
-    # Mask elliptical regions around detected sources
-    for obj in objects:
-        # increase the factor to 5 to cover even stars in the annulus
-        sep.mask_ellipse(mask,
-                         obj['x'], obj['y'],
-                         obj['a'], obj['b'],
-                         obj['theta'],
-                         r=2.0)
+    # Build a mask from the segmentation map (all detected sources are masked)
+    mask = segmap > 0  # True = masked (star), False = sky
 
     # Column labels
     col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
     Tout = None
 
     for r in aperture_radii:
-        flux, fluxerr, _ = sep.sum_circle(data, x, y, r,
-                                          subpix=0,
-                                          bkgann=(rsi, rso),
-                                          gain=gain,
-                                          mask=mask)
+        # Photometry with sky annulus using the mask
+        flux, fluxerr, _ = sep.sum_circle(
+            data, x, y, r,
+            subpix=0,
+            bkgann=(rsi, rso),
+            gain=gain,
+            mask=mask
+        )
 
-        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(data, x, y, r,
-                                                      subpix=0,
-                                                      gain=gain,
-                                                      mask=mask)
+        # Flux without sky subtraction (also masked)
+        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(
+            data, x, y, r,
+            subpix=0,
+            gain=gain,
+            mask=mask
+        )
 
+        # Max pixel value in aperture
         max_pixel_value = np.array([data[int(yi), int(xi)] for xi, yi in zip(x, y)])
 
         # Build the table
         if Tout is None:
-            Tout = Table([flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
-                         names=tuple([f"{c}_{r}" for c in col_labels]))
+            Tout = Table(
+                [flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
+                names=tuple([f"{c}_{r}" for c in col_labels])
+            )
         else:
-            T = Table([flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
-                      names=tuple([f"{c}_{r}" for c in col_labels]))
+            T = Table(
+                [flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
+                names=tuple([f"{c}_{r}" for c in col_labels])
+            )
             Tout = hstack([Tout, T])
 
     return Tout
