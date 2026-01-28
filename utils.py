@@ -318,8 +318,8 @@ def find_max_pixel_value(data, x, y, radius):
 def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
     """
     Extract photometry at positions (x, y) for multiple aperture radii.
-    Uses SEP's segmentation map to mask detected stars, preventing contamination
-    in the annulus background.
+    Uses SEP's mask_ellipse to mask detected stars, preventing contamination
+    in the annulus background. Also prints how many pixels in the annulus are masked.
 
     Parameters
     ----------
@@ -340,41 +340,50 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
         Photometry table with fluxes, errors, max pixel in aperture.
     """
 
-    # Estimate global background
+    # Detect sources
     bkg = sep.Background(data)
     data_sub = data - bkg
+    objects = sep.extract(data_sub, thresh=5.0)
 
-    # Detect sources and create segmentation map
-    objects, segmap = sep.extract(data_sub, thresh=5.0, segmentation_map=True)
+    # Create empty mask (False = good pixel, True = masked)
+    mask = np.zeros(data.shape, dtype=bool)
 
-    # Build a mask from the segmentation map (all detected sources are masked)
-    mask = segmap > 0  # True = masked (star), False = sky
+    # Mask elliptical regions around detected sources
+    for obj in objects:
+        # increase the factor to 5 to cover even stars in the annulus
+        sep.mask_ellipse(mask,
+                         obj['x'], obj['y'],
+                         obj['a'], obj['b'],
+                         obj['theta'],
+                         r=5.0)
 
     # Column labels
-    col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
+    col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value", "masked_annulus_pixels"]
     Tout = None
 
     for r in aperture_radii:
-        # Photometry with sky annulus using the mask
-        flux, fluxerr, _ = sep.sum_circle(
-            data, x, y, r,
-            subpix=0,
-            bkgann=(rsi, rso),
-            gain=gain,
-            mask=mask
-        )
+        flux, fluxerr, _ = sep.sum_circle(data, x, y, r,
+                                          subpix=0,
+                                          bkgann=(rsi, rso),
+                                          gain=gain,
+                                          mask=mask)
 
-        # Flux without sky subtraction (also masked)
-        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(
-            data, x, y, r,
-            subpix=0,
-            gain=gain,
-            mask=mask
-        )
+        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(data, x, y, r,
+                                                      subpix=0,
+                                                      gain=gain,
+                                                      mask=mask)
 
-        # Max pixel value in aperture
         max_pixel_value = np.array([data[int(yi), int(xi)] for xi, yi in zip(x, y)])
 
+        # Count masked pixels in the annulus for each source
+        masked_annulus = []
+        yy, xx = np.ogrid[:data.shape[0], :data.shape[1]]
+        for xi, yi in zip(x, y):
+            r2 = (xx - xi)**2 + (yy - yi)**2
+            ann_mask = (r2 >= rsi**2) & (r2 <= rso**2) & mask
+            masked_count = np.sum(ann_mask)
+            masked_annulus.append(np.sum(ann_mask))
+            print(f"Source at x={xi:.2f}, y={yi:.2f}: {masked_count} pixels masked in annulus")
         # Build the table
         if Tout is None:
             Tout = Table(
