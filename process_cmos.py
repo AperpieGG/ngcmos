@@ -152,6 +152,8 @@ def main():
         logging.info(f"Creating new photometry file for prefix {prefix}.")
         phot_table = None
 
+        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
+
         ref_image = prefix_filenames[0]
         # --- Prepare reference image and mask BEFORE the loop ---
         bkg_ref = sep.Background(ref_image)
@@ -167,7 +169,6 @@ def main():
                              r=3.0)  # factor to cover stars in annulus
 
         # Iterate over filenames with the current prefix
-        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
             logging.info(f"Processing filename {filename}......")
             # Calibrate image and get FITS file
