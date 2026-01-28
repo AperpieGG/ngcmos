@@ -157,7 +157,7 @@ def main():
         ref_image = fits.getdata(os.path.join(directory, prefix_filenames[0])).astype(np.float32)
         bkg_ref = sep.Background(ref_image)
         data_sub_ref = ref_image - bkg_ref
-        objects_ref = sep.extract(data_sub_ref, thresh=2.0)
+        objects_ref = sep.extract(data_sub_ref, thresh=4.0)
 
         mask = np.zeros(ref_image.shape, dtype=bool)
         for obj in objects_ref:
@@ -165,7 +165,7 @@ def main():
                              obj['x'], obj['y'],
                              obj['a'], obj['b'],
                              obj['theta'],
-                             r=2.0)  # factor to cover stars in annulus
+                             r=1.0)  # factor to cover stars in annulus
 
         # Iterate over filenames with the current prefix
         for filename in prefix_filenames:
