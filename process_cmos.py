@@ -154,8 +154,7 @@ def main():
 
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
 
-        ref_image = fits.getdata(os.path.join(directory, prefix_filenames[0]))
-        # --- Prepare reference image and mask BEFORE the loop ---
+        ref_image = fits.getdata(os.path.join(directory, prefix_filenames[0])).astype(np.float32)
         bkg_ref = sep.Background(ref_image)
         data_sub_ref = ref_image - bkg_ref
         objects_ref = sep.extract(data_sub_ref, thresh=5.0)
