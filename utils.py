@@ -355,7 +355,7 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
                          obj['x'], obj['y'],
                          obj['a'], obj['b'],
                          obj['theta'],
-                         r=3.0)
+                         r=2.0)
 
     # Column labels
     col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
