@@ -317,88 +317,71 @@ def find_max_pixel_value(data, x, y, radius):
 
 def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
     """
-    Take a corrected image array and extract photometry for a set of WCS driven
-    X and Y pixel positions. Do this for a series of aperture radii and apply
-    a gain correction to the photometry.
-    Pixels belonging to detected sources are masked so they do not contribute
-    to sky background estimation.
+    Extract photometry at positions (x, y) for multiple aperture radii.
+    Uses SEP's mask_ellipse to mask detected stars, preventing contamination
+    in the annulus background.
+
+    Parameters
+    ----------
+    data : 2D array
+        Image data.
+    x, y : array-like
+        Pixel coordinates of sources.
+    rsi, rso : float
+        Inner and outer radius of background annulus.
+    aperture_radii : list of float
+        Aperture radii for photometry.
+    gain : float
+        CCD/CMOS gain.
+
+    Returns
+    -------
+    Tout : astropy Table
+        Photometry table with fluxes, errors, max pixel in aperture.
     """
 
-    # ----------------------------------------------------
-    # Global background + source detection
-    # ----------------------------------------------------
+    # Detect sources
     bkg = sep.Background(data)
     data_sub = data - bkg
-
     objects = sep.extract(data_sub, thresh=5.0)
 
-    # ----------------------------------------------------
-    # Build source mask
-    # False = good pixel
-    # True  = masked pixel
-    # ----------------------------------------------------
+    # Create empty mask (False = good pixel, True = masked)
     mask = np.zeros(data.shape, dtype=bool)
 
+    # Mask elliptical regions around detected sources
     for obj in objects:
-        sep.mask_ellipse(
-            mask,
-            obj['x'], obj['y'],
-            obj['a'], obj['b'],
-            obj['theta'],
-            r=3.0        # grow ellipse to be conservative
-        )
+        # increase the factor to 5 to cover even stars in the annulus
+        sep.mask_ellipse(mask,
+                         obj['x'], obj['y'],
+                         obj['a'], obj['b'],
+                         obj['theta'],
+                         r=5.0) 
 
-    # ----------------------------------------------------
-    # Photometry
-    # ----------------------------------------------------
-    col_labels = ["flux", "fluxerr",
-                  "flux_w_sky", "fluxerr_w_sky",
-                  "max_pixel_value"]
-
+    # Column labels
+    col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
     Tout = None
 
     for r in aperture_radii:
+        flux, fluxerr, _ = sep.sum_circle(data, x, y, r,
+                                          subpix=0,
+                                          bkgann=(rsi, rso),
+                                          gain=gain,
+                                          mask=mask)
 
-        # With sky subtraction using masked annulus
-        flux, fluxerr, _ = sep.sum_circle(
-            data, x, y, r,
-            subpix=0,
-            bkgann=(rsi, rso),
-            gain=gain,
-            mask=mask
-        )
+        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(data, x, y, r,
+                                                      subpix=0,
+                                                      gain=gain,
+                                                      mask=mask)
 
-        # Raw aperture (no sky subtraction)
-        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(
-            data, x, y, r,
-            subpix=0,
-            gain=gain,
-            mask=mask
-        )
+        max_pixel_value = np.array([data[int(yi), int(xi)] for xi, yi in zip(x, y)])
 
-        # Max pixel inside aperture
-        max_pixel_value = np.array([
-            find_max_pixel_value(data, int(i), int(j), int(r + 1))
-            for i, j in zip(x, y)
-        ])
-
-        # ------------------------------------------------
-        # Build output table
-        # ------------------------------------------------
+        # Build the table
         if Tout is None:
-            Tout = Table(
-                [flux, fluxerr,
-                 flux_w_sky, fluxerr_w_sky,
-                 max_pixel_value],
-                names=[f"{c}_{r}" for c in col_labels]
-            )
+            Tout = Table([flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
+                         names=tuple([f"{c}_{r}" for c in col_labels]))
         else:
-            T = Table(
-                [flux, fluxerr,
-                 flux_w_sky, fluxerr_w_sky,
-                 max_pixel_value],
-                names=[f"{c}_{r}" for c in col_labels]
-            )
+            T = Table([flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value],
+                      names=tuple([f"{c}_{r}" for c in col_labels]))
             Tout = hstack([Tout, T])
 
     return Tout
