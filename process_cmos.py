@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 import os
 from datetime import datetime, timedelta
+
+import numpy as np
+
 from calibration_images import reduce_images
 from utils import (get_location, wcs_phot, _detect_objects_sep, get_catalog,
                    extract_airmass_and_zp, get_light_travel_times)
@@ -45,7 +48,7 @@ warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 GAIN = 1.131
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
-APERTURE_RADII = [4, 5]
+APERTURE_RADII = [5]
 RSI = 15  # 15
 RSO = 20  # 20
 DEFOCUS = 0.0
@@ -149,6 +152,20 @@ def main():
         logging.info(f"Creating new photometry file for prefix {prefix}.")
         phot_table = None
 
+        ref_image = prefix_filenames[0]
+        # --- Prepare reference image and mask BEFORE the loop ---
+        bkg_ref = sep.Background(ref_image)
+        data_sub_ref = ref_image - bkg_ref
+        objects_ref = sep.extract(data_sub_ref, thresh=5.0)
+
+        mask = np.zeros(ref_image.shape, dtype=bool)
+        for obj in objects_ref:
+            sep.mask_ellipse(mask,
+                             obj['x'], obj['y'],
+                             obj['a'], obj['b'],
+                             obj['theta'],
+                             r=3.0)  # factor to cover stars in annulus
+
         # Iterate over filenames with the current prefix
         prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
@@ -218,7 +235,9 @@ def main():
                                           "jd_bary", "x", "y", "airmass", "zp"))
 
             # Extract photometry at locations
-            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+            # Extract photometry at positions using precomputed mask
+            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII,
+                                  gain=GAIN, mask=mask)
 
             # Stack the photometry and preamble
             frame_output = hstack([frame_preamble, frame_phot])
