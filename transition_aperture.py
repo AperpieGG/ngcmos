@@ -151,8 +151,8 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
     plt.xlabel("X pixel")
     plt.ylabel("Y pixel")
-    plt.xlim(0,12)
-    plt.ylim(0,12)
+    plt.xlim(0.5,12.5)
+    plt.ylim(0.5,12.5)
     plt.tight_layout()
     plt.show()
 
