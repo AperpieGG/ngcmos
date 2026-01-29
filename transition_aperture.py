@@ -87,38 +87,64 @@ plt.show()
 
 from matplotlib.patches import Circle
 
-def show_star_aperture(image, x, y, r):
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+
+def show_star_aperture(frame_data, x_star, y_star, r=5, thresh=None):
     """
-    Display star cutout with pixel values and aperture overlay
+    Display a star cutout with counts, median ± 2*RMS color scaling,
+    and a circular aperture overlaid.
+
+    Parameters
+    ----------
+    frame_data : 2D array
+        The FITS image data.
+    x_star, y_star : float
+        Pixel coordinates of the star.
+    r : int
+        Radius of the aperture in pixels.
+    thresh : tuple or None
+        Optional threshold (min, max) to highlight pixels, e.g., (1600, 2000).
     """
+    ny, nx = frame_data.shape
 
-    x = int(round(x))
-    y = int(round(y))
-    r = int(np.ceil(r))
+    # Define square cutout around the star
+    x_min = int(max(x_star - r - 1, 0))
+    x_max = int(min(x_star + r + 2, nx))
+    y_min = int(max(y_star - r - 1, 0))
+    y_max = int(min(y_star + r + 2, ny))
 
-    # Cutout box
-    cutout = image[y-r:y+r+1, x-r:x+r+1]
+    sub_image = frame_data[y_min:y_max, x_min:x_max]
 
-    plt.figure(figsize=(5,5))
-    plt.imshow(cutout, origin='lower', cmap='gray')
-    plt.colorbar(label="Counts")
+    # Compute median and RMS for color scaling
+    median_val = np.median(sub_image)
+    rms_val = np.std(sub_image)
+    vmin = median_val - 2 * rms_val
+    vmax = median_val + 2 * rms_val
 
-    # Annotate pixel values
-    for j in range(cutout.shape[0]):
-        for i in range(cutout.shape[1]):
-            val = cutout[j, i]
-            plt.text(i, j, f"{int(val)}",
-                     color='red',
-                     ha='center',
-                     va='center',
-                     fontsize=8)
+    # Mask pixels outside circular aperture
+    y_indices, x_indices = np.ogrid[:sub_image.shape[0], :sub_image.shape[1]]
+    r2 = (x_indices - (x_star - x_min))**2 + (y_indices - (y_star - y_min))**2
+    aperture_mask = r2 <= r**2
+    sub_image_masked = np.where(aperture_mask, sub_image, np.nan)
 
-    # Aperture circle (centered in cutout)
-    circ = Circle((r, r), r, edgecolor='cyan',
-                  facecolor='none', linewidth=2)
+    plt.figure(figsize=(6,6))
+    im = plt.imshow(sub_image_masked, origin='lower', cmap='viridis', vmin=vmin, vmax=vmax)
+    plt.colorbar(im, label='Counts')
+
+    # Overlay aperture circle
+    circ = Circle((r, r), r, edgecolor='cyan', facecolor='none', linewidth=2)
     plt.gca().add_patch(circ)
 
-    plt.title("Star aperture with pixel values")
+    # Annotate pixel values
+    for j in range(sub_image.shape[0]):
+        for i in range(sub_image.shape[1]):
+            if aperture_mask[j, i]:
+                plt.text(i, j, f"{int(sub_image[j,i])}", color='white',
+                         ha='center', va='center', fontsize=8)
+
+    plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
     plt.xlabel("X pixel")
     plt.ylabel("Y pixel")
     plt.tight_layout()
