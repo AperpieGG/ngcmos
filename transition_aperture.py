@@ -104,25 +104,6 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
     ny, nx = frame_data.shape
 
-    # Define square cutout around the star
-    x_min = int(max(x_star - r - 1, 0))
-    x_max = int(min(x_star + r + 2, nx))
-    y_min = int(max(y_star - r - 1, 0))
-    y_max = int(min(y_star + r + 2, ny))
-
-    sub_image = frame_data[y_min:y_max, x_min:x_max]
-
-    # Compute mean and RMS for color scaling
-    mean_val = np.mean(sub_image)
-    rms_val = np.std(sub_image)
-    vmin = mean_val - 2 * rms_val
-    vmax = mean_val + 2 * rms_val
-
-    plt.figure(figsize=(6, 6))
-    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=-2000, vmax=30000)
-    plt.colorbar(im, label='Counts')
-
-    # Overlay aperture circle
     # Ensure cutout size is odd
     half_size = r
     x_min = int(max(np.floor(x_star - half_size), 0))
@@ -135,6 +116,17 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     # Star position within cutout (float!)
     x_center = x_star - x_min
     y_center = y_star - y_min
+
+    # Compute mean and RMS for color scaling
+    mean_val = np.mean(sub_image)
+    rms_val = np.std(sub_image)
+    vmin = mean_val - 2 * rms_val
+    vmax = mean_val + 2 * rms_val
+
+    plt.figure(figsize=(6, 6))
+    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=-2000, vmax=30000)
+    plt.colorbar(im, label='Counts')
+
 
     # Overlay aperture circle at exact center
     circ = Circle((x_center, y_center), r, edgecolor='cyan', facecolor='none', linewidth=2)
