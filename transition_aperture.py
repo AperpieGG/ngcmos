@@ -79,8 +79,8 @@ for xi, yi, mag in zip(phot_x, phot_y, phot_cat['Tmag']):
 
 
 plt.figure()
-plt.hist(count_list, bins=30)
-plt.xlabel("Pixels within 1800 ± 200")
-plt.ylabel("Number of stars")
-plt.title("Pixel-count distribution inside r=5 px aperture")
+plt.scatter(mag_list, fraction_list, s=8)
+plt.xlabel("Tmag")
+plt.ylabel("Fraction of aperture pixels in range")
+plt.gca().invert_xaxis()
 plt.show()
