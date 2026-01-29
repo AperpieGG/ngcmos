@@ -79,8 +79,66 @@ for xi, yi, mag in zip(phot_x, phot_y, phot_cat['Tmag']):
 
 
 plt.figure()
-plt.scatter(mag_list, fraction_list, s=8)
+plt.scatter(mag_list, fraction_list, s=12)
 plt.xlabel("Tmag")
 plt.ylabel("Percentage of aperture pixels in range (%)")
 plt.gca().invert_xaxis()
 plt.show()
+
+from matplotlib.patches import Circle
+
+def show_star_aperture(image, x, y, r):
+    """
+    Display star cutout with pixel values and aperture overlay
+    """
+
+    x = int(round(x))
+    y = int(round(y))
+    r = int(np.ceil(r))
+
+    # Cutout box
+    cutout = image[y-r:y+r+1, x-r:x+r+1]
+
+    plt.figure(figsize=(5,5))
+    plt.imshow(cutout, origin='lower', cmap='gray')
+    plt.colorbar(label="Counts")
+
+    # Annotate pixel values
+    for j in range(cutout.shape[0]):
+        for i in range(cutout.shape[1]):
+            val = cutout[j, i]
+            plt.text(i, j, f"{int(val)}",
+                     color='red',
+                     ha='center',
+                     va='center',
+                     fontsize=8)
+
+    # Aperture circle (centered in cutout)
+    circ = Circle((r, r), r, edgecolor='cyan',
+                  facecolor='none', linewidth=2)
+    plt.gca().add_patch(circ)
+
+    plt.title("Star aperture with pixel values")
+    plt.xlabel("X pixel")
+    plt.ylabel("Y pixel")
+    plt.tight_layout()
+    plt.show()
+
+target_tic = 270187200
+
+idx = np.where(phot_cat['tic_id'] == target_tic)[0]
+
+if len(idx) == 0:
+    raise ValueError(f"TIC {target_tic} not found in catalog")
+
+i = idx[0]   # first match
+
+x_star = phot_x[i]
+y_star = phot_y[i]
+mag_star = phot_cat['Tmag'][i]
+
+print(f"Selected TIC {target_tic}")
+print(f"x={x_star:.2f}, y={y_star:.2f}, Tmag={mag_star:.2f}")
+
+
+show_star_aperture(frame_data, x_star, y_star, r=5)
