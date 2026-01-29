@@ -119,7 +119,7 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     vmax = mean_val + 2 * rms_val
 
     plt.figure(figsize=(6, 6))
-    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=-2000, vmax=30000)
+    im = plt.imshow(sub_image, origin='lower', cmap='gray', vmin=-2000, vmax=30000)
     plt.colorbar(im, label='Counts')
 
     # Overlay aperture circle
@@ -146,11 +146,13 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     for j in range(sub_image.shape[0]):
         for i in range(sub_image.shape[1]):
             plt.text(i + 1, j + 1, f"{int(sub_image[j, i])}",
-                     color='blue', ha='center', va='center', fontsize=10)
+                     color='green', ha='center', va='center', fontsize=10)
 
     plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
     plt.xlabel("X pixel")
     plt.ylabel("Y pixel")
+    plt.xlim(0,12)
+    plt.ylim(0,12)
     plt.tight_layout()
     plt.show()
 
