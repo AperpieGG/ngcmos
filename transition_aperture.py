@@ -38,7 +38,10 @@ reduced_data_dict = {
 
 frame_data, frame_hdr = reduced_data_dict[filename]
 
-phot_cat, _ = get_catalog(os.path.join(directory, "NG2320-1302_catalog_input.fits", ext=1))
+phot_cat, _ = get_catalog(
+    os.path.join(directory, "NG2320-1302_catalog_input.fits"),
+    ext=1
+)
 phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
 
