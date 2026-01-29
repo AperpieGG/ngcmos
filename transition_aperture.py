@@ -91,10 +91,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 
-def show_star_aperture(frame_data, x_star, y_star, r=5, thresh=None):
+def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
     Display a star cutout with counts, median ± 2*RMS color scaling,
-    and a circular aperture overlaid.
+    and a circular aperture overlaid. No pixels are masked.
 
     Parameters
     ----------
@@ -104,8 +104,6 @@ def show_star_aperture(frame_data, x_star, y_star, r=5, thresh=None):
         Pixel coordinates of the star.
     r : int
         Radius of the aperture in pixels.
-    thresh : tuple or None
-        Optional threshold (min, max) to highlight pixels, e.g., (1600, 2000).
     """
     ny, nx = frame_data.shape
 
@@ -117,20 +115,14 @@ def show_star_aperture(frame_data, x_star, y_star, r=5, thresh=None):
 
     sub_image = frame_data[y_min:y_max, x_min:x_max]
 
-    # Compute median and RMS for color scaling
-    median_val = np.median(sub_image)
+    # Compute mean and RMS for color scaling
+    mean_val = np.mean(sub_image)
     rms_val = np.std(sub_image)
-    vmin = median_val - 2 * rms_val
-    vmax = median_val + 2 * rms_val
-
-    # Mask pixels outside circular aperture
-    y_indices, x_indices = np.ogrid[:sub_image.shape[0], :sub_image.shape[1]]
-    r2 = (x_indices - (x_star - x_min))**2 + (y_indices - (y_star - y_min))**2
-    aperture_mask = r2 <= r**2
-    sub_image_masked = np.where(aperture_mask, sub_image, np.nan)
+    vmin = mean_val - 2 * rms_val
+    vmax = mean_val + 2 * rms_val
 
     plt.figure(figsize=(6,6))
-    im = plt.imshow(sub_image_masked, origin='lower', cmap='viridis', vmin=vmin, vmax=vmax)
+    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=vmin, vmax=vmax)
     plt.colorbar(im, label='Counts')
 
     # Overlay aperture circle
@@ -140,9 +132,8 @@ def show_star_aperture(frame_data, x_star, y_star, r=5, thresh=None):
     # Annotate pixel values
     for j in range(sub_image.shape[0]):
         for i in range(sub_image.shape[1]):
-            if aperture_mask[j, i]:
-                plt.text(i, j, f"{int(sub_image[j,i])}", color='white',
-                         ha='center', va='center', fontsize=8)
+            plt.text(i, j, f"{int(sub_image[j,i])}", color='white',
+                     ha='center', va='center', fontsize=8)
 
     plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
     plt.xlabel("X pixel")
