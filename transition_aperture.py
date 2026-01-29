@@ -104,7 +104,26 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
     ny, nx = frame_data.shape
 
-    # Ensure cutout size is odd, centered on star
+    # Define square cutout around the star
+    x_min = int(max(x_star - r - 1, 0))
+    x_max = int(min(x_star + r + 2, nx))
+    y_min = int(max(y_star - r - 1, 0))
+    y_max = int(min(y_star + r + 2, ny))
+
+    sub_image = frame_data[y_min:y_max, x_min:x_max]
+
+    # Compute mean and RMS for color scaling
+    mean_val = np.mean(sub_image)
+    rms_val = np.std(sub_image)
+    vmin = mean_val - 2 * rms_val
+    vmax = mean_val + 2 * rms_val
+
+    plt.figure(figsize=(6, 6))
+    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=-2000, vmax=30000)
+    plt.colorbar(im, label='Counts')
+
+    # Overlay aperture circle
+    # Ensure cutout size is odd
     half_size = r
     x_min = int(max(np.floor(x_star - half_size), 0))
     x_max = int(min(np.ceil(x_star + half_size + 1), nx))
@@ -117,24 +136,16 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     x_center = x_star - x_min
     y_center = y_star - y_min
 
-    # Compute median and RMS for color scaling
-    median_val = np.median(sub_image)
-    rms_val = np.std(sub_image)
-    vmin = median_val - 2 * rms_val
-    vmax = median_val + 2 * rms_val
-
-    plt.figure(figsize=(6, 6))
-    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=vmin, vmax=vmax)
-    plt.colorbar(im, label='Counts')
-
     # Overlay aperture circle at exact center
     circ = Circle((x_center, y_center), r, edgecolor='cyan', facecolor='none', linewidth=2)
     plt.gca().add_patch(circ)
+    plt.gca().add_patch(circ)
+    plt.gca().add_patch(circ)
 
-    # Annotate pixel values (add 0.5 to align with imshow pixel centers)
+    # Annotate pixel values
     for j in range(sub_image.shape[0]):
         for i in range(sub_image.shape[1]):
-            plt.text(i + 0.5, j + 0.5, f"{int(sub_image[j, i])}",
+            plt.text(i + 1, j + 1, f"{int(sub_image[j, i])}",
                      color='blue', ha='center', va='center', fontsize=10)
 
     plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
