@@ -78,19 +78,9 @@ for xi, yi, mag in zip(phot_x, phot_y, phot_cat['Tmag']):
     fraction_list.append(n_good / n_total)
 
 
-mag_bins = np.arange(8, 17, 1)   # adjust range if needed
-
 plt.figure()
-
-for m1, m2 in zip(mag_bins[:-1], mag_bins[1:]):
-    sel = (np.array(mag_list) >= m1) & (np.array(mag_list) < m2)
-    plt.hist(np.array(count_list)[sel],
-             bins=20,
-             alpha=0.5,
-             label=f"{m1}-{m2}")
-
+plt.hist(count_list, bins=30)
 plt.xlabel("Pixels within 1800 ± 200")
 plt.ylabel("Number of stars")
-plt.legend()
-plt.title("Pixel distribution per magnitude bin")
+plt.title("Pixel-count distribution inside r=5 px aperture")
 plt.show()
