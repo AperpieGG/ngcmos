@@ -119,28 +119,34 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     vmax = mean_val + 2 * rms_val
 
     plt.figure(figsize=(6, 6))
-    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=-5000, vmax=30000)
+    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=-2000, vmax=30000)
     plt.colorbar(im, label='Counts')
 
     # Overlay aperture circle
-    # Size of cutout
-    cutout_nx = x_max - x_min
-    cutout_ny = y_max - y_min
+    # Ensure cutout size is odd
+    half_size = r
+    x_min = int(max(np.floor(x_star - half_size), 0))
+    x_max = int(min(np.ceil(x_star + half_size + 1), nx))
+    y_min = int(max(np.floor(y_star - half_size), 0))
+    y_max = int(min(np.ceil(y_star + half_size + 1), ny))
 
-    # Star position within cutout
+    sub_image = frame_data[y_min:y_max, x_min:x_max]
+
+    # Star position within cutout (float!)
     x_center = x_star - x_min
     y_center = y_star - y_min
 
-    # Overlay aperture circle at correct center
+    # Overlay aperture circle at exact center
     circ = Circle((x_center, y_center), r, edgecolor='cyan', facecolor='none', linewidth=2)
+    plt.gca().add_patch(circ)
     plt.gca().add_patch(circ)
     plt.gca().add_patch(circ)
 
     # Annotate pixel values
     for j in range(sub_image.shape[0]):
         for i in range(sub_image.shape[1]):
-            plt.text(i, j, f"{int(sub_image[j, i])}", color='green',
-                     ha='center', va='center', fontsize=8)
+            plt.text(i, j, f"{int(sub_image[j, i])}", color='blue',
+                     ha='center', va='center', fontsize=10)
 
     plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
     plt.xlabel("X pixel")
