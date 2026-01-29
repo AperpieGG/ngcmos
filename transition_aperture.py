@@ -8,7 +8,7 @@ from utils import *
 # read the catalog
 # set aperture to 5 and within measure how many pixels are 1800 -+ 200
 
-
+plot_images()
 def load_config(filename):
     with open(filename, 'r') as file:
         config = json.load(file)
@@ -75,12 +75,12 @@ for xi, yi, mag in zip(phot_x, phot_y, phot_cat['Tmag']):
 
     mag_list.append(mag)
     count_list.append(n_good)
-    fraction_list.append(n_good / n_total)
+    fraction_list.append(100.0 * n_good / n_total)
 
 
 plt.figure()
 plt.scatter(mag_list, fraction_list, s=8)
 plt.xlabel("Tmag")
-plt.ylabel("Fraction of aperture pixels in range")
+plt.ylabel("Percentage of aperture pixels in range (%)")
 plt.gca().invert_xaxis()
 plt.show()
