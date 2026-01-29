@@ -45,63 +45,52 @@ phot_cat, _ = get_catalog(
 phot_x, phot_y = WCS(frame_hdr).all_world2pix(phot_cat['ra_deg_corr'], phot_cat['dec_deg_corr'], 1)
 
 
-def count_pixels_in_range(image, x, y, r, vmin, vmax):
+def count_pixels_in_range(data, x, y, r, low=1600, high=2000):
     """
-    Count how many pixels inside a circular aperture (x,y,r)
-    fall within [vmin, vmax].
-
-    Returns
-    -------
-    n_total : int
-        Total pixels in aperture
-    n_in_range : int
-        Pixels within value range
+    Counts how many pixels inside a circular aperture
+    fall between [low, high].
     """
+    ny, nx = data.shape
+    yy, xx = np.ogrid[:ny, :nx]
 
-    ny, nx = image.shape
-    xi = int(round(x))
-    yi = int(round(y))
+    r2 = (xx - x)**2 + (yy - y)**2
+    aperture_mask = r2 <= r**2
 
-    # Bounding box
-    x0 = max(0, xi - r)
-    x1 = min(nx, xi + r + 1)
-    y0 = max(0, yi - r)
-    y1 = min(ny, yi + r + 1)
+    aperture_pixels = data[aperture_mask]
+    good = (aperture_pixels >= low) & (aperture_pixels <= high)
 
-    yy, xx = np.ogrid[y0:y1, x0:x1]
-    rr2 = (xx - x)**2 + (yy - y)**2
-    aperture_mask = rr2 <= r**2
-
-    pixels = image[y0:y1, x0:x1][aperture_mask]
-
-    n_total = pixels.size
-    n_in_range = np.sum((pixels >= vmin) & (pixels <= vmax))
-
-    return n_total, n_in_range
+    return np.sum(good), aperture_pixels.size
 
 
-AP_RADIUS = 5
-TARGET_VAL = 1800
-TOL = 200
+radius = 5
+mag_list = []
+count_list = []
+fraction_list = []
 
-vmin = TARGET_VAL - TOL
-vmax = TARGET_VAL + TOL
+for xi, yi, mag in zip(phot_x, phot_y, phot_cat['Tmag']):
+    xi = int(round(xi))
+    yi = int(round(yi))
 
-for i in range(len(phot_x)):
-    x = phot_x[i]
-    y = phot_y[i]
+    n_good, n_total = count_pixels_in_range(frame_data, xi, yi, radius)
 
-    n_total, n_good = count_pixels_in_range(
-        frame_data,
-        x, y,
-        AP_RADIUS,
-        vmin, vmax
-    )
+    mag_list.append(mag)
+    count_list.append(n_good)
+    fraction_list.append(n_good / n_total)
 
-    tic = phot_cat['tic_id'][i]
-    mag = phot_cat['Tmag'][i]
 
-    print(
-        f"TIC {tic:>12} | Tmag={mag:5.2f} | "
-        f"{n_good}/{n_total} pixels in [{vmin},{vmax}]"
-    )
+mag_bins = np.arange(8, 17, 1)   # adjust range if needed
+
+plt.figure()
+
+for m1, m2 in zip(mag_bins[:-1], mag_bins[1:]):
+    sel = (np.array(mag_list) >= m1) & (np.array(mag_list) < m2)
+    plt.hist(np.array(count_list)[sel],
+             bins=20,
+             alpha=0.5,
+             label=f"{m1}-{m2}")
+
+plt.xlabel("Pixels within 1800 ± 200")
+plt.ylabel("Number of stars")
+plt.legend()
+plt.title("Pixel distribution per magnitude bin")
+plt.show()
