@@ -174,3 +174,20 @@ print(f"Selected TIC {target_tic}")
 print(f"x={x_star:.2f}, y={y_star:.2f}, Tmag={mag_star:.2f}")
 
 show_star_aperture(frame_data, x_star, y_star, r=5)
+
+
+# Define magnitude bins (e.g., 9-10, 10-11, ..., 15-16)
+mag_bins = np.arange(9, 17, 1)  # adjust max mag as needed
+bin_centers = mag_bins[:-1] + 0.5
+
+print("Magnitude bin | Average % of pixels in range")
+print("-------------------------------------------")
+
+for low, high in zip(mag_bins[:-1], mag_bins[1:]):
+    # select stars in this magnitude bin
+    mask = (np.array(mag_list) >= low) & (np.array(mag_list) < high)
+    if np.any(mask):
+        avg_fraction = np.mean(np.array(fraction_list)[mask])
+        print(f"{low:.0f}-{high:.0f}       | {avg_fraction:.2f}%")
+    else:
+        print(f"{low:.0f}-{high:.0f}       | No stars in this bin")
