@@ -104,7 +104,7 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
     ny, nx = frame_data.shape
 
-    # Ensure cutout size is odd
+    # Ensure cutout size is odd, centered on star
     half_size = r
     x_min = int(max(np.floor(x_star - half_size), 0))
     x_max = int(min(np.ceil(x_star + half_size + 1), nx))
@@ -117,28 +117,25 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     x_center = x_star - x_min
     y_center = y_star - y_min
 
-    # Compute mean and RMS for color scaling
-    mean_val = np.mean(sub_image)
+    # Compute median and RMS for color scaling
+    median_val = np.median(sub_image)
     rms_val = np.std(sub_image)
-    vmin = mean_val - 2 * rms_val
-    vmax = mean_val + 2 * rms_val
+    vmin = median_val - 2 * rms_val
+    vmax = median_val + 2 * rms_val
 
     plt.figure(figsize=(6, 6))
-    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=-2000, vmax=30000)
+    im = plt.imshow(sub_image, origin='lower', cmap='hot', vmin=vmin, vmax=vmax)
     plt.colorbar(im, label='Counts')
-
 
     # Overlay aperture circle at exact center
     circ = Circle((x_center, y_center), r, edgecolor='cyan', facecolor='none', linewidth=2)
     plt.gca().add_patch(circ)
-    plt.gca().add_patch(circ)
-    plt.gca().add_patch(circ)
 
-    # Annotate pixel values
+    # Annotate pixel values (add 0.5 to align with imshow pixel centers)
     for j in range(sub_image.shape[0]):
         for i in range(sub_image.shape[1]):
-            plt.text(i, j, f"{int(sub_image[j, i])}", color='blue',
-                     ha='center', va='center', fontsize=10)
+            plt.text(i + 0.5, j + 0.5, f"{int(sub_image[j, i])}",
+                     color='blue', ha='center', va='center', fontsize=10)
 
     plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
     plt.xlabel("X pixel")
