@@ -31,7 +31,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 directory = '.'
-filename = 'NG2320-1302_TIC-188620407_S43-20240706072737751.fits'
+filename = 'NG2320-1302_TIC-188620407_S43-20240706044527071.fits'
 reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
 
 reduced_data_dict = {
@@ -157,7 +157,7 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     plt.show()
 
 
-target_tic = 270187200
+target_tic = 188620486
 
 idx = np.where(phot_cat['tic_id'] == target_tic)[0]
 
