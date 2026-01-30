@@ -250,10 +250,85 @@ flux, sky, n_pix = aperture_photometry(
     r_in=15,
     r_out=20
 )
-
+gain_stable = 1.13  # e-/ADU
 print("\n--- Aperture Photometry ---")
 print(f"TIC {target_tic}")
 print(f"Aperture radius = 5 px")
 print(f"Pixels in aperture = {n_pix}")
-print(f"Background (median) = {sky:.2f} ADU/pix")
-print(f"Net flux = {flux:.2f} ADU")
+print(f"Background (median) = {sky*gain_stable:.2f} ADU/pix")
+print(f"Net flux = {flux * gain_stable:.2f} ADU")
+
+
+import pickle
+
+with open("gain_vs_signal_spline.pkl", "rb") as f:
+    gain_model = pickle.load(f)
+
+
+def aperture_photometry_gain_corrected(
+    data, x, y,
+    r_ap=5, r_in=15, r_out=20,
+    gain_model=None
+):
+    """
+    Aperture photometry with signal-dependent gain correction.
+
+    Returns:
+    --------
+    net_flux_e : float
+        Net flux in electrons
+    sky_e_per_pix : float
+        Sky background in electrons per pixel
+    n_pix : int
+        Number of aperture pixels
+    """
+
+    ny, nx = data.shape
+    yy, xx = np.ogrid[:ny, :nx]
+
+    r2 = (xx - x)**2 + (yy - y)**2
+
+    ap_mask = r2 <= r_ap**2
+    sky_mask = (r2 >= r_in**2) & (r2 <= r_out**2)
+
+    ap_pixels = data[ap_mask]
+    sky_pixels = data[sky_mask]
+
+    # --------------------------------
+    # Convert SKY pixels → electrons
+    # --------------------------------
+    sky_gains = gain_model(sky_pixels)
+    sky_pixels_e = sky_pixels * sky_gains
+
+    sky_e_per_pix = np.median(sky_pixels_e)
+
+    # --------------------------------
+    # Convert APERTURE pixels → electrons
+    # --------------------------------
+    ap_gains = gain_model(ap_pixels)
+    ap_pixels_e = ap_pixels * ap_gains
+
+    total_aperture_e = np.sum(ap_pixels_e)
+    total_sky_e = sky_e_per_pix * ap_pixels.size
+
+    net_flux_e = total_aperture_e - total_sky_e
+
+    return net_flux_e, sky_e_per_pix, ap_pixels.size
+
+
+net_flux_e, sky_e_pix, n_pix = aperture_photometry_gain_corrected(
+    frame_data,
+    x_star,
+    y_star,
+    r_ap=5,
+    r_in=15,
+    r_out=20,
+    gain_model=gain_model
+)
+
+print("\n--- Gain-Corrected Aperture Photometry ---")
+print(f"TIC {target_tic}")
+print(f"Aperture radius = 5 px")
+print(f"Pixels in aperture = {n_pix}")
+print(f"Sky background = {sky_e_pix:.2f} e-/pix")
+print(f"Net flux = {net_flux_e:.2f} e-")
