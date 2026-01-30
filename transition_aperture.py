@@ -255,8 +255,8 @@ print("\n--- Aperture Photometry ---")
 print(f"TIC {target_tic}")
 print(f"Aperture radius = 5 px")
 print(f"Pixels in aperture = {n_pix}")
-print(f"Background (median) = {sky*gain_stable:.2f} ADU/pix")
-print(f"Net flux = {flux * gain_stable:.2f} ADU")
+print(f"Background (median) = {sky*gain_stable:.2f} e/pix")
+print(f"Net flux = {flux * gain_stable:.2f} e-")
 
 
 import pickle
