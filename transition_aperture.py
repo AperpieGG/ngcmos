@@ -260,8 +260,8 @@ print(f"Net flux = {flux * gain_stable:.2f} ADU")
 
 
 import pickle
-
-with open("gain_vs_signal_spline.pkl", "rb") as f:
+path = '/home/ops/ngcmos/'
+with open(path + "gain_vs_signal_spline.pkl", "rb") as f:
     gain_model = pickle.load(f)
 
 
