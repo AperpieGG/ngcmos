@@ -10,7 +10,6 @@ from astropy.wcs import WCS
 from calibration_images import reduce_images
 from utils import *
 
-
 plot_images()
 
 # ======================================================
@@ -57,10 +56,11 @@ print("Loaded spline gain model.")
 # ======================================================
 # LIST FITS FILES
 # ======================================================
-files = [f for f in os.listdir(base_path) if f.endswith(".fits") and f.startswith("NG2320-1302_TIC-188620407")]
+files = [f for f in os.listdir(os.getcwd()) if f.endswith(".fits") and f.startswith("NG2320-1302_TIC-188620407")]
 files.sort()
 
 print(f"Found {len(files)} FITS files")
+
 
 # ======================================================
 # SIMPLE APERTURE PHOTOMETRY FUNCTION
@@ -80,6 +80,7 @@ def aperture_photometry(data, x, y, r_ap=5, r_in=15, r_out=20):
     net_flux = np.sum(ap_pixels) - sky_median * ap_pixels.size
 
     return net_flux, sky_median, ap_pixels.size
+
 
 # ======================================================
 # GAIN-CORRECTED PHOTOMETRY
@@ -104,6 +105,7 @@ def aperture_photometry_gain_corrected(data, x, y, r_ap=5, r_in=15, r_out=20, ga
     net_flux_e = np.sum(ap_e) - sky_e_per_pix * ap_pixels.size
 
     return net_flux_e, sky_e_per_pix, ap_pixels.size
+
 
 # ======================================================
 # LOOP OVER FILES
@@ -157,7 +159,7 @@ for i, filename in enumerate(files):
 # ======================================================
 plot_images()
 
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(10, 6))
 plt.plot(frame_times, flux_constant_list, 'o-', label='Constant Gain')
 plt.plot(frame_times, flux_spline_list, 'o-', label='Signal-Dependent Gain')
 plt.xlabel("Frame index")
