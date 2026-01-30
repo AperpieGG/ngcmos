@@ -324,16 +324,39 @@ def main():
     parser.add_argument('--bin_size', type=int, default=1, help='Number of images to bin')
     parser.add_argument('--aper', type=int, default=5, help='Aperture radius for photometry')
     parser.add_argument('--exposure', type=float, default=10, help='Exposure time for the images')
-    parser.add_argument('--crop_size', type=int, default=None, help='Size of the crop region around the target star')
+    parser.add_argument('--crop_size', type=int, default=1500, help='Size of the crop region around the target star')
     parser.add_argument('--dmb', type=float, default=0.2, help='Magnitude difference for comparison stars')
     parser.add_argument('--dmf', type=float, default=3.5, help='Magnitude difference for comparison stars')
     args = parser.parse_args()
-    bin_size = args.bin_size
+
+    CMOS_PIXEL_SIZE = 11.0  # microns
+    CCD_PIXEL_SIZE = 13.5  # microns
+
+    # User always provides CMOS-equivalent crop size
+    crop_size_cmos = args.crop_size
+    crop_size_ccd = int(crop_size_cmos * CMOS_PIXEL_SIZE / CCD_PIXEL_SIZE)
+
     APERTURE = args.aper
+    bin_size = args.bin_size
     EXPOSURE = args.exposure
-    crop_size = args.crop_size
     DM_BRIGHT = args.dmb
     DM_FAINT = args.dmf
+
+    # -------------------------------------------------
+    # Decide which crop size to use
+    # (you are currently using aper==5 as CMOS)
+    # -------------------------------------------------
+    if APERTURE == 5:
+        crop_size = crop_size_cmos
+    else:
+        crop_size = crop_size_ccd
+
+    # -------------------------------------------------
+    # Optional: log for sanity check
+    # -------------------------------------------------
+    print(f"Requested CMOS crop size : {crop_size_cmos}")
+    print(f"Computed CCD crop size   : {crop_size_ccd}")
+    print(f"Using crop size          : {crop_size}")
 
     # Set plot parameters
     plot_images()
