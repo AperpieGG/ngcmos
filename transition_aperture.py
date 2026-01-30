@@ -177,17 +177,83 @@ show_star_aperture(frame_data, x_star, y_star, r=5)
 
 
 # Define magnitude bins (e.g., 9-10, 10-11, ..., 15-16)
-mag_bins = np.arange(9, 17, 1)  # adjust max mag as needed
-bin_centers = mag_bins[:-1] + 0.5
+# mag_bins = np.arange(9, 17, 1)  # adjust max mag as needed
+# bin_centers = mag_bins[:-1] + 0.5
+#
+# print("Magnitude bin | Average % of pixels in range")
+# print("-------------------------------------------")
+#
+# for low, high in zip(mag_bins[:-1], mag_bins[1:]):
+#     # select stars in this magnitude bin
+#     mask = (np.array(mag_list) >= low) & (np.array(mag_list) < high)
+#     if np.any(mask):
+#         avg_fraction = np.mean(np.array(fraction_list)[mask])
+#         print(f"{low:.0f}-{high:.0f}       | {avg_fraction:.2f}%")
+#     else:
+#         print(f"{low:.0f}-{high:.0f}       | No stars in this bin")
 
-print("Magnitude bin | Average % of pixels in range")
-print("-------------------------------------------")
 
-for low, high in zip(mag_bins[:-1], mag_bins[1:]):
-    # select stars in this magnitude bin
-    mask = (np.array(mag_list) >= low) & (np.array(mag_list) < high)
-    if np.any(mask):
-        avg_fraction = np.mean(np.array(fraction_list)[mask])
-        print(f"{low:.0f}-{high:.0f}       | {avg_fraction:.2f}%")
-    else:
-        print(f"{low:.0f}-{high:.0f}       | No stars in this bin")
+# ============================================================
+# Simple Aperture Photometry (SEP-style)
+# ============================================================
+
+def aperture_photometry(data, x, y, r_ap=5, r_in=15, r_out=20):
+    """
+    Perform simple circular aperture photometry with background subtraction.
+
+    Parameters
+    ----------
+    data : 2D array
+        Image data
+    x, y : float
+        Star position in pixel coordinates
+    r_ap : float
+        Aperture radius
+    r_in, r_out : float
+        Inner/outer radius of background annulus
+
+    Returns
+    -------
+    net_flux : float
+        Background-subtracted flux (ADU)
+    sky_median : float
+        Background level per pixel
+    n_ap_pix : int
+        Number of aperture pixels
+    """
+
+    ny, nx = data.shape
+    yy, xx = np.ogrid[:ny, :nx]
+
+    r2 = (xx - x)**2 + (yy - y)**2
+
+    aperture_mask = r2 <= r_ap**2
+    annulus_mask  = (r2 >= r_in**2) & (r2 <= r_out**2)
+
+    ap_pixels = data[aperture_mask]
+    sky_pixels = data[annulus_mask]
+
+    sky_median = np.median(sky_pixels)
+
+    flux_raw = np.sum(ap_pixels)
+    flux_sky = sky_median * ap_pixels.size
+
+    net_flux = flux_raw - flux_sky
+
+    return net_flux, sky_median, ap_pixels.size
+
+flux, sky, n_pix = aperture_photometry(
+    frame_data,
+    x_star,
+    y_star,
+    r_ap=5,
+    r_in=15,
+    r_out=20
+)
+
+print("\n--- Aperture Photometry ---")
+print(f"TIC {target_tic}")
+print(f"Aperture radius = 5 px")
+print(f"Pixels in aperture = {n_pix}")
+print(f"Background (median) = {sky:.2f} ADU/pix")
+print(f"Net flux = {flux:.2f} ADU")
