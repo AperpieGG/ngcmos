@@ -96,8 +96,6 @@ plt.grid(alpha=0.3)
 plt.xlabel("Tmag")
 plt.ylabel("#/78 of pixels in transition")
 plt.gca().invert_xaxis()
-plt.xlim(5, 17)
-plt.xticks(np.arange(5, 18, 1))
 # save figure
 plt.tight_layout()
 plt.savefig('transition_pixels.pdf', dpi=300)
