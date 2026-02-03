@@ -62,28 +62,42 @@ def count_pixels_in_range(data, x, y, r, low=1600, high=2000):
     aperture_pixels = data[aperture_mask]
     good = (aperture_pixels >= low) & (aperture_pixels <= high)
 
-    return np.sum(good), aperture_pixels.size
+    n_good = np.sum(good)
+
+    if n_good > 0:
+        max_val = np.max(aperture_pixels[good])
+    else:
+        max_val = None
+
+    return n_good, aperture_pixels.size, max_val
 
 
 radius = 5
 mag_list = []
 count_list = []
-fraction_list = []
+pixel_number_list = []
 
-for xi, yi, mag in zip(phot_x, phot_y, phot_cat['Tmag']):
+for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']):
     xi = int(round(xi))
     yi = int(round(yi))
 
-    n_good, n_total = count_pixels_in_range(frame_data, xi, yi, radius)
+    n_good, n_total, max_val = count_pixels_in_range(frame_data, xi, yi, radius)
+
+    if n_good > 0:
+        print(
+            f"TIC {tic} | Tmag={mag:.2f} | "
+            f"{n_good} transition pixels | "
+            f"highest pixel = {max_val:.1f}"
+        )
 
     mag_list.append(mag)
-    count_list.append(n_good)
-    fraction_list.append(100.0 * n_good / n_total)
+    count_list.append(n_total)
+    pixel_number_list.append(n_good)
 
 plt.figure()
-plt.scatter(mag_list, fraction_list, s=12)
+plt.scatter(mag_list, pixel_number_list, s=12)
 plt.xlabel("Tmag")
-plt.ylabel("Percentage of aperture pixels in range (%)")
+plt.ylabel("Number of aperture pixels in transition")
 plt.gca().invert_xaxis()
 plt.show()
 
@@ -151,8 +165,8 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     plt.title(f"Star at x={x_star:.1f}, y={y_star:.1f}, r={r}px aperture")
     plt.xlabel("X pixel")
     plt.ylabel("Y pixel")
-    plt.xlim(0.5,12.5)
-    plt.ylim(0.5,12.5)
+    plt.xlim(0.5, 12.5)
+    plt.ylim(0.5, 12.5)
     plt.tight_layout()
     plt.show()
 
@@ -225,10 +239,10 @@ def aperture_photometry(data, x, y, r_ap=5, r_in=15, r_out=20):
     ny, nx = data.shape
     yy, xx = np.ogrid[:ny, :nx]
 
-    r2 = (xx - x)**2 + (yy - y)**2
+    r2 = (xx - x) ** 2 + (yy - y) ** 2
 
-    aperture_mask = r2 <= r_ap**2
-    annulus_mask  = (r2 >= r_in**2) & (r2 <= r_out**2)
+    aperture_mask = r2 <= r_ap ** 2
+    annulus_mask = (r2 >= r_in ** 2) & (r2 <= r_out ** 2)
 
     ap_pixels = data[aperture_mask]
     sky_pixels = data[annulus_mask]
@@ -241,6 +255,7 @@ def aperture_photometry(data, x, y, r_ap=5, r_in=15, r_out=20):
     net_flux = flux_raw - flux_sky
 
     return net_flux, sky_median, ap_pixels.size
+
 
 flux, sky, n_pix = aperture_photometry(
     frame_data,
@@ -255,20 +270,20 @@ print("\n--- Aperture Photometry ---")
 print(f"TIC {target_tic}")
 print(f"Aperture radius = 5 px")
 print(f"Pixels in aperture = {n_pix}")
-print(f"Background (median) = {sky*gain_stable:.2f} e/pix")
+print(f"Background (median) = {sky * gain_stable:.2f} e/pix")
 print(f"Net flux = {flux * gain_stable:.2f} e-")
 
-
 import pickle
+
 path = '/home/ops/ngcmos/'
 with open(path + "gain_vs_signal_spline.pkl", "rb") as f:
     gain_model = pickle.load(f)
 
 
 def aperture_photometry_gain_corrected(
-    data, x, y,
-    r_ap=5, r_in=15, r_out=20,
-    gain_model=None
+        data, x, y,
+        r_ap=5, r_in=15, r_out=20,
+        gain_model=None
 ):
     """
     Aperture photometry with signal-dependent gain correction.
@@ -286,10 +301,10 @@ def aperture_photometry_gain_corrected(
     ny, nx = data.shape
     yy, xx = np.ogrid[:ny, :nx]
 
-    r2 = (xx - x)**2 + (yy - y)**2
+    r2 = (xx - x) ** 2 + (yy - y) ** 2
 
-    ap_mask = r2 <= r_ap**2
-    sky_mask = (r2 >= r_in**2) & (r2 <= r_out**2)
+    ap_mask = r2 <= r_ap ** 2
+    sky_mask = (r2 >= r_in ** 2) & (r2 <= r_out ** 2)
 
     ap_pixels = data[ap_mask]
     sky_pixels = data[sky_mask]
