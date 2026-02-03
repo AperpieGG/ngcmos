@@ -80,6 +80,8 @@ pixel_number_list = []
 for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']):
     xi = int(round(xi))
     yi = int(round(yi))
+    tmag_vals = []
+    maxpix_vals = []
 
     n_good, n_total, max_val = count_pixels_in_range(frame_data, xi, yi, radius)
 
@@ -94,13 +96,39 @@ for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']
     count_list.append(n_total)
     pixel_number_list.append(n_good)
 
+    if max_val is not None:
+        tmag_vals.append(mag)
+        maxpix_vals.append(max_val)
+
 plt.figure()
 plt.scatter(mag_list, pixel_number_list, s=12)
 plt.xlabel("Tmag")
-plt.ylabel("Number of aperture pixels in transition")
+plt.ylabel("# of pixels (78) in transition")
 plt.gca().invert_xaxis()
 plt.show()
 
+mag_edges = np.arange(7, 17, 1)   # 7,8,...,16
+plt.figure(figsize=(8,6))
+
+for mmin, mmax in zip(mag_edges[:-1], mag_edges[1:]):
+
+    mask = [(m >= mmin and m < mmax) for m in tmag_vals]
+    values = np.array(maxpix_vals)[mask]
+
+    if len(values) > 0:
+        plt.hist(
+            values,
+            bins=30,
+            histtype='step',
+            linewidth=2,
+            label=f"{mmin} ≤ Tmag < {mmax}"
+        )
+
+plt.xlabel("Highest transition pixel value (ADU)")
+plt.ylabel("Number of stars")
+plt.legend(title="Magnitude bin", fontsize=9)
+plt.tight_layout()
+plt.show()
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
