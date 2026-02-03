@@ -107,28 +107,13 @@ plt.ylabel("# of pixels (78) in transition")
 plt.gca().invert_xaxis()
 plt.show()
 
-mag_edges = np.arange(7, 17, 1)   # 7,8,...,16
-plt.figure(figsize=(8,6))
-
-for mmin, mmax in zip(mag_edges[:-1], mag_edges[1:]):
-
-    mask = [(m >= mmin and m < mmax) for m in tmag_vals]
-    values = np.array(maxpix_vals)[mask]
-
-    if len(values) > 0:
-        plt.hist(
-            values,
-            bins=30,
-            histtype='step',
-            linewidth=2,
-            label=f"{mmin} ≤ Tmag < {mmax}"
-        )
-
-plt.xlabel("Highest transition pixel value (ADU)")
-plt.ylabel("Number of stars")
-plt.legend(title="Magnitude bin", fontsize=9)
-plt.tight_layout()
+plt.figure()
+plt.scatter(tmag_vals, maxpix_vals, s=12)
+plt.gca().invert_xaxis()
+plt.xlabel("Tmag")
+plt.ylabel("Highest transition pixel value (ADU)")
 plt.show()
+
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
