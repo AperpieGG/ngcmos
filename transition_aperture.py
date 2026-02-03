@@ -512,7 +512,7 @@ import matplotlib.pyplot as plt
 # -------------------------------------------------
 
 classified_file = "classified_stars_tic_only.json"
-rms_file = "rms_mags_from_json_CMOS_0705.json"
+rms_file = "rms_mags_rel_phot_NG2320-1302_5_1_0705.json"
 
 # -------------------------------------------------
 # Load classified stars
