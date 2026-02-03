@@ -167,6 +167,10 @@ tmag_blue = []
 maxpix_blue = []
 tic_blue = []
 
+# to save in json
+red_tics = []
+blue_tics = []
+
 
 radius = 5
 low, high = 1600, 2000
@@ -182,6 +186,7 @@ for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']
     if low <= max_val <= high:
         tmag_red.append(mag)
         maxpix_red.append(max_val)
+        red_tics.append(str(tic))
         print(f"TIC {tic} | Tmag={mag:.2f} | highest pixel = {max_val:.1f} (transition)")
     else:
         tmag_blue.append(mag)
@@ -229,6 +234,7 @@ for xi, yi, mag, tic in zip(phot_x, phot_y,
         if not (low <= second <= high or
                 low <= third  <= high or
                 low <= fourth <= high):
+            blue_tics.append(str(tic))
 
             print(
                 f"TIC {tic} | Tmag={mag:.2f} | "
@@ -236,6 +242,17 @@ for xi, yi, mag, tic in zip(phot_x, phot_y,
                 f"2nd={second:.1f}, 3rd={third:.1f}, 4th={fourth:.1f} "
                 f"(clean)"
             )
+
+# save clean blue tic ids and red tic ids that have max pixel value in transition
+output = {
+    "red_stars": sorted(set(red_tics)),
+    "blue_stars": sorted(set(blue_tics))
+}
+
+with open("classified_stars_tic_only.json", "w") as f:
+    json.dump(output, f, indent=4)
+
+print("Saved classified_stars_tic_only.json")
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
