@@ -151,6 +151,8 @@ maxpix_red = []
 # Lists for blue stars (not in transition)
 tmag_blue = []
 maxpix_blue = []
+tic_blue = []
+
 
 radius = 5
 low, high = 1600, 2000
@@ -170,6 +172,7 @@ for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']
     else:
         tmag_blue.append(mag)
         maxpix_blue.append(max_val)
+        tic_blue.append(tic)
 
 plt.figure(figsize=(8, 6))
 
@@ -189,6 +192,15 @@ plt.ylim(0, 4000)
 plt.tight_layout()
 plt.savefig('transition_pixels_magnitude.pdf', dpi=300)
 plt.show()
+
+print("\nBlue stars (not in transition) with 12 ≤ Tmag < 13:\n")
+
+for mag, max_val, tic in zip(tmag_blue, maxpix_blue, tic_blue):
+    if 12 <= mag < 13:
+        print(
+            f"TIC {tic} | Tmag={mag:.2f} | "
+            f"highest pixel = {max_val:.1f} (not in transition)"
+        )
 
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
