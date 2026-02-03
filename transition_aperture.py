@@ -32,7 +32,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 directory = '.'
-filename = 'NG2320-1302_TIC-188620407_S43-20240706044527071.fits'
+filename = 'NG2320-1302_TIC-188620407_S43-20240706092016004.fits'
 reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
 
 reduced_data_dict = {
@@ -253,6 +253,7 @@ with open("classified_stars_tic_only.json", "w") as f:
     json.dump(output, f, indent=4)
 
 print("Saved classified_stars_tic_only.json")
+
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
