@@ -500,3 +500,100 @@ print(f"Aperture radius = 5 px")
 print(f"Pixels in aperture = {n_pix}")
 print(f"Sky background = {sky_e_pix:.2f} e-/pix")
 print(f"Net flux = {net_flux_e:.2f} e-")
+
+
+import json
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+# -------------------------------------------------
+# File names (must exist in current directory)
+# -------------------------------------------------
+
+classified_file = "classified_stars_tic_only.json"
+rms_file = "rms_mags_from_json_CMOS_0705.json"
+
+# -------------------------------------------------
+# Load classified stars
+# -------------------------------------------------
+
+with open(classified_file, "r") as f:
+    classified = json.load(f)
+
+red_tics = set(classified.get("red_stars", []))
+blue_tics = set(classified.get("blue_stars", []))
+
+print(f"Loaded {len(red_tics)} red stars")
+print(f"Loaded {len(blue_tics)} blue stars")
+
+# -------------------------------------------------
+# Load RMS catalog
+# -------------------------------------------------
+
+with open(rms_file, "r") as f:
+    rms_data = json.load(f)
+
+tic_ids   = rms_data["TIC_IDs"]
+rms_vals  = rms_data["RMS_list"]
+tmag_vals = rms_data["Tmag_list"]
+
+# -------------------------------------------------
+# Containers for plotting
+# -------------------------------------------------
+
+red_tmag  = []
+red_rms   = []
+
+blue_tmag = []
+blue_rms  = []
+
+# -------------------------------------------------
+# Match and sort
+# -------------------------------------------------
+
+for tic, rms, mag in zip(tic_ids, rms_vals, tmag_vals):
+
+    tic_str = str(tic)
+
+    if tic_str in red_tics:
+        red_tmag.append(mag)
+        red_rms.append(rms)
+
+    elif tic_str in blue_tics:
+        blue_tmag.append(mag)
+        blue_rms.append(rms)
+
+# -------------------------------------------------
+# Convert to numpy
+# -------------------------------------------------
+
+red_tmag  = np.array(red_tmag)
+red_rms   = np.array(red_rms)
+blue_tmag = np.array(blue_tmag)
+blue_rms  = np.array(blue_rms)
+
+print(f"Matched red stars : {len(red_tmag)}")
+print(f"Matched blue stars: {len(blue_tmag)}")
+
+# -------------------------------------------------
+# Plot
+# -------------------------------------------------
+
+plt.figure(figsize=(8,6))
+
+plt.scatter(blue_tmag, blue_rms, s=20, c="blue",
+            alpha=0.7, label="Blue stars (clean)")
+
+plt.scatter(red_tmag, red_rms, s=20, c="red",
+            alpha=0.7, label="Red stars (transition)")
+
+plt.xlabel("Tmag")
+plt.ylabel("RMS")
+plt.gca().invert_xaxis()
+plt.grid(alpha=0.3)
+plt.legend()
+plt.tight_layout()
+
+plt.savefig("rms_vs_mag_blue_red.png", dpi=300)
+plt.show()
