@@ -260,7 +260,7 @@ def show_star_aperture(frame_data, x_star, y_star, r=5):
     plt.show()
 
 
-target_tic = 5796229
+target_tic = 5796211
 
 idx = np.where(phot_cat['tic_id'] == target_tic)[0]
 
