@@ -150,13 +150,14 @@ plt.scatter(tmag_red, maxpix_red, s=20, c='red', alpha=0.7, label='Transition pi
 
 plt.xlabel("Tmag")
 plt.ylabel("Highest pixel value in aperture (ADU)")
-plt.title("Stars with max pixel in transition vs rest")
 plt.gca().invert_xaxis()  # brighter stars left
 plt.grid(alpha=0.3)
-plt.xlim(8, 16)
-plt.legend()
+plt.xlim(11.5, 13)
+plt.ylim(0, 4000)
+# plt.legend()
 plt.tight_layout()
 plt.show()
+
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
