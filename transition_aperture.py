@@ -32,7 +32,7 @@ for calibration_path, base_path, out_path in zip(calibration_paths, base_paths, 
         break
 
 directory = '.'
-filename = 'NG2320-1302_TIC-188620407_S43-20240706092016004.fits'
+filename = 'NG2320-1302_TIC-188620407_S43-20240706092807977.fits'
 reduced_data, reduced_header, _ = reduce_images(base_path, out_path, [filename])
 
 reduced_data_dict = {
