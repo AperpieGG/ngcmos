@@ -93,7 +93,7 @@ for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']
 plt.figure(figsize=(8, 6))
 plt.scatter(mag_list, pixel_number_list, s=12, c='blue', alpha=0.7)
 # apply a shaded green area between 12-13 mags
-plt.axvspan(12, 13, color='green', alpha=0.2)
+plt.axvspan(12, 12.8, color='green', alpha=0.2)
 plt.grid(alpha=0.3)
 plt.xlabel("Tmag")
 plt.ylabel("#/78 of pixels in transition")
