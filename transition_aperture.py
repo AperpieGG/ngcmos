@@ -113,35 +113,50 @@ def max_pixel_in_aperture(data, x, y, r):
     return max_val
 
 
-tmag_vals = []
-maxpix_vals = []
+# Lists for red stars (in transition)
+tmag_red = []
+maxpix_red = []
 
-radius = 5  # aperture radius
-low, high = 1600, 2000  # transition range
+# Lists for blue stars (not in transition)
+tmag_blue = []
+maxpix_blue = []
+
+radius = 5
+low, high = 1600, 2000
 
 for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']):
     xi = int(round(xi))
     yi = int(round(yi))
 
-    # get max pixel in the aperture (no filtering yet)
+    # maximum pixel in the aperture
     max_val = max_pixel_in_aperture(frame_data, xi, yi, radius)
 
-    # check if max pixel is within transition range
+    # split stars into red/blue
     if low <= max_val <= high:
-        print(f"TIC {tic} | Tmag={mag:.2f} | highest pixel = {max_val:.1f}")
-        tmag_vals.append(mag)
-        maxpix_vals.append(max_val)
+        tmag_red.append(mag)
+        maxpix_red.append(max_val)
+        print(f"TIC {tic} | Tmag={mag:.2f} | highest pixel = {max_val:.1f} (transition)")
+    else:
+        tmag_blue.append(mag)
+        maxpix_blue.append(max_val)
 
 plt.figure(figsize=(8, 6))
-plt.scatter(tmag_vals, maxpix_vals, s=20, c='blue', alpha=0.7)
+
+# Blue: rest of stars
+plt.scatter(tmag_blue, maxpix_blue, s=20, c='blue', alpha=0.7, label='Rest of sample')
+
+# Red: stars in transition
+plt.scatter(tmag_red, maxpix_red, s=20, c='red', alpha=0.7, label='Transition pixels')
+
 plt.xlabel("Tmag")
 plt.ylabel("Highest pixel value in aperture (ADU)")
-plt.gca().invert_xaxis()  # brighter stars on left
+plt.title("Stars with max pixel in transition vs rest")
+plt.gca().invert_xaxis()  # brighter stars left
 plt.grid(alpha=0.3)
 plt.xlim(8, 16)
+plt.legend()
 plt.tight_layout()
 plt.show()
-
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
