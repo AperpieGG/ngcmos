@@ -107,7 +107,6 @@ print("\nTransition-pixel statistics per magnitude bin:")
 
 for mmin, mmax in zip(mag_edges[:-1], mag_edges[1:]):
 
-    # indices of stars in this mag bin
     idx = [(m >= mmin and m < mmax) for m in mag_list]
 
     mags_bin = np.array(mag_list)[idx]
@@ -116,9 +115,15 @@ for mmin, mmax in zip(mag_edges[:-1], mag_edges[1:]):
     total_stars = len(mags_bin)
     affected = np.sum(ntrans_bin > 0)
 
+    if total_stars > 0:
+        avg_pixels = np.mean(ntrans_bin)
+    else:
+        avg_pixels = 0.0
+
     print(
         f"{mmin:.0f}-{mmax:.0f} mag : "
-        f"{affected} / {total_stars} stars with transition pixels"
+        f"{affected} / {total_stars} stars with transition pixels | "
+        f"average transition pixels = {avg_pixels:.2f}"
     )
 
 # here plotting scatter of pixels value vs mags for star that have max pixel value transiting pixels
