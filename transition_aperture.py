@@ -128,6 +128,20 @@ for mmin, mmax in zip(mag_edges[:-1], mag_edges[1:]):
 
 
 # here plotting scatter of pixels value vs mags for star that have max pixel value transiting pixels
+def top_n_pixels_in_aperture(data, x, y, r, n=4):
+    """
+    Returns the top-n highest pixel values inside a circular aperture.
+    """
+    ny, nx = data.shape
+    yy, xx = np.ogrid[:ny, :nx]
+    r2 = (xx - x)**2 + (yy - y)**2
+    mask = r2 <= r**2
+
+    pixels = data[mask]
+    pixels_sorted = np.sort(pixels)[::-1]   # descending
+    return pixels_sorted[:n]
+
+
 def max_pixel_in_aperture(data, x, y, r):
     """
     Returns the maximum pixel value inside a circular aperture of radius r.
@@ -193,15 +207,35 @@ plt.tight_layout()
 plt.savefig('transition_pixels_magnitude.pdf', dpi=300)
 plt.show()
 
-print("\nBlue stars (not in transition) with 12 ≤ Tmag < 13:\n")
+print("\nBlue stars (not in transition) with 12 ≤ Tmag < 13\n"
+      "and 2nd–4th brightest pixels also NOT in transition:\n")
 
-for mag, max_val, tic in zip(tmag_blue, maxpix_blue, tic_blue):
-    if 12 <= mag < 13:
-        print(
-            f"TIC {tic} | Tmag={mag:.2f} | "
-            f"highest pixel = {max_val:.1f} (not in transition)"
-        )
+for xi, yi, mag, tic in zip(phot_x, phot_y,
+                            phot_cat['Tmag'],
+                            phot_cat['TIC_ID']):
 
+    xi = int(round(xi))
+    yi = int(round(yi))
+
+    max_val = max_pixel_in_aperture(frame_data, xi, yi, radius)
+
+    # must already be blue (max pixel not in transition)
+    if not (low <= max_val <= high) and (12 <= mag < 13):
+
+        top4 = top_n_pixels_in_aperture(frame_data, xi, yi, radius, n=4)
+
+        second, third, fourth = top4[1], top4[2], top4[3]
+
+        if not (low <= second <= high or
+                low <= third  <= high or
+                low <= fourth <= high):
+
+            print(
+                f"TIC {tic} | Tmag={mag:.2f} | "
+                f"max={max_val:.1f}, "
+                f"2nd={second:.1f}, 3rd={third:.1f}, 4th={fourth:.1f} "
+                f"(clean)"
+            )
 
 def show_star_aperture(frame_data, x_star, y_star, r=5):
     """
