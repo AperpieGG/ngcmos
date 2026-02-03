@@ -590,10 +590,10 @@ plt.scatter(red_tmag, red_rms, s=20, c="red",
 
 plt.xlabel("Tmag")
 plt.ylabel("RMS")
+plt.xlim(12.2, 12.8)
+plt.ylim(10000, 40000)
 plt.gca().invert_xaxis()
 plt.grid(alpha=0.3)
-plt.legend()
 plt.tight_layout()
-
-plt.savefig("rms_vs_mag_blue_red.png", dpi=300)
+plt.savefig("rms_vs_mag_blue_red.pdf", dpi=300)
 plt.show()
