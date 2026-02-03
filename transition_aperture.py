@@ -76,8 +76,7 @@ radius = 5
 mag_list = []
 count_list = []
 pixel_number_list = []
-tmag_vals = []
-maxpix_vals = []
+
 
 for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']):
     xi = int(round(xi))
@@ -85,20 +84,10 @@ for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']
 
     n_good, n_total, max_val = count_pixels_in_range(frame_data, xi, yi, radius)
 
-    if n_good > 0:
-        print(
-            f"TIC {tic} | Tmag={mag:.2f} | "
-            f"{n_good} transition pixels | "
-            f"highest pixel = {max_val:.1f}"
-        )
-
     mag_list.append(mag)
     count_list.append(n_total)
     pixel_number_list.append(n_good)
 
-    if max_val is not None:
-        tmag_vals.append(mag)
-        maxpix_vals.append(max_val)
 
 plt.figure()
 plt.scatter(mag_list, pixel_number_list, s=12)
@@ -107,11 +96,44 @@ plt.ylabel("# of pixels (78) in transition")
 plt.gca().invert_xaxis()
 plt.show()
 
-plt.figure()
-plt.scatter(tmag_vals, maxpix_vals, s=12)
-plt.gca().invert_xaxis()
+# here plotting scatter of pixels value vs mags for star that have max pixel value transiting pixels
+# Lists to collect for plotting
+tmag_vals = []
+maxpix_vals = []
+
+radius = 5  # your aperture radius
+low, high = 1600, 2000  # transition range
+
+for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']):
+    xi = int(round(xi))
+    yi = int(round(yi))
+
+    # Get number of transition pixels, total pixels, and max pixel in aperture
+    n_good, n_total, max_val = count_pixels_in_range(frame_data, xi, yi, radius, low=low, high=high)
+
+    # Only consider stars whose max pixel is within the transition range
+    if max_val is not None and low <= max_val <= high:
+        print(
+            f"TIC {tic} | Tmag={mag:.2f} | "
+            f"{n_good} transition pixels | "
+            f"highest pixel = {max_val:.1f}"
+        )
+
+        # Add to lists for plotting
+        tmag_vals.append(mag)
+        maxpix_vals.append(max_val)
+
+
+plt.figure(figsize=(8,6))
+
+plt.scatter(tmag_vals, maxpix_vals, s=20, c='blue', alpha=0.7)
+
 plt.xlabel("Tmag")
 plt.ylabel("Highest transition pixel value (ADU)")
+plt.title("Max transition pixel vs Tmag")
+plt.gca().invert_xaxis()  # brighter stars to the left
+plt.grid(alpha=0.3)
+plt.tight_layout()
 plt.show()
 
 
