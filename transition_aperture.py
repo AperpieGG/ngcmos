@@ -76,12 +76,12 @@ radius = 5
 mag_list = []
 count_list = []
 pixel_number_list = []
+tmag_vals = []
+maxpix_vals = []
 
 for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']):
     xi = int(round(xi))
     yi = int(round(yi))
-    tmag_vals = []
-    maxpix_vals = []
 
     n_good, n_total, max_val = count_pixels_in_range(frame_data, xi, yi, radius)
 
