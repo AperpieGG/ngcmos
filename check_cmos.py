@@ -134,6 +134,9 @@ def check_donuts(file_groups, filenames):
     # Assuming Donuts class and measure_shift function are defined elsewhere
     for filename, file_group in zip(filenames, file_groups):
         # Using the first filename as the reference image
+        all_sx = []
+        all_sy = []
+
         reference_image = file_group[0]
         logger.info(f"Reference image: {reference_image}")
 
@@ -154,6 +157,14 @@ def check_donuts(file_groups, filenames):
                 comm = f'mv {i} failed_donuts/'
                 logger.info(comm)
                 os.system(comm)
+    # Compute scatter (std) after all shifts
+    if all_sx and all_sy:
+        std_x = np.std(all_sx)
+        std_y = np.std(all_sy)
+        logger.info(f"Scatter of X shifts (std): {std_x:.3f} pixels")
+        logger.info(f"Scatter of Y shifts (std): {std_y:.3f} pixels")
+    else:
+        logger.info("No shifts measured; scatter cannot be computed.")
 
 
 def main():
