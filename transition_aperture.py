@@ -96,6 +96,8 @@ plt.grid(alpha=0.3)
 plt.xlabel("Tmag")
 plt.ylabel("#/78 of pixels in transition")
 plt.gca().invert_xaxis()
+plt.xlim(5, 17)
+plt.xticks(np.arange(5, 18, 1))
 # save figure
 plt.tight_layout()
 plt.savefig('transition_pixels.pdf', dpi=300)
@@ -125,6 +127,7 @@ for mmin, mmax in zip(mag_edges[:-1], mag_edges[1:]):
         f"{affected} / {total_stars} stars with transition pixels | "
         f"average transition pixels = {avg_pixels:.2f}"
     )
+
 
 # here plotting scatter of pixels value vs mags for star that have max pixel value transiting pixels
 def max_pixel_in_aperture(data, x, y, r):
