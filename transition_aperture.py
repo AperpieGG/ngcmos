@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 import os
@@ -89,12 +90,36 @@ for xi, yi, mag, tic in zip(phot_x, phot_y, phot_cat['Tmag'], phot_cat['TIC_ID']
     pixel_number_list.append(n_good)
 
 
-plt.figure()
-plt.scatter(mag_list, pixel_number_list, s=12)
+plt.figure(figsize=(8, 6))
+plt.scatter(mag_list, pixel_number_list, s=12, c='blue', alpha=0.7)
+plt.grid(alpha=0.3)
 plt.xlabel("Tmag")
-plt.ylabel("# of pixels (78) in transition")
+plt.ylabel("#/78 of pixels in transition")
 plt.gca().invert_xaxis()
+# save figure
+plt.tight_layout()
+plt.savefig('transition_pixels.pdf', dpi=300)
 plt.show()
+
+mag_edges = np.arange(6, 17, 1)
+
+print("\nTransition-pixel statistics per magnitude bin:")
+
+for mmin, mmax in zip(mag_edges[:-1], mag_edges[1:]):
+
+    # indices of stars in this mag bin
+    idx = [(m >= mmin and m < mmax) for m in mag_list]
+
+    mags_bin = np.array(mag_list)[idx]
+    ntrans_bin = np.array(pixel_number_list)[idx]
+
+    total_stars = len(mags_bin)
+    affected = np.sum(ntrans_bin > 0)
+
+    print(
+        f"{mmin:.0f}-{mmax:.0f} mag : "
+        f"{affected} / {total_stars} stars with transition pixels"
+    )
 
 # here plotting scatter of pixels value vs mags for star that have max pixel value transiting pixels
 def max_pixel_in_aperture(data, x, y, r):
@@ -156,6 +181,7 @@ plt.xlim(11.5, 13)
 plt.ylim(0, 4000)
 # plt.legend()
 plt.tight_layout()
+plt.savefig('transition_pixels_magnitude.pdf', dpi=300)
 plt.show()
 
 
