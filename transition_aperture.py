@@ -138,6 +138,7 @@ plt.xlabel("Tmag")
 plt.ylabel("Highest pixel value in aperture (ADU)")
 plt.gca().invert_xaxis()  # brighter stars on left
 plt.grid(alpha=0.3)
+plt.xlim(8, 16)
 plt.tight_layout()
 plt.show()
 
