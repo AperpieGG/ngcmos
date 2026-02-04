@@ -103,6 +103,21 @@ plt.tight_layout()
 plt.savefig('transition_pixels.pdf', dpi=300)
 plt.show()
 
+
+# -----------------------------------
+# Save results to JSON
+# -----------------------------------
+
+output_dict = {
+    "Tmag": mag_list,
+    "n_transition_pixels": pixel_number_list
+}
+
+with open("transition_pixel_stats.json", "w") as f:
+    json.dump(output_dict, f, indent=4)
+
+print("Saved transition_pixel_stats.json")
+
 mag_edges = np.arange(6, 17, 1)
 
 print("\nTransition-pixel statistics per magnitude bin:")
