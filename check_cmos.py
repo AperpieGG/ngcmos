@@ -149,6 +149,9 @@ def check_donuts(file_groups, filenames):
             sy = round(shift.y.value, 2)
             logger.info(f'{i} shift X: {sx} Y: {sy}')
             shifts = np.array([abs(sx), abs(sy)])
+            
+            all_sx.append(sx)
+            all_sy.append(sy)
 
             if abs(sx) >= 0.5 or abs(sy) >= 0.5:
                 logger.warning(f'{i} image shift too big X: {sx} Y: {sy}')
