@@ -109,14 +109,12 @@ plt.show()
 # -----------------------------------
 
 output_dict = {
-    "Tmag": mag_list,
-    "n_transition_pixels": pixel_number_list
+    "Tmag": [float(x) for x in mag_list],
+    "n_transition_pixels": [int(x) for x in pixel_number_list]
 }
 
 with open("transition_pixel_stats.json", "w") as f:
     json.dump(output_dict, f, indent=4)
-
-print("Saved transition_pixel_stats.json")
 
 mag_edges = np.arange(6, 17, 1)
 
