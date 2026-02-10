@@ -315,7 +315,7 @@ def find_max_pixel_value(data, x, y, radius):
                  int(x - radius):int(x + radius)].ravel().max(), 2)
 
 
-def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain, mask=None):
+def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain):
     """
     Extract photometry at positions (x, y) for multiple aperture radii.
     Optionally uses a precomputed mask to prevent contamination in the annulus background.
@@ -332,9 +332,6 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain, mask=None):
         Aperture radii for photometry.
     gain : float
         CCD/CMOS gain.
-    mask : 2D bool array, optional
-        Precomputed mask to exclude bad pixels / stars (True = masked).
-
     Returns
     -------
     Tout : astropy Table
