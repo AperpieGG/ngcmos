@@ -152,22 +152,8 @@ def main():
         logging.info(f"Creating new photometry file for prefix {prefix}.")
         phot_table = None
 
-        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
-
-        ref_image = fits.getdata(os.path.join(directory, prefix_filenames[0])).astype(np.float32)
-        bkg_ref = sep.Background(ref_image)
-        data_sub_ref = ref_image - bkg_ref
-        objects_ref = sep.extract(data_sub_ref, thresh=4.0)
-
-        mask = np.zeros(ref_image.shape, dtype=bool)
-        for obj in objects_ref:
-            sep.mask_ellipse(mask,
-                             obj['x'], obj['y'],
-                             obj['a'], obj['b'],
-                             obj['theta'],
-                             r=1.0)  # factor to cover stars in annulus
-
         # Iterate over filenames with the current prefix
+        prefix_filenames = [filename for filename in filenames if filename.startswith(prefix)]
         for filename in prefix_filenames:
             logging.info(f"Processing filename {filename}......")
             # Calibrate image and get FITS file
@@ -235,9 +221,7 @@ def main():
                                           "jd_bary", "x", "y", "airmass", "zp"))
 
             # Extract photometry at locations
-            # Extract photometry at positions using precomputed mask
-            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII,
-                                  gain=GAIN, mask=mask)
+            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
 
             # Stack the photometry and preamble
             frame_output = hstack([frame_preamble, frame_phot])
