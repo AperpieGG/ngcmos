@@ -341,20 +341,6 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain, mask=None):
         Photometry table with fluxes, errors, max pixel in aperture.
     """
 
-    # If no mask is provided, compute one from this frame
-    if mask is None:
-        bkg = sep.Background(data)
-        data_sub = data - bkg
-        objects = sep.extract(data_sub, thresh=5.0)
-
-        mask = np.zeros(data.shape, dtype=bool)
-        for obj in objects:
-            sep.mask_ellipse(mask,
-                             obj['x'], obj['y'],
-                             obj['a'], obj['b'],
-                             obj['theta'],
-                             r=3.0)
-
     # Column labels
     col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
     Tout = None
@@ -364,15 +350,10 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain, mask=None):
         flux, fluxerr, _ = sep.sum_circle(data, x, y, r,
                                           subpix=0,
                                           bkgann=(rsi, rso),
-                                          gain=gain,
-                                          mask=mask)
-
-        # Sum flux inside aperture without background subtraction
+                                          gain=gain)
         flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(data, x, y, r,
                                                       subpix=0,
-                                                      gain=gain,
-                                                      mask=mask)
-
+                                                      gain=gain)
         # Maximum pixel value inside the aperture
         max_pixel_value = np.array([data[int(yi), int(xi)] for xi, yi in zip(x, y)])
 
