@@ -315,33 +315,10 @@ def find_max_pixel_value(data, x, y, radius):
                  int(x - radius):int(x + radius)].ravel().max(), 2)
 
 
-def circular_annulus_mask(shape, x0, y0, r_in, r_out):
+def wcs_phot(data, x, y, rsi, rso, aperture_radii, frame_data_corr_no_bg, bg_rms, gain):
     """
-    Create a boolean mask for a circular annulus.
-
-    Parameters
-    ----------
-    shape : tuple
-        Shape of the 2D image (ny, nx)
-    x0, y0 : float
-        Center of the annulus
-    r_in, r_out : float
-        Inner and outer radius of the annulus
-
-    Returns
-    -------
-    mask : 2D boolean array
-        True where the pixel is in the annulus
-    """
-    y, x = np.ogrid[:shape[0], :shape[1]]
-    r = np.sqrt((x - x0) ** 2 + (y - y0) ** 2)
-    mask = (r >= r_in) & (r <= r_out)
-    return mask
-
-
-def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain, sigma_clip=3.0, iters=5):
-    """
-    Extract photometry at positions (x, y) for multiple aperture radii with robust sky estimation.
+    Extract photometry at positions (x, y) for multiple aperture radii.
+    Optionally uses a precomputed mask to prevent contamination in the annulus background.
 
     Parameters
     ----------
@@ -353,77 +330,42 @@ def wcs_phot(data, x, y, rsi, rso, aperture_radii, gain, sigma_clip=3.0, iters=5
         Inner and outer radius of background annulus.
     aperture_radii : list of float
         Aperture radii for photometry.
+    bg_rms : float
+        Background RMS for error estimation.
+    frame_data_corr_no_bg : 2D array
+        Precomputed mask to prevent contamination in the annulus background.
     gain : float
         CCD/CMOS gain.
-    sigma_clip : float
-        Number of sigma for clipping in the annulus.
-    iters : int
-        Number of iterations for sigma-clipping.
-
     Returns
     -------
     Tout : astropy Table
-        Photometry table with fluxes, errors, background-subtracted fluxes, and max pixel.
+        Photometry table with fluxes, errors, max pixel in aperture.
     """
-    Tout = None
-    col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
 
-    # Convert to float32 for sep
-    data = data.astype(np.float32)
+    # Column labels
+    col_labels = ["flux", "fluxerr", "flux_w_sky", "fluxerr_w_sky", "max_pixel_value"]
+    Tout = None
 
     for r in aperture_radii:
-        fluxes = []
-        fluxerrs = []
-        flux_w_sky = []
-        fluxerr_w_sky = []
-        max_pix = []
-
-        for xi, yi in zip(x, y):
-            # Extract annulus pixels
-            mask_annulus = circular_annulus_mask(data.shape, xi, yi, rsi, rso)
-            annulus_pixels = data[mask_annulus]
-
-            # Sigma-clipped sky background
-            sky = np.mean(annulus_pixels)
-            sky_rms = np.std(annulus_pixels)
-            for _ in range(iters):
-                clip_mask = (annulus_pixels > sky - sigma_clip * sky_rms) & (
-                            annulus_pixels < sky + sigma_clip * sky_rms)
-                if clip_mask.sum() == 0:
-                    break
-                annulus_pixels = annulus_pixels[clip_mask]
-                sky = np.mean(annulus_pixels)
-                sky_rms = np.std(annulus_pixels)
-
-            # Flux inside aperture
-            flux, fluxerr, _ = sep.sum_circle(data, xi, yi, r, subpix=0, gain=gain)
-            # Flux corrected with robust sky
-            flux_sky = flux - sky * np.pi * r ** 2
-            fluxerr_sky = np.sqrt(fluxerr ** 2 + (sky_rms ** 2) * np.pi * r ** 2)
-
-            # Maximum pixel in aperture
-            y_min = max(int(yi - r), 0)
-            y_max = min(int(yi + r) + 1, data.shape[0])
-            x_min = max(int(xi - r), 0)
-            x_max = min(int(xi + r) + 1, data.shape[1])
-            aperture_pixels = data[y_min:y_max, x_min:x_max]
-            max_pixel = aperture_pixels.max()
-
-            fluxes.append(flux)
-            fluxerrs.append(fluxerr)
-            flux_w_sky.append(flux_sky)
-            fluxerr_w_sky.append(fluxerr_sky)
-            max_pix.append(max_pixel)
+        # Sum flux inside aperture with background annulus
+        flux, fluxerr, _ = sep.sum_circle(frame_data_corr_no_bg, x, y, r,
+                                          subpix=0,
+                                          err=bg_rms,
+                                          gain=gain)
+        flux_w_sky, fluxerr_w_sky, _ = sep.sum_circle(data, x, y, r,
+                                                      subpix=0,
+                                                      gain=gain)
+        # Maximum pixel value inside the aperture
+        max_pixel_value = np.array([data[int(yi), int(xi)] for xi, yi in zip(x, y)])
 
         # Build the table
-        row_data = [np.array(fluxes), np.array(fluxerrs), np.array(flux_w_sky),
-                    np.array(fluxerr_w_sky), np.array(max_pix)]
-        names = [f"{c}_{r}" for c in col_labels]
-
+        row_data = [flux, fluxerr, flux_w_sky, fluxerr_w_sky, max_pixel_value]
         if Tout is None:
-            Tout = Table(row_data, names=names)
+            Tout = Table(row_data,
+                         names=[f"{c}_{r}" for c in col_labels])
         else:
-            T = Table(row_data, names=names)
+            T = Table(row_data,
+                      names=[f"{c}_{r}" for c in col_labels])
             Tout = hstack([Tout, T])
 
     return Tout
