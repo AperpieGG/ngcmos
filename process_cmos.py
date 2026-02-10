@@ -180,7 +180,7 @@ def main():
 
             frame_bg = sep.Background(frame_data)
             # calculate background rms
-            bg_rms = frame_bg.globalrms
+            bg_rms = frame_bg.rms()
             frame_data_corr_no_bg = frame_data - frame_bg
             estimate_coord = SkyCoord(ra=frame_hdr['TELRA'],
                                       dec=frame_hdr['TELDEC'],
