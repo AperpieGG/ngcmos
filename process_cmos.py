@@ -179,6 +179,8 @@ def main():
                     wcs_header[card.keyword] = card.value
 
             frame_bg = sep.Background(frame_data)
+            # calculate background rms
+            bg_rms = frame_bg.globalrms
             frame_data_corr_no_bg = frame_data - frame_bg
             estimate_coord = SkyCoord(ra=frame_hdr['TELRA'],
                                       dec=frame_hdr['TELDEC'],
@@ -221,8 +223,8 @@ def main():
                                           "jd_bary", "x", "y", "airmass", "zp"))
 
             # Extract photometry at locations
-            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN,
-                                  sigma_clip=3.0, iters=5)
+            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, frame_data_corr_no_bg, bg_rms,
+                                  gain=GAIN)
 
             # Stack the photometry and preamble
             frame_output = hstack([frame_preamble, frame_phot])
