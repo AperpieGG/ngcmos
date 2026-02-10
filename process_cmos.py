@@ -221,7 +221,8 @@ def main():
                                           "jd_bary", "x", "y", "airmass", "zp"))
 
             # Extract photometry at locations
-            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+            frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN,
+                                  sigma_clip=3.0, iters=5)
 
             # Stack the photometry and preamble
             frame_output = hstack([frame_preamble, frame_phot])
