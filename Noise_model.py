@@ -157,12 +157,11 @@ def main():
     # the file has the form phot_prefix.fits, I want to extract only the prefix
     zp = extract_zero_point(f'zp{APERTURE}.json')
     print('Calculate zp and header zp avg is: ', np.mean(zp), np.mean(zp_list))
-    zp_to_use = (np.mean(zp) + np.mean(zp_list)) / 2
     print('The average sky brightness is: ', np.mean(sky_list))
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_array, zp_to_use, APERTURE,
+        noise_sources(sky_list, bin_size, airmass_array, zp_list, APERTURE,
                       READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN))
 
     # Convert lists to JSON serializable lists
