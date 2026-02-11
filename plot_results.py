@@ -88,7 +88,7 @@ def plot_noise_model(data):
     ax.set_xlim(7.5, 14)
     ax.set_ylim(1000, 100000)
     ax.invert_xaxis()
-    plt.legend(loc='best')
+    # plt.legend(loc='best')
     plt.tight_layout()
     plt.show()
 
