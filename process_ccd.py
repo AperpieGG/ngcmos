@@ -46,7 +46,7 @@ warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 GAIN = 2
 MAX_ALLOWED_PIXEL_SHIFT = 50
 N_OBJECTS_LIMIT = 200
-APERTURE_RADII = [4, 5, 6, 8]
+APERTURE_RADII = [4, 5]
 RSI = 15
 RSO = 20
 DEFOCUS = 0.0
@@ -206,6 +206,8 @@ def main():
 
         # WCS handling and background subtraction
         frame_bg = sep.Background(frame_data)
+        # calculate background rms
+        bg_rms = frame_bg.rms()
         frame_data_corr_no_bg = frame_data - frame_bg
         estimate_coord = SkyCoord(ra=frame_hdr['CMD_RA'], dec=frame_hdr['CMD_DEC'], unit=(u.deg, u.deg))
 
@@ -244,7 +246,8 @@ def main():
                                names=("frame_id", "Tmag", "tic_id", "gaiabp", "gaiarp", "jd_mid",
                                       "jd_bary", "x", "y", "airmass", "zp"))
 
-        frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, gain=GAIN)
+        frame_phot = wcs_phot(frame_data, phot_x, phot_y, RSI, RSO, APERTURE_RADII, frame_data_corr_no_bg, bg_rms,
+                              gain=GAIN)
 
         frame_output = hstack([frame_preamble, frame_phot])
 
