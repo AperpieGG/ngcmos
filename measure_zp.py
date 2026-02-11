@@ -96,9 +96,26 @@ def main():
         print(f"Results saved to zp{APERTURE}.json")
 
         # Filter out entries where either zp or color is NaN
-        valid_data = [{'zp': zp, 'color': color, 'flux': flux, 'tmag': tmag}
-                      for zp, color, flux, tmag in zip(zp_list, color_list, flux_list, tmag_list)
-                      if not np.isnan(zp) and not np.isnan(color) and not np.isnan(flux) and not np.isnan(tmag)]
+        # Magnitude limits
+        TMAG_MIN = 9.5
+        TMAG_MAX = 14.0
+
+        valid_data = [
+            {
+                'zp': zp,
+                'color': color,
+                'flux': flux,
+                'tmag': tmag
+            }
+            for zp, color, flux, tmag in zip(zp_list, color_list, flux_list, tmag_list)
+            if (
+                    not np.isnan(zp)
+                    and not np.isnan(color)
+                    and not np.isnan(flux)
+                    and not np.isnan(tmag)
+                    and TMAG_MIN <= tmag <= TMAG_MAX
+            )
+        ]
 
         # Extract zp_list and color_list separately after filtering
         filtered_zp_list = [entry['zp'] for entry in valid_data]
