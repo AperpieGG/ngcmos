@@ -51,7 +51,7 @@ def main():
     # Read the catalog file
     with fits.open(catalog_file) as catalog_hdul:
         catalog_data = catalog_hdul[1].data  # Assuming the table is in the first extension
-        catalog_tic_ids = catalog_data['TIC']
+        catalog_tic_ids = catalog_data['tic_id']
         catalog_teff = catalog_data['Teff']  # Assuming 'Teff' column exists
 
     # Read the photometry file
