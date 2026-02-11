@@ -687,8 +687,8 @@ def scintilation_noise(airmass_list, exposure):
     h = 2400  # height of Paranal
     H = 8000  # height of atmospheric scale
     airmass = np.mean(airmass_list)  # airmass
-    C_y = 1.52  # constant
-    # C_y = 1.8
+    # C_y = 1.52  # constant
+    C_y = 1.2
     N = np.sqrt(10e-6 * (C_y ** 2) * (D ** (-4 / 3)) * (1 / exposure) * (airmass ** 3) * np.exp((-2. * h) / H))
     # print('Scintilation noise: ', N)
     # print('Airmass: ', airmass)
