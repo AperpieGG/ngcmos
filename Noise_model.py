@@ -161,7 +161,7 @@ def main():
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
-        noise_sources(sky_list, bin_size, airmass_array, zp_list, APERTURE,
+        noise_sources(sky_list, bin_size, airmass_array, zp, APERTURE,
                       READ_NOISE, DARK_CURRENT, EXPOSURE, GAIN))
 
     # Convert lists to JSON serializable lists
