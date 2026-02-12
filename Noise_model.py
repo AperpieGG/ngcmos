@@ -159,7 +159,6 @@ def main():
     print('Calculate zp and header zp avg is: ', np.mean(zp), np.mean(zp_list))
     print('The average sky brightness is: ', np.mean(sky_list))
     print('The RMS sky brightness is: ', np.sqrt(np.mean(np.array(sky_list) ** 2)))
-    print(f'The overall sky list is: {sky_list}')
 
     # Get noise sources
     synthetic_mag, photon_shot_noise, sky_noise, read_noise, dc_noise, N, RNS = (
