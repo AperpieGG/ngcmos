@@ -1,21 +1,47 @@
 #! /usr/bin/env python
+"""
+Photometry Processing Pipeline
+
+This script performs automated aperture photometry on calibrated SCIENCE FITS
+images located in the current working directory. It uses, two methods: sky annulus
+ and sky background map photometry.
+
+Main steps:
+    1. Filter FITS files using the IMGCLASS='SCIENCE' header keyword.
+    2. Subtracts a master bias frame (if available in the parent directory).
+    3. Estimates and subtracts the sky background using SEP.
+    4. Detects sources and validates object count.
+    5. Cross-matches detected sources with an input catalog.
+    6. Converts observation times to JD, BJD (TDB), and HJD.
+    7. Performs WCS-based aperture photometry.
+    8. Stacks results from all frames into a single FITS photometry table.
+
+Inputs:
+    - SCIENCE FITS images in the current directory.
+    - master_bias.fits in the parent directory (optional).
+    - <prefix>_catalog_input.fits catalog file in the current directory.
+
+Output:
+    - phot_<OBJECT>.fits containing stacked photometry results.
+
+Dependencies:
+    astropy, sep, fitsio, numpy
+
+Author: AperPieGG
+"""
 import os
-from datetime import datetime, timedelta
 import numpy as np
 from calibration_images import reduce_images
 from utils import (get_location, _detect_objects_sep, get_catalog,
                    extract_airmass_and_zp, get_light_travel_times)
 import json
-import warnings
 import logging
 from astropy.io import fits
-from astropy.table import Table, hstack, vstack
+from astropy.table import Table, hstack
 from astropy.wcs import WCS
 import sep
 from astropy.time import Time
-from astropy.coordinates import SkyCoord
 from astropy import units as u
-from astropy.utils.exceptions import AstropyWarning
 import argparse
 
 parser = argparse.ArgumentParser(description="Run photometry for a specific TIC ID.")
