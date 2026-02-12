@@ -758,8 +758,7 @@ def noise_sources(sky_list, bin_size, airmass_list, zp, aper, rn, dc, exposure, 
     read_noise = (read_noise_pix * np.sqrt(npix)) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     read_signal = npix * (read_noise_pix ** 2)
 
-    # sky_flux = np.median(sky_list)
-    sky_flux = 52000
+    sky_flux = np.mean(sky_list)
     print(f'The sky flux is: {sky_flux}')
     sky_noise = np.sqrt(sky_flux) / synthetic_flux / np.sqrt(bin_size) * 1000000  # Convert to ppm
     print('Average sky flux: ', sky_flux)
