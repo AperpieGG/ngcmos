@@ -29,6 +29,7 @@ def load_all_jsons_as_table(directory):
             "Time_BJD": data["Time_BJD"],
             "Relative_Flux": data["Relative_Flux"],
             "Relative_Flux_err": data["Relative_Flux_err"],
+            "Airmass": data["Airmass"],
             "RMS": [data["RMS"]] * row_count,
         })
 
@@ -48,6 +49,13 @@ def compute_rms_values(phot_table, args):
 
     for tic_id in tic_ids:
         star_data = phot_table[phot_table['TIC_ID'] == tic_id]
+        # --- FILTER HERE ---
+        mask = star_data['Airmass'] < 1.7
+        star_data = star_data[mask]
+
+        # Skip star if too few points remain
+        if len(star_data) < 10:
+            continue
         jd_mid = star_data['Time_BJD']
         rel_flux = star_data['Relative_Flux']
         rel_fluxerr = star_data['Relative_Flux_err']
