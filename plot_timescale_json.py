@@ -13,7 +13,6 @@ plot_images()
 
 
 def load_all_jsons_as_table(directory):
-    """Load all JSON photometry files and return as a combined Astropy Table."""
     all_tables = []
 
     for json_file in glob.glob(f"{directory}/*.json"):
@@ -21,9 +20,22 @@ def load_all_jsons_as_table(directory):
             data = json.load(f)
 
         if isinstance(data, list):
-            data = data[0]  # assume list of dicts
+            data = data[0]
 
-        row_count = len(data["Time_BJD"])
+        # Check lengths
+        lengths = {
+            "Time_BJD": len(data["Time_BJD"]),
+            "Relative_Flux": len(data["Relative_Flux"]),
+            "Relative_Flux_err": len(data["Relative_Flux_err"]),
+            "Airmass": len(data["Airmass"]),
+        }
+
+        if len(set(lengths.values())) != 1:
+            print(f"Length mismatch in {json_file}: {lengths}")
+            continue  # Skip problematic file
+
+        row_count = lengths["Time_BJD"]
+
         table = Table({
             "TIC_ID": [data["TIC_ID"]] * row_count,
             "Time_BJD": data["Time_BJD"],
