@@ -109,8 +109,11 @@ if __name__ == "__main__":
         "Median_RMS_ppm": avg_rms.tolist(),
         "RMS_Model_ppm": RMS_model.tolist()
     }
-
-    with open("rms_vs_timescale.json", "w") as outfile:
+    if args.exp == 10:
+        label = 'CMOS'
+    else:
+        label = 'CCD'
+    with open(f"rms_vs_time_{label}_{args.directory}.json", "w") as outfile:
         json.dump(output_data, outfile, indent=2)
 
     print("Saved RMS vs timescale results to rms_vs_timescale.json")
