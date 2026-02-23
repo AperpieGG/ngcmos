@@ -95,10 +95,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Aggregate RMS vs time binning from all JSON files")
     parser.add_argument('--bin', type=int, default=180, help='Max binning size')
     parser.add_argument('--exp', type=int, default=10, help='Exposure time in seconds')
+    parser.add_argument('directory', type=str, help='Directory containing JSON photometry files')
     args = parser.parse_args()
     home_dir = '.'
-    directory = f"{home_dir}/targets"
-    phot_table = load_all_jsons_as_table(directory)
+    directory = f"{home_dir}/{args.directory}"
+    phot_table = load_all_jsons_as_table(args.directory)
 
     times, avg_rms, RMS_model = compute_rms_values(phot_table, args=args)
 
